@@ -64,6 +64,11 @@
         }
         .error-box h4 { color: #ff6b6b; margin-bottom: 8px; font-size: 1rem; }
         .error-box p { color: #d0d0e0; font-size: 0.9rem; line-height: 1.6; }
+        #debugLog {
+            margin-top: 16px; font-size: 0.75rem; color: #606080; text-align: left;
+            background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;
+            max-height: 100px; overflow-y: auto; display: none;
+        }
     </style>
 </head>
 <body>
@@ -86,12 +91,10 @@
             <button id="retryBtn" class="btn btn-secondary" style="display:none;">🔄 Try Again</button>
             <p id="status"></p>
             <div id="errorBox" class="error-box">
-                <h4>⚠️ Microphone Access Needed</h4>
-                <p>1. Tap the lock icon next to the URL above</p>
-                <p>2. Find "Microphone" and set it to "Allow"</p>
-                <p>3. Tap "Try Again" below</p>
-                <p style="margin-top:8px; color:#a0a0d0;">Or copy this link and open it directly in Chrome.</p>
+                <h4>⚠️ Something went wrong</h4>
+                <p id="errorDetail">Please tap "Try Again" below.</p>
             </div>
+            <div id="debugLog"></div>
         </div>
 
         <div id="callingScreen" class="calling">
@@ -106,12 +109,12 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@vapi-ai/web@latest/dist/index.min.js"></script>
     <script>
         const VAPI_PUBLIC_KEY = '947b4bce-4ce0-4e8b-b612-08846a3e6f29';
         const VAPI_ASSISTANT_ID = '5a835193-3fd0-4a16-90cb-2670e2d0e5b0';
 
         let vapiInstance = null;
+        let sdkLoaded = false;
         const startBtn = document.getElementById('startCall');
         const endBtn = document.getElementById('endCall');
         const retryBtn = document.getElementById('retryBtn');
@@ -119,49 +122,103 @@
         const landing = document.getElementById('landingScreen');
         const calling = document.getElementById('callingScreen');
         const errorBox = document.getElementById('errorBox');
+        const errorDetail = document.getElementById('errorDetail');
+        const debugLog = document.getElementById('debugLog');
+
+        function log(msg) {
+            console.log(msg);
+            debugLog.style.display = 'block';
+            debugLog.innerHTML += msg + '<br>';
+        }
 
         function showError(msg) {
-            status.textContent = msg || 'Microphone access denied.';
+            errorDetail.textContent = msg || 'Please tap "Try Again" below.';
             errorBox.style.display = 'block';
             retryBtn.style.display = 'block';
             startBtn.disabled = false;
+            status.textContent = '';
         }
 
-        async function startSession() {
+        // Load the official Vapi HTML script-tag SDK (exposes window.vapiSDK)
+        (function (d, t) {
+            var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
+            g.src = "https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js";
+            g.defer = true;
+            g.async = true;
+            s.parentNode.insertBefore(g, s);
+            g.onload = function () {
+                sdkLoaded = true;
+                log('✅ Vapi SDK loaded');
+            };
+            g.onerror = function () {
+                log('❌ Failed to load Vapi SDK script');
+                showError('Could not load voice engine. Check your internet connection and try again.');
+            };
+        })(document, "script");
+
+        function startSession() {
             startBtn.disabled = true;
             errorBox.style.display = 'none';
             retryBtn.style.display = 'none';
             status.textContent = 'Connecting to Valerie...';
 
+            if (!sdkLoaded || !window.vapiSDK) {
+                log('⏳ SDK not ready yet, waiting...');
+                let attempts = 0;
+                const waitForSdk = setInterval(() => {
+                    attempts++;
+                    if (window.vapiSDK) {
+                        clearInterval(waitForSdk);
+                        launchCall();
+                    } else if (attempts > 20) {
+                        clearInterval(waitForSdk);
+                        showError('Voice engine failed to load. Please refresh the page.');
+                    }
+                }, 250);
+                return;
+            }
+            launchCall();
+        }
+
+        function launchCall() {
             try {
+                vapiInstance = window.vapiSDK.run({
+                    apiKey: VAPI_PUBLIC_KEY,
+                    assistant: VAPI_ASSISTANT_ID,
+                    config: {
+                        position: "bottom-right",
+                        width: "0px",
+                        height: "0px"
+                    }
+                });
+
                 if (!vapiInstance) {
-                    vapiInstance = new VapiSDK(VAPI_PUBLIC_KEY);
-                    
-                    vapiInstance.on('call-start', () => {
-                        landing.style.display = 'none';
-                        calling.style.display = 'flex';
-                        status.textContent = '';
-                    });
-
-                    vapiInstance.on('call-end', () => {
-                        calling.style.display = 'none';
-                        landing.style.display = 'block';
-                        startBtn.disabled = false;
-                        status.textContent = 'Session ended. Practice again anytime!';
-                    });
-
-                    vapiInstance.on('error', (e) => {
-                        console.error('Vapi error:', e);
-                        calling.style.display = 'none';
-                        landing.style.display = 'block';
-                        showError('Connection error. Please try again.');
-                    });
+                    showError('Could not start the voice engine. Please try again.');
+                    return;
                 }
 
-                await vapiInstance.start(VAPI_ASSISTANT_ID);
+                vapiInstance.on('call-start', () => {
+                    landing.style.display = 'none';
+                    calling.style.display = 'flex';
+                    status.textContent = '';
+                });
+
+                vapiInstance.on('call-end', () => {
+                    calling.style.display = 'none';
+                    landing.style.display = 'block';
+                    startBtn.disabled = false;
+                    status.textContent = 'Session ended. Practice again anytime!';
+                });
+
+                vapiInstance.on('error', (e) => {
+                    log('Vapi error: ' + JSON.stringify(e && e.message ? e.message : e));
+                    calling.style.display = 'none';
+                    landing.style.display = 'block';
+                    showError('Connection error: ' + (e && e.message ? e.message : 'please try again.'));
+                });
             } catch (err) {
-                console.error('Session error:', err);
-                showError();
+                log('Exception: ' + err.message);
+                showError('Error: ' + err.message);
             }
         }
 
