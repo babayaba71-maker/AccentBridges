@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valerie 3 — Voice Coach</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        .logo {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #ff9ff3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            font-size: 1rem;
+            color: #a0a0d0;
+            margin-bottom: 30px;
+        }
+        .instructions {
+            background: rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+        .instructions h3 {
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: #feca57;
+        }
+        .instructions ol {
+            padding-left: 20px;
+            line-height: 1.8;
+            font-size: 0.95rem;
+            color: #d0d0e0;
+        }
+        .instructions ol li {
+            margin-bottom: 6px;
+        }
+        #startCall {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(238,90,111,0.4);
+            width: 100%;
+        }
+        #startCall:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(238,90,111,0.6);
+        }
+        #startCall:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        #status {
+            margin-top: 20px;
+            font-size: 0.95rem;
+            color: #a0a0d0;
+            min-height: 24px;
+        }
+        .calling {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .pulse {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(238,90,111,0.7); }
+            50% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(238,90,111,0); }
+        }
+        #endCall {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 12px 30px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: #606080;
+        }
+        .footer a {
+            color: #feca57;
+            text-decoration: none;
+        }
+        #vapiContainer {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🎙️</div>
+        <h1 class="title">Valerie 3</h1>
+        <p class="subtitle">Your American Accent Coach</p>
+
+        <div id="landingScreen">
+            <div class="instructions">
+                <h3>📋 Before we start:</h3>
+                <ol>
+                    <li>Allow microphone access when prompted</li>
+                    <li>Use headphones for best experience</li>
+                    <li>Find a quiet space</li>
+                    <li>Be ready to practice out loud!</li>
+                </ol>
+            </div>
+            <button id="startCall">🎤 Start Voice Session</button>
+            <p id="status"></p>
+        </div>
+
+        <div id="callingScreen" class="calling">
+            <div class="pulse">🗣️</div>
+            <p style="font-size: 1.2rem; font-weight: 600;">Valerie is listening...</p>
+            <p style="color: #a0a0d0; font-size: 0.9rem;">Speak naturally — she'll guide you</p>
+            <button id="endCall">End Session</button>
+        </div>
+
+        <div id="vapiContainer"></div>
+
+        <div class="footer">
+            <p>Valerie 3 · AccentBridges · <a href="https://youtube.com/@jacobmendoza5379">YouTube</a></p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@vapi-ai/web@latest/dist/index.min.js"></script>
+    <script>
+        const VAPI_PUBLIC_KEY = '947b4bce-4ce0-4e8b-b612-08846a3e6f29';
+        const VAPI_ASSISTANT_ID = '5a835193-3fd0-4a16-90cb-2670e2d0e5b0';
+
+        let vapiInstance = null;
+        const startBtn = document.getElementById('startCall');
+        const endBtn = document.getElementById('endCall');
+        const status = document.getElementById('status');
+        const landing = document.getElementById('landingScreen');
+        const calling = document.getElementById('callingScreen');
+
+        startBtn.addEventListener('click', async () => {
+            startBtn.disabled = true;
+            status.textContent = 'Requesting microphone access...';
+
+            try {
+                // Request mic permission first
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                stream.getTracks().forEach(t => t.stop()); // release, Vapi will re-acquire
+
+                status.textContent = 'Connecting to Valerie...';
+
+                // Initialize Vapi
+                vapiInstance = new VapiSDK(VAPI_PUBLIC_KEY);
+                
+                vapiInstance.on('call-start', () => {
+                    landing.style.display = 'none';
+                    calling.style.display = 'flex';
+                    status.textContent = '';
+                });
+
+                vapiInstance.on('call-end', () => {
+                    calling.style.display = 'none';
+                    landing.style.display = 'block';
+                    startBtn.disabled = false;
+                    status.textContent = 'Session ended. Practice again anytime!';
+                });
+
+                vapiInstance.on('error', (e) => {
+                    console.error('Vapi error:', e);
+                    status.textContent = 'Connection error. Please try again.';
+                    startBtn.disabled = false;
+                });
+
+                // Start the call with assistant speaks first
+                await vapiInstance.start(VAPI_ASSISTANT_ID);
+            } catch (err) {
+                console.error('Mic or connection error:', err);
+                status.textContent = 'Microphone access denied. Please allow mic and try again.';
+                startBtn.disabled = false;
+            }
+        });
+
+        endBtn.addEventListener('click', () => {
+            if (vapiInstance) {
+                vapiInstance.stop();
+            }
+        });
+    </script>
+</body>
+</html>
