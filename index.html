@@ -30,45 +30,16 @@
         .instructions h3 { font-size: 1.1rem; margin-bottom: 12px; color: #feca57; }
         .instructions ol { padding-left: 20px; line-height: 1.8; font-size: 0.95rem; color: #d0d0e0; }
         .instructions ol li { margin-bottom: 6px; }
-        .btn {
-            border: none; padding: 18px 40px; font-size: 1.2rem; font-weight: 700;
-            border-radius: 50px; cursor: pointer; transition: all 0.3s ease; width: 100%;
+        .start-hint {
+            margin-top: 20px; font-size: 1.1rem; color: #feca57;
+            animation: bounce 1.5s infinite;
         }
-        .btn-primary {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white;
-            box-shadow: 0 8px 24px rgba(238,90,111,0.4);
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
         }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(238,90,111,0.6); }
-        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        .btn-secondary {
-            background: rgba(255,255,255,0.15); color: white;
-            border: 1px solid rgba(255,255,255,0.3); margin-top: 12px;
-        }
-        #status { margin-top: 20px; font-size: 0.95rem; color: #a0a0d0; min-height: 24px; }
-        .calling { display: none; flex-direction: column; align-items: center; gap: 20px; }
-        .pulse {
-            width: 120px; height: 120px; border-radius: 50%;
-            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 3rem; animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(238,90,111,0.7); }
-            50% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(238,90,111,0); }
-        }
-        .footer { margin-top: 30px; font-size: 0.8rem; color: #606080; }
+        .footer { margin-top: 40px; font-size: 0.8rem; color: #606080; }
         .footer a { color: #feca57; text-decoration: none; }
-        .error-box {
-            display: none; background: rgba(255,80,80,0.15); border: 1px solid rgba(255,80,80,0.3);
-            border-radius: 12px; padding: 16px; margin-top: 16px; text-align: left;
-        }
-        .error-box h4 { color: #ff6b6b; margin-bottom: 8px; font-size: 1rem; }
-        .error-box p { color: #d0d0e0; font-size: 0.9rem; line-height: 1.6; }
-        #debugLog {
-            margin-top: 16px; font-size: 0.75rem; color: #606080; text-align: left;
-            background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;
-            max-height: 100px; overflow-y: auto; display: none;
-        }
     </style>
 </head>
 <body>
@@ -77,154 +48,69 @@
         <h1 class="title">Valerie 3</h1>
         <p class="subtitle">Your American Accent Coach</p>
 
-        <div id="landingScreen">
-            <div class="instructions">
-                <h3>📋 Before we start:</h3>
-                <ol>
-                    <li>Allow microphone access when prompted</li>
-                    <li>Use headphones for best experience</li>
-                    <li>Find a quiet space</li>
-                    <li>Be ready to practice out loud!</li>
-                </ol>
-            </div>
-            <button id="startCall" class="btn btn-primary">🎤 Start Voice Session</button>
-            <button id="retryBtn" class="btn btn-secondary" style="display:none;">🔄 Try Again</button>
-            <p id="status"></p>
-            <div id="errorBox" class="error-box">
-                <h4>⚠️ Something went wrong</h4>
-                <p id="errorDetail">Please tap "Try Again" below.</p>
-            </div>
-            <div id="debugLog"></div>
+        <div class="instructions">
+            <h3>📋 Before we start:</h3>
+            <ol>
+                <li>Tap the floating button at the bottom right to start</li>
+                <li>Allow microphone access when prompted</li>
+                <li>Use headphones for best experience</li>
+                <li>Be ready to practice out loud!</li>
+            </ol>
         </div>
 
-        <div id="callingScreen" class="calling">
-            <div class="pulse">🗣️</div>
-            <p style="font-size: 1.2rem; font-weight: 600;">Valerie is listening...</p>
-            <p style="color: #a0a0d0; font-size: 0.9rem;">Speak naturally — she'll guide you</p>
-            <button id="endCall" class="btn btn-secondary">End Session</button>
-        </div>
+        <p class="start-hint">👇 Tap the button below to begin</p>
 
         <div class="footer">
             <p>Valerie 3 · AccentBridges · <a href="https://youtube.com/@jacobmendoza5379">YouTube</a></p>
         </div>
     </div>
 
+    <!-- Official Vapi HTML Script Tag Widget -->
     <script>
-        const VAPI_PUBLIC_KEY = '947b4bce-4ce0-4e8b-b612-08846a3e6f29';
-        const VAPI_ASSISTANT_ID = '5a835193-3fd0-4a16-90cb-2670e2d0e5b0';
+        var vapiInstance = null;
+        const assistant = "5a835193-3fd0-4a16-90cb-2670e2d0e5b0";
+        const apiKey = "947b4bce-4ce0-4e8b-b612-08846a3e6f29";
+        const buttonConfig = {
+            position: "bottom-right",
+            offset: "40px",
+            width: "60px",
+            height: "60px",
+            idle: {
+                color: "rgb(255, 107, 107)",
+                type: "round",
+                icon: "https://unpkg.com/lucide-static@0.321.0/icons/phone.svg"
+            },
+            loading: {
+                color: "rgb(93, 124, 202)",
+                type: "round",
+                icon: "https://unpkg.com/lucide-static@0.321.0/icons/loader-2.svg"
+            },
+            active: {
+                color: "rgb(255, 0, 0)",
+                type: "round",
+                icon: "https://unpkg.com/lucide-static@0.321.0/icons/phone-off.svg"
+            }
+        };
 
-        let vapiInstance = null;
-        let sdkLoaded = false;
-        const startBtn = document.getElementById('startCall');
-        const endBtn = document.getElementById('endCall');
-        const retryBtn = document.getElementById('retryBtn');
-        const status = document.getElementById('status');
-        const landing = document.getElementById('landingScreen');
-        const calling = document.getElementById('callingScreen');
-        const errorBox = document.getElementById('errorBox');
-        const errorDetail = document.getElementById('errorDetail');
-        const debugLog = document.getElementById('debugLog');
-
-        function log(msg) {
-            console.log(msg);
-            debugLog.style.display = 'block';
-            debugLog.innerHTML += msg + '<br>';
-        }
-
-        function showError(msg) {
-            errorDetail.textContent = msg || 'Please tap "Try Again" below.';
-            errorBox.style.display = 'block';
-            retryBtn.style.display = 'block';
-            startBtn.disabled = false;
-            status.textContent = '';
-        }
-
-        // Load the official Vapi HTML script-tag SDK (exposes window.vapiSDK)
         (function (d, t) {
-            var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
+            var g = d.createElement(t),
+                s = d.getElementsByTagName(t)[0];
             g.src = "https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js";
             g.defer = true;
             g.async = true;
             s.parentNode.insertBefore(g, s);
             g.onload = function () {
-                sdkLoaded = true;
-                log('✅ Vapi SDK loaded');
+                vapiInstance = window.vapiSDK.run({
+                    apiKey: apiKey,
+                    assistant: assistant,
+                    config: buttonConfig
+                });
+                console.log("Vapi widget loaded and running");
             };
             g.onerror = function () {
-                log('❌ Failed to load Vapi SDK script');
-                showError('Could not load voice engine. Check your internet connection and try again.');
+                console.error("Failed to load Vapi SDK");
             };
         })(document, "script");
-
-        function startSession() {
-            startBtn.disabled = true;
-            errorBox.style.display = 'none';
-            retryBtn.style.display = 'none';
-            status.textContent = 'Connecting to Valerie...';
-
-            if (!sdkLoaded || !window.vapiSDK) {
-                log('⏳ SDK not ready yet, waiting...');
-                let attempts = 0;
-                const waitForSdk = setInterval(() => {
-                    attempts++;
-                    if (window.vapiSDK) {
-                        clearInterval(waitForSdk);
-                        launchCall();
-                    } else if (attempts > 20) {
-                        clearInterval(waitForSdk);
-                        showError('Voice engine failed to load. Please refresh the page.');
-                    }
-                }, 250);
-                return;
-            }
-            launchCall();
-        }
-
-        function launchCall() {
-            try {
-                vapiInstance = window.vapiSDK.run({
-                    apiKey: VAPI_PUBLIC_KEY,
-                    assistant: VAPI_ASSISTANT_ID,
-                    config: {
-                        position: "bottom-right",
-                        width: "0px",
-                        height: "0px"
-                    }
-                });
-
-                if (!vapiInstance) {
-                    showError('Could not start the voice engine. Please try again.');
-                    return;
-                }
-
-                vapiInstance.on('call-start', () => {
-                    landing.style.display = 'none';
-                    calling.style.display = 'flex';
-                    status.textContent = '';
-                });
-
-                vapiInstance.on('call-end', () => {
-                    calling.style.display = 'none';
-                    landing.style.display = 'block';
-                    startBtn.disabled = false;
-                    status.textContent = 'Session ended. Practice again anytime!';
-                });
-
-                vapiInstance.on('error', (e) => {
-                    log('Vapi error: ' + JSON.stringify(e && e.message ? e.message : e));
-                    calling.style.display = 'none';
-                    landing.style.display = 'block';
-                    showError('Connection error: ' + (e && e.message ? e.message : 'please try again.'));
-                });
-            } catch (err) {
-                log('Exception: ' + err.message);
-                showError('Error: ' + err.message);
-            }
-        }
-
-        startBtn.addEventListener('click', startSession);
-        retryBtn.addEventListener('click', startSession);
-        endBtn.addEventListener('click', () => { if (vapiInstance) vapiInstance.stop(); });
     </script>
 </body>
 </html>
