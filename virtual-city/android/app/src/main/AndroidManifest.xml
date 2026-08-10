@@ -14,6 +14,9 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    
+    <!-- Microphone — Alma hears you -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:label="Alma"
@@ -33,9 +36,15 @@
                 android:resource="@xml/wallpaper" />
         </service>
 
-        <!-- Overlay Service — Alma SPEAKS + sees your location -->
+        <!-- Overlay Service — Alma greets + tracks GPS + starts floating button -->
         <service
             android:name=".AlmaOverlayService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!-- Floating Button — Press to TALK to Alma (STT + TTS) -->
+        <service
+            android:name=".AlmaFloatingButton"
             android:enabled="true"
             android:exported="false" />
 

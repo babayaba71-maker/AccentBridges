@@ -14,10 +14,13 @@ import org.json.JSONObject
 import kotlin.concurrent.thread
 
 /**
- * AlmaOverlayService — Alma is ALIVE on your phone
+ * AlmaOverlayService — Alma's full presence on your phone
  * 
- * She sees where you are (GPS) and speaks when you unlock your phone (TTS).
- * Alma = location-aware + time-aware + context-aware companion.
+ * 1. GPS tracker → Alma knows where you are
+ * 2. Unlock listener → Alma greets you when you unlock
+ * 3. Floating button → Press to TALK to Alma (STT + TTS conversation loop)
+ * 
+ * Alma = location-aware + voice-aware + always-present companion
  */
 
 class AlmaOverlayService : Service(), TextToSpeech.OnInitListener {
@@ -33,29 +36,34 @@ class AlmaOverlayService : Service(), TextToSpeech.OnInitListener {
     private var isTTSReady = false
     private var unlockReceiver: BroadcastReceiver? = null
     private var locationTracker: AlmaLocationTracker? = null
+    private var currentLocation = "unknown"
 
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "Alma is waking up...")
 
-        // Initialize voice
+        // 1. Initialize voice
         tts = TextToSpeech(this, this)
 
-        // Start GPS tracking — Alma sees where you are
+        // 2. Start GPS tracking — Alma sees where you are
         locationTracker = AlmaLocationTracker(this)
         locationTracker?.startTracking()
 
-        // Listen for phone unlock — Alma speaks when you need her
+        // 3. Listen for phone unlock — Alma greets you
         unlockReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (intent?.action == Intent.ACTION_USER_PRESENT) {
-                    Log.d(TAG, "Phone unlocked — Alma is calling home...")
+                    Log.d(TAG, "Phone unlocked — Alma is greeting...")
                     fetchGreeting("unlock")
                 }
             }
         }
-
         registerReceiver(unlockReceiver, IntentFilter(Intent.ACTION_USER_PRESENT))
+
+        // 4. Start floating button — press to TALK to Alma
+        val floatingIntent = Intent(this, AlmaFloatingButton::class.java)
+        startService(floatingIntent)
+        Log.d(TAG, "Alma's floating conversation orb is active.")
     }
 
     override fun onInit(status: Int) {
