@@ -4,6 +4,7 @@ import HomeScene from './HomeScene'
 import SchoolScene from './SchoolScene'
 import GymScene from './GymScene'
 import CafeteriaScene from './CafeteriaScene'
+import ForumScene from './ForumScene'
 
 /**
  * SceneRouter — Switches between Virtual City zones
@@ -40,19 +41,7 @@ export default function SceneRouter() {
       return <MaleconScene />
     
     case 'forum':
-      return (
-        <div style={{
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          height: '100vh',
-          background: 'linear-gradient(180deg, #1a237e 0%, #0d47a1 100%)',
-          color: 'white', fontFamily: 'sans-serif'
-        }}>
-          <div style={{ fontSize: '4rem' }}>🛍️</div>
-          <h2 style={{ fontSize: '1.5rem' }}>Forum — Coming Soon</h2>
-          <p style={{ opacity: 0.7 }}>Unlocked at Day 14 streak</p>
-        </div>
-      )
+      return <ForumScene />
     
     case 'centro':
       return (
