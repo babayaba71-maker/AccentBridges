@@ -6,7 +6,7 @@ import { useAlmaGameStore } from '../store/useAlmaGameStore'
  * MaleconScene — 3D Malecón de Culiacán
  * 
  * Unlocked at Day 10 streak. Features:
- * - Sunset over the water
+ * - Sunset over the water (BRIGHT golden hour)
  * - Palm trees lining the boardwalk
  * - Interactive practice objects (bench, boat, seagull)
  * - Fog clears when unlocked
@@ -14,6 +14,7 @@ import { useAlmaGameStore } from '../store/useAlmaGameStore'
  * - Haptic feedback on object tap
  * - TTS speaks American English phrases
  * - STT evaluates student pronunciation
+ * - Browser streak support
  */
 
 export default function MaleconScene() {
@@ -27,7 +28,7 @@ export default function MaleconScene() {
   const fogOpacity = useAlmaGameStore(s => s.fogOpacity)
   const cameraShake = useAlmaGameStore(s => s.cameraShake)
   const hapticEnabled = useAlmaGameStore(s => s.hapticEnabled)
-  const triggerCameraShake = useAlmaGameStore(s => s.triggerCameraShake)
+  const masteryPoints = useAlmaGameStore(s => s.masteryPoints)
   
   const isUnlocked = unlocked.includes('malecon') || unlocked.includes('full_city')
 
@@ -40,43 +41,72 @@ export default function MaleconScene() {
     
     // === SCENE SETUP ===
     scene = new THREE.Scene()
-    scene.fog = new THREE.FogExp2(0xff6b35, fogOpacity * 0.05)
+    scene.fog = new THREE.FogExp2(0xff7a3a, fogOpacity * 0.035)
+    scene.background = new THREE.Color(0xff6b35)
     
     camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000)
     camera.position.set(0, 5, 15)
     camera.lookAt(0, 2, 0)
     
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false })
     renderer.setSize(window.innerWidth, window.innerHeight)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.shadowMap.enabled = true
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    renderer.toneMapping = THREE.ACESFilmicToneMapping
+    renderer.toneMappingExposure = 1.5
     mountRef.current.appendChild(renderer.domElement)
     
     raycaster = new THREE.Raycaster()
     mouse = new THREE.Vector2()
     
-    // === LIGHTING — Golden hour sunset ===
-    const ambientLight = new THREE.AmbientLight(0xff8c42, 0.6)
+    // === LIGHTING — BRIGHT golden hour sunset ===
+    
+    // Ambient — boosted
+    const ambientLight = new THREE.AmbientLight(0xffa060, 0.9)
     scene.add(ambientLight)
     
-    const sunLight = new THREE.DirectionalLight(0xffb347, 1.2)
+    // Hemisphere light for natural sky/ground fill
+    const hemiLight = new THREE.HemisphereLight(0xffd0a0, 0x8B5E3C, 0.6)
+    hemiLight.position.set(0, 10, 0)
+    scene.add(hemiLight)
+    
+    // Sun — main directional, boosted
+    const sunLight = new THREE.DirectionalLight(0xffc080, 2.0)
     sunLight.position.set(-20, 15, -10)
     sunLight.castShadow = true
     sunLight.shadow.mapSize.width = 2048
     sunLight.shadow.mapSize.height = 2048
+    sunLight.shadow.bias = -0.001
     scene.add(sunLight)
     
-    const rimLight = new THREE.DirectionalLight(0xff4500, 0.4)
+    // Rim light — boosted
+    const rimLight = new THREE.DirectionalLight(0xff6030, 0.8)
     rimLight.position.set(20, 10, 5)
     scene.add(rimLight)
     
-    // === WATER — The lagoon ===
+    // Fill light from the sun direction
+    const fillLight = new THREE.PointLight(0xffaa70, 1.5, 30)
+    fillLight.position.set(-15, 8, -20)
+    scene.add(fillLight)
+    
+    // Boardwalk lamp lights
+    const lampLight1 = new THREE.PointLight(0xffd060, 1.0, 8)
+    lampLight1.position.set(-8, 3, 3)
+    scene.add(lampLight1)
+    
+    const lampLight2 = new THREE.PointLight(0xffd060, 1.0, 8)
+    lampLight2.position.set(8, 3, 3)
+    scene.add(lampLight2)
+    
+    // === WATER — The lagoon (brighter) ===
     const waterGeometry = new THREE.PlaneGeometry(200, 200, 50, 50)
-    const waterMaterial = new THREE.MeshPhongMaterial({
-      color: 0x1a5276,
-      shininess: 100,
+    const waterMaterial = new THREE.MeshStandardMaterial({
+      color: 0x2a7da8,
+      roughness: 0.15,
+      metalness: 0.6,
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.9,
       side: THREE.DoubleSide
     })
     const water = new THREE.Mesh(waterGeometry, waterMaterial)
@@ -85,19 +115,38 @@ export default function MaleconScene() {
     water.receiveShadow = true
     scene.add(water)
     
-    // Animate water vertices for gentle waves
     const waterPositions = waterGeometry.attributes.position.array
     
-    // === BOARDWALK ===
+    // === BOARDWALK — brighter wood ===
     const boardwalkGeo = new THREE.BoxGeometry(30, 0.3, 4)
-    const boardwalkMat = new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+    const boardwalkMat = new THREE.MeshStandardMaterial({ 
+      color: 0xA0673A,
+      roughness: 0.6
+    })
     const boardwalk = new THREE.Mesh(boardwalkGeo, boardwalkMat)
     boardwalk.position.set(0, 0, 3)
     boardwalk.castShadow = true
     boardwalk.receiveShadow = true
     scene.add(boardwalk)
     
-    // === PALM TREES ===
+    // Boardwalk railings
+    for (const xPos of [-1.8, 1.8]) {
+      for (let i = -14; i <= 14; i += 2) {
+        const postGeo = new THREE.CylinderGeometry(0.04, 0.04, 1.2, 6)
+        const postMat = new THREE.MeshStandardMaterial({ color: 0x8B5E3C, roughness: 0.5 })
+        const post = new THREE.Mesh(postGeo, postMat)
+        post.position.set(xPos, 0.8, i + 3)
+        post.castShadow = true
+        scene.add(post)
+      }
+      // Top rail
+      const railGeo = new THREE.BoxGeometry(0.08, 0.08, 28)
+      const rail = new THREE.Mesh(railGeo, postMat)
+      rail.position.set(xPos, 1.4, 3)
+      scene.add(rail)
+    }
+    
+    // === PALM TREES — brighter ===
     const palmPositions = [
       { x: -12, z: 3 },
       { x: -8, z: 3 },
@@ -108,18 +157,24 @@ export default function MaleconScene() {
     ]
     
     palmPositions.forEach((pos, i) => {
-      // Trunk
       const trunkGeo = new THREE.CylinderGeometry(0.15, 0.25, 4, 8)
-      const trunkMat = new THREE.MeshPhongMaterial({ color: 0x6B4226 })
+      const trunkMat = new THREE.MeshStandardMaterial({ 
+        color: 0x8B6B4A,
+        roughness: 0.8
+      })
       const trunk = new THREE.Mesh(trunkGeo, trunkMat)
       trunk.position.set(pos.x, 2, pos.z)
       trunk.castShadow = true
       scene.add(trunk)
       
-      // Leaves (simple fan shapes)
       for (let j = 0; j < 6; j++) {
         const leafGeo = new THREE.ConeGeometry(0.6, 2.5, 4)
-        const leafMat = new THREE.MeshPhongMaterial({ color: 0x2E8B57 })
+        const leafMat = new THREE.MeshStandardMaterial({ 
+          color: 0x3CB371,
+          roughness: 0.6,
+          emissive: 0x1a5530,
+          emissiveIntensity: 0.2
+        })
         const leaf = new THREE.Mesh(leafGeo, leafMat)
         const angle = (j / 6) * Math.PI * 2
         leaf.position.set(
@@ -131,47 +186,80 @@ export default function MaleconScene() {
         leaf.rotation.x = Math.sin(angle) * 0.5
         leaf.castShadow = true
         scene.add(leaf)
-        
-        // Animate leaves swaying
-        leaf.userData = { swayBase: angle, swaySpeed: 0.5 + Math.random() * 0.3, palmIndex: i }
       }
     })
     
-    // === SUN — Big orange sphere on the horizon ===
-    const sunGeo = new THREE.SphereGeometry(3, 32, 32)
-    const sunMat = new THREE.MeshBasicMaterial({ color: 0xFF6B35, transparent: true, opacity: 0.9 })
+    // === SUN — Big bright orange sphere ===
+    const sunGeo = new THREE.SphereGeometry(3.5, 32, 32)
+    const sunMat = new THREE.MeshBasicMaterial({ 
+      color: 0xFF8C42,
+      transparent: true,
+      opacity: 0.95
+    })
     const sun = new THREE.Mesh(sunGeo, sunMat)
     sun.position.set(-15, 3, -40)
     scene.add(sun)
     
-    // Sun glow
-    const glowGeo = new THREE.SphereGeometry(4.5, 32, 32)
-    const glowMat = new THREE.MeshBasicMaterial({ color: 0xFFB347, transparent: true, opacity: 0.3 })
+    // Sun glow — bigger and brighter
+    const glowGeo = new THREE.SphereGeometry(5.5, 32, 32)
+    const glowMat = new THREE.MeshBasicMaterial({ 
+      color: 0xFFCC77,
+      transparent: true,
+      opacity: 0.4
+    })
     const sunGlow = new THREE.Mesh(glowGeo, glowMat)
     sunGlow.position.copy(sun.position)
     scene.add(sunGlow)
     
+    // Second glow layer
+    const glow2Geo = new THREE.SphereGeometry(8, 32, 32)
+    const glow2Mat = new THREE.MeshBasicMaterial({ 
+      color: 0xFFB347,
+      transparent: true,
+      opacity: 0.15
+    })
+    const sunGlow2 = new THREE.Mesh(glow2Geo, glow2Mat)
+    sunGlow2.position.copy(sun.position)
+    scene.add(sunGlow2)
+    
     // === INTERACTIVE PRACTICE OBJECTS ===
     
-    // 1. BENCH — "I sit on the bench and watch the sunset"
+    // 1. BENCH — brighter
     const benchGeo = new THREE.BoxGeometry(2, 0.5, 0.8)
-    const benchMat = new THREE.MeshPhongMaterial({ color: 0x4A4A4A })
+    const benchMat = new THREE.MeshStandardMaterial({ 
+      color: 0x6A6A6A,
+      roughness: 0.4,
+      metalness: 0.3
+    })
     const bench = new THREE.Mesh(benchGeo, benchMat)
     bench.position.set(-3, 0.5, 2)
     bench.castShadow = true
+    bench.receiveShadow = true
     bench.userData = {
       practicePhrase: "I sit on the bench and watch the sunset",
       phoneticFocus: "TH in 'the', CH in 'watch'",
       emoji: "🪑",
       name: "Bench",
-      color: 0x4A4A4A
+      color: 0x6A6A6A
     }
     scene.add(bench)
     objects3D.push(bench)
     
-    // 2. BOAT — "The boat sails across the calm water"
+    // Bench legs
+    for (const [lx, lz] of [[-0.8, -0.3], [0.8, -0.3], [-0.8, 0.3], [0.8, 0.3]]) {
+      const legGeo = new THREE.BoxGeometry(0.08, 0.5, 0.08)
+      const leg = new THREE.Mesh(legGeo, benchMat)
+      leg.position.set(-3 + lx, 0.25, 2 + lz)
+      scene.add(leg)
+    }
+    
+    // 2. BOAT — brighter
     const boatHullGeo = new THREE.ConeGeometry(0.8, 2, 4)
-    const boatMat = new THREE.MeshPhongMaterial({ color: 0xD2691E })
+    const boatMat = new THREE.MeshStandardMaterial({ 
+      color: 0xE8821E,
+      roughness: 0.4,
+      metalness: 0.2
+    })
     const boatHull = new THREE.Mesh(boatHullGeo, boatMat)
     boatHull.rotation.z = Math.PI / 2
     boatHull.position.set(5, 0.2, -5)
@@ -181,14 +269,31 @@ export default function MaleconScene() {
       phoneticFocus: "TH in 'the', R in 'across'",
       emoji: "⛵",
       name: "Boat",
-      color: 0xD2691E
+      color: 0xE8821E
     }
     scene.add(boatHull)
     objects3D.push(boatHull)
     
-    // 3. SEAGULL — "The seagull flies over the ocean"
+    // Boat sail
+    const sailGeo = new THREE.ConeGeometry(0.6, 1.5, 3)
+    const sailMat = new THREE.MeshStandardMaterial({ 
+      color: 0xFFFAF0,
+      roughness: 0.7,
+      side: THREE.DoubleSide
+    })
+    const sail = new THREE.Mesh(sailGeo, sailMat)
+    sail.position.set(5, 1.2, -5)
+    sail.castShadow = true
+    scene.add(sail)
+    
+    // 3. SEAGULL — brighter white
     const seagullBodyGeo = new THREE.SphereGeometry(0.3, 8, 8)
-    const seagullMat = new THREE.MeshPhongMaterial({ color: 0xF5F5F5 })
+    const seagullMat = new THREE.MeshStandardMaterial({ 
+      color: 0xFFFFFF,
+      roughness: 0.3,
+      emissive: 0x444444,
+      emissiveIntensity: 0.1
+    })
     const seagull = new THREE.Mesh(seagullBodyGeo, seagullMat)
     seagull.position.set(-2, 6, -10)
     seagull.castShadow = true
@@ -197,10 +302,52 @@ export default function MaleconScene() {
       phoneticFocus: "TH in 'the', L in 'flies'",
       emoji: "🦅",
       name: "Seagull",
-      color: 0xF5F5F5
+      color: 0xFFFFFF
     }
     scene.add(seagull)
     objects3D.push(seagull)
+    
+    // Seagull wings
+    const wingGeo = new THREE.ConeGeometry(0.5, 1.2, 3)
+    const wingMat = new THREE.MeshStandardMaterial({ 
+      color: 0xF5F5F5,
+      roughness: 0.3
+    })
+    const wingL = new THREE.Mesh(wingGeo, wingMat)
+    wingL.position.set(-2.4, 6, -10)
+    wingL.rotation.z = 0.3
+    scene.add(wingL)
+    
+    const wingR = new THREE.Mesh(wingGeo, wingMat)
+    wingR.position.set(-1.6, 6, -10)
+    wingR.rotation.z = -0.3
+    scene.add(wingR)
+    
+    // === DECORATIVE ELEMENTS ===
+    
+    // Street lamps along boardwalk
+    for (const xPos of [-10, -5, 5, 10]) {
+      const lampPoleGeo = new THREE.CylinderGeometry(0.05, 0.05, 3, 6)
+      const lampPoleMat = new THREE.MeshStandardMaterial({ 
+        color: 0x3a3a3a,
+        roughness: 0.4,
+        metalness: 0.6
+      })
+      const lampPole = new THREE.Mesh(lampPoleGeo, lampPoleMat)
+      lampPole.position.set(xPos, 1.5, 4.5)
+      lampPole.castShadow = true
+      scene.add(lampPole)
+      
+      const lampHeadGeo = new THREE.SphereGeometry(0.15, 8, 8)
+      const lampHeadMat = new THREE.MeshStandardMaterial({ 
+        color: 0xFFE060,
+        emissive: 0xFFD040,
+        emissiveIntensity: 0.8
+      })
+      const lampHead = new THREE.Mesh(lampHeadGeo, lampHeadMat)
+      lampHead.position.set(xPos, 3, 4.5)
+      scene.add(lampHead)
+    }
     
     // === ANIMATION LOOP ===
     let time = 0
@@ -217,39 +364,43 @@ export default function MaleconScene() {
       waterGeometry.attributes.position.needsUpdate = true
       waterGeometry.computeVertexNormals()
       
-      // Sun glow pulse
+      // Sun glow pulse — brighter
       sunGlow.scale.setScalar(1 + Math.sin(time * 0.5) * 0.05)
+      sunGlow2.scale.setScalar(1 + Math.sin(time * 0.3) * 0.08)
+      sunMat.opacity = 0.9 + Math.sin(time * 0.4) * 0.05
       
-      // Seagull floating
+      // Seagull floating + wing flap
       seagull.position.y = 6 + Math.sin(time * 0.8) * 0.5
       seagull.position.x = -2 + Math.sin(time * 0.3) * 2
+      wingL.rotation.z = 0.3 + Math.sin(time * 4) * 0.3
+      wingR.rotation.z = -0.3 - Math.sin(time * 4) * 0.3
       
       // Boat gentle bobbing
       boatHull.position.y = 0.2 + Math.sin(time * 1.2) * 0.1
       boatHull.rotation.z = Math.PI / 2 + Math.sin(time * 0.8) * 0.05
+      sail.position.y = 1.2 + Math.sin(time * 1.2) * 0.1
       
       // Camera shake
       if (cameraShake > 0) {
         camera.position.x = (Math.random() - 0.5) * cameraShake * 0.1
         camera.position.y = 5 + (Math.random() - 0.5) * cameraShake * 0.1
       } else {
-        // Gentle camera drift
         camera.position.x = Math.sin(time * 0.1) * 0.5
         camera.position.y = 5 + Math.sin(time * 0.15) * 0.3
       }
       camera.lookAt(0, 2, 0)
       
-      // Update fog
-      scene.fog.density = fogOpacity * 0.05
+      scene.fog.density = fogOpacity * 0.035
       
       renderer.render(scene, camera)
     }
     animate()
     
-    // === CLICK HANDLER — Raycaster for 3D objects ===
+    // === CLICK HANDLER ===
     const handleClick = (event) => {
-      mouse.x = (event.clientX / window.innerWidth) * 2 - 1
-      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
+      const rect = renderer.domElement.getBoundingClientRect()
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
       raycaster.setFromCamera(mouse, camera)
       const intersects = raycaster.intersectObjects(objects3D)
       
@@ -257,33 +408,34 @@ export default function MaleconScene() {
         const obj = intersects[0].object
         const data = obj.userData
         
+        if (!data.practicePhrase) return
+        
         setSelectedObject(data)
         setFeedback('')
         
-        // Haptic feedback
-        if (hapticEnabled && navigator.vibrate) {
-          navigator.vibrate(50)
-        }
+        if (hapticEnabled && navigator.vibrate) navigator.vibrate(50)
         
-        // TTS — Speak the practice phrase
         if ('speechSynthesis' in window) {
+          speechSynthesis.cancel()
           const utterance = new SpeechSynthesisUtterance(data.practicePhrase)
           utterance.lang = 'en-US'
           utterance.rate = 0.85
           speechSynthesis.speak(utterance)
         }
         
-        // Highlight selected object
         objects3D.forEach(o => {
-          o.material.emissive.setHex(0x000000)
+          if (o.material && o.material.emissive) {
+            o.material.emissive.setHex(0x000000)
+          }
         })
-        obj.material.emissive.setHex(0x441111)
+        if (obj.material && obj.material.emissive) {
+          obj.material.emissive.setHex(0x441100)
+        }
       }
     }
     
     renderer.domElement.addEventListener('click', handleClick)
     
-    // === RESIZE HANDLER ===
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight
       camera.updateProjectionMatrix()
@@ -291,7 +443,6 @@ export default function MaleconScene() {
     }
     window.addEventListener('resize', handleResize)
     
-    // Cleanup
     return () => {
       cancelAnimationFrame(animationId)
       window.removeEventListener('resize', handleResize)
@@ -324,7 +475,6 @@ export default function MaleconScene() {
       const confidence = event.results[0][0].confidence
       const target = selectedObject.practicePhrase.toLowerCase()
       
-      // Word-by-word matching
       const targetWords = target.split(' ')
       const spokenWords = transcript.split(' ')
       let matches = 0
@@ -334,10 +484,12 @@ export default function MaleconScene() {
       const accuracy = Math.min(100, Math.round((matches / targetWords.length) * 100))
       
       if (accuracy >= 85 && confidence > 0.7) {
-        setFeedback(`🔥 ${accuracy}% accuracy! Excellent, Clyde!`)
+        setFeedback(`🔥 ${accuracy}% — Excellent, Clyde! Nailed it!`)
         if (navigator.vibrate) navigator.vibrate([100, 50, 200])
+        useAlmaGameStore.getState().recordSession(accuracy, true)
       } else if (accuracy >= 60) {
         setFeedback(`💪 ${accuracy}% — Good effort! Focus on: ${selectedObject.phoneticFocus}`)
+        useAlmaGameStore.getState().recordSession(accuracy, false)
       } else {
         setFeedback(`📖 ${accuracy}% — Try again. Say: "${selectedObject.practicePhrase}"`)
       }
@@ -388,37 +540,30 @@ export default function MaleconScene() {
       
       {/* Top HUD */}
       <div style={{
-        position: 'absolute',
-        top: '20px',
-        left: '20px',
-        background: 'rgba(0,0,0,0.6)',
-        color: 'white',
-        padding: '12px 20px',
-        borderRadius: '12px',
-        fontFamily: 'sans-serif',
-        backdropFilter: 'blur(10px)'
+        position: 'absolute', top: '20px', left: '20px',
+        background: 'rgba(0,0,0,0.6)', color: 'white',
+        padding: '12px 20px', borderRadius: '12px',
+        fontFamily: 'sans-serif', backdropFilter: 'blur(10px)'
       }}>
         <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>🌅 Malecón</div>
-        <div style={{ fontSize: '0.9rem', opacity: 0.8 }}>Streak: {streak} 🔥 | {unlocked.length} zones unlocked</div>
+        <div style={{ fontSize: '0.9rem', opacity: 0.8 }}>
+          Streak: {streak} 🔥 | Mastery: {masteryPoints} pts
+        </div>
       </div>
       
       {/* Practice Panel */}
       {selectedObject && (
         <div style={{
-          position: 'absolute',
-          bottom: '20px',
-          left: '50%',
+          position: 'absolute', bottom: '20px', left: '50%',
           transform: 'translateX(-50%)',
-          background: 'rgba(0,0,0,0.75)',
-          color: 'white',
-          padding: '20px 30px',
-          borderRadius: '16px',
-          fontFamily: 'sans-serif',
-          backdropFilter: 'blur(15px)',
-          maxWidth: '90vw',
-          textAlign: 'center'
+          background: 'rgba(0,0,0,0.75)', color: 'white',
+          padding: '20px 30px', borderRadius: '16px',
+          fontFamily: 'sans-serif', backdropFilter: 'blur(15px)',
+          maxWidth: '90vw', textAlign: 'center'
         }}>
-          <div style={{ fontSize: '2rem', marginBottom: '8px' }}>{selectedObject.emoji} {selectedObject.name}</div>
+          <div style={{ fontSize: '2rem', marginBottom: '8px' }}>
+            {selectedObject.emoji} {selectedObject.name}
+          </div>
           <div style={{ fontSize: '1.1rem', marginBottom: '6px', fontStyle: 'italic' }}>
             "{selectedObject.practicePhrase}"
           </div>
@@ -431,13 +576,10 @@ export default function MaleconScene() {
             disabled={isListening}
             style={{
               background: isListening ? '#FF6B35' : '#FF4500',
-              color: 'white',
-              border: 'none',
-              padding: '12px 30px',
-              borderRadius: '25px',
-              fontSize: '1rem',
-              cursor: isListening ? 'wait' : 'pointer',
-              fontWeight: 'bold'
+              color: 'white', border: 'none',
+              padding: '12px 30px', borderRadius: '25px',
+              fontSize: '1rem', fontWeight: 'bold',
+              cursor: isListening ? 'wait' : 'pointer'
             }}
           >
             {isListening ? '🎤 Listening...' : '🎤 Say it!'}
@@ -445,11 +587,9 @@ export default function MaleconScene() {
           
           {feedback && (
             <div style={{
-              marginTop: '12px',
-              padding: '8px 16px',
+              marginTop: '12px', padding: '8px 16px',
               background: 'rgba(255,107,53,0.2)',
-              borderRadius: '8px',
-              fontSize: '0.95rem'
+              borderRadius: '8px', fontSize: '0.95rem'
             }}>
               {feedback}
             </div>
