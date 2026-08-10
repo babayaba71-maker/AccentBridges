@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { useRef, useEffect, useState } from 'react'
 import { useAlmaGameStore } from '../store/useAlmaGameStore'
 
