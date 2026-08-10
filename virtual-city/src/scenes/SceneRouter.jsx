@@ -1,0 +1,166 @@
+import { useAlmaGameStore } from '../store/useAlmaGameStore'
+import MaleconScene from './MaleconScene'
+import HomeScene from './HomeScene'
+
+/**
+ * SceneRouter — Switches between Virtual City zones
+ * based on unlocked locations from the streak system.
+ * 
+ * Unlock schedule:
+ * Day 1  → Home (always open)
+ * Day 3  → School
+ * Day 5  → Gym
+ * Day 7  → Cafetería
+ * Day 10 → Malecón
+ * Day 14 → Forum
+ * Day 21 → Centro
+ * Day 30 → Full City + Holographic
+ */
+
+export default function SceneRouter() {
+  const cameraTarget = useAlmaGameStore(s => s.cameraTarget)
+  const unlocked = useAlmaGameStore(s => s.unlockedLocations)
+  
+  // Render the current camera target scene
+  // If not unlocked, the scene itself shows the locked view
+  
+  switch (cameraTarget) {
+    case 'home':
+      return <HomeScene />
+    
+    case 'malecon':
+      return <MaleconScene />
+    
+    case 'school':
+      return (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          background: 'linear-gradient(180deg, #1e3a5f 0%, #2c3e50 100%)',
+          color: 'white',
+          fontFamily: 'sans-serif',
+          flexDirection: 'column'
+        }}>
+          <div style={{ fontSize: '4rem' }}>🏫</div>
+          <h2>School — Coming Soon</h2>
+          <p>Unlocked at Day 3 streak</p>
+        </div>
+      )
+    
+    case 'gym':
+      return (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          background: 'linear-gradient(180deg, #2d2d2d 0%, #1a1a1a 100%)',
+          color: 'white',
+          fontFamily: 'sans-serif',
+          flexDirection: 'column'
+        }}>
+          <div style={{ fontSize: '4rem' }}>💪</div>
+          <h2>Gym — Coming Soon</h2>
+          <p>Unlocked at Day 5 streak</p>
+        </div>
+      )
+    
+    case 'cafeteria':
+      return (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          background: 'linear-gradient(180deg, #3e2723 0%, #2c1810 100%)',
+          color: 'white',
+          fontFamily: 'sans-serif',
+          flexDirection: 'column'
+        }}>
+          <div style={{ fontSize: '4rem' }}>☕</div>
+          <h2>Cafetería — Coming Soon</h2>
+          <p>Unlocked at Day 7 streak</p>
+        </div>
+      )
+    
+    case 'forum':
+      return (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          background: 'linear-gradient(180deg, #1a237e 0%, #0d47a1 100%)',
+          color: 'white',
+          fontFamily: 'sans-serif',
+          flexDirection: 'column'
+        }}>
+          <div style={{ fontSize: '4rem' }}>🛍️</div>
+          <h2>Forum — Coming Soon</h2>
+          <p>Unlocked at Day 14 streak</p>
+        </div>
+      )
+    
+    case 'centro':
+      return (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          background: 'linear-gradient(180deg, #263238 0%, #37474f 100%)',
+          color: 'white',
+          fontFamily: 'sans-serif',
+          flexDirection: 'column'
+        }}>
+          <div style={{ fontSize: '4rem' }}>🏙️</div>
+          <h2>Centro — Coming Soon</h2>
+          <p>Unlocked at Day 21 streak</p>
+        </div>
+      )
+    
+    case 'full_city':
+      return (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          background: 'linear-gradient(180deg, #0a0a1a 0%, #1a0a2e 50%, #0a1a2e 100%)',
+          color: 'white',
+          fontFamily: 'sans-serif',
+          flexDirection: 'column'
+        }}>
+          <div style={{ fontSize: '5rem' }}>🌌</div>
+          <h2 style={{ fontSize: '2rem', textShadow: '0 0 20px rgba(255,107,53,0.5)' }}>
+            Full City + Holographic Mode
+          </h2>
+          <p style={{ fontSize: '1.2rem', opacity: 0.8 }}>All zones unlocked. Alma is holographic.</p>
+          <div style={{ display: 'flex', gap: '20px', marginTop: '20px' }}>
+            <button onClick={() => useAlmaGameStore.getState().navigateTo('home')} style={zoneBtn}>🏠</button>
+            <button onClick={() => useAlmaGameStore.getState().navigateTo('malecon')} style={zoneBtn}>🌅</button>
+            <button onClick={() => useAlmaGameStore.getState().navigateTo('school')} style={zoneBtn}>🏫</button>
+            <button onClick={() => useAlmaGameStore.getState().navigateTo('gym')} style={zoneBtn}>💪</button>
+            <button onClick={() => useAlmaGameStore.getState().navigateTo('cafeteria')} style={zoneBtn}>☕</button>
+            <button onClick={() => useAlmaGameStore.getState().navigateTo('forum')} style={zoneBtn}>🛍️</button>
+            <button onClick={() => useAlmaGameStore.getState().navigateTo('centro')} style={zoneBtn}>🏙️</button>
+          </div>
+        </div>
+      )
+    
+    default:
+      return <HomeScene />
+  }
+}
+
+const zoneBtn = {
+  fontSize: '2rem',
+  padding: '12px 16px',
+  borderRadius: '12px',
+  border: '1px solid rgba(255,107,53,0.3)',
+  background: 'rgba(255,107,53,0.1)',
+  cursor: 'pointer',
+  transition: 'all 0.3s'
+}
