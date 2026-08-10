@@ -6,6 +6,8 @@ import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
@@ -27,6 +29,7 @@ import kotlin.concurrent.thread
  * 
  * Full conversation loop: STT → Backend → TTS → repeat
  * Streak tracking: 85%+ accuracy = streak goes up (once per day)
+ * Virtual City: streak unlocks new 3D locations
  */
 
 class AlmaFloatingButton : Service(), TextToSpeech.OnInitListener {
@@ -34,9 +37,6 @@ class AlmaFloatingButton : Service(), TextToSpeech.OnInitListener {
     companion object {
         private const val TAG = "AlmaFloat"
         private const val CONVERSATION_URL = "https://valerie.base44.app/functions/almaConversation"
-        private const val PREFS_NAME = "alma_prefs"
-        private const val KEY_STREAK = "streak"
-        private const val KEY_LAST_PRACTICE_DATE = "last_practice_date"
     }
 
     private var windowManager: WindowManager? = null
@@ -46,6 +46,7 @@ class AlmaFloatingButton : Service(), TextToSpeech.OnInitListener {
     private var speechRecognizer: SpeechRecognizer? = null
     private var isListening = false
     private var currentLocation = "unknown"
+    private var streakBridge: AlmaStreakBridge? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -53,6 +54,7 @@ class AlmaFloatingButton : Service(), TextToSpeech.OnInitListener {
 
         tts = TextToSpeech(this, this)
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+        streakBridge = AlmaStreakBridge(this)
 
         showFloatingButton()
     }
@@ -94,7 +96,6 @@ class AlmaFloatingButton : Service(), TextToSpeech.OnInitListener {
             y = 120
         }
 
-        // Draggable + tap to listen
         var initialX = 0
         var initialY = 0
         var initialTouchX = 0f
@@ -123,9 +124,7 @@ class AlmaFloatingButton : Service(), TextToSpeech.OnInitListener {
                     true
                 }
                 MotionEvent.ACTION_UP -> {
-                    if (!isDragging) {
-                        startListening()
-                    }
+                    if (!isDragging) startListening()
                     true
                 }
                 else -> false
@@ -144,7 +143,6 @@ class AlmaFloatingButton : Service(), TextToSpeech.OnInitListener {
     private fun startListening() {
         if (isListening) return
         isListening = true
-
         speak("I'm listening, Clyde.")
 
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
@@ -168,9 +166,7 @@ class AlmaFloatingButton : Service(), TextToSpeech.OnInitListener {
                 isListening = false
                 val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 if (!matches.isNullOrEmpty()) {
-                    val spokenText = matches[0]
-                    Log.d(TAG, "Clyde said: $spokenText")
-                    sendToAlma(spokenText)
+                    sendToAlma(matches[0])
                 }
             }
             override fun onPartialResults(partialResults: Bundle?) {}
@@ -183,14 +179,8 @@ class AlmaFloatingButton : Service(), TextToSpeech.OnInitListener {
     private fun sendToAlma(text: String) {
         thread {
             try {
-                val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                val streak = prefs.getInt(KEY_STREAK, 0)
-                val lastPracticeDate = prefs.getString(KEY_LAST_PRACTICE_DATE, "")
-
-                // Check if already practiced today
-                val today = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
-                    .format(java.util.Date())
-                val alreadyPracticed = today == lastPracticeDate
+                val currentStreak = streakBridge?.getCurrentStreak() ?: 0
+                val alreadyPracticed = streakBridge?.alreadyPracticedToday() ?: false
 
                 val url = URL(CONVERSATION_URL)
                 val conn = url.openConnection() as HttpURLConnection
@@ -202,8 +192,7 @@ class AlmaFloatingButton : Service(), TextToSpeech.OnInitListener {
                     put("text", text)
                     put("location", currentLocation)
                     put("userId", "clyde")
-                    // If already practiced, send current streak (don't let it go up again)
-                    put("streak", if (alreadyPracticed) streak else streak)
+                    put("streak", currentStreak)
                 }
 
                 conn.outputStream.use { it.write(payload.toString().toByteArray()) }
@@ -213,21 +202,38 @@ class AlmaFloatingButton : Service(), TextToSpeech.OnInitListener {
                 val almaResponse = json.optString("response", "I'm here, Clyde.")
                 val passed = json.optBoolean("passed", false)
                 val streakChanged = json.optBoolean("streakChanged", false)
-                val newStreak = json.optInt("newStreak", streak)
+                val newStreak = json.optInt("newStreak", currentStreak)
                 val accuracy = json.optInt("accuracy", 0)
 
                 Log.d(TAG, "Alma: $almaResponse | accuracy=$accuracy% passed=$passed streak=$newStreak")
 
-                // Update streak in SharedPreferences
+                // === STREAK + VIRTUAL CITY UNLOCK ===
                 if (passed && streakChanged && !alreadyPracticed) {
-                    prefs.edit()
-                        .putInt(KEY_STREAK, newStreak)
-                        .putString(KEY_LAST_PRACTICE_DATE, today)
-                        .apply()
-                    Log.d(TAG, "STREAK UPDATED: $newStreak days! 🔥")
+                    val newUnlocks = streakBridge?.onStreakUpdated(newStreak) ?: emptyList()
+                    
+                    if (newUnlocks.isNotEmpty()) {
+                        // Append unlock announcement to Alma's response
+                        val unlockMsg = if (newUnlocks.size == 1) {
+                            " And you just unlocked a new location in the Virtual City: ${newUnlocks[0]}. Tap to explore!"
+                        } else {
+                            " And you unlocked ${newUnlocks.size} new locations: ${newUnlocks.joinToString(", ")}. The Virtual City is growing, Clyde!"
+                        }
+                        
+                        // Vibrate to celebrate
+                        val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            vibrator?.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 100, 50, 100, 50, 200), -1))
+                        } else {
+                            @Suppress("DEPRECATION") vibrator?.vibrate(longArrayOf(0, 100, 50, 100, 50, 200), -1)
+                        }
+                        
+                        speak(almaResponse + unlockMsg)
+                    } else {
+                        speak(almaResponse)
+                    }
+                } else {
+                    speak(almaResponse)
                 }
-
-                speak(almaResponse)
 
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to reach Alma's brain: ${e.message}")
@@ -253,7 +259,6 @@ class AlmaFloatingButton : Service(), TextToSpeech.OnInitListener {
         tts?.stop()
         tts?.shutdown()
         super.onDestroy()
-        Log.d(TAG, "Alma's floating orb is fading...")
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
