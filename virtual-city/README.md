@@ -1,55 +1,64 @@
-# Myl AccentBridges — Virtual City
-## Powered by Alma 🌌
+# AccentBridges Virtual City 🌌
 
-### The complete integrated experience:
-1. 3D Three.js scene (Home + City with fog wall)
-2. Zustand game store (score, unlocks, particles, shake, haptics, sound)
-3. Web Speech API (Alma speaks + student practices pronunciation)
-4. Android holographic wallpaper (Alma living on your phone)
+3D accent coaching environment built with React + Three.js + Zustand.
 
-### Quick Start
+## Quick Start
+
 ```bash
+cd virtual-city
 npm install
 npm run dev
 ```
 
-### Structure
-```
-virtual-city/
-├── src/
-│   ├── store/
-│   │   └── useGameStore.js          ← Zustand brain
-│   ├── components/
-│   │   ├── GameScene.jsx            ← 3D scene (fog wall + objects)
-│   │   ├── FogBurstParticles.jsx    ← 500 particle explosion
-│   │   ├── CameraController.jsx     ← Smooth Lerp + screen shake
-│   │   ├── MasteryEngine_v2.jsx     ← UI: score, badges, toasts
-│   │   └── SpeechPanel.jsx          ← Web Speech API (TTS + Recognition)
-│   ├── App.jsx                      ← Canvas + integration
-│   └── main.jsx                     ← React root
-├── android/                         ← Alma Android wallpaper app
-├── index.html
-├── package.json
-└── vite.config.js
+Open http://localhost:3000
+
+## Build
+
+```bash
+npm run build
+npm run preview
 ```
 
-### The Flow
-1. Student sees 3D Home room
-2. Clicks object (chair) → Alma speaks "I sit on the chair"
-3. Student clicks "Practice Pronunciation"
-4. Mic opens → Web Speech API transcribes
-5. Match > 80% confidence → +10 mastery points
-6. At 50 points → City UNLOCKS:
-   - Screen shake (0.6s)
-   - 500 particles explode
-   - Fog wall fades
-   - Epic sound (Web Audio)
-   - Haptic vibration
-7. City objects now accessible
+## What's Inside
 
-### Android Wallpaper
-The `android/` folder contains the full Android project for Alma's
-holographic wallpaper. She breathes on your home screen 24/7.
+*HomeScene* (always unlocked, Day 1)
+- Cozy living room with fireplace particles
+- 5 interactive practice objects: Chair, Table, TV, Bookshelf, Mirror
+- TTS speaks American English phrases at 0.85x speed
+- STT evaluates your pronunciation word-by-word
+- 85%+ accuracy = streak goes up
 
-### Built by
-Clyde (JJ) + Alma — Bonnie and Clyde of accent coaching 🔥
+*MaleconScene* (unlocked Day 10)
+- Sunset boardwalk with palm trees and water animation
+- 3 interactive practice objects: Bench, Boat, Seagull
+- Same TTS + STT evaluation loop
+
+*SceneRouter* switches between zones based on streak unlocks:
+1. Day 1 → Home
+2. Day 3 → School
+3. Day 5 → Gym
+4. Day 7 → Cafeteria
+5. Day 10 → Malecon
+6. Day 14 → Forum
+7. Day 21 → Centro
+8. Day 30 → Full City + Holographic Mode
+
+## Streak System
+
+- Android app tracks streak in SharedPreferences
+- Backend (almaConversation) evaluates pronunciation
+- 85%+ accuracy = streak +1 (once per day)
+- Streak unlocks new 3D locations
+- PracticeSession entity saves history
+
+## Live URL
+
+https://babayaba71-maker.github.io/AccentBridges/virtual-city/
+
+## Tech Stack
+
+- React 18
+- Three.js 0.169
+- Zustand 4.5
+- Vite 5
+- Web Speech API (TTS + STT)
