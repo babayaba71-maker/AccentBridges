@@ -5,6 +5,8 @@ import SchoolScene from './SchoolScene'
 import GymScene from './GymScene'
 import CafeteriaScene from './CafeteriaScene'
 import ForumScene from './ForumScene'
+import CentroScene from './CentroScene'
+import FullCityScene from './FullCityScene'
 
 /**
  * SceneRouter — Switches between Virtual City zones
@@ -19,6 +21,8 @@ import ForumScene from './ForumScene'
  * Day 14 → Forum
  * Day 21 → Centro
  * Day 30 → Full City + Holographic
+ * 
+ * ALL 8 ZONES BUILT ✅
  */
 
 export default function SceneRouter() {
@@ -44,45 +48,10 @@ export default function SceneRouter() {
       return <ForumScene />
     
     case 'centro':
-      return (
-        <div style={{
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          height: '100vh',
-          background: 'linear-gradient(180deg, #263238 0%, #37474f 100%)',
-          color: 'white', fontFamily: 'sans-serif'
-        }}>
-          <div style={{ fontSize: '4rem' }}>🏙️</div>
-          <h2 style={{ fontSize: '1.5rem' }}>Centro — Coming Soon</h2>
-          <p style={{ opacity: 0.7 }}>Unlocked at Day 21 streak</p>
-        </div>
-      )
+      return <CentroScene />
     
     case 'full_city':
-      return (
-        <div style={{
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          height: '100vh',
-          background: 'linear-gradient(180deg, #0a0a1a 0%, #1a0a2e 50%, #0a1a2e 100%)',
-          color: 'white', fontFamily: 'sans-serif'
-        }}>
-          <div style={{ fontSize: '5rem' }}>🌌</div>
-          <h2 style={{ fontSize: '2rem', textShadow: '0 0 20px rgba(255,107,53,0.5)' }}>
-            Full City + Holographic Mode
-          </h2>
-          <p style={{ fontSize: '1.2rem', opacity: 0.8 }}>All zones unlocked. Alma is holographic.</p>
-          <div style={{ display: 'flex', gap: '20px', marginTop: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <button onClick={() => useAlmaGameStore.getState().navigateTo('home')} style={zoneBtn}>🏠</button>
-            <button onClick={() => useAlmaGameStore.getState().navigateTo('school')} style={zoneBtn}>🏫</button>
-            <button onClick={() => useAlmaGameStore.getState().navigateTo('gym')} style={zoneBtn}>💪</button>
-            <button onClick={() => useAlmaGameStore.getState().navigateTo('cafeteria')} style={zoneBtn}>☕</button>
-            <button onClick={() => useAlmaGameStore.getState().navigateTo('malecon')} style={zoneBtn}>🌅</button>
-            <button onClick={() => useAlmaGameStore.getState().navigateTo('forum')} style={zoneBtn}>🛍️</button>
-            <button onClick={() => useAlmaGameStore.getState().navigateTo('centro')} style={zoneBtn}>🏙️</button>
-          </div>
-        </div>
-      )
+      return <FullCityScene />
     
     default:
       return <HomeScene />
