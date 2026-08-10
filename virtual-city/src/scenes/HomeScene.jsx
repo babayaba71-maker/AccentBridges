@@ -5,14 +5,8 @@ import { useAlmaGameStore } from '../store/useAlmaGameStore'
 /**
  * HomeScene — 3D Home environment (always unlocked from Day 1)
  * 
- * A cozy living room with interactive practice objects:
- * - 🪑 Chair → "I sit on the chair and read a book"
- * - 🪑 Table → "I eat breakfast at the table every morning"  
- * - 📺 TV → "I watch TV after dinner"
- * - 📚 Bookshelf → "The bookshelf is full of stories"
- * - 🪞 Mirror → "I look in the mirror and practice my accent"
- * 
- * Warm indoor lighting, fireplace glow, ambient particles.
+ * A cozy living room with interactive practice objects.
+ * Bright warm lighting — fireplace glow + lamp + ceiling + window sunset.
  */
 
 export default function HomeScene() {
@@ -23,12 +17,11 @@ export default function HomeScene() {
   
   const streak = useAlmaGameStore(s => s.streak)
   const unlocked = useAlmaGameStore(s => s.unlockedLocations)
-  const fogOpacity = useAlmaGameStore(s => s.fogOpacity)
   const cameraShake = useAlmaGameStore(s => s.cameraShake)
   const hapticEnabled = useAlmaGameStore(s => s.hapticEnabled)
   const masteryPoints = useAlmaGameStore(s => s.masteryPoints)
   
-  const isUnlocked = unlocked.includes('home') // Always true
+  const isUnlocked = unlocked.includes('home')
 
   useEffect(() => {
     if (!mountRef.current || !isUnlocked) return
@@ -40,64 +33,96 @@ export default function HomeScene() {
     
     // === SCENE SETUP ===
     scene = new THREE.Scene()
-    scene.fog = new THREE.FogExp2(0x2a1f1a, 0.02)
+    scene.fog = new THREE.FogExp2(0x3a2a20, 0.012)
+    scene.background = new THREE.Color(0x2a1a10)
     
     camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100)
     camera.position.set(0, 4, 12)
     camera.lookAt(0, 2, 0)
     
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false })
     renderer.setSize(window.innerWidth, window.innerHeight)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    renderer.toneMapping = THREE.ACESFilmicToneMapping
+    renderer.toneMappingExposure = 1.4
     mountRef.current.appendChild(renderer.domElement)
     
     raycaster = new THREE.Raycaster()
     mouse = new THREE.Vector2()
     
-    // === LIGHTING — Warm indoor ===
-    const ambient = new THREE.AmbientLight(0xff9966, 0.4)
+    // === LIGHTING — BRIGHT WARM INDOOR ===
+    
+    // Ambient — boosted for visibility
+    const ambient = new THREE.AmbientLight(0xffb380, 0.7)
     scene.add(ambient)
     
-    // Ceiling light
-    const ceilingLight = new THREE.PointLight(0xffaa66, 1.5, 20)
-    ceilingLight.position.set(0, 6, 0)
+    // Hemisphere light for natural fill
+    const hemiLight = new THREE.HemisphereLight(0xffd6a0, 0x6B4226, 0.5)
+    hemiLight.position.set(0, 8, 0)
+    scene.add(hemiLight)
+    
+    // Ceiling light — main source, boosted
+    const ceilingLight = new THREE.PointLight(0xffc080, 2.5, 25)
+    ceilingLight.position.set(0, 6.5, 0)
     ceilingLight.castShadow = true
     ceilingLight.shadow.mapSize.width = 2048
     ceilingLight.shadow.mapSize.height = 2048
+    ceilingLight.shadow.bias = -0.001
     scene.add(ceilingLight)
     
-    // Fireplace glow
-    const fireLight = new THREE.PointLight(0xff4500, 1.2, 8)
-    fireLight.position.set(-5, 1, -3)
+    // Second ceiling light for even coverage
+    const ceilingLight2 = new THREE.PointLight(0xffd090, 1.5, 20)
+    ceilingLight2.position.set(5, 6.5, 2)
+    scene.add(ceilingLight2)
+    
+    // Third ceiling light — left side
+    const ceilingLight3 = new THREE.PointLight(0xffb070, 1.5, 20)
+    ceilingLight3.position.set(-5, 6.5, 2)
+    scene.add(ceilingLight3)
+    
+    // Fireplace glow — bright
+    const fireLight = new THREE.PointLight(0xff5500, 2.0, 10)
+    fireLight.position.set(-5, 1.5, -3)
     scene.add(fireLight)
     
-    // Lamp light
-    const lampLight = new THREE.PointLight(0xffd700, 0.8, 6)
+    // Lamp light — bright
+    const lampLight = new THREE.PointLight(0xffe060, 1.5, 8)
     lampLight.position.set(4, 3, 2)
     scene.add(lampLight)
     
-    // === FLOOR — Wood ===
+    // Window sunset light — warm directional
+    const windowLight = new THREE.DirectionalLight(0xff8855, 0.8)
+    windowLight.position.set(0, 4, -10)
+    scene.add(windowLight)
+    
+    // === FLOOR — Wood (lighter) ===
     const floorGeo = new THREE.PlaneGeometry(20, 20)
-    const floorMat = new THREE.MeshPhongMaterial({ color: 0x6B4226, shininess: 30 })
+    const floorMat = new THREE.MeshStandardMaterial({ 
+      color: 0x8B5E3C, 
+      roughness: 0.7,
+      metalness: 0.1
+    })
     const floor = new THREE.Mesh(floorGeo, floorMat)
     floor.rotation.x = -Math.PI / 2
     floor.position.y = 0
     floor.receiveShadow = true
     scene.add(floor)
     
-    // === WALLS ===
-    const wallMat = new THREE.MeshPhongMaterial({ color: 0x3e2723, side: THREE.DoubleSide })
+    // === WALLS — Lighter warm tone ===
+    const wallMat = new THREE.MeshStandardMaterial({ 
+      color: 0x6B4E3A, 
+      side: THREE.DoubleSide,
+      roughness: 0.9
+    })
     
-    // Back wall
     const backWallGeo = new THREE.PlaneGeometry(20, 8)
     const backWall = new THREE.Mesh(backWallGeo, wallMat)
     backWall.position.set(0, 4, -8)
     backWall.receiveShadow = true
     scene.add(backWall)
     
-    // Left wall
     const leftWallGeo = new THREE.PlaneGeometry(20, 8)
     const leftWall = new THREE.Mesh(leftWallGeo, wallMat)
     leftWall.position.set(-10, 4, 0)
@@ -105,7 +130,6 @@ export default function HomeScene() {
     leftWall.receiveShadow = true
     scene.add(leftWall)
     
-    // Right wall
     const rightWallGeo = new THREE.PlaneGeometry(20, 8)
     const rightWall = new THREE.Mesh(rightWallGeo, wallMat)
     rightWall.position.set(10, 4, 0)
@@ -113,17 +137,24 @@ export default function HomeScene() {
     rightWall.receiveShadow = true
     scene.add(rightWall)
     
-    // === CEILING ===
+    // === CEILING — lighter ===
     const ceilGeo = new THREE.PlaneGeometry(20, 20)
-    const ceilMat = new THREE.MeshPhongMaterial({ color: 0x2a1a1a, side: THREE.DoubleSide })
+    const ceilMat = new THREE.MeshStandardMaterial({ 
+      color: 0x4a3528, 
+      side: THREE.DoubleSide,
+      roughness: 1.0
+    })
     const ceiling = new THREE.Mesh(ceilGeo, ceilMat)
     ceiling.position.set(0, 8, 0)
     ceiling.rotation.x = Math.PI / 2
     scene.add(ceiling)
     
-    // === RUG ===
+    // === RUG — brighter red ===
     const rugGeo = new THREE.CircleGeometry(4, 32)
-    const rugMat = new THREE.MeshPhongMaterial({ color: 0x8B0000, shininess: 10 })
+    const rugMat = new THREE.MeshStandardMaterial({ 
+      color: 0xC0392B, 
+      roughness: 0.8
+    })
     const rug = new THREE.Mesh(rugGeo, rugMat)
     rug.rotation.x = -Math.PI / 2
     rug.position.set(0, 0.02, 0)
@@ -132,27 +163,30 @@ export default function HomeScene() {
     
     // === FIREPLACE ===
     const fireplaceGeo = new THREE.BoxGeometry(3, 4, 1)
-    const fireplaceMat = new THREE.MeshPhongMaterial({ color: 0x4a4a4a })
+    const fireplaceMat = new THREE.MeshStandardMaterial({ 
+      color: 0x5a5a5a,
+      roughness: 0.6
+    })
     const fireplace = new THREE.Mesh(fireplaceGeo, fireplaceMat)
     fireplace.position.set(-5, 2, -7.8)
     fireplace.castShadow = true
     fireplace.receiveShadow = true
     scene.add(fireplace)
     
-    // Fire opening
+    // Fire opening — brighter
     const fireOpeningGeo = new THREE.BoxGeometry(2, 1.5, 0.5)
-    const fireOpeningMat = new THREE.MeshBasicMaterial({ color: 0xff6600 })
+    const fireOpeningMat = new THREE.MeshBasicMaterial({ color: 0xff8800 })
     const fireOpening = new THREE.Mesh(fireOpeningGeo, fireOpeningMat)
     fireOpening.position.set(-5, 1.5, -7.3)
     scene.add(fireOpening)
     
-    // Fire particles
-    for (let i = 0; i < 30; i++) {
-      const particleGeo = new THREE.SphereGeometry(0.08, 6, 6)
+    // Fire particles — more, brighter
+    for (let i = 0; i < 40; i++) {
+      const particleGeo = new THREE.SphereGeometry(0.1, 6, 6)
       const particleMat = new THREE.MeshBasicMaterial({
-        color: i % 3 === 0 ? 0xff4500 : 0xffaa00,
+        color: i % 3 === 0 ? 0xff5500 : 0xffcc00,
         transparent: true,
-        opacity: 0.8
+        opacity: 0.9
       })
       const particle = new THREE.Mesh(particleGeo, particleMat)
       particle.position.set(
@@ -164,7 +198,7 @@ export default function HomeScene() {
         vy: 0.02 + Math.random() * 0.03,
         vx: (Math.random() - 0.5) * 0.01,
         life: 1.0,
-        decay: 0.005 + Math.random() * 0.005
+        decay: 0.004 + Math.random() * 0.004
       }
       scene.add(particle)
       fireplaceParticles.push(particle)
@@ -172,9 +206,12 @@ export default function HomeScene() {
     
     // === INTERACTIVE OBJECTS ===
     
-    // 1. CHAIR — "I sit on the chair and read a book"
+    // 1. CHAIR
     const chairSeatGeo = new THREE.BoxGeometry(1.2, 0.15, 1.2)
-    const chairMat = new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+    const chairMat = new THREE.MeshStandardMaterial({ 
+      color: 0xA0673A,
+      roughness: 0.6
+    })
     const chairSeat = new THREE.Mesh(chairSeatGeo, chairMat)
     chairSeat.position.set(3, 0.6, 2)
     chairSeat.castShadow = true
@@ -187,7 +224,6 @@ export default function HomeScene() {
     chairBack.castShadow = true
     scene.add(chairBack)
     
-    // Chair legs
     for (const [lx, lz] of [[-0.5, -0.5], [0.5, -0.5], [-0.5, 0.5], [0.5, 0.5]]) {
       const legGeo = new THREE.BoxGeometry(0.1, 0.6, 0.1)
       const leg = new THREE.Mesh(legGeo, chairMat)
@@ -201,14 +237,17 @@ export default function HomeScene() {
       phoneticFocus: "CH in 'chair', R in 'read'",
       emoji: "🪑",
       name: "Chair",
-      color: 0x8B4513
+      color: 0xA0673A
     }
     chairBack.userData = chairSeat.userData
     objects3D.push(chairSeat, chairBack)
     
-    // 2. TABLE — "I eat breakfast at the table every morning"
+    // 2. TABLE
     const tableTopGeo = new THREE.BoxGeometry(2.5, 0.15, 1.5)
-    const tableMat = new THREE.MeshPhongMaterial({ color: 0x5D3A1A })
+    const tableMat = new THREE.MeshStandardMaterial({ 
+      color: 0x7A4F2A,
+      roughness: 0.5
+    })
     const tableTop = new THREE.Mesh(tableTopGeo, tableMat)
     tableTop.position.set(0, 1.5, -1)
     tableTop.castShadow = true
@@ -228,16 +267,17 @@ export default function HomeScene() {
       phoneticFocus: "EA in 'breakfast', T in 'table'",
       emoji: "🍽️",
       name: "Table",
-      color: 0x5D3A1A
+      color: 0x7A4F2A
     }
     objects3D.push(tableTop)
     
-    // 3. TV — "I watch TV after dinner"
+    // 3. TV — brighter screen
     const tvScreenGeo = new THREE.BoxGeometry(2, 1.2, 0.1)
-    const tvScreenMat = new THREE.MeshPhongMaterial({ 
+    const tvScreenMat = new THREE.MeshStandardMaterial({ 
       color: 0x111111,
-      emissive: 0x1133ff,
-      emissiveIntensity: 0.3
+      emissive: 0x2266ff,
+      emissiveIntensity: 0.6,
+      roughness: 0.3
     })
     const tvScreen = new THREE.Mesh(tvScreenGeo, tvScreenMat)
     tvScreen.position.set(5, 3, -7.7)
@@ -245,7 +285,10 @@ export default function HomeScene() {
     scene.add(tvScreen)
     
     const tvStandGeo = new THREE.BoxGeometry(2.5, 1.5, 0.8)
-    const tvStandMat = new THREE.MeshPhongMaterial({ color: 0x2a2a2a })
+    const tvStandMat = new THREE.MeshStandardMaterial({ 
+      color: 0x3a3a3a,
+      roughness: 0.4
+    })
     const tvStand = new THREE.Mesh(tvStandGeo, tvStandMat)
     tvStand.position.set(5, 0.75, -7.5)
     tvStand.castShadow = true
@@ -260,9 +303,12 @@ export default function HomeScene() {
     }
     objects3D.push(tvScreen)
     
-    // 4. BOOKSHELF — "The bookshelf is full of stories"
+    // 4. BOOKSHELF — brighter wood
     const shelfWoodGeo = new THREE.BoxGeometry(2, 4, 0.8)
-    const shelfMat = new THREE.MeshPhongMaterial({ color: 0x4a3020 })
+    const shelfMat = new THREE.MeshStandardMaterial({ 
+      color: 0x6B4530,
+      roughness: 0.6
+    })
     const shelf = new THREE.Mesh(shelfWoodGeo, shelfMat)
     shelf.position.set(-8, 2, -3)
     shelf.rotation.y = Math.PI / 2
@@ -270,13 +316,16 @@ export default function HomeScene() {
     shelf.receiveShadow = true
     scene.add(shelf)
     
-    // Books on shelf
-    const bookColors = [0xff4444, 0x4444ff, 0x44ff44, 0xffff44, 0xff44ff, 0x44ffff, 0xff8844]
+    // Books — brighter colors
+    const bookColors = [0xff6666, 0x6666ff, 0x66ff66, 0xffff66, 0xff66ff, 0x66ffff, 0xff9944]
     for (let row = 0; row < 4; row++) {
       for (let col = 0; col < 5; col++) {
         const bookGeo = new THREE.BoxGeometry(0.3, 0.6, 0.5)
-        const bookMat = new THREE.MeshPhongMaterial({ 
-          color: bookColors[(row * 5 + col) % bookColors.length]
+        const bookMat = new THREE.MeshStandardMaterial({ 
+          color: bookColors[(row * 5 + col) % bookColors.length],
+          roughness: 0.4,
+          emissive: bookColors[(row * 5 + col) % bookColors.length],
+          emissiveIntensity: 0.15
         })
         const book = new THREE.Mesh(bookGeo, bookMat)
         book.position.set(-8 + (col - 2) * 0.35, 0.8 + row * 0.9, -2.5)
@@ -290,13 +339,17 @@ export default function HomeScene() {
       phoneticFocus: "TH in 'the', F in 'full'",
       emoji: "📚",
       name: "Bookshelf",
-      color: 0x4a3020
+      color: 0x6B4530
     }
     objects3D.push(shelf)
     
-    // 5. MIRROR — "I look in the mirror and practice my accent"
+    // 5. MIRROR — brighter shimmer
     const mirrorFrameGeo = new THREE.BoxGeometry(1.5, 2.5, 0.1)
-    const frameMat = new THREE.MeshPhongMaterial({ color: 0xDAA520 })
+    const frameMat = new THREE.MeshStandardMaterial({ 
+      color: 0xDAA520,
+      roughness: 0.2,
+      metalness: 0.8
+    })
     const mirrorFrame = new THREE.Mesh(mirrorFrameGeo, frameMat)
     mirrorFrame.position.set(8, 3, 2)
     mirrorFrame.rotation.y = -Math.PI / 2
@@ -304,11 +357,13 @@ export default function HomeScene() {
     scene.add(mirrorFrame)
     
     const mirrorGlassGeo = new THREE.PlaneGeometry(1.3, 2.3)
-    const mirrorMat = new THREE.MeshPhongMaterial({ 
+    const mirrorMat = new THREE.MeshStandardMaterial({ 
       color: 0x88ccff,
       emissive: 0x336699,
-      emissiveIntensity: 0.2,
-      shininess: 100
+      emissiveIntensity: 0.4,
+      shininess: 120,
+      metalness: 0.9,
+      roughness: 0.1
     })
     const mirrorGlass = new THREE.Mesh(mirrorGlassGeo, mirrorMat)
     mirrorGlass.position.set(7.95, 3, 2)
@@ -324,20 +379,46 @@ export default function HomeScene() {
     }
     objects3D.push(mirrorFrame)
     
-    // === WINDOW with sunset light ===
-    const windowGeo = new THREE.PlaneGeometry(2, 2)
+    // === WINDOW with sunset ===
+    const windowGeo = new THREE.PlaneGeometry(2.5, 2.5)
     const windowMat = new THREE.MeshBasicMaterial({ 
-      color: 0xff6b35,
+      color: 0xff7a3a,
       transparent: true,
-      opacity: 0.6
+      opacity: 0.8
     })
     const window1 = new THREE.Mesh(windowGeo, windowMat)
     window1.position.set(0, 4, -7.9)
     scene.add(window1)
     
-    const windowLight = new THREE.DirectionalLight(0xff8855, 0.5)
-    windowLight.position.set(0, 4, -10)
-    scene.add(windowLight)
+    // === DECORATIVE PLANT ===
+    const potGeo = new THREE.CylinderGeometry(0.4, 0.3, 0.8, 12)
+    const potMat = new THREE.MeshStandardMaterial({ 
+      color: 0xCC6633,
+      roughness: 0.5
+    })
+    const pot = new THREE.Mesh(potGeo, potMat)
+    pot.position.set(-3, 0.4, 5)
+    pot.castShadow = true
+    scene.add(pot)
+    
+    // Plant leaves
+    for (let i = 0; i < 8; i++) {
+      const leafGeo = new THREE.SphereGeometry(0.3, 8, 6)
+      const leafMat = new THREE.MeshStandardMaterial({ 
+        color: 0x4a8a2a,
+        roughness: 0.7
+      })
+      const leaf = new THREE.Mesh(leafGeo, leafMat)
+      const angle = (i / 8) * Math.PI * 2
+      leaf.position.set(
+        -3 + Math.cos(angle) * 0.3,
+        1.1 + Math.sin(i) * 0.2,
+        5 + Math.sin(angle) * 0.3
+      )
+      leaf.scale.y = 1.5
+      leaf.castShadow = true
+      scene.add(leaf)
+    }
     
     // === ANIMATION LOOP ===
     let time = 0
@@ -357,16 +438,16 @@ export default function HomeScene() {
         }
       })
       
-      // Fire light flicker
-      fireLight.intensity = 1.0 + Math.sin(time * 8) * 0.3 + Math.random() * 0.2
+      // Fire light flicker — brighter
+      fireLight.intensity = 1.8 + Math.sin(time * 8) * 0.4 + Math.random() * 0.3
       
-      // TV screen flicker
-      tvScreenMat.emissiveIntensity = 0.2 + Math.sin(time * 3) * 0.1
+      // TV screen flicker — brighter
+      tvScreenMat.emissiveIntensity = 0.5 + Math.sin(time * 3) * 0.15
       
       // Mirror shimmer
-      mirrorMat.emissiveIntensity = 0.15 + Math.sin(time * 2) * 0.05
+      mirrorMat.emissiveIntensity = 0.3 + Math.sin(time * 2) * 0.1
       
-      // Camera
+      // Camera gentle drift
       if (cameraShake > 0) {
         camera.position.x = (Math.random() - 0.5) * cameraShake * 0.1
         camera.position.y = 4 + (Math.random() - 0.5) * cameraShake * 0.1
@@ -383,8 +464,9 @@ export default function HomeScene() {
     
     // === CLICK HANDLER ===
     const handleClick = (event) => {
-      mouse.x = (event.clientX / window.innerWidth) * 2 - 1
-      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
+      const rect = renderer.domElement.getBoundingClientRect()
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
       raycaster.setFromCamera(mouse, camera)
       const intersects = raycaster.intersectObjects(objects3D)
       
@@ -515,7 +597,7 @@ export default function HomeScene() {
         display: 'flex', gap: '8px',
         fontFamily: 'sans-serif'
       }}>
-        {useAlmaGameStore.getState().getUnlockProgress().slice(0, 8).map(item => (
+        {useAlmaGameStore.getState().getUnlockProgress().map(item => (
           <button
             key={item.day}
             onClick={() => {

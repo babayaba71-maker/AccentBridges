@@ -112,8 +112,12 @@ export const useAlmaGameStore = create((set, get) => ({
 
   /**
    * Record a practice attempt
+   * Now also manages streak in browser — +1 per day when you pass (85%+)
    */
   recordSession: (accuracy, passed) => {
+    const today = new Date().toDateString()
+    const lastPractice = get().lastPracticeDate
+    
     set({
       todayAccuracy: accuracy,
       todayPassed: passed,
@@ -123,6 +127,21 @@ export const useAlmaGameStore = create((set, get) => ({
     if (passed) {
       const points = Math.round(accuracy * 10)
       set({ masteryPoints: get().masteryPoints + points })
+      
+      // Browser streak: +1 if first pass today
+      if (lastPractice !== today) {
+        const newStreak = get().streak + 1
+        set({ lastPracticeDate: today })
+        
+        // Save to localStorage
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('alma_streak', String(newStreak))
+          localStorage.setItem('alma_last_practice', new Date().toISOString())
+        }
+        
+        // Trigger unlock check
+        get().updateStreak(newStreak)
+      }
     }
   },
 
