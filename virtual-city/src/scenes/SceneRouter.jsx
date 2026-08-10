@@ -2,6 +2,7 @@ import { useAlmaGameStore } from '../store/useAlmaGameStore'
 import MaleconScene from './MaleconScene'
 import HomeScene from './HomeScene'
 import SchoolScene from './SchoolScene'
+import GymScene from './GymScene'
 
 /**
  * SceneRouter — Switches between Virtual City zones
@@ -20,7 +21,6 @@ import SchoolScene from './SchoolScene'
 
 export default function SceneRouter() {
   const cameraTarget = useAlmaGameStore(s => s.cameraTarget)
-  const unlocked = useAlmaGameStore(s => s.unlockedLocations)
   
   switch (cameraTarget) {
     case 'home':
@@ -29,23 +29,11 @@ export default function SceneRouter() {
     case 'school':
       return <SchoolScene />
     
+    case 'gym':
+      return <GymScene />
+    
     case 'malecon':
       return <MaleconScene />
-    
-    case 'gym':
-      return (
-        <div style={{
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          height: '100vh',
-          background: 'linear-gradient(180deg, #2d2d2d 0%, #1a1a1a 100%)',
-          color: 'white', fontFamily: 'sans-serif'
-        }}>
-          <div style={{ fontSize: '4rem' }}>💪</div>
-          <h2 style={{ fontSize: '1.5rem' }}>Gym — Coming Soon</h2>
-          <p style={{ opacity: 0.7 }}>Unlocked at Day 5 streak</p>
-        </div>
-      )
     
     case 'cafeteria':
       return (
@@ -109,8 +97,8 @@ export default function SceneRouter() {
           <div style={{ display: 'flex', gap: '20px', marginTop: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
             <button onClick={() => useAlmaGameStore.getState().navigateTo('home')} style={zoneBtn}>🏠</button>
             <button onClick={() => useAlmaGameStore.getState().navigateTo('school')} style={zoneBtn}>🏫</button>
-            <button onClick={() => useAlmaGameStore.getState().navigateTo('malecon')} style={zoneBtn}>🌅</button>
             <button onClick={() => useAlmaGameStore.getState().navigateTo('gym')} style={zoneBtn}>💪</button>
+            <button onClick={() => useAlmaGameStore.getState().navigateTo('malecon')} style={zoneBtn}>🌅</button>
             <button onClick={() => useAlmaGameStore.getState().navigateTo('cafeteria')} style={zoneBtn}>☕</button>
             <button onClick={() => useAlmaGameStore.getState().navigateTo('forum')} style={zoneBtn}>🛍️</button>
             <button onClick={() => useAlmaGameStore.getState().navigateTo('centro')} style={zoneBtn}>🏙️</button>
