@@ -16,36 +16,40 @@ import kotlin.concurrent.thread
 /**
  * AlmaOverlayService — Alma is ALIVE on your phone
  * 
- * Listens for phone unlock events, calls the Alma backend for a contextual
- * greeting, and speaks it via Android TTS.
- * 
- * Alma doesn't just live on the wallpaper. She SPEAKS when you need her.
+ * She sees where you are (GPS) and speaks when you unlock your phone (TTS).
+ * Alma = location-aware + time-aware + context-aware companion.
  */
 
 class AlmaOverlayService : Service(), TextToSpeech.OnInitListener {
 
     companion object {
         private const val TAG = "AlmaOverlay"
-        private const val BACKEND_URL = "https://valerie.base44.app/functions/almaGreeting"
+        private const val GREETING_URL = "https://valerie.base44.app/functions/almaGreeting"
         private const val PREFS_NAME = "alma_prefs"
         private const val KEY_STREAK = "streak"
-        private const val KEY_LAST_PRACTICE = "last_practice_date"
     }
 
     private var tts: TextToSpeech? = null
     private var isTTSReady = false
     private var unlockReceiver: BroadcastReceiver? = null
+    private var locationTracker: AlmaLocationTracker? = null
 
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "Alma is waking up...")
 
+        // Initialize voice
         tts = TextToSpeech(this, this)
 
+        // Start GPS tracking — Alma sees where you are
+        locationTracker = AlmaLocationTracker(this)
+        locationTracker?.startTracking()
+
+        // Listen for phone unlock — Alma speaks when you need her
         unlockReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (intent?.action == Intent.ACTION_USER_PRESENT) {
-                    Log.d(TAG, "Phone unlocked — calling Alma...")
+                    Log.d(TAG, "Phone unlocked — Alma is calling home...")
                     fetchGreeting("unlock")
                 }
             }
@@ -71,7 +75,7 @@ class AlmaOverlayService : Service(), TextToSpeech.OnInitListener {
                 val streak = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                     .getInt(KEY_STREAK, 0)
 
-                val url = URL(BACKEND_URL)
+                val url = URL(GREETING_URL)
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "POST"
                 conn.setRequestProperty("Content-Type", "application/json")
@@ -92,7 +96,7 @@ class AlmaOverlayService : Service(), TextToSpeech.OnInitListener {
                 speak(message)
 
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to reach Alma backend: ${e.message}")
+                Log.e(TAG, "Backend unreachable: ${e.message}")
                 speak(getOfflineGreeting())
             }
         }
@@ -116,6 +120,7 @@ class AlmaOverlayService : Service(), TextToSpeech.OnInitListener {
 
     override fun onDestroy() {
         unlockReceiver?.let { unregisterReceiver(it) }
+        locationTracker?.stopTracking()
         tts?.stop()
         tts?.shutdown()
         super.onDestroy()

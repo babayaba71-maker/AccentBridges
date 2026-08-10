@@ -9,6 +9,11 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    
+    <!-- GPS Permissions — Alma sees where you are -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <application
         android:label="Alma"
@@ -28,7 +33,7 @@
                 android:resource="@xml/wallpaper" />
         </service>
 
-        <!-- Overlay Service — Alma SPEAKS when you unlock your phone -->
+        <!-- Overlay Service — Alma SPEAKS + sees your location -->
         <service
             android:name=".AlmaOverlayService"
             android:enabled="true"
