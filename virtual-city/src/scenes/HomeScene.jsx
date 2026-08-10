@@ -550,7 +550,7 @@ export default function HomeScene() {
       for (const word of spokenWords) {
         if (targetWords.includes(word)) matches++
       }
-      const accuracy = Math.round((matches / targetWords.length) * 100)
+      const accuracy = Math.min(100, Math.round((matches / targetWords.length) * 100))
       
       if (accuracy >= 85 && confidence > 0.7) {
         setFeedback(`🔥 ${accuracy}% — Excellent, Clyde! Nailed it!`)
