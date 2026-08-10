@@ -23,12 +23,10 @@ import org.json.JSONObject
 import kotlin.concurrent.thread
 
 /**
- * AlmaFloatingButton — A floating orb that lives on top of everything
+ * AlmaFloatingButton — Press to TALK to Alma
  * 
- * Press and hold to talk to Alma. Release to send.
- * Alma listens (STT) → thinks (backend) → speaks (TTS) → listens again.
- * 
- * This is the full conversation loop: STT → Brain → TTS
+ * Full conversation loop: STT → Backend → TTS → repeat
+ * Streak tracking: 85%+ accuracy = streak goes up (once per day)
  */
 
 class AlmaFloatingButton : Service(), TextToSpeech.OnInitListener {
@@ -36,9 +34,9 @@ class AlmaFloatingButton : Service(), TextToSpeech.OnInitListener {
     companion object {
         private const val TAG = "AlmaFloat"
         private const val CONVERSATION_URL = "https://valerie.base44.app/functions/almaConversation"
-        private const val LOCATION_URL = "https://valerie.base44.app/functions/almaLocation"
         private const val PREFS_NAME = "alma_prefs"
         private const val KEY_STREAK = "streak"
+        private const val KEY_LAST_PRACTICE_DATE = "last_practice_date"
     }
 
     private var windowManager: WindowManager? = null
@@ -75,7 +73,7 @@ class AlmaFloatingButton : Service(), TextToSpeech.OnInitListener {
             text = "🎙"
             setBackgroundResource(android.R.drawable.dialog_holo_light_frame)
             textSize = 24f
-            setPadding(20, 20, 20, 20)
+            setPadding(24, 24, 24, 24)
             alpha = 0.85f
         }
 
@@ -96,33 +94,14 @@ class AlmaFloatingButton : Service(), TextToSpeech.OnInitListener {
             y = 120
         }
 
-        // Touch listener — press and hold to talk
-        button.setOnTouchListener { _, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    button.alpha = 1.0f
-                    button.text = "🔴"
-                    startListening()
-                    true
-                }
-                MotionEvent.ACTION_UP -> {
-                    button.alpha = 0.85f
-                    button.text = "🎙"
-                    stopListening()
-                    true
-                }
-                else -> false
-            }
-        }
-
-        // Make it draggable
+        // Draggable + tap to listen
         var initialX = 0
         var initialY = 0
         var initialTouchX = 0f
         var initialTouchY = 0f
         var isDragging = false
 
-        button.setOnTouchListener { v, event ->
+        button.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     initialX = params.x
@@ -145,7 +124,6 @@ class AlmaFloatingButton : Service(), TextToSpeech.OnInitListener {
                 }
                 MotionEvent.ACTION_UP -> {
                     if (!isDragging) {
-                        // It was a tap, not a drag — start listening
                         startListening()
                     }
                     true
@@ -157,37 +135,30 @@ class AlmaFloatingButton : Service(), TextToSpeech.OnInitListener {
         floatingButton = button
         try {
             windowManager?.addView(button, params)
-            Log.d(TAG, "Alma's floating orb is visible on screen.")
+            Log.d(TAG, "Alma's floating orb is visible.")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to show floating button: ${e.message}")
         }
     }
 
-    /**
-     * STT — Start listening to Clyde
-     */
     private fun startListening() {
         if (isListening) return
         isListening = true
+
         speak("I'm listening, Clyde.")
 
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US")
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
-            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false)
         }
 
         speechRecognizer?.setRecognitionListener(object : RecognitionListener {
             override fun onReadyForSpeech(params: Bundle?) {}
-            override fun onBeginningOfSpeech() {
-                Log.d(TAG, "Clyde is speaking...")
-            }
+            override fun onBeginningOfSpeech() { Log.d(TAG, "Clyde is speaking...") }
             override fun onRmsChanged(rmsdB: Float) {}
             override fun onBufferReceived(buffer: ByteArray?) {}
-            override fun onEndOfSpeech() {
-                Log.d(TAG, "Clyde stopped speaking.")
-            }
+            override fun onEndOfSpeech() { Log.d(TAG, "Clyde stopped speaking.") }
             override fun onError(error: Int) {
                 Log.e(TAG, "STT error: $error")
                 isListening = false
@@ -209,18 +180,17 @@ class AlmaFloatingButton : Service(), TextToSpeech.OnInitListener {
         speechRecognizer?.startListening(intent)
     }
 
-    private fun stopListening() {
-        // SpeechRecognizer stops automatically on end of speech
-    }
-
-    /**
-     * Send spoken text to Alma's brain (backend)
-     */
     private fun sendToAlma(text: String) {
         thread {
             try {
-                val streak = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                    .getInt(KEY_STREAK, 0)
+                val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                val streak = prefs.getInt(KEY_STREAK, 0)
+                val lastPracticeDate = prefs.getString(KEY_LAST_PRACTICE_DATE, "")
+
+                // Check if already practiced today
+                val today = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+                    .format(java.util.Date())
+                val alreadyPracticed = today == lastPracticeDate
 
                 val url = URL(CONVERSATION_URL)
                 val conn = url.openConnection() as HttpURLConnection
@@ -231,7 +201,9 @@ class AlmaFloatingButton : Service(), TextToSpeech.OnInitListener {
                 val payload = JSONObject().apply {
                     put("text", text)
                     put("location", currentLocation)
-                    put("streak", streak)
+                    put("userId", "clyde")
+                    // If already practiced, send current streak (don't let it go up again)
+                    put("streak", if (alreadyPracticed) streak else streak)
                 }
 
                 conn.outputStream.use { it.write(payload.toString().toByteArray()) }
@@ -239,9 +211,22 @@ class AlmaFloatingButton : Service(), TextToSpeech.OnInitListener {
                 val response = conn.inputStream.bufferedReader().use { it.readText() }
                 val json = JSONObject(response)
                 val almaResponse = json.optString("response", "I'm here, Clyde.")
-                val intent = json.optString("intent", "unknown")
+                val passed = json.optBoolean("passed", false)
+                val streakChanged = json.optBoolean("streakChanged", false)
+                val newStreak = json.optInt("newStreak", streak)
+                val accuracy = json.optInt("accuracy", 0)
 
-                Log.d(TAG, "Alma responded ($intent): $almaResponse")
+                Log.d(TAG, "Alma: $almaResponse | accuracy=$accuracy% passed=$passed streak=$newStreak")
+
+                // Update streak in SharedPreferences
+                if (passed && streakChanged && !alreadyPracticed) {
+                    prefs.edit()
+                        .putInt(KEY_STREAK, newStreak)
+                        .putString(KEY_LAST_PRACTICE_DATE, today)
+                        .apply()
+                    Log.d(TAG, "STREAK UPDATED: $newStreak days! 🔥")
+                }
+
                 speak(almaResponse)
 
             } catch (e: Exception) {
