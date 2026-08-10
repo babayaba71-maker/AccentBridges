@@ -1,23 +1,22 @@
 {
-  "name": "myl-accentbridges-virtual-city",
+  "name": "virtual-city",
+  "private": true,
   "version": "1.0.0",
-  "description": "Myl AccentBridges Virtual City — Immersive 3D English pronunciation coach",
   "type": "module",
+  "description": "AccentBridges Virtual City — 3D accent coaching environment",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "@react-three/fiber": "^8.15.0",
-    "@react-three/drei": "^9.96.0",
-    "three": "^0.160.0",
-    "zustand": "^4.5.0"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "three": "^0.169.0",
+    "zustand": "^4.5.5"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.2.0",
-    "vite": "^5.0.0"
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^5.4.11"
   }
 }
