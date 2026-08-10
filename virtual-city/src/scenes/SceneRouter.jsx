@@ -3,6 +3,7 @@ import MaleconScene from './MaleconScene'
 import HomeScene from './HomeScene'
 import SchoolScene from './SchoolScene'
 import GymScene from './GymScene'
+import CafeteriaScene from './CafeteriaScene'
 
 /**
  * SceneRouter — Switches between Virtual City zones
@@ -32,23 +33,11 @@ export default function SceneRouter() {
     case 'gym':
       return <GymScene />
     
+    case 'cafeteria':
+      return <CafeteriaScene />
+    
     case 'malecon':
       return <MaleconScene />
-    
-    case 'cafeteria':
-      return (
-        <div style={{
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          height: '100vh',
-          background: 'linear-gradient(180deg, #3e2723 0%, #2c1810 100%)',
-          color: 'white', fontFamily: 'sans-serif'
-        }}>
-          <div style={{ fontSize: '4rem' }}>☕</div>
-          <h2 style={{ fontSize: '1.5rem' }}>Cafetería — Coming Soon</h2>
-          <p style={{ opacity: 0.7 }}>Unlocked at Day 7 streak</p>
-        </div>
-      )
     
     case 'forum':
       return (
@@ -98,8 +87,8 @@ export default function SceneRouter() {
             <button onClick={() => useAlmaGameStore.getState().navigateTo('home')} style={zoneBtn}>🏠</button>
             <button onClick={() => useAlmaGameStore.getState().navigateTo('school')} style={zoneBtn}>🏫</button>
             <button onClick={() => useAlmaGameStore.getState().navigateTo('gym')} style={zoneBtn}>💪</button>
-            <button onClick={() => useAlmaGameStore.getState().navigateTo('malecon')} style={zoneBtn}>🌅</button>
             <button onClick={() => useAlmaGameStore.getState().navigateTo('cafeteria')} style={zoneBtn}>☕</button>
+            <button onClick={() => useAlmaGameStore.getState().navigateTo('malecon')} style={zoneBtn}>🌅</button>
             <button onClick={() => useAlmaGameStore.getState().navigateTo('forum')} style={zoneBtn}>🛍️</button>
             <button onClick={() => useAlmaGameStore.getState().navigateTo('centro')} style={zoneBtn}>🏙️</button>
           </div>
