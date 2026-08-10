@@ -1,91 +1,44 @@
-# Valerie/Alma Android App — Holographic Wallpaper + Overlay
-# ============================================================
-# Package: com.valerie.ai
-# Source: JJ's prototype + Alma's enhanced version
-# Date: August 10, 2026
-# ============================================================
+# Alma — Android Holographic Companion
 
-## STRUCTURE
+## How to compile the APK
 
-android/
-└── app/
-    └── src/
-        └── main/
-            ├── java/com/valerie/ai/
-            │   ├── MainActivity.kt              ← Launches overlay service
-            │   ├── ValerieOverlayService.kt      ← Floating overlay (TYPE_APPLICATION_OVERLAY)
-            │   └── ValerieWallpaperService.kt    ← Live wallpaper (enhanced with particles + breathing orb + Alma text)
-            ├── res/
-            │   ├── layout/
-            │   │   └── valerie_overlay.xml        ← ImageView for overlay
-            │   └── xml/
-            │       └── wallpaper.xml             ← Wallpaper metadata
-            └── AndroidManifest_snippet.xml        ← Service registration
+### Requirements
+- Android Studio (Hedgehog 2023.1.1 or newer)
+- JDK 17 (bundled with Android Studio)
+- Android SDK 34 (API level 34, Android 14)
 
-## WHAT EACH FILE DOES
+### Steps
 
-### MainActivity.kt
-Simple launcher — starts the overlay service on app open.
+1. Open Android Studio
+2. File → Open → Select the `android/` folder
+3. Wait for Gradle sync to complete (downloads dependencies)
+4. If prompted, install SDK 34 and build tools
+5. Go to Build → Build Bundle(s) / APK(s) → Build APK(s)
+6. The APK will be at: `app/build/outputs/apk/debug/app-debug.apk`
 
-### ValerieOverlayService.kt
-Floating overlay that appears on top of other apps.
-Uses TYPE_APPLICATION_OVERLAY (requires SYSTEM_ALERT_WINDOW permission).
-Currently shows a placeholder ImageView that fades in.
-Replace with animation/video of Alma later.
+### Install on your phone
 
-### ValerieWallpaperService.kt (ENHANCED BY ALMA)
-Live wallpaper with:
-1. Deep space background (dark blue/black)
-2. Breathing light orb — pulses like breathing (80-120px radius)
-3. 50 floating particles (holographic dust, twinkle effect)
-4. Rotating glow ring (3 dots orbiting the orb)
-5. "Alma" text that fades in/out gently
-6. 30fps animation loop
-7. Battery efficient (only draws when visible)
-8. Surface lifecycle managed (cleans up on destroy)
+1. Transfer the APK to your Android phone
+2. Open the file (enable "Install from unknown sources" if prompted)
+3. Open the Alma app
+4. Grant permissions: Location, Microphone, Overlay
+5. Set Alma as your wallpaper: Settings → Wallpaper → Alma
+6. Alma is now live on your device 24/7
 
-### wallpaper.xml
-Wallpaper metadata — description + thumbnail reference.
+### Features
+- Holographic breathing orb wallpaper (30fps)
+- GPS location tracking (8 Culiacán contexts)
+- Floating button — press to talk to Alma
+- Streak tracking with pronunciation validation (>85%)
+- Boot receiver — Alma starts automatically
+- Conversational loop with STT/TTS
 
-### AndroidManifest_snippet.xml
-Service registration for the wallpaper engine.
-Needs to be added to AndroidManifest.xml inside <application>.
-
-## ANDROIDMANIFEST.XML — FULL PERMISSIONS NEEDED
-
-<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-<uses-permission android:name="android.permission.BIND_WALLPAPER" />
-
-Add inside <application>:
-<service android:name=".ValerieWallpaperService"
-    android:permission="android.permission.BIND_WALLPAPER">
-    <intent-filter>
-        <action android:name="android.service.wallpaper.WallpaperService" />
-    </intent-filter>
-    <meta-data
-        android:name="android.service.wallpaper"
-        android:resource="@xml/wallpaper" />
-</service>
-
-<service android:name=".ValerieOverlayService" />
-
-## NEXT STEPS FOR ANDROID BUILD
-
-1. Create Android Studio project (package: com.valerie.ai)
-2. Add these files to the project
-3. Add permissions to AndroidManifest.xml
-4. Create valerie_placeholder.png in res/drawable/
-5. Add ic_launcher icon in res/mipmap/
-6. Build APK
-7. Set wallpaper: Settings → Wallpaper → Valerie AI Wallpaper
-8. Student sees Alma "breathing" on their home screen 🌌
-
-## FUTURE ENHANCEMENTS
-
-1. Replace placeholder with 3D animated Alma (OpenGL ES or Unity)
-2. Add text-to-speech: Alma greets student when they unlock phone
-3. Add streak counter overlay
-4. Add notification: "Alma misses you! Practice your TH sounds"
-5. GPS integration: Alma says location-aware phrases
-6. Camera emotion detection: Alma changes color based on student mood
-7. AR mode: Alma appears via Rokid glasses
+### Permissions
+- INTERNET — Backend communication
+- BIND_WALLPAPER — Holographic presence
+- ACCESS_FINE_LOCATION — GPS context
+- RECORD_AUDIO — Voice conversation
+- SYSTEM_ALERT_WINDOW — Floating button
+- VIBRATE — Haptic feedback
+- RECEIVE_BOOT_COMPLETED — Auto-start
+- FOREGROUND_SERVICE — Persistent service
