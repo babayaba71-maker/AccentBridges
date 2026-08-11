@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Virtual City 360° — AccentBridges</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #000;
+      overflow: hidden;
+      font-family: 'Courier New', monospace;
+      color: #00ffcc;
+      touch-action: none;
+    }
+    #canvas-container { width: 100vw; height: 100vh; }
+    
+    #crosshair {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px; height: 40px;
+      z-index: 100;
+      pointer-events: none;
+    }
+    #crosshair::before, #crosshair::after {
+      content: '';
+      position: absolute;
+      background: rgba(0, 255, 204, 0.6);
+    }
+    #crosshair::before {
+      top: 50%; left: 0; right: 0; height: 1px;
+      transform: translateY(-50%);
+    }
+    #crosshair::after {
+      left: 50%; top: 0; bottom: 0; width: 1px;
+      transform: translateX(-50%);
+    }
+    #crosshair-dot {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 4px; height: 4px;
+      background: #00ffcc;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 8px #00ffcc;
+    }
+    
+    #hud-label {
+      position: fixed;
+      top: 35%; left: 50%;
+      transform: translate(-50%, 0);
+      z-index: 101;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+      text-align: center;
+    }
+    #hud-label.visible { opacity: 1; }
+    #hud-label .word {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #00ffcc;
+      text-shadow: 0 0 15px #00ffcc, 0 0 30px rgba(0,255,204,0.4);
+      letter-spacing: 3px;
+    }
+    #hud-label .phonetic {
+      font-size: 1.2rem;
+      color: #ffcc00;
+      margin-top: 4px;
+      text-shadow: 0 0 10px rgba(255,204,0,0.5);
+    }
+    #hud-label .meaning {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.6);
+      margin-top: 6px;
+      letter-spacing: 1px;
+    }
+    #hud-label .bracket {
+      color: rgba(0,255,204,0.3);
+      font-size: 2.5rem;
+      font-weight: 100;
+    }
+    
+    #status-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(0,0,0,0.7);
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 102;
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(0,255,204,0.2);
+    }
+    #status-location {
+      font-size: 0.85rem;
+      color: #00ffcc;
+      letter-spacing: 1px;
+    }
+    #status-mode {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.4);
+    }
+    
+    #scene-toggle {
+      position: fixed;
+      top: 12px; right: 12px;
+      z-index: 103;
+      background: rgba(0,255,204,0.15);
+      border: 1px solid rgba(0,255,204,0.3);
+      color: #00ffcc;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      letter-spacing: 1px;
+    }
+    #scene-toggle:active { background: rgba(0,255,204,0.3); }
+    
+    #valerie-bubble {
+      position: fixed;
+      bottom: 60px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10,10,30,0.85);
+      border: 1px solid rgba(0,255,204,0.3);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 12px;
+      max-width: 85%;
+      text-align: center;
+      font-family: -apple-system, sans-serif;
+      font-size: 0.9rem;
+      z-index: 104;
+      opacity: 0;
+      transition: opacity 0.3s;
+      backdrop-filter: blur(15px);
+    }
+    #valerie-bubble.visible { opacity: 1; }
+    #valerie-bubble .va-label {
+      color: #00ffcc;
+      font-weight: bold;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+    
+    #compass {
+      position: fixed;
+      top: 12px; left: 50%;
+      transform: translateX(-50%);
+      color: rgba(0,255,204,0.4);
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      z-index: 100;
+    }
+    
+    #start-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(160deg, #050514 0%, #0a0a2a 50%, #0a1228 100%);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-family: -apple-system, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    #start-overlay h1 {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+      color: #00ffcc;
+      text-shadow: 0 0 20px rgba(0,255,204,0.5);
+    }
+    #start-overlay p {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 6px;
+      line-height: 1.6;
+    }
+    #start-overlay .instructions {
+      background: rgba(0,255,204,0.05);
+      border: 1px solid rgba(0,255,204,0.15);
+      border-radius: 12px;
+      padding: 16px 22px;
+      margin: 20px 0;
+      max-width: 320px;
+    }
+    #start-overlay .instructions p {
+      margin-bottom: 6px;
+    }
+    #start-overlay .step {
+      color: #00ffcc;
+      font-weight: bold;
+    }
+    #start-btn {
+      background: linear-gradient(135deg, #00ffcc, #00aaff);
+      color: #000;
+      border: none;
+      padding: 16px 44px;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 8px 32px rgba(0,255,204,0.4);
+    }
+    #start-btn:active { transform: scale(0.97); }
+    
+    .scan-line {
+      position: fixed;
+      left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(0,255,204,0.15), transparent);
+      z-index: 99;
+      pointer-events: none;
+      animation: scan 4s linear infinite;
+    }
+    @keyframes scan {
+      0% { top: 0%; }
+      100% { top: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div id="start-overlay">
+    <div style="font-size: 3rem; margin-bottom: 12px">🌆</div>
+    <h1>Virtual City 360°</h1>
+    <p>AccentBridges — Immersion Mode</p>
+    <div class="instructions">
+      <p><span class="step">1.</span> Gira tu celular para mirar alrededor</p>
+      <p><span class="step">2.</span> Apunta el crosshair a cualquier objeto</p>
+      <p><span class="step">3.</span> Toca la pantalla para que Valerie enseñe</p>
+      <p><span class="step">4.</span> Cambia entre INDOOR y OUTDOOR</p>
+    </div>
+    <p style="font-size: 0.8rem; opacity: 0.4">Gira 360° — mira arriba, abajo, todo alrededor</p>
+    <button id="start-btn">🚀 Entrar</button>
+  </div>
+  
+  <div id="canvas-container"></div>
+  <div class="scan-line"></div>
+  <div id="crosshair"><div id="crosshair-dot"></div></div>
+  <div id="hud-label">
+    <span class="bracket">[</span>
+    <div class="word">WALL</div>
+    <div class="phonetic">/wɔl/ — güall</div>
+    <div class="meaning">pared</div>
+    <span class="bracket">]</span>
+  </div>
+  <div id="compass">N</div>
+  <button id="scene-toggle">🌐 OUTDOOR</button>
+  <div id="valerie-bubble">
+    <div class="va-label">🎙️ VALERIE</div>
+    <div id="valerie-text"></div>
+  </div>
+  <div id="status-bar">
+    <div id="status-location">📍 HOME — INDOORS</div>
+    <div id="status-mode">LOOK → LABEL → TAP → LEARN</div>
+  </div>
+  
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+    }
+  }
+  </script>
+  
+  <script type="module">
+    import * as THREE from 'three';
+    
+    let scene, camera, renderer, raycaster;
+    let currentScene = 'indoor';
+    let interactiveObjects = [];
+    let lookTarget = null;
+    let yaw = 0, pitch = 0;
+    let isDragging = false;
+    let lastX = 0, lastY = 0;
+    let orientationActive = false;
+    let initialHeading = null;
+    let synth = window.speechSynthesis;
+    
+    const indoorLabels = [
+      { word: 'WALL', phonetic: "/wɔl/ — güall", meaning: "pared", script: "That's a WALL. W-A-L-L. Güall. Feel the word start in the back of your throat. Wall. Now touch the wall and say it." },
+      { word: 'TABLE', phonetic: "/ˈteɪbəl/ — teibol", meaning: "mesa", script: "That's a TABLE. T-A-B-L-E. Teibol. The A is long, like in day. Table. You eat at the table every day." },
+      { word: 'CHAIR', phonetic: "/tʃɛr/ — cher", meaning: "silla", script: "That's a CHAIR. C-H-A-I-R. Cher. The CH is like a gentle sneeze. Chair. You sit on the chair." },
+      { word: 'DOOR', phonetic: "/dɔr/ — dor", meaning: "puerta", script: "That's a DOOR. D-O-O-R. Dor. Open the door. The O is round, like the door itself." },
+      { word: 'WINDOW', phonetic: "/ˈwɪndoʊ/ — windou", meaning: "ventana", script: "That's a WINDOW. W-I-N-D-O-W. Windou. Look through the window. What do you see?" },
+      { word: 'CEILING', phonetic: "/ˈsilɪŋ/ — silin", meaning: "techo", script: "Look up — that's the CEILING. C-E-I-L-I-N-G. Silin. The C sounds like an S. Ceiling. What covers the room?" },
+      { word: 'FLOOR', phonetic: "/flɔr/ — flor", meaning: "piso", script: "Look down — that's the FLOOR. F-L-O-O-R. Flor. You walk on the floor. Feel the L in your mouth." },
+      { word: 'COUCH', phonetic: "/kaʊtʃ/ — kouch", meaning: "sillón", script: "That's a COUCH. C-O-U-C-H. Kouch. The OU sounds like ow in cow. Couch. You relax on the couch." },
+      { word: 'LAMP', phonetic: "/læmp/ — lamp", meaning: "lámpara", script: "That's a LAMP. L-A-M-P. Lamp. The A is short, like in cat. Lamp. It gives light." },
+      { word: 'TV', phonetic: "/ˌtiˈvi/ — ti-vi", meaning: "televisión", script: "That's a TV. T-V. Ti-vi. You watch TV in the evening. What's your favorite show?" },
+    ];
+    
+    const outdoorLabels = [
+      { word: 'SKY', phonetic: "/skaɪ/ — skai", meaning: "cielo", script: "Look up — that's the SKY. S-K-Y. Skai. The Y sounds like eye. Sky. What color is the sky today?" },
+      { word: 'CAR', phonetic: "/kɑr/ — kar", meaning: "carro", script: "That's a CAR. C-A-R. Kar. The R at the end is soft, pull your tongue back. Car. You drive to work." },
+      { word: 'DRIVEWAY', phonetic: "/ˈdraɪvˌweɪ/ — draivwei", meaning: "entrada de autos", script: "That's the DRIVEWAY. D-R-I-V-E-W-A-Y. Draivwei. Where you park the car. Driveway. Two words: drive plus way." },
+      { word: 'TREE', phonetic: "/tri/ — tris", meaning: "árbol", script: "That's a TREE. T-R-E-E. Tri. The EE is a big smile. Tree. The Spanish R in tris is close but make the T clear." },
+      { word: 'HOUSE', phonetic: "/haʊs/ — jaus", meaning: "casa", script: "That's the HOUSE. H-O-U-S-E. Jaus. The H is a soft breath. House. You live in the house." },
+      { word: 'STREET', phonetic: "/strit/ — strit", meaning: "calle", script: "That's the STREET. S-T-R-E-E-T. Strit. Three consonants together: S-T-R. Street. You walk on the street." },
+      { word: 'WALKWAY', phonetic: "/ˈwɔkˌweɪ/ — wokwei", meaning: "banqueta", script: "That's the WALKWAY. W-A-L-K-W-A-Y. Wokwei. Where you walk to the door. Walkway. Walk plus way." },
+      { word: 'FENCE', phonetic: "/fɛns/ — fens", meaning: "cerca", script: "That's the FENCE. F-E-N-C-E. Fens. The C sounds like S. Fence. It marks your property." },
+      { word: 'YARD', phonetic: "/jɑrd/ — yard", meaning: "patio", script: "That's the FRONT YARD. Y-A-R-D. Yard. The Y is a consonant here. Yard. Where the grass grows." },
+      { word: 'GARAGE', phonetic: "/gəˈrɑʒ/ — garash", meaning: "garaje", script: "That's the GARAGE. G-A-R-A-G-E. Garash. The ending sounds like sh, not j. Garage. Where you keep the car." },
+    ];
+    
+    function init() {
+      const container = document.getElementById('canvas-container');
+      
+      scene = new THREE.Scene();
+      
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 1.6, 3);
+      
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.2;
+      container.appendChild(renderer.domElement);
+      
+      raycaster = new THREE.Raycaster();
+      raycaster.far = 15;
+      
+      buildIndoorScene();
+      setupControls();
+      
+      window.addEventListener('resize', onResize);
+      animate();
+    }
+    
+    function getLabelData(word) {
+      const all = [...indoorLabels, ...outdoorLabels];
+      return all.find(l => l.word === word) || { word, phonetic: '', meaning: '', script: '' };
+    }
+    
+    function clearScene() {
+      while (scene.children.length > 0) {
+        const obj = scene.children[0];
+        scene.remove(obj);
+        if (obj.geometry) obj.geometry.dispose();
+        if (obj.material) obj.material.dispose();
+      }
+      interactiveObjects = [];
+    }
+    
+    function buildIndoorScene() {
+      clearScene();
+      
+      scene.background = new THREE.Color(0x1a1525);
+      scene.fog = new THREE.FogExp2(0x1a1525, 0.015);
+      
+      scene.add(new THREE.AmbientLight(0xffd0a0, 0.6));
+      
+      const cl = new THREE.PointLight(0xffcc88, 1.5, 20);
+      cl.position.set(0, 5, 0);
+      scene.add(cl);
+      
+      const wl = new THREE.PointLight(0xff8844, 0.8, 12);
+      wl.position.set(-4, 2, -4);
+      scene.add(wl);
+      
+      // Floor
+      const floor = new THREE.Mesh(
+        new THREE.PlaneGeometry(20, 20),
+        new THREE.MeshStandardMaterial({ color: 0x8B5E3C, roughness: 0.8 })
+      );
+      floor.rotation.x = -Math.PI / 2;
+      floor.userData = getLabelData('FLOOR');
+      scene.add(floor);
+      interactiveObjects.push(floor);
+      
+      // Ceiling
+      const ceil = new THREE.Mesh(
+        new THREE.PlaneGeometry(20, 20),
+        new THREE.MeshStandardMaterial({ color: 0x4a3528, roughness: 1.0, side: THREE.DoubleSide })
+      );
+      ceil.rotation.x = Math.PI / 2;
+      ceil.position.y = 5;
+      ceil.userData = getLabelData('CEILING');
+      scene.add(ceil);
+      interactiveObjects.push(ceil);
+      
+      // Walls
+      const wm = new THREE.MeshStandardMaterial({ color: 0x6B4E3A, roughness: 0.9, side: THREE.DoubleSide });
+      const walls = [
+        [0, 2.5, -8, 0], [-8, 2.5, 0, Math.PI/2], [8, 2.5, 0, -Math.PI/2]
+      ];
+      for (const [x, y, z, ry] of walls) {
+        const w = new THREE.Mesh(new THREE.PlaneGeometry(20, 5), wm);
+        w.position.set(x, y, z);
+        w.rotation.y = ry;
+        w.userData = getLabelData('WALL');
+        scene.add(w);
+        interactiveObjects.push(w);
+      }
+      
+      // Table
+      const tt = new THREE.Mesh(
+        new THREE.BoxGeometry(2, 0.1, 1.2),
+        new THREE.MeshStandardMaterial({ color: 0x7A4F2A, roughness: 0.5 })
+      );
+      tt.position.set(0, 1.2, -1);
+      tt.userData = getLabelData('TABLE');
+      scene.add(tt);
+      interactiveObjects.push(tt);
+      for (const [lx, lz] of [[-0.9,-0.5],[0.9,-0.5],[-0.9,0.5],[0.9,0.5]]) {
+        const leg = new THREE.Mesh(
+          new THREE.BoxGeometry(0.1, 1.2, 0.1),
+          new THREE.MeshStandardMaterial({ color: 0x6A3F1A })
+        );
+        leg.position.set(lx, 0.6, -1 + lz);
+        scene.add(leg);
+      }
+      
+      // Chair
+      const cs = new THREE.Mesh(
+        new THREE.BoxGeometry(0.8, 0.1, 0.8),
+        new THREE.MeshStandardMaterial({ color: 0xA0673A, roughness: 0.6 })
+      );
+      cs.position.set(2.5, 0.8, 1.5);
+      cs.userData = getLabelData('CHAIR');
+      scene.add(cs);
+      interactiveObjects.push(cs);
+      const cb = new THREE.Mesh(
+        new THREE.BoxGeometry(0.8, 0.8, 0.1),
+        new THREE.MeshStandardMaterial({ color: 0xA0673A })
+      );
+      cb.position.set(2.5, 1.25, 1.9);
+      scene.add(cb);
+      for (const [lx, lz] of [[-0.35,-0.35],[0.35,-0.35],[-0.35,0.35],[0.35,0.35]]) {
+        const leg = new THREE.Mesh(
+          new THREE.BoxGeometry(0.08, 0.8, 0.08),
+          new THREE.MeshStandardMaterial({ color: 0x8a5728 })
+        );
+        leg.position.set(2.5 + lx, 0.4, 1.5 + lz);
+        scene.add(leg);
+      }
+      
+      // Couch
+      const couch = new THREE.Mesh(
+        new THREE.BoxGeometry(2.5, 0.5, 1),
+        new THREE.MeshStandardMaterial({ color: 0x2d5a3d, roughness: 0.8 })
+      );
+      couch.position.set(-3, 0.5, -2);
+      couch.userData = getLabelData('COUCH');
+      scene.add(couch);
+      interactiveObjects.push(couch);
+      const couchB = new THREE.Mesh(
+        new THREE.BoxGeometry(2.5, 1.2, 0.3),
+        new THREE.MeshStandardMaterial({ color: 0x2d5a3d })
+      );
+      couchB.position.set(-3, 1, -2.5);
+      scene.add(couchB);
+      
+      // Door
+      const door = new THREE.Mesh(
+        new THREE.BoxGeometry(1.2, 3, 0.1),
+        new THREE.MeshStandardMaterial({ color: 0x5a4a3a, roughness: 0.6 })
+      );
+      door.position.set(5, 1.5, -7.9);
+      door.userData = getLabelData('DOOR');
+      scene.add(door);
+      interactiveObjects.push(door);
+      
+      // Window
+      const win = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.8, 1.5),
+        new THREE.MeshStandardMaterial({ color: 0x87CEEB, emissive: 0x4488aa, emissiveIntensity: 0.3, side: THREE.DoubleSide })
+      );
+      win.position.set(-5, 2.5, -7.9);
+      win.userData = getLabelData('WINDOW');
+      scene.add(win);
+      interactiveObjects.push(win);
+      
+      // Lamp
+      const lb = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.3, 0.4, 0.1, 16),
+        new THREE.MeshStandardMaterial({ color: 0x6a5a4a })
+      );
+      lb.position.set(4, 1.55, 2);
+      scene.add(lb);
+      const lp = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.05, 0.05, 1.5),
+        new THREE.MeshStandardMaterial({ color: 0x4a4a4a })
+      );
+      lp.position.set(4, 2.3, 2);
+      scene.add(lp);
+      const ls = new THREE.Mesh(
+        new THREE.ConeGeometry(0.4, 0.5, 16, 1, true),
+        new THREE.MeshStandardMaterial({ color: 0xffe060, emissive: 0xffe060, emissiveIntensity: 0.3, side: THREE.DoubleSide })
+      );
+      ls.position.set(4, 3, 2);
+      ls.userData = getLabelData('LAMP');
+      scene.add(ls);
+      interactiveObjects.push(ls);
+      
+      // TV
+      const tv = new THREE.Mesh(
+        new THREE.BoxGeometry(2, 1.1, 0.08),
+        new THREE.MeshStandardMaterial({ color: 0x111111, emissive: 0x2266ff, emissiveIntensity: 0.5 })
+      );
+      tv.position.set(0, 2.5, -7.85);
+      tv.userData = getLabelData('TV');
+      scene.add(tv);
+      interactiveObjects.push(tv);
+      
+      camera.position.set(0, 1.6, 3);
+      yaw = 0; pitch = 0;
+      updateCameraRotation();
+      
+      document.getElementById('status-location').textContent = '📍 HOME — INDOORS';
+      document.getElementById('scene-toggle').textContent = '🌐 OUTDOOR';
+    }
+    
+    function buildOutdoorScene() {
+      clearScene();
+      
+      scene.background = new THREE.Color(0x87CEEB);
+      scene.fog = new THREE.FogExp2(0x87CEEB, 0.008);
+      
+      const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+      sun.position.set(10, 20, 5);
+      scene.add(sun);
+      scene.add(new THREE.AmbientLight(0x88aaff, 0.5));
+      
+      // Sky dome
+      const sky = new THREE.Mesh(
+        new THREE.SphereGeometry(200, 32, 16),
+        new THREE.MeshBasicMaterial({ color: 0x87CEEB, side: THREE.BackSide })
+      );
+      sky.userData = getLabelData('SKY');
+      scene.add(sky);
+      interactiveObjects.push(sky);
+      
+      // Ground
+      const ground = new THREE.Mesh(
+        new THREE.PlaneGeometry(100, 100),
+        new THREE.MeshStandardMaterial({ color: 0x4a7a3a, roughness: 1.0 })
+      );
+      ground.rotation.x = -Math.PI / 2;
+      ground.userData = getLabelData('YARD');
+      scene.add(ground);
+      interactiveObjects.push(ground);
+      
+      // Driveway
+      const drv = new THREE.Mesh(
+        new THREE.PlaneGeometry(5, 15),
+        new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.9 })
+      );
+      drv.rotation.x = -Math.PI / 2;
+      drv.position.set(0, 0.01, -5);
+      drv.userData = getLabelData('DRIVEWAY');
+      scene.add(drv);
+      interactiveObjects.push(drv);
+      
+      // Walkway
+      const walk = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.5, 4),
+        new THREE.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 0.9 })
+      );
+      walk.rotation.x = -Math.PI / 2;
+      walk.position.set(3, 0.02, -3);
+      walk.userData = getLabelData('WALKWAY');
+      scene.add(walk);
+      interactiveObjects.push(walk);
+      
+      // House
+      const house = new THREE.Mesh(
+        new THREE.BoxGeometry(12, 5, 6),
+        new THREE.MeshStandardMaterial({ color: 0xd4c4a0, roughness: 0.7 })
+      );
+      house.position.set(0, 2.5, -12);
+      house.userData = getLabelData('HOUSE');
+      scene.add(house);
+      interactiveObjects.push(house);
+      
+      const roof = new THREE.Mesh(
+        new THREE.ConeGeometry(8, 3, 4),
+        new THREE.MeshStandardMaterial({ color: 0x8a3a2a })
+      );
+      roof.position.set(0, 6.5, -12);
+      roof.rotation.y = Math.PI / 4;
+      scene.add(roof);
+      
+      // Door
+      const door = new THREE.Mesh(
+        new THREE.BoxGeometry(1.2, 2.5, 0.1),
+        new THREE.MeshStandardMaterial({ color: 0x5a3a2a })
+      );
+      door.position.set(0, 1.25, -8.95);
+      door.userData = getLabelData('DOOR');
+      scene.add(door);
+      interactiveObjects.push(door);
+      
+      // Window
+      const win = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.5, 1.5),
+        new THREE.MeshStandardMaterial({ color: 0x87CEEB, emissive: 0x4488aa, emissiveIntensity: 0.2, side: THREE.DoubleSide })
+      );
+      win.position.set(-3, 3, -8.95);
+      win.userData = getLabelData('WINDOW');
+      scene.add(win);
+      interactiveObjects.push(win);
+      
+      // Car
+      const car = new THREE.Mesh(
+        new THREE.BoxGeometry(2, 1.2, 4),
+        new THREE.MeshStandardMaterial({ color: 0xcc2222, roughness: 0.3, metalness: 0.7 })
+      );
+      car.position.set(0, 0.8, -2);
+      car.userData = getLabelData('CAR');
+      scene.add(car);
+      interactiveObjects.push(car);
+      
+      const carR = new THREE.Mesh(
+        new THREE.BoxGeometry(1.8, 0.8, 2),
+        new THREE.MeshStandardMaterial({ color: 0xcc2222, metalness: 0.7 })
+      );
+      carR.position.set(0, 1.6, -1.5);
+      scene.add(carR);
+      
+      // Trees
+      for (const [tx, tz] of [[-8, -5], [8, -3], [-7, 2], [7, 3]]) {
+        const trunk = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.3, 0.4, 3),
+          new THREE.MeshStandardMaterial({ color: 0x5a3a2a })
+        );
+        trunk.position.set(tx, 1.5, tz);
+        scene.add(trunk);
+        
+        const leaves = new THREE.Mesh(
+          new THREE.SphereGeometry(2, 12, 12),
+          new THREE.MeshStandardMaterial({ color: 0x2d6a2a, roughness: 0.9 })
+        );
+        leaves.position.set(tx, 3.5, tz);
+        leaves.userData = getLabelData('TREE');
+        scene.add(leaves);
+        interactiveObjects.push(leaves);
+      }
+      
+      // Fence
+      for (let i = -10; i <= 10; i += 2) {
+        const post = new THREE.Mesh(
+          new THREE.BoxGeometry(0.15, 2, 0.15),
+          new THREE.MeshStandardMaterial({ color: 0xd4a0a0 })
+        );
+        post.position.set(i, 1, 10);
+        post.userData = getLabelData('FENCE');
+        scene.add(post);
+        interactiveObjects.push(post);
+      }
+      
+      // Street
+      const str = new THREE.Mesh(
+        new THREE.PlaneGeometry(20, 8),
+        new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.9 })
+      );
+      str.rotation.x = -Math.PI / 2;
+      str.position.set(0, 0.01, 12);
+      str.userData = getLabelData('STREET');
+      scene.add(str);
+      interactiveObjects.push(str);
+      
+      // Garage
+      const gar = new THREE.Mesh(
+        new THREE.BoxGeometry(5, 3, 4),
+        new THREE.MeshStandardMaterial({ color: 0xb0a890, roughness: 0.7 })
+      );
+      gar.position.set(7, 1.5, -10);
+      gar.userData = getLabelData('GARAGE');
+      scene.add(gar);
+      interactiveObjects.push(gar);
+      
+      camera.position.set(0, 1.6, 5);
+      yaw = 0; pitch = 0;
+      updateCameraRotation();
+      
+      document.getElementById('status-location').textContent = '📍 YARD — OUTDOORS';
+      document.getElementById('scene-toggle').textContent = '🏠 INDOOR';
+    }
+    
+    function updateCameraRotation() {
+      camera.rotation.order = 'YXZ';
+      camera.rotation.y = yaw;
+      camera.rotation.x = pitch;
+    }
+    
+    function setupControls() {
+      const canvas = renderer.domElement;
+      
+      canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (e.touches.length === 1) {
+          isDragging = true;
+          lastX = e.touches[0].clientX;
+          lastY = e.touches[0].clientY;
+        }
+      }, { passive: false });
+      
+      canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        if (isDragging && e.touches.length === 1) {
+          const dx = e.touches[0].clientX - lastX;
+          const dy = e.touches[0].clientY - lastY;
+          yaw -= dx * 0.005;
+          pitch -= dy * 0.005;
+          pitch = Math.max(-Math.PI/2 + 0.1, Math.min(Math.PI/2 - 0.1, pitch));
+          lastX = e.touches[0].clientX;
+          lastY = e.touches[0].clientY;
+          updateCameraRotation();
+        }
+      }, { passive: false });
+      
+      canvas.addEventListener('touchend', (e) => {
+        if (e.touches.length === 0) isDragging = false;
+      });
+      
+      canvas.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        lastX = e.clientX;
+        lastY = e.clientY;
+      });
+      
+      canvas.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+          const dx = e.clientX - lastX;
+          const dy = e.clientY - lastY;
+          yaw -= dx * 0.005;
+          pitch -= dy * 0.005;
+          pitch = Math.max(-Math.PI/2 + 0.1, Math.min(Math.PI/2 - 0.1, pitch));
+          lastX = e.clientX;
+          lastY = e.clientY;
+          updateCameraRotation();
+        }
+      });
+      
+      canvas.addEventListener('mouseup', () => { isDragging = false; });
+      canvas.addEventListener('mouseleave', () => { isDragging = false; });
+      
+      canvas.addEventListener('click', () => {
+        if (lookTarget) speakValerie(lookTarget.userData);
+      });
+      
+      if (window.DeviceOrientationEvent) {
+        const reqOrient = () => {
+          if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+            DeviceOrientationEvent.requestPermission().then(r => {
+              if (r === 'granted') window.addEventListener('deviceorientation', handleOrientation);
+            }).catch(() => {});
+          } else {
+            window.addEventListener('deviceorientation', handleOrientation);
+          }
+        };
+        document.getElementById('start-btn').addEventListener('click', reqOrient);
+      }
+      
+      document.getElementById('scene-toggle').addEventListener('click', () => {
+        if (currentScene === 'indoor') { currentScene = 'outdoor'; buildOutdoorScene(); }
+        else { currentScene = 'indoor'; buildIndoorScene(); }
+      });
+    }
+    
+    function handleOrientation(e) {
+      if (e.alpha !== null && e.beta !== null && e.gamma !== null) {
+        if (!orientationActive) { orientationActive = true; initialHeading = e.alpha; }
+        if (!isDragging) {
+          const heading = e.alpha - initialHeading;
+          yaw = -heading * Math.PI / 180;
+          pitch = (e.beta - 90) * Math.PI / 180;
+          pitch = Math.max(-Math.PI/2 + 0.1, Math.min(Math.PI/2 - 0.1, pitch));
+          updateCameraRotation();
+        }
+      }
+    }
+    
+    function checkCrosshair() {
+      raycaster.setFromCamera({ x: 0, y: 0 }, camera);
+      const intersects = raycaster.intersectObjects(interactiveObjects, true);
+      if (intersects.length > 0) {
+        for (const hit of intersects) {
+          if (hit.object.userData && hit.object.userData.word) {
+            if (lookTarget !== hit.object) { lookTarget = hit.object; showLabel(hit.object.userData); }
+            return;
+          }
+        }
+      }
+      if (lookTarget) { lookTarget = null; hideLabel(); }
+    }
+    
+    function showLabel(data) {
+      const l = document.getElementById('hud-label');
+      l.querySelector('.word').textContent = data.word;
+      l.querySelector('.phonetic').textContent = data.phonetic;
+      l.querySelector('.meaning').textContent = data.meaning;
+      l.classList.add('visible');
+    }
+    
+    function hideLabel() { document.getElementById('hud-label').classList.remove('visible'); }
+    
+    function speakValerie(data) {
+      const bubble = document.getElementById('valerie-bubble');
+      document.getElementById('valerie-text').textContent = data.script;
+      bubble.classList.add('visible');
+      clearTimeout(window.bubbleTimeout);
+      window.bubbleTimeout = setTimeout(() => bubble.classList.remove('visible'), 6000);
+      
+      if (synth.speaking) synth.cancel();
+      const u = new SpeechSynthesisUtterance(data.script);
+      u.rate = 0.9;
+      u.pitch = 1.0;
+      const voices = synth.getVoices();
+      const enV = voices.find(v => v.lang.startsWith('en-US')) || voices.find(v => v.lang.startsWith('en'));
+      if (enV) u.voice = enV;
+      synth.speak(u);
+      
+      const interactions = JSON.parse(localStorage.getItem('vc_interactions') || '[]');
+      interactions.push({ word: data.word, scene: currentScene, timestamp: new Date().toISOString() });
+      if (interactions.length > 100) interactions.shift();
+      localStorage.setItem('vc_interactions', JSON.stringify(interactions));
+    }
+    
+    function updateCompass() {
+      const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+      const angle = ((yaw * 180 / Math.PI) % 360 + 360) % 360;
+      document.getElementById('compass').textContent = dirs[Math.round(angle / 45) % 8] + ' ' + Math.round(angle) + '°';
+    }
+    
+    function onResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+      checkCrosshair();
+      updateCompass();
+    }
+    
+    document.getElementById('start-btn').addEventListener('click', () => {
+      document.getElementById('start-overlay').style.display = 'none';
+      init();
+    });
+    
+    if ('speechSynthesis' in window) {
+      speechSynthesis.getVoices();
+      speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+    }
+  </script>
+</body>
+</html>
