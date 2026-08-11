@@ -2,53 +2,142 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Valerie 3 — Connecting...</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            color: white;
-            min-height: 100vh;
+            background: linear-gradient(160deg, #050514 0%, #0a0a2a 30%, #0a1228 60%, #050510 100%);
+            color: white; min-height: 100vh;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            padding: 20px; text-align: center;
+            padding: 20px; text-align: center; overflow: hidden; position: relative;
         }
-        .logo { font-size: 3rem; margin-bottom: 20px; animation: bounce 1s infinite; }
-        @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        h1 { font-size: 1.5rem; margin-bottom: 10px; }
-        p { color: #a0a0d0; font-size: 1rem; }
+        #holoCanvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0; pointer-events: none;
+        }
+        .ambient-glow {
+            position: fixed; width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(59,158,255,0.08) 0%, transparent 70%);
+            top: 50%; left: 50%; transform: translate(-50%,-50%);
+            z-index: 1; pointer-events: none;
+            animation: pulse 4s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%,100% { opacity: 0.5; transform: translate(-50%,-50%) scale(1); }
+            50% { opacity: 0.8; transform: translate(-50%,-50%) scale(1.1); }
+        }
+        .content { position: relative; z-index: 2; }
+        .orb {
+            width: 100px; height: 100px; border-radius: 50%;
+            background: linear-gradient(135deg, #3b9eff, #1a5fb4);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 48px; margin: 0 auto 20px;
+            box-shadow: 0 0 50px rgba(59,158,255,0.4), 0 0 100px rgba(59,158,255,0.15);
+            animation: floatOrb 3s ease-in-out infinite;
+        }
+        @keyframes floatOrb {
+            0%,100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        h1 { font-size: 26px; font-weight: 800; margin-bottom: 6px; letter-spacing: 1px; }
+        .sub { font-size: 13px; color: rgba(59,158,255,0.7); margin-bottom: 24px; letter-spacing: 1px; text-transform: uppercase; }
         .spinner {
-            margin-top: 30px; width: 50px; height: 50px;
-            border: 4px solid rgba(255,255,255,0.1);
-            border-top: 4px solid #ff6b6b;
+            margin-top: 20px; width: 50px; height: 50px;
+            border: 4px solid rgba(59,158,255,0.1);
+            border-top: 4px solid #3b9eff;
             border-radius: 50%; animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         .btn {
-            display: none; margin-top: 30px;
-            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            display: none; margin-top: 24px;
+            background: linear-gradient(135deg, #3b9eff, #1a5fb4);
             color: white; text-decoration: none;
-            padding: 18px 40px; border-radius: 50px;
-            font-size: 1.2rem; font-weight: 700;
-            box-shadow: 0 8px 24px rgba(238,90,111,0.4);
+            padding: 18px 48px; border-radius: 50px;
+            font-size: 18px; font-weight: 700;
+            box-shadow: 0 8px 32px rgba(59,158,255,0.4);
         }
+        .btn:hover { transform: translateY(-2px); transition: all 0.3s; }
     </style>
 </head>
 <body>
-    <div class="logo">🎙️</div>
-    <h1>Valerie 3</h1>
-    <p>Connecting to your accent coach...</p>
-    <div class="spinner" id="spinner"></div>
-    <a href="https://valerie.base44.app/functions/valerieCall" class="btn" id="enterBtn">🚀 Entrar a la Sesión</a>
+    <canvas id="holoCanvas"></canvas>
+    <div class="ambient-glow"></div>
+    <div class="content">
+        <div class="orb">🎙️</div>
+        <h1>Valerie 3</h1>
+        <div class="sub">Your AI Accent Coach</div>
+        <div class="spinner" id="spinner"></div>
+        <a href="https://valerie.base44.app/functions/valerieCall" class="btn" id="enterBtn">🚀 Entrar a la Sesión</a>
+    </div>
 
     <script>
+        // Holographic particle system — floating dots in blue ambient space
+        (function(){
+            const canvas = document.getElementById('holoCanvas');
+            const ctx = canvas.getContext('2d');
+            let W, H, particles;
+            
+            function resize(){
+                W = canvas.width = window.innerWidth;
+                H = canvas.height = window.innerHeight;
+                const count = Math.min(150, Math.floor(W * H / 8000));
+                particles = [];
+                for(let i = 0; i < count; i++){
+                    particles.push({
+                        x: Math.random() * W,
+                        y: Math.random() * H,
+                        r: Math.random() * 2.5 + 0.5,
+                        vy: -(Math.random() * 0.3 + 0.05),
+                        vx: (Math.random() - 0.5) * 0.15,
+                        alpha: Math.random() * 0.5 + 0.1,
+                        pulse: Math.random() * Math.PI * 2,
+                        pulseSpeed: Math.random() * 0.02 + 0.005,
+                        hue: 200 + Math.random() * 40
+                    });
+                }
+            }
+            resize();
+            window.addEventListener('resize', resize);
+            
+            function animate(){
+                ctx.fillStyle = 'rgba(5, 5, 16, 0.08)';
+                ctx.fillRect(0, 0, W, H);
+                
+                particles.forEach(function(p){
+                    p.y += p.vy;
+                    p.x += p.vx;
+                    p.pulse += p.pulseSpeed;
+                    
+                    if(p.y < -10){ p.y = H + 10; p.x = Math.random() * W; }
+                    if(p.x < -10) p.x = W + 10;
+                    if(p.x > W + 10) p.x = -10;
+                    
+                    const pulseAlpha = p.alpha * (0.5 + Math.sin(p.pulse) * 0.5);
+                    const radius = Math.max(0.1, p.r);
+                    
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, radius * 3, 0, Math.PI * 2);
+                    ctx.fillStyle = 'hsla(' + p.hue + ', 80%, 60%, ' + (pulseAlpha * 0.15) + ')';
+                    ctx.fill();
+                    
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+                    ctx.fillStyle = 'hsla(' + p.hue + ', 80%, 70%, ' + pulseAlpha + ')';
+                    ctx.fill();
+                });
+                
+                requestAnimationFrame(animate);
+            }
+            animate();
+        })();
+
         // Redirect to backend function which creates a fresh Vapi call
-        // and returns a Daily.co room URL with proper mic permissions
         setTimeout(function() {
             window.location.href = 'https://valerie.base44.app/functions/valerieCall';
-        }, 1500);
+        }, 1800);
         
         // Fallback button if redirect doesn't fire
         setTimeout(function() {
