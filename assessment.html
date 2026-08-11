@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>AccentBridges — Professional Assessment</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: linear-gradient(160deg, #050514 0%, #0a0a2a 50%, #0a1228 100%);
+      color: white;
+      font-family: -apple-system, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    /* Progress bar */
+    #progress {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 4px; background: rgba(255,255,255,0.1); z-index: 100;
+    }
+    #progress-bar {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #00ffcc, #00aaff);
+      transition: width 0.5s;
+      box-shadow: 0 0 10px #00ffcc;
+    }
+    
+    /* Stage indicator */
+    #stage-indicator {
+      position: fixed; top: 16px; left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.8rem; color: rgba(0,255,204,0.6);
+      letter-spacing: 2px; z-index: 101;
+      font-family: 'Courier New', monospace;
+    }
+    
+    /* Main container */
+    .screen {
+      max-width: 600px; margin: 0 auto;
+      padding: 80px 20px 40px;
+      display: none;
+      animation: fadeIn 0.4s;
+    }
+    .screen.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    h1 {
+      font-size: 1.6rem; margin-bottom: 8px;
+      background: linear-gradient(135deg, #00ffcc, #00aaff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle { font-size: 0.9rem; color: rgba(255,255,255,0.5); margin-bottom: 30px; }
+    
+    /* Start screen */
+    .start-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(0,255,204,0.2);
+      border-radius: 16px; padding: 30px;
+      margin-bottom: 20px; text-align: center;
+    }
+    .start-card .icon { font-size: 3rem; margin-bottom: 16px; }
+    .start-card h2 { font-size: 1.3rem; margin-bottom: 10px; }
+    .start-card p { color: rgba(255,255,255,0.6); font-size: 0.9rem; line-height: 1.6; margin-bottom: 8px; }
+    
+    .stages-overview { display: flex; gap: 8px; justify-content: center; margin: 24px 0; flex-wrap: wrap; }
+    .stage-chip {
+      background: rgba(0,255,204,0.08); border: 1px solid rgba(0,255,204,0.2);
+      border-radius: 20px; padding: 8px 16px; font-size: 0.8rem; color: #00ffcc;
+    }
+    
+    /* Buttons */
+    .btn {
+      background: linear-gradient(135deg, #00ffcc, #00aaff);
+      color: #000; border: none; padding: 16px 40px;
+      border-radius: 50px; font-size: 1.1rem; font-weight: bold;
+      cursor: pointer; width: 100%;
+      box-shadow: 0 8px 32px rgba(0,255,204,0.3);
+      transition: transform 0.2s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-secondary {
+      background: rgba(255,255,255,0.1); color: white;
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: none;
+    }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    
+    /* Questions */
+    .question-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px; padding: 24px; margin-bottom: 16px;
+    }
+    .question-num { font-size: 0.8rem; color: #00ffcc; margin-bottom: 8px; font-family: 'Courier New', monospace; }
+    .question-text { font-size: 1.05rem; margin-bottom: 16px; line-height: 1.5; }
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .option {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; padding: 14px 18px; cursor: pointer;
+      font-size: 0.95rem; transition: all 0.2s; color: white;
+      text-align: left;
+    }
+    .option:hover, .option.selected {
+      background: rgba(0,255,204,0.15); border-color: #00ffcc;
+    }
+    
+    /* Recording */
+    .record-section { text-align: center; padding: 20px 0; }
+    .phrase-card {
+      background: rgba(0,255,204,0.08); border: 1px solid rgba(0,255,204,0.3);
+      border-radius: 16px; padding: 30px; margin-bottom: 24px; text-align: center;
+    }
+    .phrase-label { font-size: 0.8rem; color: #00ffcc; margin-bottom: 8px; letter-spacing: 1px; }
+    .phrase-text { font-size: 1.5rem; line-height: 1.5; margin-bottom: 12px; }
+    .phrase-focus { font-size: 0.85rem; color: rgba(255,204,0,0.8); }
+    .phrase-counter { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 12px; }
+    
+    .record-btn {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: rgba(255,50,50,0.2); border: 2px solid #ff3232;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px; cursor: pointer; font-size: 2rem;
+      transition: all 0.3s;
+    }
+    .record-btn.recording {
+      background: #ff3232; animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(255,50,50,0.4); } 50% { box-shadow: 0 0 0 20px rgba(255,50,50,0); } }
+    
+    .record-status { font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-bottom: 16px; }
+    .transcript {
+      background: rgba(255,255,255,0.05); border-radius: 12px;
+      padding: 16px; margin: 12px 0; font-size: 0.9rem; min-height: 40px;
+      color: rgba(255,255,255,0.7); font-style: italic;
+    }
+    .transcript .correct { color: #00ffcc; }
+    .transcript .wrong { color: #ff6464; text-decoration: line-through; }
+    
+    .score-badge {
+      display: inline-block; padding: 4px 14px; border-radius: 20px;
+      font-size: 0.85rem; font-weight: bold; margin-top: 8px;
+    }
+    .score-good { background: rgba(0,255,100,0.2); color: #00ff66; }
+    .score-mid { background: rgba(255,204,0,0.2); color: #ffcc00; }
+    .score-bad { background: rgba(255,50,50,0.2); color: #ff5050; }
+    
+    /* Sliders */
+    .slider-section { margin-bottom: 24px; }
+    .slider-label { font-size: 0.95rem; margin-bottom: 8px; display: flex; justify-content: space-between; }
+    .slider-value { color: #00ffcc; font-weight: bold; }
+    input[type=range] {
+      width: 100%; height: 6px; -webkit-appearance: none;
+      background: rgba(255,255,255,0.1); border-radius: 3px; outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 24px; height: 24px;
+      border-radius: 50%; background: #00ffcc; cursor: pointer;
+      box-shadow: 0 0 10px #00ffcc;
+    }
+    
+    /* Results */
+    .result-card {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px; padding: 24px; margin-bottom: 16px;
+    }
+    .result-label { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-bottom: 4px; }
+    .result-value { font-size: 1.3rem; color: #00ffcc; margin-bottom: 12px; }
+    .result-big { font-size: 2.5rem; font-weight: bold; }
+    .sound-bar {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
+    }
+    .sound-name { width: 100px; font-size: 0.85rem; }
+    .sound-track { flex: 1; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+    .sound-fill { height: 100%; border-radius: 4px; transition: width 1s; }
+    .sound-pct { width: 50px; font-size: 0.85rem; text-align: right; font-family: 'Courier New', monospace; }
+    
+    .plan-item {
+      display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px;
+      font-size: 0.9rem; line-height: 1.5;
+    }
+    .plan-num {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: rgba(0,255,204,0.2); color: #00ffcc;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: bold; flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="progress"><div id="progress-bar"></div></div>
+  <div id="stage-indicator"></div>
+  
+  <!-- START SCREEN -->
+  <div class="screen active" id="screen-start">
+    <div class="start-card">
+      <div class="icon">🎓</div>
+      <h2>Professional English Assessment</h2>
+      <p>Descubre tu nivel exacto de inglés</p>
+      <p>Evaluación profesional de 4 etapas</p>
+      <p>Duración: ~8 minutos</p>
+      <div class="stages-overview">
+        <div class="stage-chip">1. Nivel General</div>
+        <div class="stage-chip">2. Pronunciación</div>
+        <div class="stage-chip">3. Confianza</div>
+        <div class="stage-chip">4. Diagnóstico</div>
+      </div>
+      <p style="font-size: 0.8rem; color: rgba(0,255,204,0.5)">🔊 Necesitas micrófono para las etapas 2 y 4</p>
+    </div>
+    <button class="btn" onclick="startAssessment()">🚀 Comenzar Assessment</button>
+  </div>
+  
+  <!-- STAGE 1: GENERAL LEVEL -->
+  <div class="screen" id="screen-stage1">
+    <h1>Etapa 1: Nivel General</h1>
+    <p class="subtitle">10 preguntas de vocabulario y gramática</p>
+    <div id="stage1-questions"></div>
+    <button class="btn" id="stage1-next" onclick="submitStage1()" disabled>Continuar →</button>
+  </div>
+  
+  <!-- STAGE 2: PRONUNCIATION -->
+  <div class="screen" id="screen-stage2">
+    <h1>Etapa 2: Pronunciación</h1>
+    <p class="subtitle">Lee cada frase en voz alta y toca grabar</p>
+    <div class="record-section">
+      <div class="phrase-card">
+        <div class="phrase-label" id="s2-label">FRASE 1 DE 5</div>
+        <div class="phrase-text" id="s2-phrase"></div>
+        <div class="phrase-focus" id="s2-focus"></div>
+        <div class="phrase-counter" id="s2-counter"></div>
+      </div>
+      <div class="record-btn" id="s2-record-btn" onclick="toggleRecordS2()">🎤</div>
+      <div class="record-status" id="s2-status">Toca para grabar</div>
+      <div class="transcript" id="s2-transcript">Tu transcripción aparecerá aquí...</div>
+      <button class="btn" id="s2-next" onclick="nextS2()" disabled>Siguiente frase →</button>
+    </div>
+  </div>
+  
+  <!-- STAGE 3: CONFIDENCE -->
+  <div class="screen" id="screen-stage3">
+    <h1>Etapa 3: Confianza</h1>
+    <p class="subtitle">¿Qué tan seguro te sientes hablando inglés en estas situaciones?</p>
+    <div id="stage3-sliders"></div>
+    <button class="btn" onclick="submitStage3()">Continuar →</button>
+  </div>
+  
+  <!-- STAGE 4: PHONETIC DIAGNOSIS -->
+  <div class="screen" id="screen-stage4">
+    <h1>Etapa 4: Diagnóstico Fonético</h1>
+    <p class="subtitle">Lee el párrafo completo en voz alta</p>
+    <div class="record-section">
+      <div class="phrase-card">
+        <div class="phrase-label" id="s4-label">PÁRRAFO 1 DE 3</div>
+        <div class="phrase-text" id="s4-phrase" style="font-size: 1.15rem; text-align: left; line-height: 1.8"></div>
+      </div>
+      <div class="record-btn" id="s4-record-btn" onclick="toggleRecordS4()">🎤</div>
+      <div class="record-status" id="s4-status">Toca para grabar</div>
+      <div class="transcript" id="s4-transcript">Tu transcripción aparecerá aquí...</div>
+      <button class="btn" id="s4-next" onclick="nextS4()" disabled>Siguiente párrafo →</button>
+    </div>
+  </div>
+  
+  <!-- RESULTS -->
+  <div class="screen" id="screen-results">
+    <h1>🎉 Tu Diagnóstico</h1>
+    <p class="subtitle">AccentBridges Professional Assessment</p>
+    <div id="results-content"></div>
+    <button class="btn" onclick="window.location.href='https://t.me/Valerie3bot'">🎙️ Practicar con Valerie →</button>
+    <div style="height: 16px"></div>
+    <button class="btn btn-secondary" onclick="window.location.href='https://babayaba71-maker.github.io/AccentBridges/virtual-city-first-person.html'">🌆 Explorar Virtual City 360° →</button>
+  </div>
+  
+  <script>
+    // === DATA ===
+    const stage1Questions = [
+      { q: "What's the opposite of 'expensive'?", opts: ["cheap", "rich", "beautiful", "large"], correct: 0 },
+      { q: "Choose: 'She ___ to the gym every day.'", opts: ["go", "goes", "going", "gone"], correct: 1 },
+      { q: "What does 'I'm looking forward to it' mean?", opts: ["I'm scared", "I'm excited for it", "I'm looking at it", "I'm tired"], correct: 1 },
+      { q: "Choose: 'If I ___ rich, I would travel.'", opts: ["am", "was", "were", "be"], correct: 2 },
+      { q: "What's a 'schedule'?", opts: ["a type of food", "a plan of activities", "a kind of music", "a sport"], correct: 1 },
+      { q: "Choose: 'He has been working ___ 3 hours.'", opts: ["for", "since", "from", "at"], correct: 0 },
+      { q: "What does 'to figure out' mean?", opts: ["to lose", "to understand/solve", "to forget", "to break"], correct: 1 },
+      { q: "Choose the correct sentence:", opts: ["I don't have no time", "I have no time", "I don't have any time", "Both B and C are correct"], correct: 3 },
+      { q: "What's a 'deadline'?", opts: ["a finish line", "a time limit for a task", "a type of date", "a dead person"], correct: 1 },
+      { q: "Choose: 'The meeting was ___ because of the rain.'", opts: ["call off", "called off", "calling off", "call of"], correct: 1 },
+    ];
+    
+    const stage2Phrases = [
+      { text: "Think about the bath, north of here", focus: "TH Sounds — tongue between teeth", sound: "TH" },
+      { text: "Robert ran around the red car", focus: "American R — pull tongue back", sound: "R" },
+      { text: "A banana on the sofa, about today", focus: "Schwa — relax unstressed vowels", sound: "Schwa" },
+      { text: "I want to pick it up and hold on", focus: "Linking — connect words", sound: "Linking" },
+      { text: "Betty bought a bit of better butter", focus: "Flap T — soft D sound", sound: "Flap T" },
+    ];
+    
+    const stage3Contexts = [
+      { key: "phoneCall", label: "📞 Llamada telefónica en inglés" },
+      { key: "jobInterview", label: "💼 Entrevista de trabajo en inglés" },
+      { key: "casualConversation", label: "💬 Conversación casual con amigos" },
+      { key: "publicSpeaking", label: "🎤 Hablar en público en inglés" },
+      { key: "meeting", label: "👔 Reunión de trabajo en inglés" },
+    ];
+    
+    const stage4Paragraphs = [
+      {
+        text: "The teacher returned to the sofa after a moment of silence. She was alone, but the camera recorded everything. Today was different.",
+        focus: "Vowels & Schwa",
+        sounds: ["Schwa", "Vowel Length", "Stress"]
+      },
+      {
+        text: "The weather this month is rather cold, I think. My brother gathered three things together: his laptop, his phone, and his thoughts about the future.",
+        focus: "Consonants & TH",
+        sounds: ["TH", "Flap T", "R"]
+      },
+      {
+        text: "I was going to get some coffee, but I didn't have enough time. What do you mean, you can't find it? Just look around, it's right there on the table.",
+        focus: "Connected Speech & Rhythm",
+        sounds: ["Linking", "Reductions", "Rhythm"]
+      },
+    ];
+    
+    // === STATE ===
+    let results = {
+      stage1Answers: [], stage1Score: 0,
+      stage2Results: [], stage2Scores: {},
+      stage3Confidence: {},
+      stage4Results: [], stage4Scores: {},
+      problemSounds: [],
+      cefrLevel: '', cefrSubLevel: '',
+    };
+    let recognition = null; let isRecording = false;
+    let s2Index = 0; let s4Index = 0;
+    
+    // === NAV ===
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+    function updateProgress(pct) {
+      document.getElementById('progress-bar').style.width = pct + '%';
+    }
+    function updateStage(text) {
+      document.getElementById('stage-indicator').textContent = text;
+    }
+    
+    // === START ===
+    function startAssessment() {
+      showScreen('screen-stage1');
+      updateProgress(10);
+      updateStage('ETAPA 1 DE 4 — NIVEL GENERAL');
+      renderStage1();
+    }
+    
+    // === STAGE 1 ===
+    function renderStage1() {
+      const container = document.getElementById('stage1-questions');
+      container.innerHTML = '';
+      stage1Questions.forEach((q, i) => {
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        card.innerHTML = `
+          <div class="question-num">PREGUNTA ${i+1} DE 10</div>
+          <div class="question-text">${q.q}</div>
+          <div class="options" data-q="${i}">
+            ${q.opts.map((o, j) => `<div class="option" onclick="selectOption(${i}, ${j})">${o}</div>`).join('')}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+    
+    function selectOption(qIdx, optIdx) {
+      results.stage1Answers[qIdx] = optIdx;
+      const opts = document.querySelectorAll(`.options[data-q="${qIdx}"] .option`);
+      opts.forEach((o, j) => o.classList.toggle('selected', j === optIdx));
+      document.getElementById('stage1-next').disabled = results.stage1Answers.filter(a => a !== undefined).length < 10;
+    }
+    
+    function submitStage1() {
+      let correct = 0;
+      stage1Questions.forEach((q, i) => {
+        if (results.stage1Answers[i] === q.correct) correct++;
+      });
+      results.stage1Score = (correct / 10) * 100;
+      showScreen('screen-stage2');
+      updateProgress(30);
+      updateStage('ETAPA 2 DE 4 — PRONUNCIACIÓN');
+      s2Index = 0;
+      renderS2();
+    }
+    
+    // === STAGE 2: PRONUNCIATION ===
+    function renderS2() {
+      const p = stage2Phrases[s2Index];
+      document.getElementById('s2-label').textContent = `FRASE ${s2Index+1} DE 5`;
+      document.getElementById('s2-phrase').textContent = p.text;
+      document.getElementById('s2-focus').textContent = `🎯 ${p.focus}`;
+      document.getElementById('s2-counter').textContent = `Testing: ${p.sound}`;
+      document.getElementById('s2-transcript').textContent = 'Tu transcripción aparecerá aquí...';
+      document.getElementById('s2-transcript').style.fontStyle = 'italic';
+      document.getElementById('s2-status').textContent = 'Toca para grabar';
+      document.getElementById('s2-next').disabled = true;
+      document.getElementById('s2-record-btn').classList.remove('recording');
+    }
+    
+    function toggleRecordS2() {
+      if (isRecording) stopRecording('s2');
+      else startRecording('s2');
+    }
+    
+    function startRecording(stage) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert('Tu navegador no soporta reconocimiento de voz. Usa Chrome en Android o desktop.');
+        return;
+      }
+      recognition = new SpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = true;
+      recognition.continuous = false;
+      isRecording = true;
+      
+      const btnId = stage + '-record-btn';
+      const statusId = stage + '-status';
+      document.getElementById(btnId).classList.add('recording');
+      document.getElementById(statusId).textContent = '🔴 Grabando... habla ahora';
+      
+      recognition.onresult = (e) => {
+        let transcript = '';
+        for (let i = 0; i < e.results.length; i++) {
+          transcript += e.results[i][0].transcript;
+        }
+        const tEl = document.getElementById(stage + '-transcript');
+        tEl.textContent = transcript;
+        tEl.style.fontStyle = 'normal';
+        if (e.results[e.results.length - 1].isFinal) {
+          processSpeech(stage, transcript);
+        }
+      };
+      
+      recognition.onerror = (e) => {
+        document.getElementById(statusId).textContent = 'Error: ' + e.error + '. Toca de nuevo.';
+        document.getElementById(btnId).classList.remove('recording');
+        isRecording = false;
+      };
+      
+      recognition.onend = () => {
+        document.getElementById(btnId).classList.remove('recording');
+        isRecording = false;
+        document.getElementById(statusId).textContent = '✅ Grabación completada';
+      };
+      
+      recognition.start();
+    }
+    
+    function stopRecording(stage) {
+      if (recognition) recognition.stop();
+      isRecording = false;
+    }
+    
+    function processSpeech(stage, transcript) {
+      let target, sound;
+      if (stage === 's2') {
+        target = stage2Phrases[s2Index].text;
+        sound = stage2Phrases[s2Index].sound;
+      } else {
+        target = stage4Paragraphs[s4Index].text;
+        sound = stage4Paragraphs[s4Index].focus;
+      }
+      
+      // Compare word by word
+      const targetWords = target.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/);
+      const spokenWords = transcript.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/);
+      let matched = 0;
+      let htmlTranscript = '';
+      
+      spokenWords.forEach((w, i) => {
+        if (targetWords.includes(w)) {
+          matched++;
+          htmlTranscript += `<span class="correct">${w}</span> `;
+        } else {
+          htmlTranscript += `<span class="wrong">${w}</span> `;
+        }
+      });
+      
+      const accuracy = Math.round((matched / targetWords.length) * 100);
+      
+      const tEl = document.getElementById(stage + '-transcript');
+      tEl.innerHTML = htmlTranscript + `<br><br><span class="score-badge ${accuracy >= 70 ? 'score-good' : accuracy >= 40 ? 'score-mid' : 'score-bad'}">${accuracy}% accuracy</span>`;
+      
+      if (stage === 's2') {
+        results.stage2Scores[sound] = accuracy;
+        results.stage2Results.push({ sound, accuracy, transcript });
+        document.getElementById('s2-next').disabled = false;
+      } else {
+        const sounds = stage4Paragraphs[s4Index].sounds;
+        sounds.forEach(s => {
+          const prev = results.stage4Scores[s] || [];
+          prev.push(accuracy);
+          results.stage4Scores[s] = prev;
+        });
+        results.stage4Results.push({ focus: sound, accuracy, transcript });
+        document.getElementById('s4-next').disabled = false;
+      }
+    }
+    
+    function nextS2() {
+      s2Index++;
+      if (s2Index < 5) {
+        renderS2();
+      } else {
+        showScreen('screen-stage3');
+        updateProgress(60);
+        updateStage('ETAPA 3 DE 4 — CONFIANZA');
+        renderStage3();
+      }
+    }
+    
+    // === STAGE 3: CONFIDENCE ===
+    function renderStage3() {
+      const container = document.getElementById('stage3-sliders');
+      container.innerHTML = '';
+      stage3Contexts.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'slider-section';
+        div.innerHTML = `
+          <div class="slider-label"><span>${c.label}</span><span class="slider-value" id="val-${c.key}">5</span></div>
+          <input type="range" min="1" max="10" value="5" oninput="updateSlider('${c.key}', this.value)">
+        `;
+        container.appendChild(div);
+      });
+    }
+    
+    function updateSlider(key, val) {
+      document.getElementById('val-' + key).textContent = val;
+      results.stage3Confidence[key] = parseInt(val);
+    }
+    
+    function submitStage3() {
+      // Ensure all values captured
+      stage3Contexts.forEach(c => {
+        if (!results.stage3Confidence[c.key]) results.stage3Confidence[c.key] = 5;
+      });
+      showScreen('screen-stage4');
+      updateProgress(75);
+      updateStage('ETAPA 4 DE 4 — DIAGNÓSTICO FONÉTICO');
+      s4Index = 0;
+      renderS4();
+    }
+    
+    // === STAGE 4: PHONETIC DIAGNOSIS ===
+    function renderS4() {
+      const p = stage4Paragraphs[s4Index];
+      document.getElementById('s4-label').textContent = `PÁRRAFO ${s4Index+1} DE 3`;
+      document.getElementById('s4-phrase').textContent = p.text;
+      document.getElementById('s4-transcript').textContent = 'Tu transcripción aparecerá aquí...';
+      document.getElementById('s4-transcript').style.fontStyle = 'italic';
+      document.getElementById('s4-status').textContent = 'Toca para grabar';
+      document.getElementById('s4-next').disabled = true;
+      document.getElementById('s4-record-btn').classList.remove('recording');
+    }
+    
+    function toggleRecordS4() {
+      if (isRecording) stopRecording('s4');
+      else startRecording('s4');
+    }
+    
+    function nextS4() {
+      s4Index++;
+      if (s4Index < 3) {
+        renderS4();
+      } else {
+        calculateResults();
+        showScreen('screen-results');
+        updateProgress(100);
+        updateStage('DIAGNÓSTICO COMPLETADO');
+        renderResults();
+      }
+    }
+    
+    // === RESULTS ===
+    function calculateResults() {
+      // CEFR from stage1
+      const s1 = results.stage1Score;
+      if (s1 <= 20) { results.cefrLevel = 'A0'; results.cefrSubLevel = 'bajo'; }
+      else if (s1 <= 40) { results.cefrLevel = 'A1'; results.cefrSubLevel = s1 <= 30 ? 'bajo' : 'medio'; }
+      else if (s1 <= 60) { results.cefrLevel = 'A2'; results.cefrSubLevel = s1 <= 50 ? 'medio' : 'alto'; }
+      else if (s1 <= 75) { results.cefrLevel = 'B1'; results.cefrSubLevel = 'medio'; }
+      else if (s1 <= 85) { results.cefrLevel = 'B2'; results.cefrSubLevel = 'alto'; }
+      else if (s1 <= 95) { results.cefrLevel = 'C1'; results.cefrSubLevel = 'alto'; }
+      else { results.cefrLevel = 'C2'; results.cefrSubLevel = 'alto'; }
+      
+      // Problem sounds — combine stage 2 and stage 4
+      const allSounds = {};
+      Object.entries(results.stage2Scores).forEach(([s, a]) => {
+        allSounds[s] = allSounds[s] || [];
+        allSounds[s].push(a);
+      });
+      Object.entries(results.stage4Scores).forEach(([s, arr]) => {
+        allSounds[s] = allSounds[s] || [];
+        allSounds[s] = allSounds[s].concat(arr);
+      });
+      
+      const soundAverages = {};
+      Object.entries(allSounds).forEach(([s, arr]) => {
+        soundAverages[s] = Math.round(arr.reduce((a, b) => a + b, 0) / arr.length);
+      });
+      
+      results.soundAverages = soundAverages;
+      
+      // Top 3 problem sounds (lowest accuracy)
+      results.problemSounds = Object.entries(soundAverages)
+        .sort((a, b) => a[1] - b[1])
+        .slice(0, 3)
+        .map(([s, a]) => ({ sound: s, accuracy: a }));
+      
+      // Confidence average
+      const confVals = Object.values(results.stage3Confidence);
+      results.confidenceScore = Math.round((confVals.reduce((a, b) => a + b, 0) / confVals.length) * 10);
+      
+      // Pronunciation average
+      const s2Vals = Object.values(results.stage2Scores);
+      results.pronunciationScore = Math.round(s2Vals.reduce((a, b) => a + b, 0) / s2Vals.length);
+    }
+    
+    function renderResults() {
+      const c = document.getElementById('results-content');
+      const locMap = { A0: 'Home', A1: 'Home', A2: 'Home', B1: 'School', B2: 'Cafeteria', C1: 'Centro', C2: 'Forum' };
+      const recommendedLocation = locMap[results.cefrLevel] || 'Home';
+      
+      // Plan
+      const planItems = [];
+      results.problemSounds.forEach((p, i) => {
+        const episodes = { 'TH': 'Episodio 1: TH Sounds', 'R': 'Episodio 2: American R', 'Schwa': 'Episodio 3: The Schwa', 'Linking': 'Episodio 4: Linking Words', 'Flap T': 'Episodio 5: The Flap T', 'Intonation': 'Episodio 6: Intonation', 'Rhythm': 'Episodio 7: Rhythm & Stress' };
+        planItems.push(`Empieza con ${episodes[p.sound] || p.sound} (${p.accuracy}% accuracy)`);
+      });
+      planItems.push(`Practica con /call dos veces por semana`);
+      planItems.push(`Virtual City: empieza en ${recommendedLocation}`);
+      planItems.push(`Únete al grupo de Telegram para práctica diaria`);
+      
+      // Sound bars HTML
+      const soundBarsHtml = Object.entries(results.soundAverages)
+        .sort((a, b) => a[1] - b[1])
+        .map(([s, a]) => {
+          const color = a >= 70 ? '#00ff66' : a >= 40 ? '#ffcc00' : '#ff5050';
+          return `<div class="sound-bar">
+            <div class="sound-name">${s}</div>
+            <div class="sound-track"><div class="sound-fill" style="width: ${a}%; background: ${color}"></div></div>
+            <div class="sound-pct">${a}%</div>
+          </div>`;
+        }).join('');
+      
+      // Confidence bars
+      const confHtml = Object.entries(results.stage3Confidence).map(([k, v]) => {
+        const labels = { phoneCall: '📞 Teléfono', jobInterview: '💼 Entrevista', casualConversation: '💬 Casual', publicSpeaking: '🎤 Público', meeting: '👔 Reunión' };
+        return `<div class="sound-bar">
+          <div class="sound-name">${labels[k] || k}</div>
+          <div class="sound-track"><div class="sound-fill" style="width: ${v*10}%; background: ${v >= 7 ? '#00ff66' : v >= 4 ? '#ffcc00' : '#ff5050'}"></div></div>
+          <div class="sound-pct">${v}/10</div>
+        </div>`;
+      }).join('');
+      
+      c.innerHTML = `
+        <div class="result-card" style="text-align: center">
+          <div class="result-label">TU NIVEL CEFR</div>
+          <div class="result-big" style="color: #00ffcc">${results.cefrLevel}<span style="font-size: 1.2rem; opacity: 0.6">-${results.cefrSubLevel}</span></div>
+          <div style="font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-top: 8px">Vocabulario & Gramática: ${results.stage1Score}%</div>
+        </div>
+        
+        <div class="result-card">
+          <div class="result-label">PRONUNCIACIÓN</div>
+          <div class="result-value">${results.pronunciationScore}% accuracy promedio</div>
+          ${soundBarsHtml}
+        </div>
+        
+        <div class="result-card">
+          <div class="result-label">CONFIANZA POR CONTEXTO</div>
+          <div style="margin-top: 12px">${confHtml}</div>
+          <div style="margin-top: 12px; font-size: 0.85rem; color: rgba(255,255,255,0.5)">Promedio: ${results.confidenceScore}%</div>
+        </div>
+        
+        <div class="result-card">
+          <div class="result-label">TOP 3 SONIDOS A TRABAJAR</div>
+          ${results.problemSounds.map((p, i) => `<div style="margin-top: 8px; font-size: 1rem"><b style="color: #ffcc00">${i+1}. ${p.sound}</b> — ${p.accuracy}% accuracy</div>`).join('')}
+        </div>
+        
+        <div class="result-card">
+          <div class="result-label">TU PLAN PERSONALIZADO</div>
+          <div style="margin-top: 12px">
+            ${planItems.map((p, i) => `<div class="plan-item"><div class="plan-num">${i+1}</div><div>${p}</div></div>`).join('')}
+          </div>
+        </div>
+        
+        <div class="result-card" style="text-align: center; border-color: rgba(0,255,204,0.3)">
+          <div style="font-size: 0.9rem; color: rgba(255,255,255,0.6); line-height: 1.6">
+            Guarda tus resultados y compártelos con Valerie<br>
+            para comenzar tu plan personalizado 🎙️
+          </div>
+        </div>
+      `;
+    }
+    
+    // Init
+    document.addEventListener('DOMContentLoaded', () => {
+      // Init confidence defaults
+      stage3Contexts.forEach(c => results.stage3Confidence[c.key] = 5);
+    });
+  </script>
+</body>
+</html>
