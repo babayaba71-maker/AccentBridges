@@ -112,7 +112,7 @@
         <span id="hud-fps" class="hud-badge">FPS: --</span>
       </div>
       <div class="hud-status-group">
-        <span class="hud-badge">MODE: AR_SPATIAL</span>
+        <span class="hud-badge" id="hud-mode">MODE: AR_SPATIAL</span>
         <span id="hud-battery" class="hud-badge">⚡ --%</span>
       </div>
     </div>
@@ -211,6 +211,7 @@
     <div class="w-14 h-14 rounded-full border-4 border-cyan-500/30 border-t-cyan-400 animate-spin"></div>
     <p class="text-cyan-300 font-black text-sm tracking-wide">Cargando MediaPipe Tasks Vision...</p>
     <p class="text-slate-400 text-xs">Descargando modelo EfficientDet-Lite0 e inicializando GPU Canvas...</p>
+    <p id="lite-note" class="text-amber-400/80 text-[10px] hidden">Modo Lite activo (gama baja). Primera vez descarga ~15MB — libera espacio si se traba.</p>
     <p class="text-slate-500 text-[10px]">Tri-Lingual Live AR Labeler — AccentBridges × Alma</p>
   </div>
 
@@ -347,6 +348,11 @@ let lastVideoTime = -1;
 let lastDetections = [];
 const spokenObjects = new Map();
 let frames = 0, lastFpsTime = performance.now();
+let frameCount = 0;
+/* ===== MODO LITE: gamas bajas (poco storage/RAM) ===== */
+const LITE = new URLSearchParams(location.search).get("lite") === "1" ||
+  (navigator.deviceMemory && navigator.deviceMemory <= 2) ||
+  (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
 
 const video = document.getElementById("webcam");
 const heatmapLayer = document.getElementById("phoneme-heatmap-layer");
@@ -369,7 +375,7 @@ async function initDetector() {
         modelAssetPath: "https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite",
         delegate: "GPU"
       },
-      scoreThreshold: 0.5,
+      scoreThreshold: LITE ? 0.6 : 0.5,
       runningMode: "VIDEO"
     });
   } catch (e) {
@@ -380,7 +386,7 @@ async function initDetector() {
           modelAssetPath: "https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite",
           delegate: "CPU"
         },
-        scoreThreshold: 0.5, runningMode: "VIDEO"
+        scoreThreshold: LITE ? 0.6 : 0.5, runningMode: "VIDEO"
       });
     } catch (e2) {
       document.getElementById("loading-overlay").innerHTML =
@@ -395,7 +401,7 @@ async function initDetector() {
 async function startCamera() {
   if (stream) { stream.getTracks().forEach(t => t.stop()); }
   stream = await navigator.mediaDevices.getUserMedia({
-    video: { facingMode: { ideal: facingMode }, width: { ideal: 1280 }, height: { ideal: 720 } },
+    video: { facingMode: { ideal: facingMode }, width: { ideal: LITE ? 640 : 1280 }, height: { ideal: LITE ? 480 : 720 } },
     audio: false
   });
   video.srcObject = stream;
@@ -430,6 +436,8 @@ function renderLoop() {
     document.getElementById("hud-fps").textContent = "FPS: " + frames;
     frames = 0; lastFpsTime = now;
   }
+  frameCount++;
+  if (LITE && frameCount % 3 !== 0) { requestAnimationFrame(renderLoop); return; }
   if (video.currentTime !== lastVideoTime && detector && video.readyState >= 2) {
     lastVideoTime = video.currentTime;
     try {
@@ -688,7 +696,11 @@ if (navigator.getBattery) {
   }).catch(() => {});
 }
 
+/* ===== Mostrar nota LITE ===== */
+if (LITE) document.getElementById("lite-note").classList.remove("hidden");
+
 /* ===== Arranque ===== */
+if (LITE) document.getElementById("hud-mode").textContent = "MODE: AR_LITE ⚡";
 initDetector().catch(err => {
   document.getElementById("loading-overlay").innerHTML =
     '<div class="space-y-3 text-center px-6"><div class="text-4xl">📷</div><p class="text-amber-400 font-black">Necesito permiso de cámara</p><p class="text-slate-400 text-xs">Recarga y permite el acceso a la cámara para arrancar el AR Labeler.</p></div>';
