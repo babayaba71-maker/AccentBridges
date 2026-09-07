@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Tri-Lingual Live AR Labeler — AccentBridges</title>
-  <!-- v1.3 brain -->
+  <!-- v1.4 bifocal -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     html, body { margin: 0; padding: 0; background: #020617; overflow: hidden; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
@@ -81,7 +81,16 @@
     /* ===== Quiz modal ===== */
     #quiz-modal { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(2,6,23,.78); backdrop-filter: blur(6px); }
     #quiz-modal.active { display: flex; }
-  </style>
+  /* ===== Zona de Lectura Bifocal — lente inferior (35%) ===== */
+.bifocal-reading-zone { position: fixed; bottom: 0; left: 0; width: 100vw; height: 35vh; background: linear-gradient(to top, rgba(0,240,255,.08) 0%, transparent 100%); border-top: 1px dashed rgba(0,240,255,.3); pointer-events: none; z-index: 85; display: flex; justify-content: flex-end; align-items: flex-end; padding: 10px; }
+.bifocal-badge { font: 700 10px ui-monospace,monospace; color: #00F0FF; background: rgba(15,23,42,.7); padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(0,240,255,.3); }
+.det-label.bifocal { border: 1px solid #00F0FF; background: rgba(15,23,42,.95); padding: 10px 12px; border-radius: 14px; box-shadow: 0 6px 24px rgba(0,240,255,.25); max-width: 240px; }
+.bifocal-title { color: #00F0FF; font: 800 9px ui-monospace,monospace; margin-bottom: 4px; letter-spacing: .5px; }
+.bifocal-meta { color: #94a3b8; font-size: 10px; margin-top: 4px; }
+.bifocal-say { color: #fbbf24; font-size: 10px; margin-top: 4px; }
+.bifocal-vocab { color: #FFD700; font-size: 10px; margin-top: 4px; }
+.det-label.bifocal .fr { color: #FF007F; }
+</style>
 </head>
 <body>
 
@@ -246,6 +255,9 @@
 
   <div id="toast"></div>
 </div>
+
+<!-- Divisoria de Lectura Bifocal -->
+<div class="bifocal-reading-zone"><span class="bifocal-badge">👓 ZONA BIFOCAL: LECTURA DETALLADA</span></div>
 
 <script type="module">
 import { ObjectDetector, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
@@ -492,17 +504,44 @@ function processDetections(detections) {
       heatmapLayer.appendChild(box);
     }
 
+    // 👓 Bifocal: si el centro del objeto cae en el 40% inferior = zona de lectura
+    const yNorm = (b.originY + b.height / 2) / (video.videoHeight || 480);
+    const isBifocal = yNorm >= 0.6;
+
     const card = document.createElement("div");
-    card.className = "det-label" + (i === inspectedIdx && locked ? " inspected" : "");
+    card.className = "det-label" + (i === inspectedIdx && locked ? " inspected" : "") + (isBifocal ? " bifocal" : "");
     card.style.left = Math.min(Math.max(x, 8), cW - 150) + "px";
     card.style.top = (y > 90 ? y - 82 : y + h + 8) + "px";
     const bd = "badge badge-d" + tr.d;
-    let html = '<div class="en">' + tr.en + (tr.ipa ? ' <span class="badge ' + bd + '">' + D_LABEL[tr.d] + '</span>' : "") + "</div>";
-    if (tr.ipa) html += '<div class="ipa">' + tr.ipa + "</div>";
-    if (langMode === "ALL" || langMode === "ES") html += '<div class="es">ES: ' + tr.es + "</div>";
-    if (langMode === "ALL" || langMode === "FR") html += '<div class="fr">FR: ' + tr.fr + "</div>";
-    if (i === inspectedIdx && locked) html += '<div style="color:#4ade80;font:800 9px ui-monospace,monospace;margin-top:2px">🎯 TARGET LOCK</div>';
-    card.innerHTML = html;
+
+    if (isBifocal) {
+      // 👓 LECTURA BIFOCAL DETALLADA — tarjeta expandida trilingüe + brain
+      const gd = BRAIN_CACHE.get(raw);
+      let html = '<div class="bifocal-title">👓 LECTURA BIFOCAL DETALLADA</div>';
+      html += '<div class="en">' + tr.en + (tr.ipa ? ' <span class="badge ' + bd + '">' + D_LABEL[tr.d] + '</span>' : "") + "</div>";
+      if (tr.ipa) html += '<div class="ipa">' + tr.ipa + "</div>";
+      html += '<div class="es">ES: ' + tr.es + "</div>";
+      html += '<div class="fr">FR: ' + tr.fr + "</div>";
+      if (gd) {
+        if (gd.material || gd.usage) html += '<div class="bifocal-meta">📦 ' + (gd.material || "") + ' • 🎯 ' + (gd.usage || "") + "</div>";
+        if (gd.example_sentence) html += '<div class="bifocal-say">🗣️ "' + gd.example_sentence + '"</div>';
+        if (Array.isArray(gd.vocab)) html += '<div class="bifocal-vocab">' + gd.vocab.map(v => v.es + "=" + v.en).join(" • ") + "</div>";
+      }
+      card.innerHTML = html;
+      card.onclick = () => { speak(tr.en); setTimeout(() => speak(tr.es, "es-MX"), 900); };
+      if (!bifocalSpoken.has(raw)) {
+        bifocalSpoken.add(raw);
+        if (!LITE) speak(tr.es, "es-MX"); // en Lite la voz es bajo demanda (proteccion RAM)
+        brainScan(false); // pedir detalles al brain — silencioso y rate-limited
+      }
+    } else {
+      let html = '<div class="en">' + tr.en + (tr.ipa ? ' <span class="badge ' + bd + '">' + D_LABEL[tr.d] + '</span>' : "") + "</div>";
+      if (tr.ipa) html += '<div class="ipa">' + tr.ipa + "</div>";
+      if (langMode === "ALL" || langMode === "ES") html += '<div class="es">ES: ' + tr.es + "</div>";
+      if (langMode === "ALL" || langMode === "FR") html += '<div class="fr">FR: ' + tr.fr + "</div>";
+      if (i === inspectedIdx && locked) html += '<div style="color:#4ade80;font:800 9px ui-monospace,monospace;margin-top:2px">🎯 TARGET LOCK</div>';
+      card.innerHTML = html;
+    }
     heatmapLayer.appendChild(card);
 
     // Auto-pronunciación por proximidad (bbox > 18% del cuadro)
@@ -586,33 +625,29 @@ document.getElementById("btn-autopron").addEventListener("click", (e) => {
 /* ===== ✨ BRAIN — Escaneo Multimodal Gemini (via backend arBrain) ===== */
 const BRAIN_URL = "https://valerie.base44.app/functions/arBrain";
 const BRAIN_CACHE = new Map(); // class -> analysis
+const bifocalSpoken = new Set(); // objetos ya leidos en voz bifocal
 let brainBusy = false, lastBrainTime = 0;
 
-document.getElementById("btn-gemini").addEventListener("click", async () => {
-  if (brainBusy) { toast("🧠 Pensando... espera"); return; }
-  if (performance.now() - lastBrainTime < 5000) { toast("⏱️ Rate limit: espera 5s entre escaneos"); return; }
-  if (!lastDetections.length) { toast("Apunta la cámara a un objeto primero 🙂"); return; }
+async function brainScan(interactive) {
+  if (brainBusy) { if (interactive) toast("🧠 Pensando... espera"); return; }
+  if (performance.now() - lastBrainTime < (interactive ? 5000 : 10000)) { if (interactive) toast("⏱️ Rate limit: espera 5s entre escaneos"); return; }
+  if (!lastDetections.length) { if (interactive) toast("Apunta la cámara a un objeto primero 🙂"); return; }
 
-  brainBusy = true; lastBrainTime = performance.now();
-  toast("✨ Escaneo multimodal Gemini en curso...");
-
-  // ¿Ya tenemos análisis en cache del objeto central?
-  const det = lastDetections.find(d => d === lastDetections[0]);
   const mainClass = (lastDetections[0].categories[0].categoryName || "").toLowerCase();
   if (BRAIN_CACHE.has(mainClass)) {
-    showBrainCard(BRAIN_CACHE.get(mainClass));
-    brainBusy = false;
+    if (interactive) showBrainCard(BRAIN_CACHE.get(mainClass));
     return;
   }
 
-  // Capturar frame
+  brainBusy = true; lastBrainTime = performance.now();
+  if (interactive) toast("✨ Escaneo multimodal Gemini en curso...");
+
   try {
     const snap = document.createElement("canvas");
     snap.width = Math.min(video.videoWidth || 640, 640);
     snap.height = Math.round(snap.width * ((video.videoHeight || 480) / (video.videoWidth || 640)));
     snap.getContext("2d").drawImage(video, 0, 0, snap.width, snap.height);
-    const dataUrl = snap.toDataURL("image/jpeg", 0.7);
-    const base64 = dataUrl.split(",")[1];
+    const base64 = snap.toDataURL("image/jpeg", 0.7).split(",")[1];
 
     const resp = await fetch(BRAIN_URL, {
       method: "POST",
@@ -625,19 +660,24 @@ document.getElementById("btn-gemini").addEventListener("click", async () => {
     const result = await resp.json();
 
     if (result.configured === false) {
-      toast("🧠 Brain listo pero falta la Gemini API key — Clyde la manda y se activa");
+      if (interactive) toast("🧠 Brain listo pero falta la Gemini API key — Clyde la manda y se activa");
     } else if (result.error) {
-      toast("⚠️ " + (result.detail || result.error));
+      if (interactive) toast("⚠️ " + (result.detail || result.error));
     } else {
       BRAIN_CACHE.set(mainClass, result);
-      showBrainCard(result);
-      if (result.example_sentence) toast("🗣️ " + result.example_sentence);
+      lastSig = ""; // forzar re-render para que la tarjeta bifocal muestre los detalles
+      if (interactive) {
+        showBrainCard(result);
+        if (result.example_sentence) toast("🗣️ " + result.example_sentence);
+      }
     }
   } catch (e) {
-    toast("⚠️ El brain no respondió — revisa tu conexión");
+    if (interactive) toast("⚠️ El brain no respondió — revisa tu conexión");
   }
   brainBusy = false;
-});
+}
+
+document.getElementById("btn-gemini").addEventListener("click", () => brainScan(true));
 
 function showBrainCard(r) {
   const old = document.getElementById("brain-card");
