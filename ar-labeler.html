@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Tri-Lingual Live AR Labeler — AccentBridges</title>
+  <!-- v1.2 -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     html, body { margin: 0; padding: 0; background: #020617; overflow: hidden; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
@@ -449,8 +450,13 @@ function renderLoop() {
 }
 
 /* ===== Procesar detecciones ===== */
+let lastSig = "";
 function processDetections(detections) {
   lastDetections = detections;
+  // Firma de escena: si nada cambio, NO reconstruir el DOM (menos RAM/GC en gamas bajas)
+  const sig = detections.map(d => d.categories[0].categoryName + Math.round(d.boundingBox.originX/12) + "," + Math.round(d.boundingBox.originY/12) + "," + Math.round(d.boundingBox.width/12) + "," + Math.round(d.boundingBox.height/12)).join("|") + "|" + langMode + "|" + heatmapOn;
+  if (sig === lastSig) return;
+  lastSig = sig;
   const { scale, offX, offY, cW, cH } = coverTransform();
   heatmapLayer.innerHTML = "";
   const seen = new Set();
@@ -700,7 +706,11 @@ if (navigator.getBattery) {
 if (LITE) document.getElementById("lite-note").classList.remove("hidden");
 
 /* ===== Arranque ===== */
-if (LITE) document.getElementById("hud-mode").textContent = "MODE: AR_LITE ⚡";
+if (LITE) {
+  document.getElementById("hud-mode").textContent = "MODE: AR_LITE ⚡";
+  autoPronOn = false;
+  document.getElementById("btn-autopron").classList.remove("on");
+}
 initDetector().catch(err => {
   document.getElementById("loading-overlay").innerHTML =
     '<div class="space-y-3 text-center px-6"><div class="text-4xl">📷</div><p class="text-amber-400 font-black">Necesito permiso de cámara</p><p class="text-slate-400 text-xs">Recarga y permite el acceso a la cámara para arrancar el AR Labeler.</p></div>';
