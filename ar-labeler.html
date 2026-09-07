@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Tri-Lingual Live AR Labeler — AccentBridges</title>
-  <!-- v1.2 -->
+  <!-- v1.3 brain -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     html, body { margin: 0; padding: 0; background: #020617; overflow: hidden; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
@@ -583,13 +583,83 @@ document.getElementById("btn-autopron").addEventListener("click", (e) => {
   toast(autoPronOn ? "🔊 Auto-pronunciación ON (acércate a un objeto)" : "🔇 Auto-pronunciación OFF");
 });
 
-document.getElementById("btn-gemini").addEventListener("click", () => {
-  if (window.GEMINI_API_KEY) {
-    toast("✨ Escaneo multimodal Gemini... (capturando frame)");
-  } else {
-    toast("✨ Gemini Scan: define window.GEMINI_API_KEY para activar análisis multimodal");
+/* ===== ✨ BRAIN — Escaneo Multimodal Gemini (via backend arBrain) ===== */
+const BRAIN_URL = "https://valerie.base44.app/functions/arBrain";
+const BRAIN_CACHE = new Map(); // class -> analysis
+let brainBusy = false, lastBrainTime = 0;
+
+document.getElementById("btn-gemini").addEventListener("click", async () => {
+  if (brainBusy) { toast("🧠 Pensando... espera"); return; }
+  if (performance.now() - lastBrainTime < 5000) { toast("⏱️ Rate limit: espera 5s entre escaneos"); return; }
+  if (!lastDetections.length) { toast("Apunta la cámara a un objeto primero 🙂"); return; }
+
+  brainBusy = true; lastBrainTime = performance.now();
+  toast("✨ Escaneo multimodal Gemini en curso...");
+
+  // ¿Ya tenemos análisis en cache del objeto central?
+  const det = lastDetections.find(d => d === lastDetections[0]);
+  const mainClass = (lastDetections[0].categories[0].categoryName || "").toLowerCase();
+  if (BRAIN_CACHE.has(mainClass)) {
+    showBrainCard(BRAIN_CACHE.get(mainClass));
+    brainBusy = false;
+    return;
   }
+
+  // Capturar frame
+  try {
+    const snap = document.createElement("canvas");
+    snap.width = Math.min(video.videoWidth || 640, 640);
+    snap.height = Math.round(snap.width * ((video.videoHeight || 480) / (video.videoWidth || 640)));
+    snap.getContext("2d").drawImage(video, 0, 0, snap.width, snap.height);
+    const dataUrl = snap.toDataURL("image/jpeg", 0.7);
+    const base64 = dataUrl.split(",")[1];
+
+    const resp = await fetch(BRAIN_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        image: base64,
+        objects: lastDetections.slice(0, 5).map(d => d.categories[0].categoryName)
+      })
+    });
+    const result = await resp.json();
+
+    if (result.configured === false) {
+      toast("🧠 Brain listo pero falta la Gemini API key — Clyde la manda y se activa");
+    } else if (result.error) {
+      toast("⚠️ " + (result.detail || result.error));
+    } else {
+      BRAIN_CACHE.set(mainClass, result);
+      showBrainCard(result);
+      if (result.example_sentence) toast("🗣️ " + result.example_sentence);
+    }
+  } catch (e) {
+    toast("⚠️ El brain no respondió — revisa tu conexión");
+  }
+  brainBusy = false;
 });
+
+function showBrainCard(r) {
+  const old = document.getElementById("brain-card");
+  if (old) old.remove();
+  const card = document.createElement("div");
+  card.id = "brain-card";
+  card.style.cssText = "position:absolute;bottom:14px;right:60px;z-index:30;width:min(300px,80%);background:rgba(10,16,32,.95);border:1px solid rgba(34,211,238,.6);border-radius:16px;padding:12px 14px;backdrop-filter:blur(8px);box-shadow:0 8px 28px rgba(0,0,0,.6);font-size:12px;color:#e0e7ff";
+  const vocab = (r.vocab || []).map(v => "<span style=\'color:#FFD700\'>" + v.es + "</span> = <span style=\'color:#00F0FF\'>" + v.en + "</span>").join(" • ");
+  card.innerHTML =
+    '<div style="font:800 10px ui-monospace,monospace;color:#34d399;margin-bottom:6px">✨ GEMINI CLOSE-UP INSPECTOR</div>' +
+    '<div style="font-size:16px;font-weight:900;color:#00F0FF">' + (r.object || r.en_word || "?") + '</div>' +
+    '<div style="color:#94a3b8;font-family:monospace;font-size:11px;margin:2px 0 8px">' + (r.ipa || "") + ' <span style="color:#fb7185">[' + (r.difficulty || "?") + ']</span></div>' +
+    '<div style="margin-bottom:4px">📦 <b style="color:#67e8f9">Material:</b> ' + (r.material || "-") + '</div>' +
+    '<div style="margin-bottom:4px">🎯 <b style="color:#67e8f9">Uso:</b> ' + (r.usage || "-") + '</div>' +
+    '<div style="margin-bottom:4px">🗣️ <b style="color:#67e8f9">Say:</b> <span style="color:#fbbf24">' + (r.example_sentence || "") + '</span></div>' +
+    '<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(148,163,184,.2)">' + vocab + '</div>' +
+    '<div style="text-align:right;margin-top:8px"><button id="brain-say" style="background:#0891b2;border:none;color:#fff;font-weight:800;font-size:11px;padding:6px 12px;border-radius:10px">🔊 Pronunciar</button> <button id="brain-close" style="background:#1e293b;border:none;color:#94a3b8;font-weight:800;font-size:11px;padding:6px 12px;border-radius:10px">✕</button></div>';
+  container.appendChild(card);
+  card.querySelector("#brain-say").onclick = () => { speak((r.en_word || r.object), "en-US"); setTimeout(() => speak(r.example_sentence, "en-US"), 1200); };
+  card.querySelector("#brain-close").onclick = () => card.remove();
+  speak(r.example_sentence || r.en_word || "", "en-US");
+}
 
 /* Idiomas */
 document.querySelectorAll(".lang-btn").forEach(btn => {
