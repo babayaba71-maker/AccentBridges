@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Tri-Lingual Live AR Labeler — AccentBridges</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #020617; overflow: hidden; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes spin-slow { to { transform: rotate(360deg); } }
+    .animate-spin-slow { animation: spin-slow 9s linear infinite; }
+
+    /* ===== Electrochromic tint layer ===== */
+    .rokid-tint-layer { position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: 0; transition: opacity .4s ease;
+      background: radial-gradient(ellipse at center, rgba(2,6,23,.18) 0%, rgba(2,6,23,.55) 72%, rgba(2,6,23,.85) 100%);
+      box-shadow: inset 0 0 120px 24px rgba(0,0,0,.55); backdrop-filter: blur(.4px); }
+    .rokid-tint-layer.active { opacity: 1; }
+
+    /* ===== Rokid HUD overlay ===== */
+    .rokid-hud-overlay { position: absolute; inset: 0; z-index: 12; pointer-events: none; }
+    .hud-grid-background { position: absolute; inset: 0; opacity: .12;
+      background-image: linear-gradient(rgba(56,189,248,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,.5) 1px, transparent 1px);
+      background-size: 44px 44px; }
+    .hud-frame-corner { position: absolute; width: 26px; height: 26px; border-color: rgba(56,189,248,.75); }
+    .frame-tl { top: 10px; left: 10px; border-top: 2px solid; border-left: 2px solid; border-top-left-radius: 8px; }
+    .frame-tr { top: 10px; right: 10px; border-top: 2px solid; border-right: 2px solid; border-top-right-radius: 8px; }
+    .frame-bl { bottom: 10px; left: 10px; border-bottom: 2px solid; border-left: 2px solid; border-bottom-left-radius: 8px; }
+    .frame-br { bottom: 10px; right: 10px; border-bottom: 2px solid; border-right: 2px solid; border-bottom-right-radius: 8px; }
+    .hud-top-bar { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 14px; align-items: center; }
+    .hud-badge { font: 700 10px/1.4 ui-monospace, monospace; color: #67e8f9; background: rgba(8,47,73,.55); border: 1px solid rgba(34,211,238,.35);
+      padding: 2px 8px; border-radius: 6px; letter-spacing: .06em; white-space: nowrap; }
+    .hud-status-group { display: flex; gap: 6px; }
+    .hud-reticle { position: absolute; top: 50%; left: 50%; width: 58px; height: 58px; transform: translate(-50%, -50%); transition: all .18s ease; }
+    .hud-reticle-corner { position: absolute; width: 16px; height: 16px; border-color: rgba(244,114,182,.85); }
+    .hud-reticle .tl { top: 0; left: 0; border-top: 2px solid; border-left: 2px solid; border-top-left-radius: 4px; }
+    .hud-reticle .tr { top: 0; right: 0; border-top: 2px solid; border-right: 2px solid; border-top-right-radius: 4px; }
+    .hud-reticle .bl { bottom: 0; left: 0; border-bottom: 2px solid; border-left: 2px solid; border-bottom-left-radius: 4px; }
+    .hud-reticle .br { bottom: 0; right: 0; border-bottom: 2px solid; border-right: 2px solid; border-bottom-right-radius: 4px; }
+    .hud-reticle.locked { width: 74px; height: 74px; filter: drop-shadow(0 0 6px rgba(74,222,128,.8)); }
+    .hud-reticle.locked .hud-reticle-corner { border-color: rgba(74,222,128,.95); }
+
+    /* ===== Right peripheral buttons (glasses mode) ===== */
+    .rokid-hud-right { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); z-index: 22; display: flex; flex-direction: column; gap: 10px; }
+    .hud-btn { width: 46px; height: 46px; border-radius: 14px; background: rgba(15,23,42,.82); border: 1px solid rgba(99,102,241,.45);
+      color: #e2e8f0; font-size: 20px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(6px); box-shadow: 0 4px 14px rgba(0,0,0,.4); }
+    .hud-btn:active { transform: scale(.92); }
+    .hud-btn.on { border-color: rgba(34,211,238,.9); background: rgba(8,47,73,.9); box-shadow: 0 0 12px rgba(34,211,238,.45); }
+
+    /* ===== Detection boxes ===== */
+    .det-box { position: absolute; z-index: 15; border-radius: 14px; }
+    .det-box.d1 { border: 2px solid rgba(52,211,153,.9); background: rgba(16,185,129,.10); }
+    .det-box.d2 { border: 2px solid rgba(251,191,36,.9); background: rgba(245,158,11,.10); }
+    .det-box.d3 { border: 2px solid rgba(251,113,133,.9); background: rgba(244,63,94,.10); }
+    .det-label { position: absolute; z-index: 16; background: rgba(10,16,32,.92); border: 1px solid rgba(99,102,241,.5);
+      border-radius: 12px; padding: 6px 10px; backdrop-filter: blur(4px); box-shadow: 0 6px 18px rgba(0,0,0,.5); min-width: 130px; }
+    .det-label .en { color: #00F0FF; font: 800 13px/1.3 sans-serif; }
+    .det-label .ipa { color: #94a3b8; font: 11px/1.3 ui-monospace, monospace; }
+    .det-label .es { color: #FFD700; font: 700 12px/1.3 sans-serif; }
+    .det-label .fr { color: #FF007F; font: 700 12px/1.3 sans-serif; }
+    .det-label .badge { display: inline-block; font: 800 9px/1.6 ui-monospace, monospace; padding: 1px 6px; border-radius: 999px; margin-left: 4px; }
+    .badge-d1 { background: rgba(16,185,129,.2); color: #34d399; border: 1px solid rgba(16,185,129,.4); }
+    .badge-d2 { background: rgba(245,158,11,.2); color: #fbbf24; border: 1px solid rgba(245,158,11,.4); }
+    .badge-d3 { background: rgba(244,63,94,.2); color: #fb7185; border: 1px solid rgba(244,63,94,.4); }
+    .det-label.inspected { border-color: rgba(74,222,128,.9); box-shadow: 0 0 16px rgba(74,222,128,.5); }
+
+    /* ===== Filters ===== */
+    .filter-normal { filter: none; }
+    .filter-ardim { filter: brightness(.8) contrast(1.08) saturate(.95); }
+    .filter-highcon { filter: contrast(1.55) saturate(1.35) brightness(1.05); }
+    .filter-mono { filter: grayscale(1) contrast(1.2); }
+
+    /* ===== Toast ===== */
+    #toast { position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%) translateY(20px); z-index: 60;
+      background: rgba(15,23,42,.95); border: 1px solid rgba(99,102,241,.6); color: #e0e7ff; font-size: 12px; font-weight: 700;
+      padding: 10px 16px; border-radius: 12px; opacity: 0; transition: all .3s ease; pointer-events: none; max-width: 86vw; text-align: center; }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ===== Quiz modal ===== */
+    #quiz-modal { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(2,6,23,.78); backdrop-filter: blur(6px); }
+    #quiz-modal.active { display: flex; }
+  </style>
+</head>
+<body>
+
+<!-- Contenedor Principal con Soporte Full View / Landscape -->
+<div id="ar-camera-container" class="relative w-full h-[100vh] min-h-[580px] bg-slate-950 overflow-hidden border-indigo-500/30 shadow-2xl flex flex-col select-none">
+
+  <!-- 1. FEED DE VIDEO EN VIVO -->
+  <video id="webcam" autoplay playsinline muted class="absolute inset-0 w-full h-full object-cover z-0 filter-normal"></video>
+
+  <!-- Filtro Electrocrómico / Tinte Oscuro de Lente -->
+  <div id="rokid-tint" class="rokid-tint-layer"></div>
+
+  <!-- 2. CANVAS HUD (futuros sprites 3D) -->
+  <canvas id="ar-canvas" class="absolute inset-0 w-full h-full z-10 pointer-events-none"></canvas>
+
+  <!-- 2.1 CAPA VISUAL DE HEATMAP FONÉTICO -->
+  <div id="phoneme-heatmap-layer" class="absolute inset-0 pointer-events-none z-[15] overflow-hidden"></div>
+
+  <!-- 2.2 ROKID OS SMART GLASSES HUD OVERLAY -->
+  <div class="rokid-hud-overlay">
+    <div class="hud-grid-background"></div>
+    <div class="hud-frame-corner frame-tl"></div>
+    <div class="hud-frame-corner frame-tr"></div>
+    <div class="hud-frame-corner frame-bl"></div>
+    <div class="hud-frame-corner frame-br"></div>
+    <div class="hud-top-bar">
+      <div class="hud-status-group">
+        <span class="hud-badge">ROKID OS v2.4</span>
+        <span id="hud-fps" class="hud-badge">FPS: --</span>
+      </div>
+      <div class="hud-status-group">
+        <span class="hud-badge">MODE: AR_SPATIAL</span>
+        <span id="hud-battery" class="hud-badge">⚡ --%</span>
+      </div>
+    </div>
+    <div id="hud-reticle" class="hud-reticle">
+      <div class="hud-reticle-corner tl"></div>
+      <div class="hud-reticle-corner tr"></div>
+      <div class="hud-reticle-corner bl"></div>
+      <div class="hud-reticle-corner br"></div>
+    </div>
+  </div>
+
+  <!-- Botonera Periférica Derecha -->
+  <div class="rokid-hud-right">
+    <button id="btn-heatmap" class="hud-btn on" title="Toggle Heatmap Fonético">🔥</button>
+    <button id="btn-autopron" class="hud-btn on" title="Toggle Auto-Pronunciación">🔊</button>
+    <button id="btn-tint" class="hud-btn" title="Filtro Tinte Oscuro">🕶️</button>
+    <button id="btn-gemini" class="hud-btn" title="Escaneo Multimodal Gemini">✨</button>
+  </div>
+
+  <!-- 3. BARRA DE CONTROL SUPERIOR -->
+  <header class="absolute top-4 left-4 right-[70px] z-20 flex flex-wrap items-center justify-between gap-2.5 bg-slate-900/85 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-indigo-500/40 shadow-xl">
+    <div class="flex items-center space-x-3">
+      <div class="p-2 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-600 to-fuchsia-500 text-white shadow-md">
+        <svg class="w-5 h-5 animate-spin-slow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg>
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <h2 class="text-sm sm:text-base font-black text-white tracking-tight">Tri-Lingual Live AR Labeler</h2>
+          <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[10px] font-mono font-bold">EN • ES • FR</span>
+        </div>
+        <p class="text-[11px] text-slate-300">MediaPipe Vision &amp; Real-time 3D Phonetic HUD</p>
+      </div>
+    </div>
+
+    <!-- Filtros de Idioma -->
+    <nav id="lang-nav" class="flex items-center space-x-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800">
+      <button data-lang="ALL" class="lang-btn px-2.5 py-1 rounded-lg text-xs font-black bg-indigo-600 text-white">ALL</button>
+      <button data-lang="EN" class="lang-btn px-2.5 py-1 rounded-lg text-xs font-black text-slate-400 hover:text-slate-200">EN</button>
+      <button data-lang="ES" class="lang-btn px-2.5 py-1 rounded-lg text-xs font-black text-slate-400 hover:text-slate-200">ES</button>
+      <button data-lang="FR" class="lang-btn px-2.5 py-1 rounded-lg text-xs font-black text-slate-400 hover:text-slate-200">FR</button>
+    </nav>
+
+    <!-- Acciones -->
+    <div class="flex items-center space-x-2">
+      <button id="btn-flip" class="px-2 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 text-xs font-bold">Trasera</button>
+      <button id="btn-freeze" class="px-2 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold">Congelar</button>
+      <button id="btn-quiz" class="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 text-white font-bold text-xs shadow-md">Quiz</button>
+      <button id="toggle-ar-fullview-btn" class="px-2 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-bold">Full View</button>
+    </div>
+  </header>
+
+  <!-- Modos de filtro visual -->
+  <div class="absolute bottom-[86px] left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 bg-slate-950/85 p-1 rounded-full border border-slate-800 backdrop-blur-md" id="mode-cluster">
+    <button data-mode="filter-normal" class="mode-btn px-3 py-1 rounded-full text-[11px] font-black bg-fuchsia-600 text-white">Normal</button>
+    <button data-mode="filter-ardim" class="mode-btn px-3 py-1 rounded-full text-[11px] font-black text-slate-400 hover:text-slate-200">AR Dim</button>
+    <button data-mode="filter-highcon" class="mode-btn px-3 py-1 rounded-full text-[11px] font-black text-slate-400 hover:text-slate-200">High Con</button>
+    <button data-mode="filter-mono" class="mode-btn px-3 py-1 rounded-full text-[11px] font-black text-slate-400 hover:text-slate-200">Mono</button>
+  </div>
+
+  <!-- 3.1 PANEL DE DIFICULTAD FONÉTICA -->
+  <aside class="absolute top-20 left-4 z-20 pointer-events-auto">
+    <div class="bg-slate-900/95 backdrop-blur-md border border-cyan-500/40 rounded-2xl p-3 shadow-2xl space-y-2.5 w-[270px] sm:w-[290px]">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-black uppercase text-cyan-300">Dificultad Fonética</span>
+        <span class="text-[10px] font-mono text-slate-400">MediaPipe Vision</span>
+      </div>
+      <div class="space-y-1">
+        <div class="flex justify-between text-[11px] font-bold">
+          <span class="text-slate-300">Nivel Promedio</span>
+          <span id="difficulty-avg" class="text-cyan-400 font-mono">--%</span>
+        </div>
+        <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+          <div id="difficulty-bar" class="h-full bg-cyan-400 rounded-full transition-all duration-500" style="width: 0%;"></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 3.2 LEYENDA IPA -->
+  <aside class="absolute top-20 right-[70px] z-20 pointer-events-auto hidden sm:block">
+    <div class="bg-slate-900/90 backdrop-blur-md border border-amber-500/40 rounded-2xl p-2.5 shadow-2xl space-y-2 max-w-[280px]">
+      <div class="flex items-center justify-between text-[10px] font-black uppercase text-amber-300">
+        <span>Heatmap Fonético IPA</span>
+        <span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">MouthGym</span>
+      </div>
+      <div class="grid grid-cols-3 gap-1 text-[10px] font-bold">
+        <span class="p-1 rounded bg-rose-500/20 text-rose-300 text-center border border-rose-500/30">Difícil [θ, ɹ]</span>
+        <span class="p-1 rounded bg-amber-500/20 text-amber-300 text-center border border-amber-500/30">Medio [æ, ʃ]</span>
+        <span class="p-1 rounded bg-emerald-500/20 text-emerald-300 text-center border border-emerald-500/30">Fácil [p, m]</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 4. PANTALLA DE CARGA / ERROR -->
+  <div id="loading-overlay" class="absolute inset-0 z-40 flex flex-col items-center justify-center bg-slate-950/92 space-y-4 text-center px-6">
+    <div class="w-14 h-14 rounded-full border-4 border-cyan-500/30 border-t-cyan-400 animate-spin"></div>
+    <p class="text-cyan-300 font-black text-sm tracking-wide">Cargando MediaPipe Tasks Vision...</p>
+    <p class="text-slate-400 text-xs">Descargando modelo EfficientDet-Lite0 e inicializando GPU Canvas...</p>
+    <p class="text-slate-500 text-[10px]">Tri-Lingual Live AR Labeler — AccentBridges × Alma</p>
+  </div>
+
+  <!-- 5. CARRUSEL DE OBJETOS DETECTADOS -->
+  <footer class="absolute bottom-4 left-4 z-20 max-w-sm sm:max-w-md pointer-events-auto">
+    <div class="bg-slate-900/90 backdrop-blur-md border border-indigo-500/40 rounded-2xl p-3 shadow-2xl space-y-2">
+      <div class="flex items-center space-x-2 text-xs font-black text-white uppercase tracking-wider">
+        <div class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></div>
+        <span>Objetos Detectados</span>
+      </div>
+      <div id="objects-carousel" class="flex items-center space-x-2 overflow-x-auto pb-1 max-w-[300px] scrollbar-none"></div>
+    </div>
+  </footer>
+
+  <!-- QUIZ MODAL -->
+  <div id="quiz-modal">
+    <div class="bg-slate-900 border border-indigo-500/50 rounded-3xl p-6 w-[86%] max-w-md space-y-4 text-center shadow-2xl">
+      <div class="text-3xl">🎤</div>
+      <h3 class="text-white font-black text-lg">Quiz de Pronunciación</h3>
+      <p class="text-slate-300 text-sm">Di en voz alta:</p>
+      <div id="quiz-word" class="text-4xl font-black text-cyan-300 tracking-wide">...</div>
+      <div id="quiz-ipa" class="text-slate-400 font-mono text-sm"></div>
+      <p class="text-slate-500 text-[11px]">Repite la palabra 2-3 veces. La mejor toma cuenta.</p>
+      <div id="quiz-result" class="text-sm font-bold text-emerald-400 hidden"></div>
+      <div class="flex gap-2 justify-center">
+        <button id="quiz-start" class="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 text-white font-bold text-sm">🎙️ Grabar</button>
+        <button id="quiz-close" class="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 font-bold text-sm">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<script type="module">
+import { ObjectDetector, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
+
+/* ============================================================
+   DICCIONARIO TRILINGÜE (COCO-80) + IPA + Dificultad
+   d: 1=Fácil  2=Medio  3=Difícil
+============================================================ */
+const DICT = {
+  "person":{en:"Person",es:"Persona",fr:"Personne",ipa:"/ˈpɜːrsən/",d:2},
+  "bicycle":{en:"Bicycle",es:"Bicicleta",fr:"Vélo",ipa:"/ˈbaɪsɪkəl/",d:2},
+  "car":{en:"Car",es:"Coche",fr:"Voiture",ipa:"/kɑːr/",d:2},
+  "motorcycle":{en:"Motorcycle",es:"Motocicleta",fr:"Moto",ipa:"/ˈmoʊtərsaɪkəl/",d:3},
+  "airplane":{en:"Airplane",es:"Avión",fr:"Avion",ipa:"/ˈerpleɪn/",d:2},
+  "bus":{en:"Bus",es:"Autobús",fr:"Bus",ipa:"/bʌs/",d:1},
+  "train":{en:"Train",es:"Tren",fr:"Train",ipa:"/treɪn/",d:1},
+  "truck":{en:"Truck",es:"Camión",fr:"Camion",ipa:"/trʌk/",d:2},
+  "boat":{en:"Boat",es:"Bote",fr:"Bateau",ipa:"/boʊt/",d:1},
+  "traffic light":{en:"Traffic light",es:"Semáforo",fr:"Feu",ipa:"/ˈtræfɪk laɪt/",d:3},
+  "fire hydrant":{en:"Fire hydrant",es:"Boca de incendios",fr:"Bouche incendie",ipa:"/ˈfaɪər ˈhaɪdrənt/",d:3},
+  "stop sign":{en:"Stop sign",es:"Señal de alto",fr:"Panneau stop",ipa:"/stɑːp saɪn/",d:2},
+  "parking meter":{en:"Parking meter",es:"Parquímetro",fr:"Parcmètre",ipa:"/ˈpɑːrkɪŋ ˈmiːtər/",d:3},
+  "bench":{en:"Bench",es:"Banco",fr:"Banc",ipa:"/bentʃ/",d:1},
+  "bird":{en:"Bird",es:"Pájaro",fr:"Oiseau",ipa:"/bɜːrd/",d:2},
+  "cat":{en:"Cat",es:"Gato",fr:"Chat",ipa:"/kæt/",d:1},
+  "dog":{en:"Dog",es:"Perro",fr:"Chien",ipa:"/dɔːɡ/",d:2},
+  "horse":{en:"Horse",es:"Caballo",fr:"Cheval",ipa:"/hɔːrs/",d:2},
+  "sheep":{en:"Sheep",es:"Oveja",fr:"Mouton",ipa:"/ʃiːp/",d:2},
+  "cow":{en:"Cow",es:"Vaca",fr:"Vache",ipa:"/kaʊ/",d:2},
+  "elephant":{en:"Elephant",es:"Elefante",fr:"Éléphant",ipa:"/ˈelɪfənt/",d:2},
+  "bear":{en:"Bear",es:"Oso",fr:"Ours",ipa:"/ber/",d:2},
+  "zebra":{en:"Zebra",es:"Cebra",fr:"Zèbre",ipa:"/ˈziːbrə/",d:1},
+  "giraffe":{en:"Giraffe",es:"Jirafa",fr:"Girafe",ipa:"/dʒəˈræf/",d:3},
+  "backpack":{en:"Backpack",es:"Mochila",fr:"Sac à dos",ipa:"/ˈbækpæk/",d:1},
+  "umbrella":{en:"Umbrella",es:"Paraguas",fr:"Parapluie",ipa:"/ʌmˈbrelə/",d:3},
+  "handbag":{en:"Handbag",es:"Bolsa",fr:"Sac à main",ipa:"/ˈhændbæɡ/",d:1},
+  "tie":{en:"Tie",es:"Corbata",fr:"Cravate",ipa:"/taɪ/",d:1},
+  "suitcase":{en:"Suitcase",es:"Maleta",fr:"Valise",ipa:"/ˈsuːtkeɪs/",d:2},
+  "frisbee":{en:"Frisbee",es:"Disco volador",fr:"Frisbee",ipa:"/ˈfrɪzbiː/",d:1},
+  "skis":{en:"Skis",es:"Esquís",fr:"Skis",ipa:"/skiːz/",d:1},
+  "snowboard":{en:"Snowboard",es:"Snowboard",fr:"Snowboard",ipa:"/ˈsnoʊbɔːrd/",d:1},
+  "sports ball":{en:"Ball",es:"Pelota",fr:"Ballon",ipa:"/bɔːl/",d:1},
+  "kite":{en:"Kite",es:"Cometa",fr:"Cerf-volant",ipa:"/kaɪt/",d:1},
+  "baseball bat":{en:"Baseball bat",es:"Bate",fr:"Batte",ipa:"/ˈbeɪsbɔːl bæt/",d:2},
+  "baseball glove":{en:"Baseball glove",es:"Guante",fr:"Gant",ipa:"/ˈbeɪsbɔːl ɡlʌv/",d:2},
+  "skateboard":{en:"Skateboard",es:"Patineta",fr:"Skateboard",ipa:"/ˈskeɪtbɔːrd/",d:1},
+  "surfboard":{en:"Surfboard",es:"Tabla de surf",fr:"Planche",ipa:"/ˈsɜːrfbɔːrd/",d:2},
+  "tennis racket":{en:"Tennis racket",es:"Raqueta",fr:"Raquette",ipa:"/ˈtenɪs ˈrækɪt/",d:3},
+  "bottle":{en:"Bottle",es:"Botella",fr:"Bouteille",ipa:"/ˈbɑːtəl/",d:2},
+  "wine glass":{en:"Wine glass",es:"Copa",fr:"Verre à vin",ipa:"/waɪn ɡlæs/",d:2},
+  "cup":{en:"Cup",es:"Taza",fr:"Tasse",ipa:"/kʌp/",d:1},
+  "fork":{en:"Fork",es:"Tenedor",fr:"Fourchette",ipa:"/fɔːrk/",d:2},
+  "knife":{en:"Knife",es:"Cuchillo",fr:"Couteau",ipa:"/naɪf/",d:1},
+  "spoon":{en:"Spoon",es:"Cuchara",fr:"Cuillère",ipa:"/spuːn/",d:1},
+  "bowl":{en:"Bowl",es:"Tazón",fr:"Bol",ipa:"/boʊl/",d:1},
+  "banana":{en:"Banana",es:"Plátano",fr:"Banane",ipa:"/bəˈnænə/",d:2},
+  "apple":{en:"Apple",es:"Manzana",fr:"Pomme",ipa:"/ˈæpəl/",d:1},
+  "sandwich":{en:"Sandwich",es:"Sándwich",fr:"Sandwich",ipa:"/ˈsænwɪdʒ/",d:2},
+  "orange":{en:"Orange",es:"Naranja",fr:"Orange",ipa:"/ˈɔːrɪndʒ/",d:2},
+  "broccoli":{en:"Broccoli",es:"Brócoli",fr:"Brocoli",ipa:"/ˈbrɑːkəli/",d:2},
+  "carrot":{en:"Carrot",es:"Zanahoria",fr:"Carotte",ipa:"/ˈkærət/",d:1},
+  "hot dog":{en:"Hot dog",es:"Hot dog",fr:"Hot-dog",ipa:"/hɑːt dɔːɡ/",d:1},
+  "pizza":{en:"Pizza",es:"Pizza",fr:"Pizza",ipa:"/ˈpiːtsə/",d:1},
+  "donut":{en:"Donut",es:"Dona",fr:"Donut",ipa:"/ˈdoʊnət/",d:2},
+  "cake":{en:"Cake",es:"Pastel",fr:"Gâteau",ipa:"/keɪk/",d:1},
+  "chair":{en:"Chair",es:"Silla",fr:"Chaise",ipa:"/tʃer/",d:2},
+  "couch":{en:"Couch",es:"Sofá",fr:"Canapé",ipa:"/kaʊtʃ/",d:1},
+  "potted plant":{en:"Potted plant",es:"Planta",fr:"Plante",ipa:"/ˈpɑːtɪd plænt/",d:2},
+  "bed":{en:"Bed",es:"Cama",fr:"Lit",ipa:"/bed/",d:1},
+  "dining table":{en:"Dining table",es:"Mesa",fr:"Table",ipa:"/ˈdaɪnɪŋ ˈteɪbəl/",d:2},
+  "toilet":{en:"Toilet",es:"Inodoro",fr:"Toilettes",ipa:"/ˈtɔɪlət/",d:2},
+  "tv":{en:"Television",es:"Televisión",fr:"Télévision",ipa:"/ˈtelɪvɪʒn/",d:3},
+  "laptop":{en:"Laptop",es:"Laptop",fr:"Ordinateur",ipa:"/ˈlæptɑːp/",d:3},
+  "mouse":{en:"Mouse",es:"Ratón",fr:"Souris",ipa:"/maʊs/",d:1},
+  "remote":{en:"Remote",es:"Control remoto",fr:"Télécommande",ipa:"/rɪˈmoʊt/",d:3},
+  "keyboard":{en:"Keyboard",es:"Teclado",fr:"Clavier",ipa:"/ˈkiːbɔːrd/",d:2},
+  "cell phone":{en:"Phone",es:"Teléfono",fr:"Téléphone",ipa:"/sel foʊn/",d:3},
+  "microwave":{en:"Microwave",es:"Microondas",fr:"Micro-ondes",ipa:"/ˈmaɪkroʊweɪv/",d:3},
+  "oven":{en:"Oven",es:"Horno",fr:"Four",ipa:"/ˈʌvən/",d:1},
+  "toaster":{en:"Toaster",es:"Tostadora",fr:"Grille-pain",ipa:"/ˈtoʊstər/",d:2},
+  "sink":{en:"Sink",es:"Fregadero",fr:"Évier",ipa:"/sɪŋk/",d:1},
+  "refrigerator":{en:"Refrigerator",es:"Refrigerador",fr:"Réfrigérateur",ipa:"/rɪˈfrɪdʒəreɪtər/",d:3},
+  "book":{en:"Book",es:"Libro",fr:"Livre",ipa:"/bʊk/",d:1},
+  "clock":{en:"Clock",es:"Reloj",fr:"Horloge",ipa:"/klɑːk/",d:1},
+  "vase":{en:"Vase",es:"Jarrón",fr:"Vase",ipa:"/veɪs/",d:1},
+  "scissors":{en:"Scissors",es:"Tijeras",fr:"Ciseaux",ipa:"/ˈsɪzərz/",d:1},
+  "teddy bear":{en:"Teddy bear",es:"Osito",fr:"Ours en peluche",ipa:"/ˈtedi ber/",d:2},
+  "hair drier":{en:"Hair drier",es:"Secadora",fr:"Sèche-cheveux",ipa:"/her ˈdraɪər/",d:2},
+  "toothbrush":{en:"Toothbrush",es:"Cepillo",fr:"Brosse à dents",ipa:"/ˈtuːθbrʌʃ/",d:2}
+};
+const D_LABEL = {1:"EASY",2:"MED",3:"HARD"};
+
+/* ===== Estado ===== */
+let detector = null;
+let stream = null;
+let facingMode = "environment";
+let langMode = "ALL";
+let heatmapOn = true, autoPronOn = true, tintOn = false;
+let frozen = false;
+let lastVideoTime = -1;
+let lastDetections = [];
+const spokenObjects = new Map();
+let frames = 0, lastFpsTime = performance.now();
+
+const video = document.getElementById("webcam");
+const heatmapLayer = document.getElementById("phoneme-heatmap-layer");
+const reticle = document.getElementById("hud-reticle");
+const toastEl = document.getElementById("toast");
+const container = document.getElementById("ar-camera-container");
+
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  setTimeout(() => toastEl.classList.remove("show"), 2600);
+}
+
+/* ===== Init MediaPipe ===== */
+async function initDetector() {
+  try {
+    const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm");
+    detector = await ObjectDetector.createFromOptions(vision, {
+      baseOptions: {
+        modelAssetPath: "https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite",
+        delegate: "GPU"
+      },
+      scoreThreshold: 0.5,
+      runningMode: "VIDEO"
+    });
+  } catch (e) {
+    try {
+      const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm");
+      detector = await ObjectDetector.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath: "https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite",
+          delegate: "CPU"
+        },
+        scoreThreshold: 0.5, runningMode: "VIDEO"
+      });
+    } catch (e2) {
+      document.getElementById("loading-overlay").innerHTML =
+        '<div class="space-y-3 text-center px-6"><div class="text-4xl">⚠️</div><p class="text-rose-400 font-black">Error al cargar el modelo</p><p class="text-slate-400 text-xs">Verifica tu conexión y recarga la página.</p></div>';
+      return;
+    }
+  }
+  await startCamera();
+}
+
+/* ===== Cámara ===== */
+async function startCamera() {
+  if (stream) { stream.getTracks().forEach(t => t.stop()); }
+  stream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: { ideal: facingMode }, width: { ideal: 1280 }, height: { ideal: 720 } },
+    audio: false
+  });
+  video.srcObject = stream;
+  await video.play();
+  frozen = false;
+  document.getElementById("btn-freeze").textContent = "Congelar";
+  document.getElementById("loading-overlay").style.display = "none";
+  renderLoop();
+}
+
+async function flipCamera() {
+  facingMode = facingMode === "environment" ? "user" : "environment";
+  document.getElementById("btn-flip").textContent = facingMode === "environment" ? "Trasera" : "Frontal";
+  await startCamera();
+  toast(facingMode === "environment" ? "📷 Cámara trasera" : "🤳 Cámara frontal");
+}
+
+/* ===== Mapeo cover (video → pantalla) ===== */
+function coverTransform() {
+  const cW = container.clientWidth, cH = container.clientHeight;
+  const vW = video.videoWidth || 1280, vH = video.videoHeight || 720;
+  const scale = Math.max(cW / vW, cH / vH);
+  return { scale, offX: (cW - vW * scale) / 2, offY: (cH - vH * scale) / 2, cW, cH };
+}
+
+/* ===== Loop principal ===== */
+function renderLoop() {
+  if (frozen) { requestAnimationFrame(renderLoop); return; }
+  frames++;
+  const now = performance.now();
+  if (now - lastFpsTime >= 1000) {
+    document.getElementById("hud-fps").textContent = "FPS: " + frames;
+    frames = 0; lastFpsTime = now;
+  }
+  if (video.currentTime !== lastVideoTime && detector && video.readyState >= 2) {
+    lastVideoTime = video.currentTime;
+    try {
+      const result = detector.detectForVideo(video, now);
+      processDetections(result.detections);
+    } catch (e) { /* frame skip */ }
+  }
+  requestAnimationFrame(renderLoop);
+}
+
+/* ===== Procesar detecciones ===== */
+function processDetections(detections) {
+  lastDetections = detections;
+  const { scale, offX, offY, cW, cH } = coverTransform();
+  heatmapLayer.innerHTML = "";
+  const seen = new Set();
+  let inspectedIdx = -1, bestDist = Infinity;
+
+  detections.forEach((det, i) => {
+    const b = det.boundingBox;
+    const cx = (b.originX + b.width / 2) * scale + offX;
+    const cy = (b.originY + b.height / 2) * scale + offY;
+    const dist = Math.hypot(cx - cW / 2, cy - cH / 2);
+    if (dist < bestDist) { bestDist = dist; inspectedIdx = i; }
+  });
+  const locked = inspectedIdx >= 0 && bestDist < 140;
+  reticle.classList.toggle("locked", locked);
+
+  let easeSum = 0, easeCount = 0;
+
+  detections.forEach((det, i) => {
+    const raw = (det.categories[0].categoryName || "").toLowerCase();
+    const tr = DICT[raw] || { en: raw, es: raw, fr: raw, ipa: "", d: 2 };
+    seen.add(raw);
+    easeSum += (4 - tr.d) / 3; easeCount++;
+
+    const b = det.boundingBox;
+    const x = b.originX * scale + offX, y = b.originY * scale + offY;
+    const w = b.width * scale, h = b.height * scale;
+
+    if (heatmapOn) {
+      const box = document.createElement("div");
+      box.className = "det-box d" + tr.d;
+      box.style.left = x + "px"; box.style.top = y + "px";
+      box.style.width = w + "px"; box.style.height = h + "px";
+      heatmapLayer.appendChild(box);
+    }
+
+    const card = document.createElement("div");
+    card.className = "det-label" + (i === inspectedIdx && locked ? " inspected" : "");
+    card.style.left = Math.min(Math.max(x, 8), cW - 150) + "px";
+    card.style.top = (y > 90 ? y - 82 : y + h + 8) + "px";
+    const bd = "badge badge-d" + tr.d;
+    let html = '<div class="en">' + tr.en + (tr.ipa ? ' <span class="badge ' + bd + '">' + D_LABEL[tr.d] + '</span>' : "") + "</div>";
+    if (tr.ipa) html += '<div class="ipa">' + tr.ipa + "</div>";
+    if (langMode === "ALL" || langMode === "ES") html += '<div class="es">ES: ' + tr.es + "</div>";
+    if (langMode === "ALL" || langMode === "FR") html += '<div class="fr">FR: ' + tr.fr + "</div>";
+    if (i === inspectedIdx && locked) html += '<div style="color:#4ade80;font:800 9px ui-monospace,monospace;margin-top:2px">🎯 TARGET LOCK</div>';
+    card.innerHTML = html;
+    heatmapLayer.appendChild(card);
+
+    // Auto-pronunciación por proximidad (bbox > 18% del cuadro)
+    if (autoPronOn && (w * h) > (cW * cH) * 0.18) {
+      const last = spokenObjects.get(raw) || 0;
+      if (now2() - last > 15000) {
+        spokenObjects.set(raw, now2());
+        speak(tr.en);
+        toast("🔊 " + tr.en + " " + tr.ipa + " — ¡repite conmigo!");
+      }
+    }
+  });
+
+  const avg = easeCount ? Math.round((easeSum / easeCount) * 100) : 0;
+  document.getElementById("difficulty-avg").textContent = easeCount ? avg + "%" : "--%";
+  document.getElementById("difficulty-bar").style.width = avg + "%";
+
+  renderCarousel(seen);
+}
+function now2() { return performance.now(); }
+
+/* ===== Carrusel ===== */
+function renderCarousel(seen) {
+  const c = document.getElementById("objects-carousel");
+  const current = new Set([...c.querySelectorAll("[data-class]")].map(e => e.dataset.class));
+  const same = seen.size === current.size && [...seen].every(s => current.has(s));
+  if (same) return;
+  c.innerHTML = "";
+  seen.forEach(raw => {
+    const tr = DICT[raw] || { en: raw, es: raw, fr: raw, ipa: "", d: 2 };
+    const dot = tr.d === 1 ? "bg-emerald-400" : tr.d === 2 ? "bg-amber-400" : "bg-rose-400";
+    const div = document.createElement("div");
+    div.dataset.class = raw;
+    div.className = "flex-shrink-0 bg-slate-950/85 border border-slate-800 rounded-xl px-3 py-1.5 space-y-0.5";
+    div.innerHTML = '<div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full ' + dot + '"></span><span class="text-[11px] font-black text-cyan-300">' + tr.en + "</span></div>" +
+      '<div class="text-[10px] text-amber-300">' + tr.es + ' <span class="text-fuchsia-400">| ' + tr.fr + "</span></div>";
+    div.onclick = () => speak(tr.en);
+    c.appendChild(div);
+  });
+}
+
+/* ===== Voz ===== */
+function speak(text, lang) {
+  try {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = lang || "en-US";
+    u.rate = 0.92;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+/* ===== Botones ===== */
+document.getElementById("btn-flip").addEventListener("click", flipCamera);
+
+document.getElementById("btn-freeze").addEventListener("click", (e) => {
+  frozen = !frozen;
+  if (frozen) { video.pause(); e.target.textContent = "Reanudar"; toast("❄️ Congelado — estudia la escena"); }
+  else { video.play(); e.target.textContent = "Congelar"; toast("▶️ En vivo"); }
+});
+
+document.getElementById("btn-tint").addEventListener("click", (e) => {
+  tintOn = !tintOn;
+  document.getElementById("rokid-tint").classList.toggle("active", tintOn);
+  e.currentTarget.classList.toggle("on", tintOn);
+  toast(tintOn ? "🕶️ Tinte electrocrómico ON" : "☀️ Tinte OFF");
+});
+
+document.getElementById("btn-heatmap").addEventListener("click", (e) => {
+  heatmapOn = !heatmapOn;
+  e.currentTarget.classList.toggle("on", heatmapOn);
+  toast(heatmapOn ? "🔥 Heatmap fonético ON" : "Heatmap OFF");
+});
+
+document.getElementById("btn-autopron").addEventListener("click", (e) => {
+  autoPronOn = !autoPronOn;
+  e.currentTarget.classList.toggle("on", autoPronOn);
+  toast(autoPronOn ? "🔊 Auto-pronunciación ON (acércate a un objeto)" : "🔇 Auto-pronunciación OFF");
+});
+
+document.getElementById("btn-gemini").addEventListener("click", () => {
+  if (window.GEMINI_API_KEY) {
+    toast("✨ Escaneo multimodal Gemini... (capturando frame)");
+  } else {
+    toast("✨ Gemini Scan: define window.GEMINI_API_KEY para activar análisis multimodal");
+  }
+});
+
+/* Idiomas */
+document.querySelectorAll(".lang-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    langMode = btn.dataset.lang;
+    document.querySelectorAll(".lang-btn").forEach(b => {
+      const on = b === btn;
+      b.className = "lang-btn px-2.5 py-1 rounded-lg text-xs font-black " + (on ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-slate-200");
+    });
+    toast("🌐 Modo: " + langMode);
+  });
+});
+
+/* Filtros visuales */
+document.querySelectorAll(".mode-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    video.className = "absolute inset-0 w-full h-full object-cover z-0 " + btn.dataset.mode;
+    document.querySelectorAll(".mode-btn").forEach(b => {
+      const on = b === btn;
+      b.className = "mode-btn px-3 py-1 rounded-full text-[11px] font-black " + (on ? "bg-fuchsia-600 text-white" : "text-slate-400 hover:text-slate-200");
+    });
+  });
+});
+
+/* ===== Full View / Landscape (modo Rokid) ===== */
+async function enterFullView() {
+  const el = document.documentElement;
+  try { if (!document.fullscreenElement && el.requestFullscreen) await el.requestFullscreen({ navigationUI: "hide" }); } catch (e) {}
+  try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock("landscape"); } catch (e) {}
+  toast("🥽 Modo Rokid: vista panorámica activada");
+}
+async function exitFullView() {
+  try { if (document.exitFullscreen && document.fullscreenElement) await document.exitFullscreen(); } catch (e) {}
+  try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {}
+}
+document.getElementById("toggle-ar-fullview-btn").addEventListener("click", () => {
+  if (document.fullscreenElement) exitFullView(); else enterFullView();
+});
+let lastTap = 0;
+video.addEventListener("pointerup", () => {
+  const t = performance.now();
+  if (t - lastTap < 320) { document.fullscreenElement ? exitFullView() : enterFullView(); }
+  lastTap = t;
+});
+window.addEventListener("orientationchange", () => {
+  setTimeout(() => {
+    if (window.innerHeight < window.innerWidth && !document.fullscreenElement) {
+      enterFullView();
+    }
+  }, 250);
+});
+
+/* ===== QUIZ ===== */
+const quizModal = document.getElementById("quiz-modal");
+let quizTarget = null;
+document.getElementById("btn-quiz").addEventListener("click", () => {
+  if (!lastDetections.length) { toast("Apunta la cámara a un objeto primero 🙂"); return; }
+  const det = lastDetections[Math.floor(Math.random() * lastDetections.length)];
+  const raw = (det.categories[0].categoryName || "").toLowerCase();
+  quizTarget = DICT[raw] || { en: raw, es: raw, ipa: "", d: 2 };
+  document.getElementById("quiz-word").textContent = quizTarget.en;
+  document.getElementById("quiz-ipa").textContent = quizTarget.ipa + "  •  ES: " + quizTarget.es;
+  const res = document.getElementById("quiz-result");
+  res.classList.add("hidden");
+  quizModal.classList.add("active");
+  speak(quizTarget.en);
+});
+document.getElementById("quiz-close").addEventListener("click", () => quizModal.classList.remove("active"));
+
+document.getElementById("quiz-start").addEventListener("click", () => {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { toast("Tu navegador no soporta reconocimiento de voz. Usa Chrome 🙂"); return; }
+  const btn = document.getElementById("quiz-start");
+  btn.textContent = "🎙️ Escuchando..."; btn.disabled = true;
+  const rec = new SR();
+  rec.lang = "en-US"; rec.interimResults = false; rec.maxAlternatives = 3;
+  rec.onresult = (ev) => {
+    let best = "";
+    for (const alt of ev.results[0]) {
+      if (similarity(alt.transcript, quizTarget.en) > similarity(best, quizTarget.en)) best = alt.transcript;
+    }
+    const score = Math.round(similarity(best, quizTarget.en) * 100);
+    const res = document.getElementById("quiz-result");
+    res.classList.remove("hidden");
+    if (score >= 85) { res.textContent = "🏆 " + score + "% — Excellent! " + quizTarget.en + " sounds natural"; res.className = "text-sm font-bold text-emerald-400"; }
+    else if (score >= 60) { res.textContent = "💪 " + score + "% — Good! You said: \"" + best + "\". Try again slower"; res.className = "text-sm font-bold text-amber-400"; }
+    else { res.textContent = "🔄 " + score + "% — I heard: \"" + best + "\". Repeat after me: " + quizTarget.en; res.className = "text-sm font-bold text-rose-400"; speak(quizTarget.en); }
+  };
+  rec.onerror = () => toast("No te escuché bien — intenta de nuevo 🎙️");
+  rec.onend = () => { btn.textContent = "🎙️ Grabar"; btn.disabled = false; };
+  rec.start();
+});
+
+function similarity(a, b) {
+  a = (a || "").toLowerCase().trim(); b = (b || "").toLowerCase().trim();
+  if (!a) return 0;
+  const m = a.length, n = b.length;
+  const dp = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]);
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++)
+    dp[i][j] = Math.min(dp[i-1][j] + 1, dp[i][j-1] + 1, dp[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+  return Math.max(0, 1 - dp[m][n] / Math.max(m, n));
+}
+
+/* ===== Batería ===== */
+if (navigator.getBattery) {
+  navigator.getBattery().then(b => {
+    const upd = () => document.getElementById("hud-battery").textContent = "⚡ " + Math.round(b.level * 100) + "%";
+    upd(); b.addEventListener("levelchange", upd);
+  }).catch(() => {});
+}
+
+/* ===== Arranque ===== */
+initDetector().catch(err => {
+  document.getElementById("loading-overlay").innerHTML =
+    '<div class="space-y-3 text-center px-6"><div class="text-4xl">📷</div><p class="text-amber-400 font-black">Necesito permiso de cámara</p><p class="text-slate-400 text-xs">Recarga y permite el acceso a la cámara para arrancar el AR Labeler.</p></div>';
+});
+</script>
+</body>
+</html>
