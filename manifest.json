@@ -1,0 +1,15 @@
+{
+  "name": "Alma — Hologram Wallpaper",
+  "short_name": "Alma",
+  "description": "Presencia holográfica 24/7 de Valerie 3 — Myl AccentBridges",
+  "start_url": "https://babayaba71-maker.github.io/AccentBridges/hologram-wallpaper.html",
+  "scope": "https://babayaba71-maker.github.io/AccentBridges/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "icons": [
+    { "src": "hologram-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "hologram-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
