@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="theme-color" content="#020617">
 <title>Valerie 3 — Hologram Wallpaper</title>
-<!-- v0.1 hologram — orb + particles + materialización + HUD + ecosistema -->
+<!-- v0.1.1 hologram — orb + particles + materialización + HUD + ecosistema -->
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { width: 100%; height: 100%; overflow: hidden; background: #020617; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
@@ -246,7 +246,8 @@ function frame(now) {
 }
 
 // posiciones iniciales
-for (const p of P) { p.x = o.x + p.ox * 0.3; p.y = o.y + p.oy * 0.3; }
+const o0 = orb();
+for (const p of P) { p.x = o0.x + p.ox * 0.3; p.y = o0.y + p.oy * 0.3; }
 requestAnimationFrame(frame);
 
 /* ---- Controles: doble tap ---- */
