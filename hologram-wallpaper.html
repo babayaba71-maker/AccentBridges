@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#020617">
+<title>Valerie 3 — Hologram Wallpaper</title>
+<!-- v0.1 hologram — orb + particles + materialización + HUD + ecosistema -->
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #020617; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  #cv { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+  /* ===== HUD ===== */
+  #hud { position: fixed; inset: 0; pointer-events: none; color: #7dd3fc; text-shadow: 0 0 12px rgba(45,212,191,.5); z-index: 10; }
+  #clock { position: absolute; top: max(18px, env(safe-area-inset-top)); left: 22px; font-size: 44px; font-weight: 800; letter-spacing: 2px; color: #e2f5ff; }
+  #clock small { font-size: 18px; color: #2dd4bf; }
+  #date { position: absolute; top: calc(max(18px, env(safe-area-inset-top)) + 52px); left: 24px; font-size: 12px; letter-spacing: 3px; color: #5eead4; text-transform: uppercase; }
+  #status { position: absolute; top: max(18px, env(safe-area-inset-top)); right: 22px; text-align: right; font-size: 11px; line-height: 1.8; letter-spacing: 1px; color: #7dd3fc; }
+  #status .on { color: #2dd4bf; }
+  #state-label { position: absolute; bottom: max(20px, env(safe-area-inset-bottom)); left: 22px; font-size: 10px; letter-spacing: 4px; color: #38bdf8; text-transform: uppercase; opacity: .85; }
+  #wordmark { position: absolute; bottom: max(20px, env(safe-area-inset-bottom)); right: 22px; font-size: 10px; letter-spacing: 3px; color: #334155; }
+
+  /* ===== Controles (doble tap) ===== */
+  #controls { position: fixed; bottom: max(64px, calc(env(safe-area-inset-bottom) + 64px)); left: 50%; transform: translateX(-50%) translateY(12px); opacity: 0; pointer-events: none; transition: all .35s ease; z-index: 20; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 92vw; }
+  #controls.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+  .ctl { background: rgba(8, 47, 73, .55); border: 1px solid rgba(45, 212, 191, .45); color: #ccfbf1; font: 700 12px ui-monospace, monospace; letter-spacing: 1px; padding: 10px 14px; border-radius: 12px; cursor: pointer; backdrop-filter: blur(8px); text-decoration: none; }
+  .ctl:active { background: rgba(45, 212, 191, .35); }
+  .ctl.gold { border-color: rgba(255, 215, 0, .5); color: #fde68a; }
+
+  #hint { position: fixed; top: 50%; left: 50%; transform: translateX(-50%); color: #0e7490; font-size: 11px; letter-spacing: 2px; z-index: 5; pointer-events: none; opacity: .9; }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div id="hud">
+  <div id="clock">--:--</div>
+  <div id="date">CARGANDO…</div>
+  <div id="status">
+    <div>🔋 <span id="batt">--%</span></div>
+    <div>📍 <span id="loc">GPS OFF</span></div>
+    <div>🧠 <span id="brain">STANDBY</span></div>
+  </div>
+  <div id="state-label">● PRESENCIA PASIVA</div>
+  <div id="wordmark">MYL ACCENTBRIDGES</div>
+</div>
+
+<div id="hint">doble tap = controles</div>
+
+<div id="controls">
+  <button class="ctl" id="btn-mat">✦ MATERIALIZAR</button>
+  <button class="ctl" id="btn-demo">▶ DEMO 3s</button>
+  <button class="ctl" id="btn-gps">📍 GPS</button>
+  <button class="ctl gold" onclick="window.open('https://babayaba71-maker.github.io/AccentBridges/ar-labeler.html','_blank')">🔭 AR LABELER</button>
+  <button class="ctl gold" onclick="window.open('https://valerie.base44.app/functions/valerieCall','_blank')">🎙️ /CALL</button>
+</div>
+
+<script>
+/* ============================================================
+   VALERIE 3 — HOLOGRAM WALLPAPER v0.1
+   Estados: passive → materializing (3s) → active → dematerializing (2.5s) → passive
+   Orb respirando + partículas orbitales + silueta de partículas + wordmark
+   ============================================================ */
+const cv = document.getElementById("cv");
+const ctx = cv.getContext("2d");
+let W = 0, H = 0, DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+function resize() {
+  W = window.innerWidth; H = window.innerHeight;
+  cv.width = W * DPR; cv.height = H * DPR;
+  cv.style.width = W + "px"; cv.style.height = H + "px";
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+window.addEventListener("resize", resize);
+resize();
+
+/* ---- Puntos objetivo: silueta femenina (cabeza + hombros) muestreada ---- */
+function buildSilhouette() {
+  const off = document.createElement("canvas");
+  off.width = 300; off.height = 400;
+  const c = off.getContext("2d");
+  c.fillStyle = "#fff";
+  // cabeza
+  c.beginPath(); c.arc(150, 105, 62, 0, Math.PI * 2); c.fill();
+  // cuello
+  c.fillRect(132, 150, 36, 34);
+  // hombros y torso
+  c.beginPath();
+  c.moveTo(150, 175);
+  c.bezierCurveTo(85, 190, 48, 235, 42, 330);
+  c.lineTo(42, 400); c.lineTo(258, 400); c.lineTo(258, 330);
+  c.bezierCurveTo(252, 235, 215, 190, 150, 175);
+  c.fill();
+  const data = c.getImageData(0, 0, 300, 400).data;
+  const pts = [];
+  for (let y = 0; y < 400; y += 7) {
+    for (let x = 0; x < 300; x += 7) {
+      if (data[(y * 300 + x) * 4 + 3] > 128) pts.push([x, y]);
+    }
+  }
+  return pts;
+}
+const SIL = buildSilhouette();
+
+/* ---- Partículas ---- */
+const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+const N = isMobile ? 130 : 200;
+const P = [];
+function rnd(a, b) { return a + Math.random() * (b - a); }
+
+for (let i = 0; i < N; i++) {
+  const ang = Math.random() * Math.PI * 2;
+  const rad = rnd(60, Math.max(W, H) * .55);
+  P.push({
+    hx: 0, hy: 0,                 // home (se recalcula al usar)
+    x: 0, y: 0,
+    ox: Math.cos(ang) * rad, oy: Math.sin(ang) * rad, // órbita pasiva
+    oang: rnd(0.02, 0.09) * (Math.random() < .5 ? 1 : -1),
+    oph: rnd(0, Math.PI * 2),
+    orad: rad,
+    size: rnd(.7, 2.4),
+    hue: Math.random() < .12 ? 48 : rnd(165, 195),  // 12% doradas, resto turquesa/cyan
+    tw: rnd(0.5, 1.6),
+    tgt: SIL[i % SIL.length]
+  });
+}
+
+/* ---- Máquina de estados ---- */
+const S = { PASSIVE: 0, MAT: 1, ACTIVE: 2, DEMAT: 3 };
+let state = S.PASSIVE, stateT = 0, matHold = 0;
+const stateEl = document.getElementById("state-label");
+function setState(s) {
+  state = s; stateT = 0;
+  stateEl.textContent = s === S.PASSIVE ? "● PRESENCIA PASIVA"
+    : s === S.MAT ? "◉ MATERIALIZANDO…"
+    : s === S.ACTIVE ? "★ VALERIE PRESENTE"
+    : "◌ DESVANECIENDO…";
+}
+
+/* ---- Loop ---- */
+let last = performance.now(), tGlobal = 0;
+function orb() { return { x: W / 2, y: H / 2 }; }
+const easeIO = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+function frame(now) {
+  const dt = Math.min((now - last) / 1000, .05); last = now;
+  tGlobal += dt; stateT += dt;
+  const o = orb();
+
+  // fondo: espacio profundo + nebulosa sutil
+  ctx.fillStyle = "#020617";
+  ctx.fillRect(0, 0, W, H);
+  const neb = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, Math.max(W, H) * .75);
+  neb.addColorStop(0, "rgba(12, 74, 110, 0.35)");
+  neb.addColorStop(.45, "rgba(8, 47, 73, 0.14)");
+  neb.addColorStop(1, "rgba(2, 6, 23, 0)");
+  ctx.fillStyle = neb;
+  ctx.fillRect(0, 0, W, H);
+
+  // estrellas fijas tenues
+  ctx.fillStyle = "rgba(148, 163, 184, 0.25)";
+  for (let i = 0; i < 60; i++) {
+    const sx = (i * 977) % W, sy = (i * 613) % H;
+    ctx.fillRect(sx, sy, 1, 1);
+  }
+
+  const breath = 1 + Math.sin(tGlobal * 1.05) * 0.06;
+  const orbR = Math.min(W, H) * 0.085 * breath;
+
+  // orbe respirando (más intenso al materializar)
+  const matBoost = state === S.MAT ? 1 + easeIO(Math.min(stateT / 3, 1)) * 0.5 : 1;
+  const g = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, orbR * 2.2 * matBoost);
+  g.addColorStop(0, "rgba(204, 251, 241, 0.95)");
+  g.addColorStop(.25, "rgba(45, 212, 191, 0.55)");
+  g.addColorStop(.6, "rgba(14, 116, 144, 0.22)");
+  g.addColorStop(1, "rgba(2, 6, 23, 0)");
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.arc(o.x, o.y, orbR * 2.2 * matBoost, 0, Math.PI * 2); ctx.fill();
+
+  // ---- partículas ----
+  const silScale = Math.min(W / 340, H / 460) * 0.95;
+  const silOffX = o.x - 150 * silScale;
+  const silOffY = o.y - 200 * silScale;
+
+  for (const p of P) {
+    let tx, ty;
+    if (state === S.PASSIVE) {
+      // órbita libre alrededor del orbe
+      p.oph += p.oang * dt;
+      const rr = p.orad * (0.92 + Math.sin(tGlobal * 0.4 + p.oph) * 0.08);
+      tx = o.x + Math.cos(p.oph) * rr;
+      ty = o.y + Math.sin(p.oph) * rr * 0.92;
+    } else if (state === S.MAT) {
+      const k = easeIO(Math.min(stateT / 3, 1));
+      const gx = silOffX + p.tgt[0] * silScale + Math.sin(tGlobal * 3 + p.oph) * (1 - k) * 30;
+      const gy = silOffY + p.tgt[1] * silScale + Math.cos(tGlobal * 3 + p.oph) * (1 - k) * 30;
+      tx = p.x + (gx - p.x) * (k * 0.9 + 0.04);
+      ty = p.y + (gy - p.y) * (k * 0.9 + 0.04);
+    } else if (state === S.ACTIVE) {
+      // shimmer alrededor de su punto de silueta
+      const gx = silOffX + p.tgt[0] * silScale;
+      const gy = silOffY + p.tgt[1] * silScale;
+      tx = gx + Math.sin(tGlobal * 1.4 + p.oph) * 2.2;
+      ty = gy + Math.cos(tGlobal * 1.1 + p.oph) * 2.2;
+    } else { // DEMAT
+      const k = easeIO(Math.min(stateT / 2.5, 1));
+      p.oph += p.oang * dt * 4;
+      const rr = p.orad * k;
+      tx = o.x + Math.cos(p.oph) * rr;
+      ty = o.y + Math.sin(p.oph) * rr * 0.92;
+    }
+    p.x += (tx - p.x) * (state === S.PASSIVE ? 0.05 : 0.18);
+    p.y += (ty - p.y) * (state === S.PASSIVE ? 0.05 : 0.18);
+
+    const tw = 0.55 + Math.sin(tGlobal * p.tw * 2.5 + p.oph) * 0.45;
+    const alpha = (state === S.ACTIVE ? 0.85 : 0.6) * tw;
+    ctx.fillStyle = p.hue === 48 ? `rgba(255, 215, 0, ${alpha})` : `rgba(103, 232, 249, ${alpha})`;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * (state === S.ACTIVE ? 1.15 : 1), 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // ---- wordmark durante ACTIVE ----
+  if (state === S.ACTIVE || (state === S.MAT && stateT > 2.2)) {
+    const k = state === S.MAT ? Math.min((stateT - 2.2) / 0.8, 1) : 1;
+    ctx.save();
+    ctx.globalAlpha = k;
+    ctx.font = "800 " + Math.max(18, Math.min(W * 0.06, 34)) + "px ui-monospace, monospace";
+    ctx.textAlign = "center";
+    ctx.shadowColor = "rgba(45,212,191,.9)"; ctx.shadowBlur = 22;
+    ctx.fillStyle = "#ccfbf1";
+    ctx.fillText("V A L E R I E", o.x, silOffY + 400 * silScale + 34);
+    ctx.shadowBlur = 0;
+    ctx.font = "600 10px ui-monospace, monospace";
+    ctx.fillStyle = "#5eead4";
+    ctx.fillText("T U   G U Í A   D E   V O Z   •   2 4 / 7", o.x, silOffY + 400 * silScale + 52);
+    ctx.restore();
+  }
+
+  // flash al completar materialización
+  if (state === S.MAT && stateT >= 3) setState(S.ACTIVE);
+  if (state === S.DEMAT && stateT >= 2.5) setState(S.PASSIVE);
+
+  requestAnimationFrame(frame);
+}
+
+// posiciones iniciales
+for (const p of P) { p.x = o.x + p.ox * 0.3; p.y = o.y + p.oy * 0.3; }
+requestAnimationFrame(frame);
+
+/* ---- Controles: doble tap ---- */
+const controls = document.getElementById("controls");
+let lastTap = 0;
+document.addEventListener("touchend", e => {
+  const t = performance.now();
+  if (t - lastTap < 350) {
+    controls.classList.toggle("show");
+    setTimeout(() => document.getElementById("hint").style.display = "none", 100);
+  }
+  lastTap = t;
+});
+document.addEventListener("dblclick", () => controls.classList.toggle("show"));
+
+document.getElementById("btn-mat").addEventListener("click", () => {
+  if (state === S.PASSIVE) setState(S.MAT);
+  else if (state === S.ACTIVE) setState(S.DEMAT);
+  controls.classList.remove("show");
+});
+document.getElementById("btn-demo").addEventListener("click", () => {
+  controls.classList.remove("show");
+  if (state !== S.PASSIVE) { setState(S.DEMAT); matHold = 1; }
+  setState(S.MAT);
+});
+
+/* ---- GPS ---- */
+document.getElementById("btn-gps").addEventListener("click", () => {
+  const locEl = document.getElementById("loc");
+  locEl.textContent = "BUSCANDO…";
+  if (!navigator.geolocation) { locEl.textContent = "NO DISPONIBLE"; return; }
+  navigator.geolocation.getCurrentPosition(async pos => {
+    const { latitude: la, longitude: lo } = pos.coords;
+    locEl.textContent = la.toFixed(3) + ", " + lo.toFixed(3);
+    locEl.parentElement.classList.add("on");
+    try {
+      const r = await fetch("https://nominatim.openstreetmap.org/reverse?format=json&lat=" + la + "&lon=" + lo + "&zoom=10", { headers: { "Accept": "application/json" } });
+      const j = await r.json();
+      const city = j.address?.city || j.address?.town || j.address?.village || j.address?.state || "—";
+      locEl.textContent = (city + "").toUpperCase();
+    } catch (e) { /* se queda con coords */ }
+  }, () => { locEl.textContent = "DENEGADO"; }, { timeout: 8000 });
+});
+
+/* ---- Batería ---- */
+if (navigator.getBattery) {
+  navigator.getBattery().then(b => {
+    const upd = () => document.getElementById("batt").textContent = Math.round(b.level * 100) + "%";
+    upd(); b.addEventListener("levelchange", upd);
+  });
+}
+
+/* ---- Reloj ---- */
+const DIAS = ["DOMINGO", "LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO"];
+const MES = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
+function tick() {
+  const d = new Date();
+  const h = String(d.getHours()).padStart(2, "0");
+  const m = String(d.getMinutes()).padStart(2, "0");
+  document.getElementById("clock").innerHTML = h + ":" + m + " <small>" + (d.getHours() >= 12 ? "PM" : "AM") + "</small>";
+  document.getElementById("date").textContent = DIAS[d.getDay()] + " • " + d.getDate() + " " + MES[d.getMonth()];
+}
+tick(); setInterval(tick, 10000);
+
+/* ---- Auto-materialización de bienvenida (4s después de abrir) ---- */
+setTimeout(() => { if (state === S.PASSIVE) setState(S.MAT); }, 4000);
+setTimeout(() => { if (state === S.ACTIVE) setState(S.DEMAT); }, 16000);
+</script>
+</body>
+</html>
