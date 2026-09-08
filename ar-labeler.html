@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Tri-Lingual Live AR Labeler — AccentBridges</title>
-  <!-- v1.4 bifocal -->
+  <!-- v1.4.1 bifocal + estabilizador -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     html, body { margin: 0; padding: 0; background: #020617; overflow: hidden; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
@@ -388,7 +388,7 @@ async function initDetector() {
         modelAssetPath: "https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite",
         delegate: "GPU"
       },
-      scoreThreshold: LITE ? 0.6 : 0.5,
+      scoreThreshold: LITE ? 0.6 : 0.55,
       runningMode: "VIDEO"
     });
   } catch (e) {
@@ -399,7 +399,7 @@ async function initDetector() {
           modelAssetPath: "https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite",
           delegate: "CPU"
         },
-        scoreThreshold: LITE ? 0.6 : 0.5, runningMode: "VIDEO"
+        scoreThreshold: LITE ? 0.6 : 0.55, runningMode: "VIDEO"
       });
     } catch (e2) {
       document.getElementById("loading-overlay").innerHTML =
@@ -455,7 +455,9 @@ function renderLoop() {
     lastVideoTime = video.currentTime;
     try {
       const result = detector.detectForVideo(video, now);
-      processDetections(result.detections);
+      // 🛡️ Estabilizador temporal (v1.4.1): una clase debe aparecer 2 inferencias
+      // consecutivas antes de etiquetarse — mata el parpadeo (gato→jirafa→oso) en baja luz.
+      processDetections(filterStable(result.detections));
     } catch (e) { /* frame skip */ }
   }
   requestAnimationFrame(renderLoop);
@@ -463,6 +465,19 @@ function renderLoop() {
 
 /* ===== Procesar detecciones ===== */
 let lastSig = "";
+/* ===== 🛡️ Estabilizador temporal anti-parpadeo (v1.4.1) ===== */
+const classStreaks = new Map(); // raw -> apariciones consecutivas
+function filterStable(dets) {
+  const present = new Set(dets.map(d => (d.categories[0].categoryName || "").toLowerCase()));
+  for (const k of classStreaks.keys()) {
+    if (!present.has(k)) classStreaks.set(k, 0); // se fue de escena → reset
+  }
+  for (const raw of present) {
+    classStreaks.set(raw, (classStreaks.get(raw) || 0) + 1);
+  }
+  return dets.filter(d => classStreaks.get((d.categories[0].categoryName || "").toLowerCase()) >= 2);
+}
+
 function processDetections(detections) {
   lastDetections = detections;
   // Firma de escena: si nada cambio, NO reconstruir el DOM (menos RAM/GC en gamas bajas)
