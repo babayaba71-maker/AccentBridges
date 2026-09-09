@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="hologram-icon-512.png">
 <title>Valerie 3 — Hologram Wallpaper</title>
-<!-- v0.1.2 hologram — orb + particles + materialización + HUD + ecosistema -->
+<!-- v0.1.3 hologram — orb + particles + materialización + HUD + ecosistema -->
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { width: 100%; height: 100%; overflow: hidden; background: #020617; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
@@ -46,6 +46,7 @@
     <div>🔋 <span id="batt">--%</span></div>
     <div>📍 <span id="loc">GPS OFF</span></div>
     <div>🧠 <span id="brain">STANDBY</span></div>
+    <div>🔊 <span id="aud">OFF</span></div>
   </div>
   <div id="state-label">● PRESENCIA PASIVA</div>
   <div id="wordmark">MYL ACCENTBRIDGES</div>
@@ -59,6 +60,7 @@
   <button class="ctl" id="btn-gps">📍 GPS</button>
   <button class="ctl gold" onclick="window.open('https://babayaba71-maker.github.io/AccentBridges/ar-labeler.html','_blank')">🔭 AR LABELER</button>
   <button class="ctl gold" onclick="window.open('https://valerie.base44.app/functions/valerieCall','_blank')">🎙️ /CALL</button>
+  <button class="ctl" id="btn-snd">🔊 SONIDO</button>
 </div>
 
 <script>
@@ -137,6 +139,8 @@ let state = S.PASSIVE, stateT = 0, matHold = 0;
 const stateEl = document.getElementById("state-label");
 function setState(s) {
   state = s; stateT = 0;
+  if (s === S.MAT) matSound();
+  if (s === S.DEMAT) dematSound();
   stateEl.textContent = s === S.PASSIVE ? "● PRESENCIA PASIVA"
     : s === S.MAT ? "◉ MATERIALIZANDO…"
     : s === S.ACTIVE ? "★ VALERIE PRESENTE"
@@ -255,18 +259,147 @@ const o0 = orb();
 for (const p of P) { p.x = o0.x + p.ox * 0.3; p.y = o0.y + p.oy * 0.3; }
 requestAnimationFrame(frame);
 
+/* ============================================================
+   AUDIO ENGINE — sintetizado en vivo (Web Audio, 0 archivos)
+   Hum de nave que respira + sweep de materializacion + power-down
+   Regla del navegador: el audio despierta con el primer toque
+   ============================================================ */
+let AC = null, master = null, amb = null, soundOn = true;
+
+function initAudio() {
+  if (AC) { if (AC.state === "suspended") AC.resume(); return; }
+  try {
+    AC = new (window.AudioContext || window.webkitAudioContext)();
+    master = AC.createGain(); master.gain.value = 0.4; master.connect(AC.destination);
+    startAmbient();
+  } catch (e) { AC = null; }
+  updAudHUD();
+}
+
+function updAudHUD() {
+  const el = document.getElementById("aud");
+  if (!el) return;
+  el.textContent = (AC && soundOn) ? "ON" : "OFF";
+  el.parentElement.className = (AC && soundOn) ? "on" : "";
+}
+
+function startAmbient() {
+  if (!AC || amb) return;
+  const t = AC.currentTime;
+  const g = AC.createGain(); g.gain.value = 0;
+  const lp = AC.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 240;
+  lp.connect(g); g.connect(master);
+  const o1 = AC.createOscillator(); o1.type = "sine"; o1.frequency.value = 55; o1.connect(lp); o1.start(t);
+  const o2 = AC.createOscillator(); o2.type = "triangle"; o2.frequency.value = 110.7;
+  const g2 = AC.createGain(); g2.gain.value = 0.35; o2.connect(g2); g2.connect(lp); o2.start(t);
+  const lfo = AC.createOscillator(); lfo.frequency.value = 1.05; // sincronizado con el breath del orbe
+  const lfoG = AC.createGain(); lfoG.gain.value = 0.04;
+  lfo.connect(lfoG); lfoG.connect(g.gain); lfo.start(t);
+  g.gain.linearRampToValueAtTime(0.09, t + 2.5);
+  amb = { g, lfo, o1, o2 };
+}
+
+function stopAmbient() {
+  if (!AC || !amb) return;
+  const t = AC.currentTime;
+  amb.g.gain.linearRampToValueAtTime(0.0001, t + 0.6);
+  const a = amb; amb = null;
+  setTimeout(() => { try { a.o1.stop(); a.o2.stop(); a.lfo.stop(); } catch (e) {} }, 700);
+}
+
+function matSound() {
+  if (!AC || !soundOn) return;
+  const t = AC.currentTime;
+  const o = AC.createOscillator(); o.type = "sawtooth";
+  o.frequency.setValueAtTime(140, t);
+  o.frequency.exponentialRampToValueAtTime(880, t + 2.7);
+  const f = AC.createBiquadFilter(); f.type = "lowpass";
+  f.frequency.setValueAtTime(300, t);
+  f.frequency.exponentialRampToValueAtTime(2400, t + 2.7);
+  const g = AC.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.12, t + 0.4);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 3.0);
+  o.connect(f); f.connect(g); g.connect(master);
+  o.start(t); o.stop(t + 3.1);
+  for (let i = 0; i < 10; i++) {
+    const bl = AC.createOscillator(); bl.type = "sine";
+    const fr = 1200 + Math.random() * 2400;
+    const st = t + 0.3 + Math.random() * 2.4;
+    bl.frequency.setValueAtTime(fr, st);
+    bl.frequency.exponentialRampToValueAtTime(fr * 1.6, st + 0.18);
+    const bg = AC.createGain();
+    bg.gain.setValueAtTime(0.0001, st);
+    bg.gain.exponentialRampToValueAtTime(0.05, st + 0.02);
+    bg.gain.exponentialRampToValueAtTime(0.0001, st + 0.35);
+    bl.connect(bg); bg.connect(master);
+    bl.start(st); bl.stop(st + 0.4);
+  }
+  [523.25, 659.25, 783.99].forEach((fr, i) => {
+    const c = AC.createOscillator(); c.type = "sine"; c.frequency.value = fr;
+    const cg = AC.createGain();
+    const st = t + 2.7 + i * 0.06;
+    cg.gain.setValueAtTime(0.0001, st);
+    cg.gain.exponentialRampToValueAtTime(0.09 / (i + 1), st + 0.05);
+    cg.gain.exponentialRampToValueAtTime(0.0001, st + 1.4);
+    c.connect(cg); cg.connect(master);
+    c.start(st); c.stop(st + 1.5);
+  });
+}
+
+function dematSound() {
+  if (!AC || !soundOn) return;
+  const t = AC.currentTime;
+  const o = AC.createOscillator(); o.type = "sawtooth";
+  o.frequency.setValueAtTime(700, t);
+  o.frequency.exponentialRampToValueAtTime(90, t + 2.2);
+  const f = AC.createBiquadFilter(); f.type = "lowpass";
+  f.frequency.setValueAtTime(2200, t);
+  f.frequency.exponentialRampToValueAtTime(200, t + 2.2);
+  const g = AC.createGain();
+  g.gain.setValueAtTime(0.1, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 2.3);
+  o.connect(f); f.connect(g); g.connect(master);
+  o.start(t); o.stop(t + 2.4);
+  const p = AC.createOscillator(); p.type = "sine";
+  p.frequency.setValueAtTime(220, t + 1.8);
+  p.frequency.exponentialRampToValueAtTime(55, t + 2.3);
+  const pg = AC.createGain();
+  pg.gain.setValueAtTime(0.0001, t + 1.8);
+  pg.gain.exponentialRampToValueAtTime(0.08, t + 1.9);
+  pg.gain.exponentialRampToValueAtTime(0.0001, t + 2.5);
+  p.connect(pg); pg.connect(master);
+  p.start(t + 1.8); p.stop(t + 2.6);
+}
+
+function blip() {
+  if (!AC || !soundOn) return;
+  const t = AC.currentTime;
+  const o = AC.createOscillator(); o.type = "sine";
+  o.frequency.setValueAtTime(660, t);
+  o.frequency.exponentialRampToValueAtTime(990, t + 0.06);
+  const g = AC.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.07, t + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+  o.connect(g); g.connect(master);
+  o.start(t); o.stop(t + 0.15);
+}
+
 /* ---- Controles: doble tap ---- */
 const controls = document.getElementById("controls");
 let lastTap = 0;
 document.addEventListener("touchend", e => {
+  initAudio();
   const t = performance.now();
   if (t - lastTap < 350) {
     controls.classList.toggle("show");
+    blip();
     setTimeout(() => document.getElementById("hint").style.display = "none", 100);
   }
   lastTap = t;
 });
-document.addEventListener("dblclick", () => controls.classList.toggle("show"));
+document.addEventListener("dblclick", () => { initAudio(); controls.classList.toggle("show"); blip(); });
 
 document.getElementById("btn-mat").addEventListener("click", () => {
   if (state === S.PASSIVE) setState(S.MAT);
@@ -274,13 +407,14 @@ document.getElementById("btn-mat").addEventListener("click", () => {
   controls.classList.remove("show");
 });
 document.getElementById("btn-demo").addEventListener("click", () => {
-  controls.classList.remove("show");
+  controls.classList.remove("show"); blip();
   if (state !== S.PASSIVE) { setState(S.DEMAT); matHold = 1; }
   setState(S.MAT);
 });
 
 /* ---- GPS ---- */
 document.getElementById("btn-gps").addEventListener("click", () => {
+  blip();
   const locEl = document.getElementById("loc");
   locEl.textContent = "BUSCANDO…";
   if (!navigator.geolocation) { locEl.textContent = "NO DISPONIBLE"; return; }
@@ -316,6 +450,14 @@ function tick() {
   document.getElementById("date").textContent = DIAS[d.getDay()] + " • " + d.getDate() + " " + MES[d.getMonth()];
 }
 tick(); setInterval(tick, 10000);
+
+/* ---- Toggle de sonido ---- */
+document.getElementById("btn-snd").addEventListener("click", () => {
+  initAudio();
+  soundOn = !soundOn;
+  if (soundOn) { startAmbient(); blip(); } else { stopAmbient(); }
+  updAudHUD();
+});
 
 /* ---- Auto-materialización de bienvenida (4s después de abrir) ---- */
 setTimeout(() => { if (state === S.PASSIVE) setState(S.MAT); }, 4000);
