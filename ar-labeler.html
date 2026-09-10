@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Tri-Lingual Live AR Labeler — AccentBridges</title>
-  <!-- v1.5 person mode (ancla sujeto I/You) + bifocal + estabilizador -->
+  <!-- v1.6 person mode duo (YOU ustedes / WE nosotros) + ancla sujeto I/You + bifocal + estabilizador -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     html, body { margin: 0; padding: 0; background: #020617; overflow: hidden; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
@@ -488,6 +488,11 @@ function filterStable(dets) {
 }
 
 function processDetections(detections) {
+  // 👤 v1.6: contar personas en el frame (para modo USTEDES/WE)
+  window.__framePersonCount = 0;
+  try {
+    detections.forEach(d => { if (((d.categories[0].categoryName) || "").toLowerCase() === "person") window.__framePersonCount++; });
+  } catch (e) {}
   lastDetections = detections;
   // Firma de escena: si nada cambio, NO reconstruir el DOM (menos RAM/GC en gamas bajas)
   const sig = detections.map(d => d.categories[0].categoryName + Math.round(d.boundingBox.originX/12) + "," + Math.round(d.boundingBox.originY/12) + "," + Math.round(d.boundingBox.width/12) + "," + Math.round(d.boundingBox.height/12)).join("|") + "|" + langMode + "|" + heatmapOn;
@@ -640,7 +645,8 @@ function speakStep(text, lang, rate) {
 }
 
 function personAnchorLesson() {
-  if (!studentName && !window.__nameAsked) {
+  const duo = (window.__framePersonCount || 1) >= 2;
+  if (!duo && !studentName && !window.__nameAsked) {
     window.__nameAsked = true;
     try {
       const n = prompt("👤 ¿Cómo te llamas? (para tu lección personalizada)");
@@ -651,10 +657,18 @@ function personAnchorLesson() {
   const el = document.getElementById("person-lesson") || document.createElement("div");
   el.id = "person-lesson";
   el.className = "person-lesson";
-  let html = '<div class="pl-title">👤 PERSON MODE — EL ANCLA SUJETO</div>';
-  html += '<div class="pl-row">La persona frente a ti = <b>YOU</b> /juː/ — <b>"iu"</b> — tú</div>';
-  html += '<div class="pl-row">¿Y tú quién eres? = <b>I</b> /aɪ/ — <b>"ai"</b></div>';
-  html += '<div class="pl-drill">Repite conmigo:<br>🔊 <b>"ai"</b> → <b>"ai em"</b> → <b>"ai em ' + name.toUpperCase() + '"</b></div>';
+  let html;
+  if (duo) {
+    html = '<div class="pl-title">👥 PERSON MODE — ¡USTEDES!</div>';
+    html += '<div class="pl-row">Las personas frente a ti = <b>YOU</b> /juː/ — <b>"iu"</b> — ustedes<br><i>¡la misma palabra para uno o para diez!</i></div>';
+    html += '<div class="pl-row">¿Y si TÚ te unes a ellos? = <b>WE</b> /wiː/ — <b>"ui"</b> — nosotros</div>';
+    html += '<div class="pl-drill">Repite conmigo:<br>🔊 <b>"iu ar"</b> → <b>"ui ar"</b> → <b>"ui ar jir"</b> (we are here)</div>';
+  } else {
+    html = '<div class="pl-title">👤 PERSON MODE — EL ANCLA SUJETO</div>';
+    html += '<div class="pl-row">La persona frente a ti = <b>YOU</b> /juː/ — <b>"iu"</b> — tú</div>';
+    html += '<div class="pl-row">¿Y tú quién eres? = <b>I</b> /aɪ/ — <b>"ai"</b></div>';
+    html += '<div class="pl-drill">Repite conmigo:<br>🔊 <b>"ai"</b> → <b>"ai em"</b> → <b>"ai em ' + name.toUpperCase() + '"</b></div>';
+  }
   html += '<div class="pl-hint">👆 Toca esta tarjeta para repetir la lección</div>';
   el.innerHTML = html;
   if (!el.parentNode) document.body.appendChild(el);
@@ -664,14 +678,25 @@ function personAnchorLesson() {
 
   if (LITE) return; // en Lite la voz es bajo demanda (protección RAM)
   try { speechSynthesis.cancel(); } catch (e) {}
-  speakStep("Person.", "en-US", 0.88);
-  setTimeout(() => speakStep("Persona. ¿Quién es? Es YOU. Iu. Tú.", "es-MX", 0.95), 1100);
-  setTimeout(() => speakStep("¿Y tú, quién eres? Tú eres I. Ai.", "es-MX", 0.95), 3800);
-  setTimeout(() => speakStep("Repite conmigo:", "es-MX", 0.95), 6300);
-  setTimeout(() => speakStep("I", "en-US", 0.8), 7300);
-  setTimeout(() => speakStep("ai em", "es-MX", 0.9), 8500);
-  setTimeout(() => speakStep("I am " + (studentName || "here") + ".", "en-US", 0.82), 9900);
-  toast("👤 La persona es YOU... y TÚ eres I! Repite: ai em");
+  if (duo) {
+    speakStep("Person. And person.", "en-US", 0.88);
+    setTimeout(() => speakStep("Dos personas frente a ti. YOU. Iu. ¡Ustedes! La misma palabra sirve para uno... o para diez.", "es-MX", 0.95), 1300);
+    setTimeout(() => speakStep("¿Y si tú te unes a ellos? WE. Ui. Nosotros.", "es-MX", 0.95), 5300);
+    setTimeout(() => speakStep("Repite conmigo:", "es-MX", 0.95), 7300);
+    setTimeout(() => speakStep("You are.", "en-US", 0.82), 8300);
+    setTimeout(() => speakStep("We are.", "en-US", 0.82), 9500);
+    setTimeout(() => speakStep("We are here.", "en-US", 0.82), 10700);
+    toast("👥 ¡Ustedes son YOU... y todos juntos son WE! Repite: ui ar jir");
+  } else {
+    speakStep("Person.", "en-US", 0.88);
+    setTimeout(() => speakStep("Persona. ¿Quién es? Es YOU. Iu. Tú.", "es-MX", 0.95), 1100);
+    setTimeout(() => speakStep("¿Y tú, quién eres? Tú eres I. Ai.", "es-MX", 0.95), 3800);
+    setTimeout(() => speakStep("Repite conmigo:", "es-MX", 0.95), 6300);
+    setTimeout(() => speakStep("I", "en-US", 0.8), 7300);
+    setTimeout(() => speakStep("ai em", "es-MX", 0.9), 8500);
+    setTimeout(() => speakStep("I am " + (studentName || "here") + ".", "en-US", 0.82), 9900);
+    toast("👤 La persona es YOU... y TÚ eres I! Repite: ai em");
+  }
 }
 
 /* ===== Botones ===== */
