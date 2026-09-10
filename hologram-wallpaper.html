@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="hologram-icon-512.png">
 <title>Valerie 3 — Hologram Wallpaper</title>
-<!-- v0.1.3 hologram — orb + particles + materialización + HUD + ecosistema -->
+<!-- v0.1.4 hologram — orb + particles + materialización + HUD + ecosistema -->
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { width: 100%; height: 100%; overflow: hidden; background: #020617; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
@@ -82,26 +82,31 @@ function resize() {
 window.addEventListener("resize", resize);
 resize();
 
-/* ---- Puntos objetivo: silueta femenina (cabeza + hombros) muestreada ---- */
+/* ---- Puntos objetivo: silueta de Valerie — cabello largo lacio con
+   raya al medio cayendo sobre los hombros, óvalo de cara, cuello alto
+   recto (turtleneck). Referencia: foto enviada por JJ 10-sep-2026. ---- */
 function buildSilhouette() {
   const off = document.createElement("canvas");
-  off.width = 300; off.height = 400;
+  off.width = 300; off.height = 470;
   const c = off.getContext("2d");
   c.fillStyle = "#fff";
-  // cabeza
-  c.beginPath(); c.arc(150, 105, 62, 0, Math.PI * 2); c.fill();
+  // volumen principal cabeza + cabello (más alto/ovalado que un círculo simple)
+  c.beginPath(); c.ellipse(150, 125, 76, 96, 0, 0, Math.PI * 2); c.fill();
+  // mechones largos cayendo sobre los hombros (izquierda / derecha)
+  c.beginPath(); c.ellipse(64, 292, 32, 142, 0.12, 0, Math.PI * 2); c.fill();
+  c.beginPath(); c.ellipse(236, 292, 32, 142, -0.12, 0, Math.PI * 2); c.fill();
   // cuello
-  c.fillRect(132, 150, 36, 34);
-  // hombros y torso
+  c.fillRect(128, 196, 44, 32);
+  // hombros / cuello de tortuga — líneas rectas, poco ensanche (no trapezoide abierto)
   c.beginPath();
-  c.moveTo(150, 175);
-  c.bezierCurveTo(85, 190, 48, 235, 42, 330);
-  c.lineTo(42, 400); c.lineTo(258, 400); c.lineTo(258, 330);
-  c.bezierCurveTo(252, 235, 215, 190, 150, 175);
+  c.moveTo(150, 216);
+  c.bezierCurveTo(100, 223, 62, 252, 55, 322);
+  c.lineTo(55, 470); c.lineTo(245, 470); c.lineTo(245, 322);
+  c.bezierCurveTo(238, 252, 200, 223, 150, 216);
   c.fill();
-  const data = c.getImageData(0, 0, 300, 400).data;
+  const data = c.getImageData(0, 0, 300, 470).data;
   const pts = [];
-  for (let y = 0; y < 400; y += 7) {
+  for (let y = 0; y < 470; y += 7) {
     for (let x = 0; x < 300; x += 7) {
       if (data[(y * 300 + x) * 4 + 3] > 128) pts.push([x, y]);
     }
@@ -188,9 +193,9 @@ function frame(now) {
   ctx.beginPath(); ctx.arc(o.x, o.y, orbR * 2.2 * matBoost, 0, Math.PI * 2); ctx.fill();
 
   // ---- partículas ----
-  const silScale = Math.min(W / 340, H / 460) * 0.95;
+  const silScale = Math.min(W / 340, H / 530) * 0.95;
   const silOffX = o.x - 150 * silScale;
-  const silOffY = o.y - 200 * silScale;
+  const silOffY = o.y - 235 * silScale;
 
   for (const p of P) {
     let tx, ty;
@@ -239,11 +244,11 @@ function frame(now) {
     ctx.textAlign = "center";
     ctx.shadowColor = "rgba(45,212,191,.9)"; ctx.shadowBlur = 22;
     ctx.fillStyle = "#ccfbf1";
-    ctx.fillText("V A L E R I E", o.x, silOffY + 400 * silScale + 34);
+    ctx.fillText("V A L E R I E", o.x, silOffY + 470 * silScale + 34);
     ctx.shadowBlur = 0;
     ctx.font = "600 10px ui-monospace, monospace";
     ctx.fillStyle = "#5eead4";
-    ctx.fillText("T U   G U Í A   D E   V O Z   •   2 4 / 7", o.x, silOffY + 400 * silScale + 52);
+    ctx.fillText("T U   G U Í A   D E   V O Z   •   2 4 / 7", o.x, silOffY + 470 * silScale + 52);
     ctx.restore();
   }
 
