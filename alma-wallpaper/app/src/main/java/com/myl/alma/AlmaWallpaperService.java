@@ -62,14 +62,28 @@ public class AlmaWallpaperService extends WallpaperService {
                 siz[i] = (float) (0.8 + Math.random() * 1.8);
                 ph[i] = (float) (Math.random() * Math.PI * 2);
                 gold[i] = Math.random() < 0.12;
-                // objetivos de silueta (u,v en 0..1): cabeza + hombros
-                if (i < N * 0.55) {
+                // objetivos de silueta: cabello largo lacio (raya al medio)
+                // cayendo sobre los hombros + óvalo de cara + cuello alto recto
+                // (turtleneck). Referencia: foto enviada por JJ 10-sep-2026.
+                float bucket = (float) Math.random();
+                if (bucket < 0.35f) {
+                    // óvalo de cara/cabello (volumen principal)
                     float a = (float) (Math.random() * Math.PI * 2);
-                    tu[i] = 0.5f + 0.115f * (float) Math.cos(a);
-                    tv[i] = 0.30f + 0.16f * (float) Math.sin(a);
+                    float rr2 = (float) Math.sqrt(Math.random());
+                    tu[i] = 0.5f + 0.16f * rr2 * (float) Math.cos(a);
+                    tv[i] = 0.27f + 0.20f * rr2 * (float) Math.sin(a);
+                } else if (bucket < 0.65f) {
+                    // mechones largos cayendo sobre los hombros (izq/der)
+                    boolean left = Math.random() < .5;
+                    float a = (float) (Math.random() * Math.PI * 2);
+                    float rr2 = (float) Math.sqrt(Math.random());
+                    float cu = left ? 0.30f : 0.70f;
+                    tu[i] = cu + 0.075f * rr2 * (float) Math.cos(a);
+                    tv[i] = 0.45f + 0.30f * rr2 * (float) Math.sin(a);
                 } else {
-                    float yy = 0.52f + (float) Math.random() * 0.46f;
-                    float half = 0.10f + (yy - 0.52f) * 0.75f;
+                    // hombros / cuello de tortuga — poco ensanche, líneas rectas
+                    float yy = 0.55f + (float) Math.random() * 0.40f;
+                    float half = 0.16f + (yy - 0.55f) * 0.28f;
                     boolean left = Math.random() < .5;
                     tu[i] = 0.5f + (left ? -half : half);
                     tv[i] = yy;
