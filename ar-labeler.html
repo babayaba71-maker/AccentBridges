@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Tri-Lingual Live AR Labeler — AccentBridges</title>
-  <!-- v1.6 person mode duo (YOU ustedes / WE nosotros) + ancla sujeto I/You + bifocal + estabilizador -->
+  <!-- v1.7 ladder completo de sujetos: I ai · YOU iu · HE ji · SHE chi · WE ui · THEY de + bifocal + estabilizador -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     html, body { margin: 0; padding: 0; background: #020617; overflow: hidden; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
@@ -662,11 +662,13 @@ function personAnchorLesson() {
     html = '<div class="pl-title">👥 PERSON MODE — ¡USTEDES!</div>';
     html += '<div class="pl-row">Las personas frente a ti = <b>YOU</b> /juː/ — <b>"iu"</b> — ustedes<br><i>¡la misma palabra para uno o para diez!</i></div>';
     html += '<div class="pl-row">¿Y si TÚ te unes a ellos? = <b>WE</b> /wiː/ — <b>"ui"</b> — nosotros</div>';
+    html += '<div class="pl-row">¿Y ellos dos juntos? = <b>THEY</b> /ðeɪ/ — <b>"de"</b> — ellos(as)</div>';
     html += '<div class="pl-drill">Repite conmigo:<br>🔊 <b>"iu ar"</b> → <b>"ui ar"</b> → <b>"ui ar jir"</b> (we are here)</div>';
   } else {
     html = '<div class="pl-title">👤 PERSON MODE — EL ANCLA SUJETO</div>';
     html += '<div class="pl-row">La persona frente a ti = <b>YOU</b> /juː/ — <b>"iu"</b> — tú</div>';
     html += '<div class="pl-row">¿Y tú quién eres? = <b>I</b> /aɪ/ — <b>"ai"</b></div>';
+    html += '<div class="pl-row">¿Y ESA persona? Hombre: <b>HE</b> /hiː/ — <b>"ji"</b> · Mujer: <b>SHE</b> /ʃiː/ — <b>"chi"</b> <i>(shi no existe en español 😉)</i></div>';
     html += '<div class="pl-drill">Repite conmigo:<br>🔊 <b>"ai"</b> → <b>"ai em"</b> → <b>"ai em ' + name.toUpperCase() + '"</b></div>';
   }
   html += '<div class="pl-hint">👆 Toca esta tarjeta para repetir la lección</div>';
@@ -682,19 +684,21 @@ function personAnchorLesson() {
     speakStep("Person. And person.", "en-US", 0.88);
     setTimeout(() => speakStep("Dos personas frente a ti. YOU. Iu. ¡Ustedes! La misma palabra sirve para uno... o para diez.", "es-MX", 0.95), 1300);
     setTimeout(() => speakStep("¿Y si tú te unes a ellos? WE. Ui. Nosotros.", "es-MX", 0.95), 5300);
-    setTimeout(() => speakStep("Repite conmigo:", "es-MX", 0.95), 7300);
-    setTimeout(() => speakStep("You are.", "en-US", 0.82), 8300);
-    setTimeout(() => speakStep("We are.", "en-US", 0.82), 9500);
-    setTimeout(() => speakStep("We are here.", "en-US", 0.82), 10700);
+    setTimeout(() => speakStep("¿Y ellos dos juntos? THEY. De. Ellos.", "es-MX", 0.95), 7600);
+    setTimeout(() => speakStep("Repite conmigo:", "es-MX", 0.95), 9500);
+    setTimeout(() => speakStep("You are.", "en-US", 0.82), 10500);
+    setTimeout(() => speakStep("We are.", "en-US", 0.82), 11700);
+    setTimeout(() => speakStep("We are here.", "en-US", 0.82), 12900);
     toast("👥 ¡Ustedes son YOU... y todos juntos son WE! Repite: ui ar jir");
   } else {
     speakStep("Person.", "en-US", 0.88);
     setTimeout(() => speakStep("Persona. ¿Quién es? Es YOU. Iu. Tú.", "es-MX", 0.95), 1100);
     setTimeout(() => speakStep("¿Y tú, quién eres? Tú eres I. Ai.", "es-MX", 0.95), 3800);
-    setTimeout(() => speakStep("Repite conmigo:", "es-MX", 0.95), 6300);
-    setTimeout(() => speakStep("I", "en-US", 0.8), 7300);
-    setTimeout(() => speakStep("ai em", "es-MX", 0.9), 8500);
-    setTimeout(() => speakStep("I am " + (studentName || "here") + ".", "en-US", 0.82), 9900);
+    setTimeout(() => speakStep("¿Y esa persona? Si es hombre, HE. Ji. Si es mujer, SHE. Chi.", "es-MX", 0.95), 6400);
+    setTimeout(() => speakStep("Repite conmigo:", "es-MX", 0.95), 9200);
+    setTimeout(() => speakStep("I", "en-US", 0.8), 10200);
+    setTimeout(() => speakStep("ai em", "es-MX", 0.9), 11400);
+    setTimeout(() => speakStep("I am " + (studentName || "here") + ".", "en-US", 0.82), 12800);
     toast("👤 La persona es YOU... y TÚ eres I! Repite: ai em");
   }
 }
