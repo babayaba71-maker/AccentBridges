@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Tri-Lingual Live AR Labeler — AccentBridges</title>
-  <!-- v1.7.2 GUARDIA DE SUPERFICIES PLANAS: muros/pisos/techos no existen en COCO-80 — el modelo adivinaba 'airplane'/'bed' con confianza baja. Clases dudosas exigen más score + vehículos gigantes en interiores se suprimen. Mejor callar que inventar. -->
+  <!-- v1.7.3 INMERSIÓN MOTORA — MODO SUPERFICIE: cuando el guardia detecta pared/piso/techo, en vez de callarse hace CLASE (TPR): toca la superficie → ¿cómo se siente? → dura=HARD (una sílaba) → repite → quiz táctil HARD/SOFT. Botón 🖐️ manual + auto-trigger con cooldown. -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     html, body { margin: 0; padding: 0; background: #020617; overflow: hidden; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
@@ -99,6 +99,9 @@
 .person-lesson .pl-drill { font: 700 12px/1.6 system-ui, sans-serif; color: #34d399; margin-top: 6px; }
 .person-lesson .pl-drill b { color: #fde047; }
 .person-lesson .pl-hint { font: 500 10px ui-monospace,monospace; color: #7dd3fc; opacity: .8; margin-top: 6px; }
+.surface-lesson .sl-btn { display:inline-block; margin:6px 6px 0 0; padding:8px 14px; border-radius:10px; font:800 13px system-ui,sans-serif; cursor:pointer; border:1px solid rgba(0,240,255,.5); background:rgba(2,6,23,.85); color:#fde047; }
+.surface-lesson .sl-btn.ok { border-color:#34d399; color:#34d399; }
+.surface-lesson .sl-close { position:absolute; top:4px; right:8px; font:700 12px ui-monospace,monospace; color:#7dd3fc; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -179,6 +182,7 @@
       <button id="btn-flip" class="px-2 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 text-xs font-bold">Trasera</button>
       <button id="btn-freeze" class="px-2 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold">Congelar</button>
       <button id="btn-quiz" class="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 text-white font-bold text-xs shadow-md">Quiz</button>
+      <button id="btn-surface" class="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xs shadow-md">🖐️ Superficie</button>
       <button id="toggle-ar-fullview-btn" class="px-2 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-bold">Full View</button>
     </div>
   </header>
@@ -515,9 +519,18 @@ function filterContext(dets) {
     if (STREET_CLASSES.has(raw) && area > 0.45) { suppressed++; continue; }
     kept.push(d);
   }
-  if (suppressed > 0 && kept.length === 0 && now2() - lastFlatToast > 10000) {
-    lastFlatToast = now2();
-    toast("🧱 Pared / piso / techo — superficie plana sin etiqueta. Mejor callar que inventar.");
+  // 🖐️ v1.7.3 INMERSIÓN MOTORA: superficie plana detectada → 2 veces seguidas + cooldown = CLASE
+  if (suppressed > 0 && kept.length === 0) {
+    flatGuardCount++;
+    if (flatGuardCount >= 2 && now2() - lastSurfaceLesson > 240000 && !surfaceLessonActive) {
+      flatGuardCount = 0;
+      surfaceLesson();
+    } else if (now2() - lastFlatToast > 30000) {
+      lastFlatToast = now2();
+      toast("🧱 Superficie plana — ¡clase de INMERSIÓN MOTORA disponible! Toca 🖐️");
+    }
+  } else {
+    flatGuardCount = 0;
   }
   return kept;
 }
@@ -634,6 +647,114 @@ function processDetections(detections) {
 }
 function now2() { return performance.now(); }
 
+/* ===== 🖐️ INMERSIÓN MOTORA — MODO SUPERFICIE (v1.7.3) =====
+   Pared/piso/techo NO existen en COCO-80, pero SÍ existen en la vida del estudiante.
+   TPR (Total Physical Response): tocar → sentir → decir. La superficie plana deja
+   de ser un error del modelo y se vuelve MATERIAL DE CLASE. */
+const SURFACE_PAIRS = [
+  { en: "HARD",  es: "dura",  ipa: "/hɑːrd/", nota: "UNA sola sílaba — una bola de sonido" },
+  { en: "SOFT",  es: "suave", ipa: "/sɒft/",  nota: "UNA sola sílaba, corta y redonda" },
+  { en: "SMOOTH",es: "lisa",  ipa: "/smuːð/",nota: 'una sílaba larga — con la TH de mother al final' }
+];
+let surfaceLessonActive = false, lastSurfaceLesson = 0;
+function surfaceStep(html, ms) {
+  const el = document.getElementById("surface-lesson");
+  if (el) el.innerHTML = html;
+  surfaceTimers.push(setTimeout(() => {}, ms));
+}
+const surfaceTimers = [];
+function sTimer(fn, ms) { surfaceTimers.push(setTimeout(fn, ms)); }
+function clearSurfaceTimers() { surfaceTimers.forEach(t => clearTimeout(t)); surfaceTimers.length = 0; }
+
+function surfaceLesson() {
+  surfaceLessonActive = true;
+  lastSurfaceLesson = now2();
+  clearSurfaceTimers();
+  const w = SURFACE_PAIRS[Math.floor(Math.random() * SURFACE_PAIRS.length)];
+  const w2 = SURFACE_PAIRS[(SURFACE_PAIRS.indexOf(w) + 1) % SURFACE_PAIRS.length];
+
+  let el = document.getElementById("surface-lesson") || document.createElement("div");
+  el.id = "surface-lesson";
+  el.className = "person-lesson surface-lesson";
+  if (!el.parentNode) document.body.appendChild(el);
+
+  const closeSurface = () => {
+    surfaceLessonActive = false;
+    clearSurfaceTimers();
+    const x = document.getElementById("surface-lesson");
+    if (x) x.remove();
+    try { speechSynthesis.cancel(); } catch (e) {}
+  };
+
+  // Etapa 1: TOCA
+  surfaceStep('<span class="sl-close" id="sl-close">✖</span><div class="pl-title">🖐️ SUPERFICIE — INMERSIÓN MOTORA</div>' +
+    '<div class="pl-row">Toca la superficie con tu mano. <b>SIENTE</b> su textura. 🖐️</div>' +
+    '<div class="pl-hint">La pared también es maestra...</div>');
+  // Etapa 2: ¿CÓMO ES?
+  sTimer(() => surfaceStep('<span class="sl-close" id="sl-close">✖</span><div class="pl-title">🖐️ ¿CÓMO SE SIENTE?</div>' +
+    '<div class="pl-row">¿Dura? ¿Suave? ¿Lisa?</div>' +
+    '<div class="pl-row">Escucha... 👂</div>'), 5000);
+  // Etapa 3: LA PALABRA
+  sTimer(() => surfaceStep('<span class="sl-close" id="sl-close">✖</span><div class="pl-title">🧱 ' + w.es.toUpperCase() + ' = ' + w.en + '</div>' +
+    '<div class="pl-row">La superficie que tocas es <b>' + w.es + '</b>.</div>' +
+    '<div class="pl-row">' + w.es + ' en inglés es <b>' + w.en + '</b> ' + w.ipa + '</div>' +
+    '<div class="pl-drill">🔊 ' + w.en + ' — ' + w.nota + '</div>'), 10000);
+  // Etapa 4: REPITE
+  sTimer(() => surfaceStep('<span class="sl-close" id="sl-close">✖</span><div class="pl-title">🔁 REPITE CONMIGO</div>' +
+    '<div class="pl-drill">🔊 <b>' + w.en + '</b><br>Tócala y dilo: ' + w.en + '... ' + w.en + '... ' + w.en + '<br>👆 Toca esta tarjeta para escuchar otra vez</div>'), 16000);
+  // Etapa 5: BONUS WORD
+  sTimer(() => surfaceStep('<span class="sl-close" id="sl-close">✖</span><div class="pl-title">🎁 BONUS</div>' +
+    '<div class="pl-row">¿Y si algo es <b>' + w2.es + '</b>? = <b>' + w2.en + '</b> ' + w2.ipa + '</div>' +
+    '<div class="pl-drill">🔊 ' + w2.en + ' — ' + w2.nota + '</div>'), 23000);
+  // Etapa 6: QUIZ TÁCTIL
+  sTimer(() => {
+    const first = Math.random() > 0.5;
+    const oA = first ? w : w2, oB = first ? w2 : w;
+    surfaceStep('<span class="sl-close" id="sl-close">✖</span><div class="pl-title">❓ QUIZ: ¿Cómo se dice "' + w.es.toUpperCase() + '"?</div>' +
+      '<div class="sl-btn" data-k="' + oA.en + '">' + oA.en + '</div>' +
+      '<div class="sl-btn" data-k="' + oB.en + '">' + oB.en + '</div>' +
+      '<div class="pl-hint" id="sl-fb">👆 Elige la palabra correcta</div>');
+    el.querySelectorAll(".sl-btn").forEach(b => {
+      b.onclick = (ev) => {
+        ev.stopPropagation();
+        if (b.dataset.k === w.en) {
+          b.classList.add("ok");
+          document.getElementById("sl-fb").innerHTML = "✅ ¡Exacto! " + w.es.toUpperCase() + " = " + w.en + " " + w.ipa + ". ¡Tu mano acaba de aprender una palabra!";
+          speak(w.en.toLowerCase(), "en-US");
+          toast("🖐️ ¡" + w.en + " aprendida con el cuerpo! Toca la pared y dilo 3 veces más");
+          sTimer(closeSurface, 6000);
+        } else {
+          document.getElementById("sl-fb").innerHTML = "❌ Casi. Esa es " + w2.es + " = " + w2.en + ". La " + w.es + " es <b>" + w.en + "</b>";
+          speak(w.en.toLowerCase(), "en-US");
+        }
+      };
+    });
+  }, 30000);
+  sTimer(closeSurface, 44000);
+  el.onclick = () => { const c = document.getElementById("sl-close"); if (c && c.remove) {} }; // base
+  el.addEventListener("click", (ev) => {
+    if (ev.target.id === "sl-close") { closeSurface(); return; }
+    // tarjeta tocada = repetir la palabra en inglés de la etapa actual
+    if (!LITE) { try { speak(w.en.toLowerCase(), "en-US"); } catch (e) {} }
+  });
+
+  if (LITE) { surfaceLessonActive = true; return; }
+  try { speechSynthesis.cancel(); } catch (e) {}
+  speakStep("Superficie.", "en-US", 0.85);
+  setTimeout(() => speakStep("Toca la superficie con tu mano. Siente su textura.", "es-MX", 0.95), 900);
+  setTimeout(() => speakStep("¿Cómo se siente? ¿Dura?", "es-MX", 0.95), 4600);
+  setTimeout(() => speakStep(w.en.toLowerCase() + ".", "en-US", 0.8), 7300);
+  setTimeout(() => speakStep("Dura, en inglés, es " + w.en.toLowerCase() + ".", "es-MX", 0.95), 8800);
+  setTimeout(() => speakStep(w.en.toLowerCase() + " es una sola sílaba. Una bola de sonido. " + w.en.toLowerCase() + ".", "es-MX", 0.95), 12300);
+  setTimeout(() => speakStep("Repite conmigo.", "es-MX", 0.95), 16500);
+  setTimeout(() => speakStep(w.en.toLowerCase() + ".", "en-US", 0.8), 17600);
+  setTimeout(() => speakStep(w.en.toLowerCase() + ".", "en-US", 0.78), 18800);
+  setTimeout(() => speakStep("¿Y si algo es " + w2.es + "? " + w2.en.toLowerCase() + ".", "es-MX", 0.95), 22500);
+  setTimeout(() => speakStep(w2.en.toLowerCase() + ".", "en-US", 0.8), 24200);
+  setTimeout(() => speakStep("¡Toca la pared y di " + w.en.toLowerCase() + " tres veces!", "es-MX", 0.95), 28500);
+  toast("🖐️ " + w.es.toUpperCase() + " = " + w.en + " — aprendida tocando. ¡Inmersión motora!");
+}
+
 /* ===== Carrusel ===== */
 function renderCarousel(seen) {
   const c = document.getElementById("objects-carousel");
@@ -740,6 +861,11 @@ function personAnchorLesson() {
 
 /* ===== Botones ===== */
 document.getElementById("btn-flip").addEventListener("click", flipCamera);
+
+document.getElementById("btn-surface").addEventListener("click", () => {
+  if (!surfaceLessonActive) surfaceLesson();
+  else { const x = document.getElementById("surface-lesson"); if (x) x.remove(); surfaceLessonActive = false; clearSurfaceTimers(); }
+});
 
 document.getElementById("btn-freeze").addEventListener("click", (e) => {
   frozen = !frozen;
