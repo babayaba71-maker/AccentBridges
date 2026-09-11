@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Tri-Lingual Live AR Labeler — AccentBridges</title>
-  <!-- v1.7.1 fix THEY=dey (diptongo /eɪ/ como 'rey') + ladder completo: I ai · YOU iu · HE ji · SHE chi · WE ui · THEY dey + bifocal + estabilizador -->
+  <!-- v1.7.2 GUARDIA DE SUPERFICIES PLANAS: muros/pisos/techos no existen en COCO-80 — el modelo adivinaba 'airplane'/'bed' con confianza baja. Clases dudosas exigen más score + vehículos gigantes en interiores se suprimen. Mejor callar que inventar. -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     html, body { margin: 0; padding: 0; background: #020617; overflow: hidden; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
@@ -397,7 +397,7 @@ async function initDetector() {
         modelAssetPath: "https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite",
         delegate: "GPU"
       },
-      scoreThreshold: LITE ? 0.6 : 0.55,
+      scoreThreshold: 0.6,
       runningMode: "VIDEO"
     });
   } catch (e) {
@@ -408,7 +408,7 @@ async function initDetector() {
           modelAssetPath: "https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite",
           delegate: "CPU"
         },
-        scoreThreshold: LITE ? 0.6 : 0.55, runningMode: "VIDEO"
+        scoreThreshold: 0.6, runningMode: "VIDEO"
       });
     } catch (e2) {
       document.getElementById("loading-overlay").innerHTML =
@@ -466,7 +466,7 @@ function renderLoop() {
       const result = detector.detectForVideo(video, now);
       // 🛡️ Estabilizador temporal (v1.4.1): una clase debe aparecer 2 inferencias
       // consecutivas antes de etiquetarse — mata el parpadeo (gato→jirafa→oso) en baja luz.
-      processDetections(filterStable(result.detections));
+      processDetections(filterContext(filterStable(result.detections)));
     } catch (e) { /* frame skip */ }
   }
   requestAnimationFrame(renderLoop);
@@ -485,6 +485,41 @@ function filterStable(dets) {
     classStreaks.set(raw, (classStreaks.get(raw) || 0) + 1);
   }
   return dets.filter(d => classStreaks.get((d.categories[0].categoryName || "").toLowerCase()) >= 2);
+}
+
+/* ===== 🧱 GUARDIA DE SUPERFICIES PLANAS (v1.7.2) =====
+   Muros, pisos y techos NO existen en el vocabulario COCO-80. Cuando la cámara
+   apunta a una superficie plana el modelo "adivina" con confianza baja:
+   airplane (paneles interiores), bed (paredes/pisos). Regla pedagógica:
+   MEJOR CALLAR QUE INVENTAR. Clases propensas a alucinación exigen más score,
+   y objetos callejeros/vehículos que "llenan la casa" se suprimen. */
+const CONTEXT_FLOOR = { airplane: 0.70, bed: 0.65, tv: 0.65, refrigerator: 0.60, couch: 0.60, oven: 0.60, microwave: 0.60 };
+const STREET_CLASSES = new Set(["airplane","boat","bus","train","truck","car","fire hydrant","stop sign","parking meter","traffic light","bench","kite","frisbee","skis","snowboard","surfboard","sports ball"]);
+let lastFlatToast = 0;
+function bboxAreaRatio(det) {
+  try {
+    const b = det.boundingBox;
+    const vw = video.videoWidth || 1280, vh = video.videoHeight || 720;
+    return (b.width * b.height) / (vw * vh);
+  } catch (e) { return 0; }
+}
+function filterContext(dets) {
+  const kept = [];
+  let suppressed = 0;
+  for (const d of dets) {
+    const raw = (d.categories[0].categoryName || "").toLowerCase();
+    const score = d.categories[0].score || 0;
+    const area = bboxAreaRatio(d);
+    const floor = CONTEXT_FLOOR[raw];
+    if (floor && score < floor) { suppressed++; continue; }
+    if (STREET_CLASSES.has(raw) && area > 0.45) { suppressed++; continue; }
+    kept.push(d);
+  }
+  if (suppressed > 0 && kept.length === 0 && now2() - lastFlatToast > 10000) {
+    lastFlatToast = now2();
+    toast("🧱 Pared / piso / techo — superficie plana sin etiqueta. Mejor callar que inventar.");
+  }
+  return kept;
 }
 
 function processDetections(detections) {
