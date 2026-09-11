@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Tri-Lingual Live AR Labeler — AccentBridges</title>
-  <!-- v1.7.3 INMERSIÓN MOTORA — MODO SUPERFICIE: cuando el guardia detecta pared/piso/techo, en vez de callarse hace CLASE (TPR): toca la superficie → ¿cómo se siente? → dura=HARD (una sílaba) → repite → quiz táctil HARD/SOFT. Botón 🖐️ manual + auto-trigger con cooldown. -->
+  <!-- v1.7.1 fix THEY=dey (diptongo /eɪ/ como 'rey') + ladder completo: I ai · YOU iu · HE ji · SHE chi · WE ui · THEY dey + bifocal + estabilizador -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     html, body { margin: 0; padding: 0; background: #020617; overflow: hidden; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
@@ -99,9 +99,6 @@
 .person-lesson .pl-drill { font: 700 12px/1.6 system-ui, sans-serif; color: #34d399; margin-top: 6px; }
 .person-lesson .pl-drill b { color: #fde047; }
 .person-lesson .pl-hint { font: 500 10px ui-monospace,monospace; color: #7dd3fc; opacity: .8; margin-top: 6px; }
-.surface-lesson .sl-btn { display:inline-block; margin:6px 6px 0 0; padding:8px 14px; border-radius:10px; font:800 13px system-ui,sans-serif; cursor:pointer; border:1px solid rgba(0,240,255,.5); background:rgba(2,6,23,.85); color:#fde047; }
-.surface-lesson .sl-btn.ok { border-color:#34d399; color:#34d399; }
-.surface-lesson .sl-close { position:absolute; top:4px; right:8px; font:700 12px ui-monospace,monospace; color:#7dd3fc; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -152,6 +149,7 @@
     <button id="btn-autopron" class="hud-btn on" title="Toggle Auto-Pronunciación">🔊</button>
     <button id="btn-tint" class="hud-btn" title="Filtro Tinte Oscuro">🕶️</button>
     <button id="btn-gemini" class="hud-btn" title="Escaneo Multimodal Gemini">✨</button>
+    <button id="btn-lesson" class="hud-btn" title="Clase Bilingual Bridge del objeto">📖</button>
   </div>
 
   <!-- 3. BARRA DE CONTROL SUPERIOR -->
@@ -182,7 +180,6 @@
       <button id="btn-flip" class="px-2 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 text-xs font-bold">Trasera</button>
       <button id="btn-freeze" class="px-2 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold">Congelar</button>
       <button id="btn-quiz" class="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 text-white font-bold text-xs shadow-md">Quiz</button>
-      <button id="btn-surface" class="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xs shadow-md">🖐️ Superficie</button>
       <button id="toggle-ar-fullview-btn" class="px-2 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-bold">Full View</button>
     </div>
   </header>
@@ -401,7 +398,7 @@ async function initDetector() {
         modelAssetPath: "https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite",
         delegate: "GPU"
       },
-      scoreThreshold: 0.6,
+      scoreThreshold: LITE ? 0.6 : 0.55,
       runningMode: "VIDEO"
     });
   } catch (e) {
@@ -412,7 +409,7 @@ async function initDetector() {
           modelAssetPath: "https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite",
           delegate: "CPU"
         },
-        scoreThreshold: 0.6, runningMode: "VIDEO"
+        scoreThreshold: LITE ? 0.6 : 0.55, runningMode: "VIDEO"
       });
     } catch (e2) {
       document.getElementById("loading-overlay").innerHTML =
@@ -470,7 +467,7 @@ function renderLoop() {
       const result = detector.detectForVideo(video, now);
       // 🛡️ Estabilizador temporal (v1.4.1): una clase debe aparecer 2 inferencias
       // consecutivas antes de etiquetarse — mata el parpadeo (gato→jirafa→oso) en baja luz.
-      processDetections(filterContext(filterStable(result.detections)));
+      processDetections(filterStable(result.detections));
     } catch (e) { /* frame skip */ }
   }
   requestAnimationFrame(renderLoop);
@@ -489,50 +486,6 @@ function filterStable(dets) {
     classStreaks.set(raw, (classStreaks.get(raw) || 0) + 1);
   }
   return dets.filter(d => classStreaks.get((d.categories[0].categoryName || "").toLowerCase()) >= 2);
-}
-
-/* ===== 🧱 GUARDIA DE SUPERFICIES PLANAS (v1.7.2) =====
-   Muros, pisos y techos NO existen en el vocabulario COCO-80. Cuando la cámara
-   apunta a una superficie plana el modelo "adivina" con confianza baja:
-   airplane (paneles interiores), bed (paredes/pisos). Regla pedagógica:
-   MEJOR CALLAR QUE INVENTAR. Clases propensas a alucinación exigen más score,
-   y objetos callejeros/vehículos que "llenan la casa" se suprimen. */
-const CONTEXT_FLOOR = { airplane: 0.70, bed: 0.65, tv: 0.65, refrigerator: 0.60, couch: 0.60, oven: 0.60, microwave: 0.60 };
-const STREET_CLASSES = new Set(["airplane","boat","bus","train","truck","car","fire hydrant","stop sign","parking meter","traffic light","bench","kite","frisbee","skis","snowboard","surfboard","sports ball"]);
-let lastFlatToast = 0;
-function bboxAreaRatio(det) {
-  try {
-    const b = det.boundingBox;
-    const vw = video.videoWidth || 1280, vh = video.videoHeight || 720;
-    return (b.width * b.height) / (vw * vh);
-  } catch (e) { return 0; }
-}
-function filterContext(dets) {
-  const kept = [];
-  let suppressed = 0;
-  for (const d of dets) {
-    const raw = (d.categories[0].categoryName || "").toLowerCase();
-    const score = d.categories[0].score || 0;
-    const area = bboxAreaRatio(d);
-    const floor = CONTEXT_FLOOR[raw];
-    if (floor && score < floor) { suppressed++; continue; }
-    if (STREET_CLASSES.has(raw) && area > 0.45) { suppressed++; continue; }
-    kept.push(d);
-  }
-  // 🖐️ v1.7.3 INMERSIÓN MOTORA: superficie plana detectada → 2 veces seguidas + cooldown = CLASE
-  if (suppressed > 0 && kept.length === 0) {
-    flatGuardCount++;
-    if (flatGuardCount >= 2 && now2() - lastSurfaceLesson > 240000 && !surfaceLessonActive) {
-      flatGuardCount = 0;
-      surfaceLesson();
-    } else if (now2() - lastFlatToast > 30000) {
-      lastFlatToast = now2();
-      toast("🧱 Superficie plana — ¡clase de INMERSIÓN MOTORA disponible! Toca 🖐️");
-    }
-  } else {
-    flatGuardCount = 0;
-  }
-  return kept;
 }
 
 function processDetections(detections) {
@@ -647,114 +600,6 @@ function processDetections(detections) {
 }
 function now2() { return performance.now(); }
 
-/* ===== 🖐️ INMERSIÓN MOTORA — MODO SUPERFICIE (v1.7.3) =====
-   Pared/piso/techo NO existen en COCO-80, pero SÍ existen en la vida del estudiante.
-   TPR (Total Physical Response): tocar → sentir → decir. La superficie plana deja
-   de ser un error del modelo y se vuelve MATERIAL DE CLASE. */
-const SURFACE_PAIRS = [
-  { en: "HARD",  es: "dura",  ipa: "/hɑːrd/", nota: "UNA sola sílaba — una bola de sonido" },
-  { en: "SOFT",  es: "suave", ipa: "/sɒft/",  nota: "UNA sola sílaba, corta y redonda" },
-  { en: "SMOOTH",es: "lisa",  ipa: "/smuːð/",nota: 'una sílaba larga — con la TH de mother al final' }
-];
-let surfaceLessonActive = false, lastSurfaceLesson = 0;
-function surfaceStep(html, ms) {
-  const el = document.getElementById("surface-lesson");
-  if (el) el.innerHTML = html;
-  surfaceTimers.push(setTimeout(() => {}, ms));
-}
-const surfaceTimers = [];
-function sTimer(fn, ms) { surfaceTimers.push(setTimeout(fn, ms)); }
-function clearSurfaceTimers() { surfaceTimers.forEach(t => clearTimeout(t)); surfaceTimers.length = 0; }
-
-function surfaceLesson() {
-  surfaceLessonActive = true;
-  lastSurfaceLesson = now2();
-  clearSurfaceTimers();
-  const w = SURFACE_PAIRS[Math.floor(Math.random() * SURFACE_PAIRS.length)];
-  const w2 = SURFACE_PAIRS[(SURFACE_PAIRS.indexOf(w) + 1) % SURFACE_PAIRS.length];
-
-  let el = document.getElementById("surface-lesson") || document.createElement("div");
-  el.id = "surface-lesson";
-  el.className = "person-lesson surface-lesson";
-  if (!el.parentNode) document.body.appendChild(el);
-
-  const closeSurface = () => {
-    surfaceLessonActive = false;
-    clearSurfaceTimers();
-    const x = document.getElementById("surface-lesson");
-    if (x) x.remove();
-    try { speechSynthesis.cancel(); } catch (e) {}
-  };
-
-  // Etapa 1: TOCA
-  surfaceStep('<span class="sl-close" id="sl-close">✖</span><div class="pl-title">🖐️ SUPERFICIE — INMERSIÓN MOTORA</div>' +
-    '<div class="pl-row">Toca la superficie con tu mano. <b>SIENTE</b> su textura. 🖐️</div>' +
-    '<div class="pl-hint">La pared también es maestra...</div>');
-  // Etapa 2: ¿CÓMO ES?
-  sTimer(() => surfaceStep('<span class="sl-close" id="sl-close">✖</span><div class="pl-title">🖐️ ¿CÓMO SE SIENTE?</div>' +
-    '<div class="pl-row">¿Dura? ¿Suave? ¿Lisa?</div>' +
-    '<div class="pl-row">Escucha... 👂</div>'), 5000);
-  // Etapa 3: LA PALABRA
-  sTimer(() => surfaceStep('<span class="sl-close" id="sl-close">✖</span><div class="pl-title">🧱 ' + w.es.toUpperCase() + ' = ' + w.en + '</div>' +
-    '<div class="pl-row">La superficie que tocas es <b>' + w.es + '</b>.</div>' +
-    '<div class="pl-row">' + w.es + ' en inglés es <b>' + w.en + '</b> ' + w.ipa + '</div>' +
-    '<div class="pl-drill">🔊 ' + w.en + ' — ' + w.nota + '</div>'), 10000);
-  // Etapa 4: REPITE
-  sTimer(() => surfaceStep('<span class="sl-close" id="sl-close">✖</span><div class="pl-title">🔁 REPITE CONMIGO</div>' +
-    '<div class="pl-drill">🔊 <b>' + w.en + '</b><br>Tócala y dilo: ' + w.en + '... ' + w.en + '... ' + w.en + '<br>👆 Toca esta tarjeta para escuchar otra vez</div>'), 16000);
-  // Etapa 5: BONUS WORD
-  sTimer(() => surfaceStep('<span class="sl-close" id="sl-close">✖</span><div class="pl-title">🎁 BONUS</div>' +
-    '<div class="pl-row">¿Y si algo es <b>' + w2.es + '</b>? = <b>' + w2.en + '</b> ' + w2.ipa + '</div>' +
-    '<div class="pl-drill">🔊 ' + w2.en + ' — ' + w2.nota + '</div>'), 23000);
-  // Etapa 6: QUIZ TÁCTIL
-  sTimer(() => {
-    const first = Math.random() > 0.5;
-    const oA = first ? w : w2, oB = first ? w2 : w;
-    surfaceStep('<span class="sl-close" id="sl-close">✖</span><div class="pl-title">❓ QUIZ: ¿Cómo se dice "' + w.es.toUpperCase() + '"?</div>' +
-      '<div class="sl-btn" data-k="' + oA.en + '">' + oA.en + '</div>' +
-      '<div class="sl-btn" data-k="' + oB.en + '">' + oB.en + '</div>' +
-      '<div class="pl-hint" id="sl-fb">👆 Elige la palabra correcta</div>');
-    el.querySelectorAll(".sl-btn").forEach(b => {
-      b.onclick = (ev) => {
-        ev.stopPropagation();
-        if (b.dataset.k === w.en) {
-          b.classList.add("ok");
-          document.getElementById("sl-fb").innerHTML = "✅ ¡Exacto! " + w.es.toUpperCase() + " = " + w.en + " " + w.ipa + ". ¡Tu mano acaba de aprender una palabra!";
-          speak(w.en.toLowerCase(), "en-US");
-          toast("🖐️ ¡" + w.en + " aprendida con el cuerpo! Toca la pared y dilo 3 veces más");
-          sTimer(closeSurface, 6000);
-        } else {
-          document.getElementById("sl-fb").innerHTML = "❌ Casi. Esa es " + w2.es + " = " + w2.en + ". La " + w.es + " es <b>" + w.en + "</b>";
-          speak(w.en.toLowerCase(), "en-US");
-        }
-      };
-    });
-  }, 30000);
-  sTimer(closeSurface, 44000);
-  el.onclick = () => { const c = document.getElementById("sl-close"); if (c && c.remove) {} }; // base
-  el.addEventListener("click", (ev) => {
-    if (ev.target.id === "sl-close") { closeSurface(); return; }
-    // tarjeta tocada = repetir la palabra en inglés de la etapa actual
-    if (!LITE) { try { speak(w.en.toLowerCase(), "en-US"); } catch (e) {} }
-  });
-
-  if (LITE) { surfaceLessonActive = true; return; }
-  try { speechSynthesis.cancel(); } catch (e) {}
-  speakStep("Superficie.", "en-US", 0.85);
-  setTimeout(() => speakStep("Toca la superficie con tu mano. Siente su textura.", "es-MX", 0.95), 900);
-  setTimeout(() => speakStep("¿Cómo se siente? ¿Dura?", "es-MX", 0.95), 4600);
-  setTimeout(() => speakStep(w.en.toLowerCase() + ".", "en-US", 0.8), 7300);
-  setTimeout(() => speakStep("Dura, en inglés, es " + w.en.toLowerCase() + ".", "es-MX", 0.95), 8800);
-  setTimeout(() => speakStep(w.en.toLowerCase() + " es una sola sílaba. Una bola de sonido. " + w.en.toLowerCase() + ".", "es-MX", 0.95), 12300);
-  setTimeout(() => speakStep("Repite conmigo.", "es-MX", 0.95), 16500);
-  setTimeout(() => speakStep(w.en.toLowerCase() + ".", "en-US", 0.8), 17600);
-  setTimeout(() => speakStep(w.en.toLowerCase() + ".", "en-US", 0.78), 18800);
-  setTimeout(() => speakStep("¿Y si algo es " + w2.es + "? " + w2.en.toLowerCase() + ".", "es-MX", 0.95), 22500);
-  setTimeout(() => speakStep(w2.en.toLowerCase() + ".", "en-US", 0.8), 24200);
-  setTimeout(() => speakStep("¡Toca la pared y di " + w.en.toLowerCase() + " tres veces!", "es-MX", 0.95), 28500);
-  toast("🖐️ " + w.es.toUpperCase() + " = " + w.en + " — aprendida tocando. ¡Inmersión motora!");
-}
-
 /* ===== Carrusel ===== */
 function renderCarousel(seen) {
   const c = document.getElementById("objects-carousel");
@@ -862,11 +707,6 @@ function personAnchorLesson() {
 /* ===== Botones ===== */
 document.getElementById("btn-flip").addEventListener("click", flipCamera);
 
-document.getElementById("btn-surface").addEventListener("click", () => {
-  if (!surfaceLessonActive) surfaceLesson();
-  else { const x = document.getElementById("surface-lesson"); if (x) x.remove(); surfaceLessonActive = false; clearSurfaceTimers(); }
-});
-
 document.getElementById("btn-freeze").addEventListener("click", (e) => {
   frozen = !frozen;
   if (frozen) { video.pause(); e.target.textContent = "Reanudar"; toast("❄️ Congelado — estudia la escena"); }
@@ -970,6 +810,108 @@ function showBrainCard(r) {
   card.querySelector("#brain-close").onclick = () => card.remove();
   speak(r.example_sentence || r.en_word || "", "en-US");
 }
+
+
+/* ===== 📖 CLASE DINÁMICA — Cerebro arLesson genera Bilingual Bridge + TPR ===== */
+const LESSON_URL = "https://valerie.base44.app/functions/arLesson";
+const LESSON_CACHE = new Map(); // class -> lesson
+let lessonBusy = false;
+
+async function lessonScan() {
+  if (lessonBusy) { toast("🧠 Generando clase... espera"); return; }
+  if (!lastDetections.length) { toast("Apunta la cámara a un objeto primero 🙂"); return; }
+  const mainClass = (lastDetections[0].categories[0].categoryName || "").toLowerCase();
+
+  if (LESSON_CACHE.has(mainClass)) { showLessonCard(LESSON_CACHE.get(mainClass)); return; }
+
+  lessonBusy = true;
+  toast("📖 Generando clase de " + mainClass + "...");
+  try {
+    const resp = await fetch(LESSON_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ className: mainClass })
+    });
+    const lesson = await resp.json();
+    if (lesson.configured === false) {
+      toast("🧠 Cerebro listo pero falta la OPENAI/GEMINI key — se activa al configurarla");
+    } else if (lesson.error) {
+      toast("⚠️ " + (lesson.detail || lesson.error));
+    } else {
+      LESSON_CACHE.set(mainClass, lesson);
+      showLessonCard(lesson);
+    }
+  } catch (e) { toast("⚠️ El cerebro no respondió — revisa tu conexión"); }
+  lessonBusy = false;
+}
+
+function speakLocalVoice(text, lang) {
+  try {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = lang; u.rate = (lang === "en-US") ? 0.82 : 0.98;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  } catch(e) {}
+}
+
+function showLessonCard(l) {
+  const old = document.getElementById("lesson-card");
+  if (old) old.remove();
+  const card = document.createElement("div");
+  card.id = "lesson-card";
+  card.style.cssText = "position:absolute;bottom:14px;right:60px;z-index:31;width:min(320px,82%);background:rgba(10,16,32,.96);border:1px solid rgba(251,191,36,.7);border-radius:16px;padding:12px 14px;backdrop-filter:blur(8px);box-shadow:0 8px 28px rgba(0,0,0,.6);font-size:12px;color:#e0e7ff;max-height:70vh;overflow-y:auto";
+
+  const quizOpts = (l.quiz_options || []).map((opt, i) =>
+    '<button data-qi="' + i + '" style="flex:1;background:#1e293b;border:1px solid rgba(148,163,184,.4);color:#e0e7ff;font-weight:800;font-size:13px;padding:8px 6px;border-radius:10px;cursor:pointer">' + opt + '</button>'
+  ).join("");
+
+  card.innerHTML =
+    '<div style="font:800 10px ui-monospace,monospace;color:#fbbf24;margin-bottom:6px">📖 CLASE BILINGUAL BRIDGE — ' + (l.engine === "openai" ? "OpenAI" : "Gemini") + '</div>' +
+    '<div style="font-size:17px;font-weight:900;color:#00F0FF">' + (l.word_en || "?") + '</div>' +
+    '<div style="color:#94a3b8;font-family:monospace;font-size:11px;margin:2px 0 6px">' + (l.ipa || "") + ' · ancla: <b style="color:#fbbf24">' + (l.pron_es || "?") + '</b> · ' + (l.syllables || "?") + ' sílabas</div>' +
+    '<div style="margin-bottom:6px">🖐️ <b style="color:#67e8f9">' + (l.touch_prompt || "-") + '</div>' +
+    '<div style="margin-bottom:6px">🤔 <b style="color:#67e8f9">' + (l.sensory_question || "-") + '</div>' +
+    '<div style="margin-bottom:8px">✨ ' + (l.sensory_es || "?") + ' = <b style="color:#00F0FF">' + (l.sensory_en || "?") + '</b> <span style="color:#94a3b8;font-family:monospace">' + (l.sensory_ipa || "") + '</span> <b style="color:#fbbf24">[' + (l.sensory_pron_es || "?") + ']</b></div>' +
+    '<div style="margin-bottom:8px">🎁 Bonus: <b style="color:#00F0FF">' + (l.bonus_en || "?") + '</b> = ' + (l.bonus_es || "?") + ' <b style="color:#fbbf24">[' + (l.bonus_pron_es || "?") + ']</b></div>' +
+    '<div style="margin-bottom:10px">🗣️ <span style="color:#fbbf24">' + (l.example_sentence || "") + '</span></div>' +
+    '<div style="margin-bottom:6px;font-weight:800;color:#fbbf24">🏆 ' + (l.quiz_question || "¿Cómo se dice?") + '</div>' +
+    '<div id="quiz-row" style="display:flex;gap:6px;margin-bottom:6px">' + quizOpts + '</div>' +
+    '<div id="quiz-feedback" style="min-height:16px;margin-bottom:4px;font-weight:800"></div>' +
+    '<div style="text-align:right;margin-top:4px"><button id="lesson-repeat" style="background:#0891b2;border:none;color:#fff;font-weight:800;font-size:11px;padding:6px 12px;border-radius:10px">🔁 Repetir</button> <button id="lesson-close" style="background:#1e293b;border:none;color:#94a3b8;font-weight:800;font-size:11px;padding:6px 12px;border-radius:10px">✕</button></div>';
+
+  container.appendChild(card);
+
+  card.querySelectorAll("#quiz-row button").forEach(btn => {
+    btn.onclick = () => {
+      const idx = parseInt(btn.dataset.qi);
+      const ok = idx === (l.quiz_correct ?? 0);
+      const fb = card.querySelector("#quiz-feedback");
+      if (ok) {
+        fb.innerHTML = '<span style="color:#34d399">✅ ¡Ese es! ' + (l.sensory_en || "") + ' — tu oído acaba de encontrar su gimnasio 🏋️</span>';
+        btn.style.background = "#065f46"; btn.style.borderColor = "#34d399";
+        speakLocalVoice(l.sensory_en + ". " + l.example_sentence, "en-US");
+      } else {
+        fb.innerHTML = '<span style="color:#fb7185">❌ Casi. Escucha otra vez... </span>';
+        btn.style.borderColor = "#fb7185";
+        speakLocalVoice(l.sensory_en, "en-US");
+      }
+      card.querySelectorAll("#quiz-row button").forEach(b => { if (parseInt(b.dataset.qi) !== (l.quiz_correct ?? 0)) b.style.opacity = .45; });
+    };
+  });
+
+  card.querySelector("#lesson-repeat").onclick = () => {
+    speakLocalVoice(l.touch_prompt, "es-MX");
+    setTimeout(() => speakLocalVoice(l.word_en + ". " + l.word_en, "en-US"), 2600);
+    setTimeout(() => speakLocalVoice("Repeat with me: " + l.word_en + ". " + l.example_sentence, "en-US"), 5200);
+  };
+  card.querySelector("#lesson-close").onclick = () => card.remove();
+
+  // Voz cascada Bilingual Bridge: instrucción es → palabra en-US x2 → frase
+  speakLocalVoice(l.touch_prompt, "es-MX");
+  setTimeout(() => speakLocalVoice(l.word_en + ". " + l.word_en, "en-US"), 2800);
+  setTimeout(() => speakLocalVoice(l.sensory_question, "es-MX"), 5400);
+  setTimeout(() => speakLocalVoice(l.sensory_en + ". " + l.sensory_en, "en-US"), 8000);
+}
+document.getElementById("btn-lesson").addEventListener("click", lessonScan);
 
 /* Idiomas */
 document.querySelectorAll(".lang-btn").forEach(btn => {
