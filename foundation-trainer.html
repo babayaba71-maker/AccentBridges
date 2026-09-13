@@ -620,7 +620,7 @@ function pronScore(){
       sum+=sw;
     }
     const sc=Math.round(100*sum/tgt.length);
-    if(sc>best){best=sc;heard=alt}
+    if(sc>best||(sc>=best&&!heard)){best=Math.max(best,sc);heard=alt}
   }
   return{score:Math.min(100,best),heard,target};
 }
