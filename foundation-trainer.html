@@ -221,6 +221,18 @@ const GREETINGS=[
  {value:"Yes",phonetic:"Yes",phoneticEs:'Como "yes"',translation:"Sí",emoji:"✅"},
  {value:"No",phonetic:"Nou",phoneticEs:'Como "nou"',translation:"No",emoji:"❌"}];
 
+const PHRASES=[
+ {value:"I am here.",phonetic:"Ai em jir",phoneticEs:'La palabra "am" se reduce a "em" — ¡palabra fundacional! (Lección 001)',translation:"Yo estoy aquí",emoji:"📍"},
+ {value:"I am ready.",phonetic:"Ai em rédi",phoneticEs:'"I" = "ai", "am" = "em"',translation:"Estoy listo",emoji:"✅"},
+ {value:"You are here.",phonetic:"Iu ar jir",phoneticEs:'"You" = "iu" (uno o muchos, la misma palabra)',translation:"Tú estás aquí",emoji:"👉"},
+ {value:"He is my friend.",phonetic:"Ji is mai frend",phoneticEs:'"He" = "ji" (h muda, j suave)',translation:"Él es mi amigo",emoji:"👦"},
+ {value:"She is my friend.",phonetic:"Chi is mai frend",phoneticEs:'"She" = "chi" — como chi-che chi-cho',translation:"Ella es mi amiga",emoji:"👧"},
+ {value:"We are here.",phonetic:"Ui ar jir",phoneticEs:'"We" = "ui"',translation:"Nosotros estamos aquí",emoji:"🤝"},
+ {value:"They are my friends.",phonetic:"Dey ar mai frends",phoneticEs:'"They" = "dey" — ¡rima con rey! 👑',translation:"Ellos son mis amigos",emoji:"👥"},
+ {value:"I want water.",phonetic:"Ai want uáter",phoneticEs:'Holofrase del niño: primero fue solo "¡agua!" 💧',translation:"Yo quiero agua",emoji:"💧"},
+ {value:"I like it.",phonetic:"Ai laik it",phoneticEs:'Tres sonidos cortos — dilo tranquilo',translation:"Me gusta",emoji:"😍"},
+ {value:"Thank you very much.",phonetic:"Zank iu veri mach",phoneticEs:'"th" suave como z, como "zank"',translation:"Muchas gracias",emoji:"🙏"}];
+
 /* ===== MELODY / INTONATION (upgrade AccentBridges) ===== */
 const MELODIES=[
  {kind:"statement",es_title:"Afirmación",en_title:"Statement",emoji:"💬",
@@ -269,10 +281,10 @@ const MELODY_QUIZ=[
  {text:"This is my house.",answer:"statement"},
  {text:"Do you speak English?",answer:"question"}];
 
-const DATA={vowels:VOWELS,alphabet:ALPHABET,numbers:NUMBERS,greetings:GREETINGS,melody:MELODIES};
+const DATA={vowels:VOWELS,alphabet:ALPHABET,numbers:NUMBERS,greetings:GREETINGS,phrases:PHRASES,melody:MELODIES};
 
 const I18N={
- es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{vowels:" Vocales",alphabet:" Alfabeto",numbers:" Números 1-10",greetings:" Saludos",melody:" Melodía"},
+ es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{vowels:" Vocales",alphabet:" Alfabeto",numbers:" Números 1-10",greetings:" Saludos",phrases:" Frases",melody:" Melodía"},
      say:"DÍLO ASÍ:",listen:"🔊 Escuchar",slow:"🐢 Lento",normal:"🚶 Normal",fast:"🏃 Rápido",
      recTitle:"Graba tu voz",rec:"Grabar",stop:"Detener",play:"Escucharte",
      prev:"Anterior",next:"Siguiente",quizOn:"🧠 Modo Quiz",quizOff:"✖️ Salir del Quiz",
@@ -281,7 +293,7 @@ const I18N={
      qReplay:"🔊 Escuchar otra vez",correct:"¡Correcto! +1 punto 🎉",wrong:"¡Uy! Tu oído acaba de encontrar su gimnasio 💪",
      statement:"Afirmación ↘",question:"Pregunta ↗",certTitle:"Certificado de Logro",
      certSub:"¡Felicitaciones! ¡Has ganado 100 puntos!",certBody:"¡Completaste el Entrenador de Inglés Básico!",certBtn:"Seguir Aprendiendo 🚀"},
- en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{vowels:" Vowels",alphabet:" Alphabet",numbers:" Numbers 1-10",greetings:" Greetings",melody:" Melody"},
+ en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{vowels:" Vowels",alphabet:" Alphabet",numbers:" Numbers 1-10",greetings:" Greetings",phrases:" Phrases",melody:" Melody"},
      say:"SAY IT LIKE:",listen:"🔊 Listen",slow:"🐢 Slow",normal:"🚶 Normal",fast:"🏃 Fast",
      recTitle:"Record your voice",rec:"Record",stop:"Stop",play:"Play",
      prev:"Prev",next:"Next",quizOn:"🧠 Quiz Mode",quizOff:"✖️ Exit Quiz",
@@ -340,7 +352,7 @@ function render(){
 }
 
 function renderTabs(){
-  const icons={vowels:"🔤",alphabet:"📖",numbers:"🔢",greetings:"👋",melody:"🎵"};
+  const icons={vowels:"🔤",alphabet:"📖",numbers:"🔢",greetings:"👋",phrases:"💬",melody:"🎵"};
   $("tabs").innerHTML=Object.keys(DATA).map(k=>
     `<button class="tab ${k===tab?"active":""}" onclick="setTab('${k}')">${icons[k]}${t().tabs[k]}</button>`).join("");
 }
