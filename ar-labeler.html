@@ -60,6 +60,7 @@
     .det-label .ipa { color: #94a3b8; font: 11px/1.3 ui-monospace, monospace; }
     .det-label .es { color: #FFD700; font: 700 12px/1.3 sans-serif; }
     .det-label .fr { color: #FF007F; font: 700 12px/1.3 sans-serif; }
+    .det-label .bridge { color: #a78bfa; font: 800 10px/1.3 sans-serif; margin-top: 1px; }
     .det-label .badge { display: inline-block; font: 800 9px/1.6 ui-monospace, monospace; padding: 1px 6px; border-radius: 999px; margin-left: 4px; }
     .badge-d1 { background: rgba(16,185,129,.2); color: #34d399; border: 1px solid rgba(16,185,129,.4); }
     .badge-d2 { background: rgba(245,158,11,.2); color: #fbbf24; border: 1px solid rgba(245,158,11,.4); }
@@ -552,13 +553,14 @@ function processDetections(detections) {
       if (tr.ipa) html += '<div class="ipa">' + tr.ipa + "</div>";
       html += '<div class="es">ES: ' + tr.es + "</div>";
       html += '<div class="fr">FR: ' + tr.fr + "</div>";
+      html += '<div class="bridge">🌉 ' + tr.es + " → " + tr.en + " → " + tr.fr + '</div>';
       if (gd) {
         if (gd.material || gd.usage) html += '<div class="bifocal-meta">📦 ' + (gd.material || "") + ' • 🎯 ' + (gd.usage || "") + "</div>";
         if (gd.example_sentence) html += '<div class="bifocal-say">🗣️ "' + gd.example_sentence + '"</div>';
         if (Array.isArray(gd.vocab)) html += '<div class="bifocal-vocab">' + gd.vocab.map(v => v.es + "=" + v.en).join(" • ") + "</div>";
       }
       card.innerHTML = html;
-      card.onclick = () => { speak(tr.en); setTimeout(() => speak(tr.es, "es-MX"), 900); };
+      card.onclick = () => speakTrio(tr); // v1.9: cascada 🇲🇽→🇺🇸→🇫🇷
       if (!bifocalSpoken.has(raw)) {
         bifocalSpoken.add(raw);
         if (!LITE) speak(tr.es, "es-MX"); // en Lite la voz es bajo demanda (proteccion RAM)
@@ -569,8 +571,10 @@ function processDetections(detections) {
       if (tr.ipa) html += '<div class="ipa">' + tr.ipa + "</div>";
       if (langMode === "ALL" || langMode === "ES") html += '<div class="es">ES: ' + tr.es + "</div>";
       if (langMode === "ALL" || langMode === "FR") html += '<div class="fr">FR: ' + tr.fr + "</div>";
+      if (langMode === "ALL") html += '<div class="bridge">🌉 ' + tr.es + " → " + tr.en + " → " + tr.fr + '</div>';
       if (i === inspectedIdx && locked) html += '<div style="color:#4ade80;font:800 9px ui-monospace,monospace;margin-top:2px">🎯 TARGET LOCK</div>';
       card.innerHTML = html;
+      card.onclick = () => speakTrio(tr); // v1.9: toca la tarjeta = oír el trío
     }
     if (raw === "person") card.onclick = () => { if (now2() - lastPersonLesson > 8000) { lastPersonLesson = now2(); personAnchorLesson(); } };
     heatmapLayer.appendChild(card);
@@ -628,6 +632,24 @@ function speak(text, lang) {
     u.rate = 0.92;
     speechSynthesis.cancel();
     speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+/* ===== 🌉 PUENTE TRILINGÜE (v1.9) — agua → water → eau, encadenado sin cortes ===== */
+function speakTrio(tr) {
+  try {
+    speechSynthesis.cancel();
+    const seq = [[tr.es, "es-MX", 0.95], [tr.en, "en-US", 0.85], [tr.fr, "fr-FR", 0.95]];
+    let idx = 0;
+    const next = () => {
+      if (idx >= seq.length) return;
+      const s = seq[idx++];
+      const u = new SpeechSynthesisUtterance(s[0]);
+      u.lang = s[1]; u.rate = s[2];
+      u.onend = next; u.onerror = next;
+      speechSynthesis.speak(u);
+    };
+    next();
   } catch (e) {}
 }
 
