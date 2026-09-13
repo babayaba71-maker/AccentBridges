@@ -98,6 +98,12 @@ audio.rec-play{width:100%;margin-top:10px}
 .certificate-body{font-size:13px;color:var(--text-soft);margin:8px 0 16px}
 footer{margin-top:auto;text-align:center;padding:16px;font-size:11.5px;color:var(--text-soft);opacity:.8}
 .melody-chip{display:inline-flex;align-items:center;gap:6px;background:var(--accent-bg);border:1.5px solid var(--accent-border);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:800;color:var(--accent-text);margin-top:10px}
+.score-zone{margin-top:10px;background:var(--accent-bg,#f5f3ff);border:1.5px solid var(--accent-border,#ddd6fe);border-radius:14px;padding:12px 14px;text-align:center}
+.score-num{font-size:42px;font-weight:900;line-height:1.1}
+.score-msg{font-size:13px;font-weight:700;margin-top:2px}
+.score-heard{font-size:12px;color:var(--text-soft,#777);margin-top:6px;font-style:italic}
+.score-best{font-size:12px;font-weight:800;margin-top:6px}
+.score-stars{font-size:15px;margin-top:2px;letter-spacing:1px}
 @media(max-width:420px){.value{font-size:38px}.emoji{font-size:54px}}
 </style>
 </head>
@@ -137,6 +143,7 @@ footer{margin-top:auto;text-align:center;padding:16px;font-size:11.5px;color:var
       <button class="rec-btn play" id="recPlayBtn" onclick="playRecording()" style="display:none">▶️ <span id="recPlayTxt">Escuchar</span></button>
     </div>
     <audio class="rec-play" id="recAudio" controls style="display:none"></audio>
+    <div class="score-zone" id="scoreZone" style="display:none"></div>
   </div>
   <div class="quiz-zone" id="quizZone" style="display:none"></div>
   <div class="row" style="margin-top:14px">
@@ -385,6 +392,7 @@ function render(){
   $("recPlayTxt").textContent=t().play;
   $("quizToggleTxt").textContent=quizOn?t().quizOff:t().quizOn;
   renderTabs();renderCard();renderDots();renderListen();renderQuiz();
+  const sz=$("scoreZone");if(sz)sz.style.display="none";
 }
 
 function renderTabs(){
@@ -546,7 +554,7 @@ function nextMelody(){
 /* ================= RECORD ================= */
 async function toggleRecord(){
   const btn=$("recBtn");
-  if(recorder&&recorder.state==="recording"){recorder.stop();return}
+  if(recorder&&recorder.state==="recording"){recorder.stop();stopRecog();return}
   try{
     const stream=await navigator.mediaDevices.getUserMedia({audio:true});
     recChunks=[];recorder=new MediaRecorder(stream);
@@ -561,10 +569,107 @@ async function toggleRecord(){
       toast(lang==="es"?"🎧 ¡Escúchate! Compara con la maestra":"🎧 Listen to yourself!");
     };
     recorder.start();
+    startRecog();
     $("recBtn").classList.add("stop");$("recBtnTxt").textContent=t().stop;
   }catch(e){alert(lang==="es"?"No pude acceder al micrófono 😢":"Couldn't access the microphone 😢")}
 }
 function playRecording(){const au=$("recAudio");if(recURL)au.play()}
+
+/* ================= 🎯 MOTOR DE EVALUACIÓN DE PRONUNCIACIÓN (v2.4) ================= */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let recog=null,heardAlts=[],recogDead=false,evalTimer=null;
+const bestKey=()=>"eft_best_"+tab+"_"+idx;
+const bestScore=()=>parseInt(lsGet(bestKey(),"0"),10)||0;
+const NUMWORD={1:"one",2:"two",3:"three",4:"four",5:"five",6:"six",7:"seven",8:"eight",9:"nine",10:"ten",A:"a",B:"bee",C:"see",D:"dee",E:"e",F:"eff",G:"gee"};
+function normTxt(s){return String(s||"").toLowerCase().replace(/[.,!?;:'"()]/g," ").replace(/\s+/g," ").trim()}
+function normTokens(txt){
+  return normTxt(txt).split(" ").filter(Boolean).map(w=>{
+    const up=w.toUpperCase();
+    if(NUMWORD[up])return NUMWORD[up];
+    if(NUMWORD[w])return NUMWORD[w];
+    return w});
+}
+function lev(a,b){
+  const m=a.length,n=b.length;if(!m)return n;if(!n)return m;
+  let prev=Array.from({length:n+1},(_,j)=>j),cur=new Array(n+1);
+  for(let i=1;i<=m;i++){cur[0]=i;
+    for(let j=1;j<=n;j++){cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1))}
+    [prev,cur]=[cur,prev]}
+  return prev[n];
+}
+function pronScore(){
+  const c=card();
+  const target=(tab==="melody")?(c.example||""):(c.value||"");
+  const tgt=normTokens(target);
+  if(!tgt.length)return null;
+  let best=0,heard="";
+  for(const alt of heardAlts){
+    const ht=normTokens(alt);
+    if(!ht.length)continue;
+    let sum=0;const used=new Array(ht.length).fill(false);
+    for(const tw of tgt){
+      let sw=0,bi=-1;
+      ht.forEach((hw,hi)=>{
+        if(used[hi])return;
+        const d=lev(tw,hw);
+        const tol=(Math.max(tw.length,hw.length)>=6)?2:1;
+        const s=(d===0)?1:(d<=tol?(d===1?0.6:0.3):0);
+        if(s>sw){sw=s;bi=hi}
+      });
+      if(bi>=0)used[bi]=true;
+      sum+=sw;
+    }
+    const sc=Math.round(100*sum/tgt.length);
+    if(sc>best){best=sc;heard=alt}
+  }
+  return{score:Math.min(100,best),heard,target};
+}
+function scoreTier(s){
+  if(s>=90)return{c:"#10b981",e:"🔥",m:"¡NIVEL NATIVO! Suenas como la muestra"};
+  if(s>=75)return{c:"#22c55e",e:"😎",m:"¡Muy bien hecho! Cada vez más americano"};
+  if(s>=60)return{c:"#eab308",e:"💪",m:"¡Vas bien! Una vez más y sube el score"};
+  if(s>=40)return{c:"#f97316",e:"🎧",m:"Tu boca encontró su gimnasio — escucha la muestra y repite"};
+  return{c:"#ef4444",e:"🌱",m:"Tranquilo — nadie nació hablando. Escucha y reintenta"};
+}
+function updatePointsUI(){$("pPts").textContent=points();$("pFill").style.width=Math.min(100,points()%100)+"%"}
+function showScore(res){
+  const z=$("scoreZone");if(!z)return;
+  const tier=scoreTier(res.score);
+  const nStars=Math.max(1,Math.round(res.score/20));
+  const b=bestScore();
+  let gain=0;
+  if(res.score>b){gain=res.score-b;lsSet(bestKey(),String(res.score))}
+  if(gain>0){setPoints(points()+gain);updatePointsUI();toast("🎉 +"+gain+" puntos")}
+  let html='<div class="score-num" style="color:'+tier.c+'">'+res.score+'<span style="font-size:16px">/100</span></div>';
+  html+='<div class="score-stars">'+"⭐".repeat(nStars)+'</div>';
+  html+='<div class="score-msg" style="color:'+tier.c+'">'+tier.e+" "+tier.m+'</div>';
+  if(res.heard)html+='<div class="score-heard">👂 Te escuché: “'+res.heard+'”</div>';
+  html+='<div class="score-best">🏆 Tu récord en esta tarjeta: '+Math.max(b,res.score)+'</div>';
+  z.innerHTML=html;z.style.display="block";
+  if(gain>0&&points()>=100)showCert();
+}
+function startRecog(){
+  heardAlts=[];recogDead=false;
+  if(!SR){recogDead=true;return}
+  try{
+    recog=new SR();recog.lang="en-US";recog.interimResults=false;recog.maxAlternatives=3;recog.continuous=true;
+    recog.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal){const alts=e.results[i];for(let j=0;j<alts.length;j++){if(alts[j].transcript&&heardAlts.length<6)heardAlts.push(alts[j].transcript)}}}};
+    recog.onerror=()=>{recogDead=true};
+    recog.start();
+  }catch(e){recogDead=true}
+}
+function stopRecog(){
+  try{if(recog)recog.stop()}catch(e){}
+  if(evalTimer)clearTimeout(evalTimer);
+  evalTimer=setTimeout(()=>{
+    if(heardAlts.length>0){const r=pronScore();if(r)showScore(r)}
+    else{
+      const z=$("scoreZone");
+      if(z&&recogDead&&SR){z.innerHTML='<div class="score-msg" style="color:#ef4444">🔇 No pude escucharte bien. Acércate al mic y reintenta</div><div class="score-best">Tip: habla fuerte y claro 🗣️</div>';z.style.display="block"}
+      else if(z){z.innerHTML='<div class="score-msg" style="color:#f97316">📱 Tu navegador no puede calificar la voz — usa Chrome para el score del 1 al 100</div>';z.style.display="block"}
+    }
+  },1300);
+}
 
 /* ================= CERT ================= */
 function showCert(){$("certModal").style.display="flex"}
