@@ -168,6 +168,7 @@ function renderMouth(q){
   <div class="q-text">Di en voz alta:</div><div class="q-audio">${q.target}</div><div class="q-anchor">DÍLO ASÍ: ${q.anchor}</div>
   <div class="rec-zone">
     <button class="rec-btn" id="recBtn" onclick="toggleRec()">⏺ Grabar mi voz</button>
+    <button class="selfbtn" onclick="micTest(this)">🎤 Probar micrófono</button>
     <div id="scoreBox" style="display:none;margin-top:10px"></div>
   </div>
   <div class="explain">${q.explain}</div>`;
@@ -185,6 +186,18 @@ function toggleRec(){
     recog.start()}catch(e){}
     b.classList.add("stop");b.textContent="⏹ Parar y calificar";
   }).catch(()=>alert("No pude acceder al micrófono 😢"));
+}
+function micTest(b){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){b.textContent="🚫 Este navegador NO soporta microfono — abre en Chrome";b.style.background="#ef4444";b.style.color="#fff";return}
+  b.textContent="...probando el microfono";
+  navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{
+    s.getTracks().forEach(x=>x.stop());
+    b.textContent="✅ El microfono SIRVE — graba normal";
+    b.style.background="#10b981";b.style.color="#fff";
+  }).catch(()=>{
+    b.textContent="🚫 Microfono BLOQUEADO — toca el 🔒 junto a la URL, Permisos, y permite el microfono";
+    b.style.background="#ef4444";b.style.color="#fff";
+  });
 }
 function gradeMouth(){
   const q=Q[DIMS[dimIdx].id][qIdx];const box=$("scoreBox");if(!box||box.dataset.done)return;box.dataset.done="1";
