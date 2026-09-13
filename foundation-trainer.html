@@ -233,6 +233,32 @@ const PHRASES=[
  {value:"I like it.",phonetic:"Ai laik it",phoneticEs:'Tres sonidos cortos — dilo tranquilo',translation:"Me gusta",emoji:"😍"},
  {value:"Thank you very much.",phonetic:"Zank iu veri mach",phoneticEs:'"th" suave como z, como "zank"',translation:"Muchas gracias",emoji:"🙏"}];
 
+const PRONOUNS=[
+ {value:"I",phonetic:"ai",phoneticEs:"El primer ancla sujeto — todo empieza con AI",translation:"Yo",emoji:"🙋"},
+ {value:"You",phonetic:"iu",phoneticEs:"Tú Y ustedes — la misma palabra para uno o muchos",translation:"Tú / Ustedes",emoji:"👉"},
+ {value:"He",phonetic:"ji",phoneticEs:"La h es muda — suena como la j suave de 'jirafa'",translation:"Él",emoji:"👦"},
+ {value:"She",phonetic:"chi",phoneticEs:"chi-che chi-cho — el sonido ya vive en tu boca",translation:"Ella",emoji:"👧"},
+ {value:"We",phonetic:"ui",phoneticEs:"Dos vocales que se funden en una: ui",translation:"Nosotros",emoji:"🤝"},
+ {value:"They",phonetic:"dey",phoneticEs:"¡Rima con rey! 👑 — nunca 'de'",translation:"Ellos / Ellas",emoji:"👥"},
+ {value:"I am",phonetic:"ai em",phoneticEs:"am se REDUCE a 'em' — palabra fundacional (Lección 001)",translation:"Yo soy / Yo estoy",emoji:"🧱"},
+ {value:"You are",phonetic:"iu ar",phoneticEs:"are suena como el nombre de la letra R",translation:"Tú eres / Tú estás",emoji:"🎯"},
+ {value:"He is",phonetic:"ji is",phoneticEs:"is suena 'is' — cortita y fuerte",translation:"Él es / Él está",emoji:"👦"},
+ {value:"She is",phonetic:"chi is",phoneticEs:"La pareja de 'he is' — chi + is",translation:"Ella es / Ella está",emoji:"👧"},
+ {value:"We are",phonetic:"ui ar",phoneticEs:"ui + ar — dos anclas en una sola frase",translation:"Nosotros somos / estamos",emoji:"🤝"},
+ {value:"They are",phonetic:"dey ar",phoneticEs:"dey + ar — rima con rey y cierra con R",translation:"Ellos son / Ellos están",emoji:"👥"}];
+
+const VERBS=[
+ {value:"eating",phonetic:"ii-ting",phoneticEs:"eat + ing — el -ing se pega nomás. -ing = lo que pasa AHORA",translation:"comiendo",emoji:"🍽️"},
+ {value:"drinking",phonetic:"drink-ing",phoneticEs:"drink + ing — la palabra no cambia",translation:"bebiendo",emoji:"🥤"},
+ {value:"running",phonetic:"ra-ning",phoneticEs:"¡run DOBLA la n! run + n + ing = running",translation:"corriendo",emoji:"🏃"},
+ {value:"playing",phonetic:"pley-ing",phoneticEs:"play = pley (rima con rey 👑) + ing",translation:"jugando",emoji:"⚽"},
+ {value:"reading",phonetic:"rii-ding",phoneticEs:"read suena 'riid' (ii larga) + ing",translation:"leyendo",emoji:"📚"},
+ {value:"sleeping",phonetic:"slii-ping",phoneticEs:"sleep = 'sliip' (ii larga) + ing",translation:"durmiendo",emoji:"😴"},
+ {value:"cooking",phonetic:"ku-king",phoneticEs:"cook = 'kuk' (como cuquita) + ing",translation:"cocinando",emoji:"🍳"},
+ {value:"writing",phonetic:"rai-ting",phoneticEs:"La E muda se cae: write → writ + ing = writing",translation:"escribiendo",emoji:"✍️"},
+ {value:"talking",phonetic:"to-king",phoneticEs:"talk = 'tok' (la L no suena) + ing",translation:"hablando",emoji:"🗣️"},
+ {value:"dancing",phonetic:"dan-sing",phoneticEs:"La E final se quita: dance → danc + ing = dancing",translation:"bailando",emoji:"💃"}];
+
 /* ===== MELODY / INTONATION (upgrade AccentBridges) ===== */
 const MELODIES=[
  {kind:"statement",es_title:"Afirmación",en_title:"Statement",emoji:"💬",
@@ -281,10 +307,10 @@ const MELODY_QUIZ=[
  {text:"This is my house.",answer:"statement"},
  {text:"Do you speak English?",answer:"question"}];
 
-const DATA={vowels:VOWELS,alphabet:ALPHABET,numbers:NUMBERS,greetings:GREETINGS,phrases:PHRASES,melody:MELODIES};
+const DATA={vowels:VOWELS,alphabet:ALPHABET,numbers:NUMBERS,greetings:GREETINGS,pronouns:PRONOUNS,phrases:PHRASES,verbs:VERBS,melody:MELODIES};
 
 const I18N={
- es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{vowels:" Vocales",alphabet:" Alfabeto",numbers:" Números 1-10",greetings:" Saludos",phrases:" Frases",melody:" Melodía"},
+ es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{vowels:" Vocales",alphabet:" Alfabeto",numbers:" Números 1-10",greetings:" Saludos",pronouns:" Pronombres",phrases:" Frases",verbs:" Verbos",melody:" Melodía"},
      say:"DÍLO ASÍ:",listen:"🔊 Escuchar",slow:"🐢 Lento",normal:"🚶 Normal",fast:"🏃 Rápido",
      recTitle:"Graba tu voz",rec:"Grabar",stop:"Detener",play:"Escucharte",
      prev:"Anterior",next:"Siguiente",quizOn:"🧠 Modo Quiz",quizOff:"✖️ Salir del Quiz",
@@ -293,7 +319,7 @@ const I18N={
      qReplay:"🔊 Escuchar otra vez",correct:"¡Correcto! +1 punto 🎉",wrong:"¡Uy! Tu oído acaba de encontrar su gimnasio 💪",
      statement:"Afirmación ↘",question:"Pregunta ↗",certTitle:"Certificado de Logro",
      certSub:"¡Felicitaciones! ¡Has ganado 100 puntos!",certBody:"¡Completaste el Entrenador de Inglés Básico!",certBtn:"Seguir Aprendiendo 🚀"},
- en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{vowels:" Vowels",alphabet:" Alphabet",numbers:" Numbers 1-10",greetings:" Greetings",phrases:" Phrases",melody:" Melody"},
+ en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{vowels:" Vowels",alphabet:" Alphabet",numbers:" Numbers 1-10",greetings:" Greetings",pronouns:" Pronouns",phrases:" Phrases",verbs:" Verbs",melody:" Melody"},
      say:"SAY IT LIKE:",listen:"🔊 Listen",slow:"🐢 Slow",normal:"🚶 Normal",fast:"🏃 Fast",
      recTitle:"Record your voice",rec:"Record",stop:"Stop",play:"Play",
      prev:"Prev",next:"Next",quizOn:"🧠 Quiz Mode",quizOff:"✖️ Exit Quiz",
@@ -352,7 +378,7 @@ function render(){
 }
 
 function renderTabs(){
-  const icons={vowels:"🔤",alphabet:"📖",numbers:"🔢",greetings:"👋",phrases:"💬",melody:"🎵"};
+  const icons={vowels:"🔤",alphabet:"📖",numbers:"🔢",greetings:"👋",pronouns:"🙋",phrases:"💬",verbs:"🏃",melody:"🎵"};
   $("tabs").innerHTML=Object.keys(DATA).map(k=>
     `<button class="tab ${k===tab?"active":""}" onclick="setTab('${k}')">${icons[k]}${t().tabs[k]}</button>`).join("");
 }
