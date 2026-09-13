@@ -259,6 +259,16 @@ const VERBS=[
  {value:"talking",phonetic:"to-king",phoneticEs:"talk = 'tok' (la L no suena) + ing",translation:"hablando",emoji:"🗣️"},
  {value:"dancing",phonetic:"dan-sing",phoneticEs:"La E final se quita: dance → danc + ing = dancing",translation:"bailando",emoji:"💃"}];
 
+const COMBOS=[
+ {value:"I am eating",phonetic:"Ai em ii-ting",phoneticEs:"La FÓRMULA MÁGICA: sujeto + SER + verbo-ing = lo que pasa AHORA",translation:"Yo estoy comiendo",emoji:"🙋🍽️"},
+ {value:"You are drinking",phonetic:"Iu ar drink-ing",phoneticEs:"iu + ar + drinking — las tres piezas ya las conoces",translation:"Tú estás bebiendo",emoji:"👉🥤"},
+ {value:"He is running",phonetic:"Ji is ra-ning",phoneticEs:"ji + is + ra-ning — la n doble de running",translation:"Él está corriendo",emoji:"👦🏃"},
+ {value:"She is dancing",phonetic:"Chi is dan-sing",phoneticEs:"chi + is + dan-sing — la e final de dancing ya se cayó",translation:"Ella está bailando",emoji:"👧💃"},
+ {value:"We are playing",phonetic:"Ui ar pley-ing",phoneticEs:"ui + ar + pley-ing — pley rima con rey 👑",translation:"Nosotros estamos jugando",emoji:"🤝⚽"},
+ {value:"They are reading",phonetic:"Dey ar rii-ding",phoneticEs:"dey + ar + rii-ding — el trío completo con la ii larga",translation:"Ellos están leyendo",emoji:"👥📚"},
+ {value:"He is sleeping",phonetic:"Ji is slii-ping",phoneticEs:"ji + is + slii-ping — el niño que se duerme 😴",translation:"Él está durmiendo",emoji:"👦😴"},
+ {value:"She is cooking",phonetic:"Chi is ku-king",phoneticEs:"chi + is + ku-king — a la abuela cocinando 👵",translation:"Ella está cocinando",emoji:"👧🍳"}];
+
 /* ===== MELODY / INTONATION (upgrade AccentBridges) ===== */
 const MELODIES=[
  {kind:"statement",es_title:"Afirmación",en_title:"Statement",emoji:"💬",
@@ -307,10 +317,10 @@ const MELODY_QUIZ=[
  {text:"This is my house.",answer:"statement"},
  {text:"Do you speak English?",answer:"question"}];
 
-const DATA={vowels:VOWELS,alphabet:ALPHABET,numbers:NUMBERS,greetings:GREETINGS,pronouns:PRONOUNS,phrases:PHRASES,verbs:VERBS,melody:MELODIES};
+const DATA={vowels:VOWELS,alphabet:ALPHABET,numbers:NUMBERS,greetings:GREETINGS,pronouns:PRONOUNS,phrases:PHRASES,verbs:VERBS,combos:COMBOS,melody:MELODIES};
 
 const I18N={
- es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{vowels:" Vocales",alphabet:" Alfabeto",numbers:" Números 1-10",greetings:" Saludos",pronouns:" Pronombres",phrases:" Frases",verbs:" Verbos",melody:" Melodía"},
+ es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{vowels:" Vocales",alphabet:" Alfabeto",numbers:" Números 1-10",greetings:" Saludos",pronouns:" Pronombres",phrases:" Frases",verbs:" Verbos",combos:" Combos",melody:" Melodía"},
      say:"DÍLO ASÍ:",listen:"🔊 Escuchar",slow:"🐢 Lento",normal:"🚶 Normal",fast:"🏃 Rápido",
      recTitle:"Graba tu voz",rec:"Grabar",stop:"Detener",play:"Escucharte",
      prev:"Anterior",next:"Siguiente",quizOn:"🧠 Modo Quiz",quizOff:"✖️ Salir del Quiz",
@@ -319,7 +329,7 @@ const I18N={
      qReplay:"🔊 Escuchar otra vez",correct:"¡Correcto! +1 punto 🎉",wrong:"¡Uy! Tu oído acaba de encontrar su gimnasio 💪",
      statement:"Afirmación ↘",question:"Pregunta ↗",certTitle:"Certificado de Logro",
      certSub:"¡Felicitaciones! ¡Has ganado 100 puntos!",certBody:"¡Completaste el Entrenador de Inglés Básico!",certBtn:"Seguir Aprendiendo 🚀"},
- en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{vowels:" Vowels",alphabet:" Alphabet",numbers:" Numbers 1-10",greetings:" Greetings",pronouns:" Pronouns",phrases:" Phrases",verbs:" Verbs",melody:" Melody"},
+ en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{vowels:" Vowels",alphabet:" Alphabet",numbers:" Numbers 1-10",greetings:" Greetings",pronouns:" Pronouns",phrases:" Phrases",verbs:" Verbs",combos:" Combos",melody:" Melody"},
      say:"SAY IT LIKE:",listen:"🔊 Listen",slow:"🐢 Slow",normal:"🚶 Normal",fast:"🏃 Fast",
      recTitle:"Record your voice",rec:"Record",stop:"Stop",play:"Play",
      prev:"Prev",next:"Next",quizOn:"🧠 Quiz Mode",quizOff:"✖️ Exit Quiz",
@@ -378,7 +388,7 @@ function render(){
 }
 
 function renderTabs(){
-  const icons={vowels:"🔤",alphabet:"📖",numbers:"🔢",greetings:"👋",pronouns:"🙋",phrases:"💬",verbs:"🏃",melody:"🎵"};
+  const icons={vowels:"🔤",alphabet:"📖",numbers:"🔢",greetings:"👋",pronouns:"🙋",phrases:"💬",verbs:"🏃",combos:"🧩",melody:"🎵"};
   $("tabs").innerHTML=Object.keys(DATA).map(k=>
     `<button class="tab ${k===tab?"active":""}" onclick="setTab('${k}')">${icons[k]}${t().tabs[k]}</button>`).join("");
 }
