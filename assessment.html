@@ -89,7 +89,7 @@ const LVLColor={"A0":"#10b981","A1":"#22c55e","A2":"#eab308","B1":"#f97316"};
 
 /* ============ STATE ============ */
 const $=id=>document.getElementById(id);
-let dimIdx=0,qIdx=0,results={},isRecording=false,SR=window.SpeechRecognition||window.webkitSpeechRecognition,recog=null,heard=[];
+let dimIdx=0,qIdx=0,results={},isRecording=false,SR=window.SpeechRecognition||window.webkitSpeechRecognition,recog=null,heard=[],lastRecogErr=null,recogStarts=0;
 let curOrder=[],curAns=0;
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
@@ -179,10 +179,12 @@ function toggleRec(){
   if(!SR){alert("Este navegador no soporta reconocimiento de voz — usa Chrome");return}
   heard=[];
   try{
+    lastRecogErr=null;recogStarts=0;
     recog=new SR();recog.lang="en-US";recog.interimResults=false;recog.maxAlternatives=3;recog.continuous=true;
     recog.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal){const al=e.results[i];for(let j=0;j<al.length;j++)if(al[j].transcript&&heard.length<6)heard.push(al[j].transcript)}}};
-    recog.onerror=()=>{};
-    recog.start();
+    recog.onerror=e=>{lastRecogErr=e.error};
+    recog.onend=()=>{if(isRecording&&recogStarts<8){recogStarts++;try{recog.start()}catch(e){}}};
+    recog.start();recogStarts++;
     isRecording=true;
     b.classList.add("stop");b.textContent="⏹ Parar y calificar";
   }catch(e){alert("No pude acceder al micrófono 😢")}
@@ -202,7 +204,7 @@ function micTest(b){
 function gradeMouth(){
   const q=Q[DIMS[dimIdx].id][qIdx];const box=$("scoreBox");if(!box||box.dataset.done)return;box.dataset.done="1";
   const res=pronScore(heard,q.target);
-  if(!res||(!res.score&&!res.heard)){box.innerHTML='<div class="score-msg" style="color:#ef4444">🔇 No te escuché bien — habla fuerte y reintenta. Si estás dentro de WhatsApp, ábreme en CHROME (fuera de WhatsApp) para que el micrófono funcione</div><button class="selfbtn" onclick="retryMouth()">🔁 Reintentar</button><button class="selfbtn" onclick="selfEval(false)">🤔 Se me atoró</button>';box.style.display="block";return}
+  if(!res||(!res.score&&!res.heard)){box.innerHTML='<div class="score-msg" style="color:#ef4444">🔇 No te escuché bien — habla fuerte y reintenta. Si estás dentro de WhatsApp, ábreme en CHROME (fuera de WhatsApp) para que el micrófono funcione</div><div class="score-msg" style="color:#94a3b8;font-size:12px">debug: '+(lastRecogErr||"sin datos")+'</div><button class="selfbtn" onclick="retryMouth()">🔁 Reintentar</button><button class="selfbtn" onclick="selfEval(false)">🤔 Se me atoró</button>';box.style.display="block";return}
   const ok=res.score>=70;
   box.innerHTML=`<div class="score-num" style="color:${ok?"#10b981":"#eab308"}">${res.score}<span style="font-size:16px">/100</span></div>
   <div class="score-stars">${"⭐".repeat(Math.max(1,Math.round(res.score/20)))}</div>
