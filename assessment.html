@@ -142,7 +142,7 @@ function nextQ(){
 function replayAudio(){const q=Q[DIMS[dimIdx].id][qIdx];if(q&&q.audio)speak(q.audio)}
 function answer(k){
   const d=DIMS[dimIdx],q=Q[d.id][qIdx],ok=(k===q.ans);
-  document.querySelectorAll(".opt").forEach((el,j)=>{el.onclick=null;el.classList.add(j===q.ans?"ok":(j===k?"bad":""))});
+  document.querySelectorAll(".opt").forEach((el,j)=>{el.onclick=null;const cls=j===q.ans?"ok":(j===k?"bad":null);if(cls)el.classList.add(cls)});
   results[d.id].answered++;results[d.id]["b"+q.band]=ok;
   if(!ok)results[d.id].failed=true;
   const box=document.createElement("div");box.className="explain";box.innerHTML=(ok?"✅ ¡Correcto! ":"🎯 Casi — ")+q.explain;
