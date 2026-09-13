@@ -214,7 +214,31 @@ const NUMBERS=[
  {value:"Seven",phonetic:"Séven",phoneticEs:'Como "séven"',emoji:"7️⃣"},
  {value:"Eight",phonetic:"Eit",phoneticEs:'Como "eit"',emoji:"8️⃣"},
  {value:"Nine",phonetic:"Náin",phoneticEs:'Como "náin"',emoji:"9️⃣"},
- {value:"Ten",phonetic:"Ten",phoneticEs:'Como "ten"',emoji:"🔟"}];
+ {value:"Ten",phonetic:"Ten",phoneticEs:'Como "ten"',emoji:"🔟"},{value:"Eleven",phonetic:"Ilevn",phoneticEs:"once — ilevn, la e final casi no suena",emoji:"⚽"},
+ {value:"Twelve",phonetic:"Tuelv",phoneticEs:"doce — tu + elv, sin e final",emoji:"🕛"},
+ {value:"Thirteen",phonetic:"Thir-TIN",phoneticEs:"trece — acento en TIN. ¡No confundas con thirty!",emoji:"🪜"},
+ {value:"Fourteen",phonetic:"For-TIN",phoneticEs:"catorce — for + TIN",emoji:"💘"},
+ {value:"Fifteen",phonetic:"Fif-TIN",phoneticEs:"quince — five PIERDE la V: fif + TIN (¡morfología!)",emoji:"👑"},
+ {value:"Sixteen",phonetic:"Siks-TIN",phoneticEs:"dieciséis — siks + TIN",emoji:"🎉"},
+ {value:"Seventeen",phonetic:"Sévn-TIN",phoneticEs:"diecisiete — sévn + TIN",emoji:"🎧"},
+ {value:"Eighteen",phonetic:"Eyt-TIN",phoneticEs:"dieciocho — solo UNA t: eyt + TIN",emoji:"🎓"},
+ {value:"Nineteen",phonetic:"Náin-TIN",phoneticEs:"diecinueve — náin + TIN",emoji:"🎯"},
+ {value:"Twenty",phonetic:"TUÉN-ti",phoneticEs:"veinte — acento ATRÁS: TUÉN-ti",emoji:"🎈"},
+ {value:"Thirty",phonetic:"THIR-ti",phoneticEs:"treinta — TH como en think + acento atrás",emoji:"🌞"},
+ {value:"Forty",phonetic:"FOR-ti",phoneticEs:"cuarenta — se escribe FORTY sin u (¡trampa clásica!)",emoji:"⏱️"},
+ {value:"Fifty",phonetic:"FIF-ti",phoneticEs:"cincuenta — five→fif otra vez + ti",emoji:"🌗"},
+ {value:"Sixty",phonetic:"SIKS-ti",phoneticEs:"sesenta — siks + ti",emoji:"🎲"},
+ {value:"Seventy",phonetic:"SÉVN-ti",phoneticEs:"setenta — sévn + ti",emoji:"🕐"},
+ {value:"Eighty",phonetic:"EY-ti",phoneticEs:"ochenta — ey + ti, sin t doble",emoji:"♾️"},
+ {value:"Ninety",phonetic:"NAIN-ti",phoneticEs:"noventa — náin + ti",emoji:"🦺"},
+ {value:"One hundred",phonetic:"uan HAN-dred",phoneticEs:"cien — la H suena suavecita: han-dred",emoji:"💯"},
+ {value:"One hundred ten",phonetic:"uan han-dred TEN",phoneticEs:"ciento diez — en USA se dice sin and",emoji:"🚀"},
+ {value:"One hundred twenty",phonetic:"uan han-dred TUÉN-ti",phoneticEs:"ciento veinte — piezas que ya sabes, pegadas",emoji:"🛸"},
+ {value:"Two hundred",phonetic:"tu HAN-dred",phoneticEs:"doscientos — hundred NUNCA lleva s con números exactos",emoji:"🥈"},
+ {value:"Three hundred",phonetic:"zri HAN-dred",phoneticEs:"trescientos — zri + han-dred",emoji:"🥉"},
+ {value:"One thousand",phonetic:"uan THAU-sand",phoneticEs:"mil — TH de think: thau-sand",emoji:"🏆"},
+ {value:"Two thousand",phonetic:"tu THAU-sand",phoneticEs:"dos mil — tu + thau-sand",emoji:"💎"},
+ {value:"Three thousand",phonetic:"zri THAU-sand",phoneticEs:"tres mil — zri + thau-sand. ¡Ya cuentas hasta tres mil!",emoji:"🌟"}];
 
 const GREETINGS=[
  {value:"Hello",phonetic:"Jelóu",phoneticEs:'La "h" es muda, "j" suave',translation:"Hola",emoji:"👋"},
@@ -327,7 +351,7 @@ const MELODY_QUIZ=[
 const DATA={vowels:VOWELS,alphabet:ALPHABET,numbers:NUMBERS,greetings:GREETINGS,pronouns:PRONOUNS,phrases:PHRASES,verbs:VERBS,combos:COMBOS,melody:MELODIES};
 
 const I18N={
- es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{vowels:" Vocales",alphabet:" Alfabeto",numbers:" Números 1-10",greetings:" Saludos",pronouns:" Pronombres",phrases:" Frases",verbs:" Verbos",combos:" Combos",melody:" Melodía"},
+ es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{vowels:" Vocales",alphabet:" Alfabeto",numbers:" Números",greetings:" Saludos",pronouns:" Pronombres",phrases:" Frases",verbs:" Verbos",combos:" Combos",melody:" Melodía"},
      say:"DÍLO ASÍ:",listen:"🔊 Escuchar",slow:"🐢 Lento",normal:"🚶 Normal",fast:"🏃 Rápido",
      recTitle:"Graba tu voz",rec:"Grabar",stop:"Detener",play:"Escucharte",
      prev:"Anterior",next:"Siguiente",quizOn:"🧠 Modo Quiz",quizOff:"✖️ Salir del Quiz",
@@ -336,7 +360,7 @@ const I18N={
      qReplay:"🔊 Escuchar otra vez",correct:"¡Correcto! +1 punto 🎉",wrong:"¡Uy! Tu oído acaba de encontrar su gimnasio 💪",
      statement:"Afirmación ↘",question:"Pregunta ↗",certTitle:"Certificado de Logro",
      certSub:"¡Felicitaciones! ¡Has ganado 100 puntos!",certBody:"¡Completaste el Entrenador de Inglés Básico!",certBtn:"Seguir Aprendiendo 🚀"},
- en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{vowels:" Vowels",alphabet:" Alphabet",numbers:" Numbers 1-10",greetings:" Greetings",pronouns:" Pronouns",phrases:" Phrases",verbs:" Verbs",combos:" Combos",melody:" Melody"},
+ en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{vowels:" Vowels",alphabet:" Alphabet",numbers:" Numbers",greetings:" Greetings",pronouns:" Pronouns",phrases:" Phrases",verbs:" Verbs",combos:" Combos",melody:" Melody"},
      say:"SAY IT LIKE:",listen:"🔊 Listen",slow:"🐢 Slow",normal:"🚶 Normal",fast:"🏃 Fast",
      recTitle:"Record your voice",rec:"Record",stop:"Stop",play:"Play",
      prev:"Prev",next:"Next",quizOn:"🧠 Quiz Mode",quizOff:"✖️ Exit Quiz",
@@ -580,14 +604,12 @@ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 let recog=null,heardAlts=[],recogDead=false,evalTimer=null;
 const bestKey=()=>"eft_best_"+tab+"_"+idx;
 const bestScore=()=>parseInt(lsGet(bestKey(),"0"),10)||0;
-const NUMWORD={1:"one",2:"two",3:"three",4:"four",5:"five",6:"six",7:"seven",8:"eight",9:"nine",10:"ten",A:"a",B:"bee",C:"see",D:"dee",E:"e",F:"eff",G:"gee"};
+const NUMWORD={1:"one",2:"two",3:"three",4:"four",5:"five",6:"six",7:"seven",8:"eight",9:"nine",10:"ten",11:"eleven",12:"twelve",13:"thirteen",14:"fourteen",15:"fifteen",16:"sixteen",17:"seventeen",18:"eighteen",19:"nineteen",20:"twenty",30:"thirty",40:"forty",50:"fifty",60:"sixty",70:"seventy",80:"eighty",90:"ninety",100:"one hundred",110:"one hundred ten",120:"one hundred twenty",200:"two hundred",300:"three hundred",1000:"one thousand",2000:"two thousand",3000:"three thousand",A:"a",B:"bee",C:"see",D:"dee",E:"e",F:"eff",G:"gee"};
 function normTxt(s){return String(s||"").toLowerCase().replace(/[.,!?;:'"()]/g," ").replace(/\s+/g," ").trim()}
 function normTokens(txt){
-  return normTxt(txt).split(" ").filter(Boolean).map(w=>{
-    const up=w.toUpperCase();
-    if(NUMWORD[up])return NUMWORD[up];
-    if(NUMWORD[w])return NUMWORD[w];
-    return w});
+  return normTxt(txt).split(" ").filter(Boolean).flatMap(w=>{
+    const rep=NUMWORD[w.toUpperCase()]||NUMWORD[w]||w;
+    return String(rep).split(" ")});
 }
 function lev(a,b){
   const m=a.length,n=b.length;if(!m)return n;if(!n)return m;
