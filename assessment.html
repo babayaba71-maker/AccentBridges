@@ -89,7 +89,7 @@ const LVLColor={"A0":"#10b981","A1":"#22c55e","A2":"#eab308","B1":"#f97316"};
 
 /* ============ STATE ============ */
 const $=id=>document.getElementById(id);
-let dimIdx=0,qIdx=0,results={},rec=null,chunks=[],SR=window.SpeechRecognition||window.webkitSpeechRecognition,recog=null,heard=[];
+let dimIdx=0,qIdx=0,results={},isRecording=false,SR=window.SpeechRecognition||window.webkitSpeechRecognition,recog=null,heard=[];
 let curOrder=[],curAns=0;
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
@@ -175,17 +175,17 @@ function renderMouth(q){
 }
 function toggleRec(){
   const b=$("recBtn");
-  if(rec&&rec.state==="recording"){rec.stop();try{recog.stop()}catch(e){};setTimeout(gradeMouth,1300);return}
-  navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
-    heard=[];chunks=[];rec=new MediaRecorder(stream);
-    rec.ondataavailable=e=>chunks.push(e.data);
-    rec.onstop=()=>{stream.getTracks().forEach(x=>x.stop())};
-    rec.start();
-    try{recog=new SR();recog.lang="en-US";recog.interimResults=false;recog.maxAlternatives=3;recog.continuous=true;
+  if(isRecording){isRecording=false;try{recog.stop()}catch(e){};setTimeout(gradeMouth,1300);return}
+  if(!SR){alert("Este navegador no soporta reconocimiento de voz — usa Chrome");return}
+  heard=[];
+  try{
+    recog=new SR();recog.lang="en-US";recog.interimResults=false;recog.maxAlternatives=3;recog.continuous=true;
     recog.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal){const al=e.results[i];for(let j=0;j<al.length;j++)if(al[j].transcript&&heard.length<6)heard.push(al[j].transcript)}}};
-    recog.start()}catch(e){}
+    recog.onerror=()=>{};
+    recog.start();
+    isRecording=true;
     b.classList.add("stop");b.textContent="⏹ Parar y calificar";
-  }).catch(()=>alert("No pude acceder al micrófono 😢"));
+  }catch(e){alert("No pude acceder al micrófono 😢")}
 }
 function micTest(b){
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){b.textContent="🚫 Este navegador NO soporta microfono — abre en Chrome";b.style.background="#ef4444";b.style.color="#fff";return}
