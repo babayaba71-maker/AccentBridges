@@ -59,7 +59,7 @@ const BANDS=["A0","A1","A2","B1"];
 const DIMS=[
  {id:"ear",name:"Oído 👂",intro:"Vas a ESCUCHAR sonidos en inglés y elegir lo que oíste. Usa audífonos si tienes. No traduzcas — siente el sonido."},
  {id:"eye",name:"Ojo 👁",intro:"Preguntas de lo que VES: anclas, escritura y sílabas. El ojo también entrena."},
- {id:"mouth",name:"Boca 👅",intro:"Vas a GRABAR tu voz diciendo frases. Chrome te califica del 1 al 100. Habla fuerte y claro."}
+ {id:"mouth",name:"Boca 👅",intro:"Vas a GRABAR tu voz diciendo frases. Chrome te califica del 1 al 100. Habla fuerte y claro. ⚠️ IMPORTANTE: si abriste este enlace DENTRO de WhatsApp, no te va a escuchar — cópialo y ábrelo en CHROME puro (fuera de WhatsApp) para que el micrófono funcione."}
 ];
 const Q={
  ear:[
@@ -187,7 +187,7 @@ function toggleRec(){
 function gradeMouth(){
   const q=Q[DIMS[dimIdx].id][qIdx];const box=$("scoreBox");if(!box||box.dataset.done)return;box.dataset.done="1";
   const res=pronScore(heard,q.target);
-  if(!res||(!res.score&&!res.heard)){box.innerHTML='<div class="score-msg" style="color:#ef4444">🔇 No te escuché bien — habla fuerte y reintenta</div><button class="selfbtn" onclick="retryMouth()">🔁 Reintentar</button><button class="selfbtn" onclick="selfEval(false)">🤔 Se me atoró</button>';box.style.display="block";return}
+  if(!res||(!res.score&&!res.heard)){box.innerHTML='<div class="score-msg" style="color:#ef4444">🔇 No te escuché bien — habla fuerte y reintenta. Si estás dentro de WhatsApp, ábreme en CHROME (fuera de WhatsApp) para que el micrófono funcione</div><button class="selfbtn" onclick="retryMouth()">🔁 Reintentar</button><button class="selfbtn" onclick="selfEval(false)">🤔 Se me atoró</button>';box.style.display="block";return}
   const ok=res.score>=70;
   box.innerHTML=`<div class="score-num" style="color:${ok?"#10b981":"#eab308"}">${res.score}<span style="font-size:16px">/100</span></div>
   <div class="score-stars">${"⭐".repeat(Math.max(1,Math.round(res.score/20)))}</div>
