@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#5d46e2">
+<title>English Foundation Trainer — Myl AccentBridges</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+<style>
+:root{
+  --primary:#5d46e2;--primary-dark:#4c38c4;--bg:#f3f5fa;--card:#ffffff;--text:#1f2937;
+  --text-soft:#6b7280;--accent-bg:#fff0f3;--accent-border:#f3d8e6;--accent-text:#8b5cf6;
+  --pill:#ffffff;--pill-active:#5d46e2;--pill-text:#374151;--ok:#10b981;--bad:#ef4444;
+  --shadow:0 10px 30px rgba(93,70,226,.12);
+}
+[data-theme="dark"]{
+  --primary:#7c6cff;--primary-dark:#5d46e2;--bg:#0f1222;--card:#181b2e;--text:#e5e7eb;
+  --text-soft:#9ca3af;--accent-bg:#241a2b;--accent-border:#3b2a47;--accent-text:#c4b5fd;
+  --pill:#232642;--pill-active:#5d46e2;--pill-text:#d1d5db;--ok:#34d399;--bad:#f87171;
+  --shadow:0 10px 30px rgba(0,0,0,.45);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;transition:background .3s,color .3s}
+header{background:var(--primary);color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;box-shadow:0 4px 14px rgba(93,70,226,.35);position:sticky;top:0;z-index:20}
+.h-left{display:flex;align-items:center;gap:10px;min-width:0}
+.h-flag{font-size:24px}
+.h-titles{min-width:0}
+h1{font-size:17px;font-weight:800;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h-sub{font-size:11.5px;opacity:.85;font-weight:500}
+.h-right{display:flex;gap:8px;align-items:center}
+.h-btn{border:none;background:rgba(255,255,255,.18);color:#fff;border-radius:999px;padding:7px 12px;font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;transition:background .2s}
+.h-btn:active{background:rgba(255,255,255,.32)}
+.progress-wrap{max-width:720px;width:100%;margin:14px auto 4px;padding:0 16px}
+.progress-card{background:var(--card);border-radius:16px;padding:12px 16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px}
+.p-label{font-size:12px;color:var(--text-soft);font-weight:700;white-space:nowrap}
+.p-track{flex:1;height:10px;background:var(--bg);border-radius:999px;overflow:hidden;position:relative}
+.p-fill{height:100%;background:linear-gradient(90deg,var(--primary),#f59e0b);border-radius:999px;width:0%;transition:width .5s}
+.p-pts{font-size:13px;font-weight:800;color:var(--primary);white-space:nowrap}
+main{max-width:720px;width:100%;margin:0 auto;padding:10px 16px 90px;flex:1}
+nav.tabs{display:flex;gap:8px;overflow-x:auto;padding:10px 16px;max-width:720px;margin:0 auto;width:100%;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;border:1.5px solid transparent;background:var(--pill);color:var(--pill-text);border-radius:999px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;display:flex;gap:6px;align-items:center;transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.tab.active{background:var(--pill-active);color:#fff;box-shadow:0 4px 12px rgba(93,70,226,.4)}
+.card{background:var(--card);border-radius:24px;padding:28px 20px 22px;box-shadow:var(--shadow);text-align:center;animation:pop .35s ease}
+@keyframes pop{0%{opacity:0;transform:translateY(10px) scale(.97)}100%{opacity:1;transform:none}}
+.emoji{font-size:64px;line-height:1;margin-bottom:8px}
+.value{font-size:46px;font-weight:900;color:var(--primary);letter-spacing:.5px;word-break:break-word}
+.translation{font-size:17px;color:var(--text-soft);font-weight:600;margin-top:4px}
+.say-box{background:var(--accent-bg);border:1.5px solid var(--accent-border);border-radius:18px;padding:14px;margin-top:18px}
+.say-label{font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text-soft)}
+.say-phon{font-size:30px;font-weight:900;color:var(--accent-text);margin:4px 0 6px}
+.say-tip{font-size:13px;font-style:italic;color:var(--accent-text);opacity:.95}
+.melody-note{font-size:13px;color:var(--text-soft);font-style:italic;margin-top:8px}
+.curve{margin:14px auto 4px;display:block}
+.dots{display:flex;gap:7px;justify-content:center;margin:18px 0 4px;flex-wrap:wrap}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--text-soft);opacity:.35;cursor:pointer;border:none;padding:0;transition:all .2s}
+.dot.on{background:var(--primary);opacity:1;transform:scale(1.25)}
+.btn{display:block;width:100%;border:none;border-radius:16px;padding:16px;font-size:16.5px;font-weight:800;cursor:pointer;transition:transform .1s,box-shadow .2s;margin-top:14px}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 6px 16px rgba(93,70,226,.4)}
+.btn-secondary{background:var(--accent-bg);color:var(--primary);border:1.5px solid var(--accent-border)!important}
+.btn-ghost{background:transparent;color:var(--text-soft);border:1.5px solid var(--text-soft)!important;opacity:.85}
+.row{display:flex;gap:10px}
+.row .btn{flex:1}
+.speed-row{display:flex;gap:8px;justify-content:center;margin-top:12px;align-items:center}
+.speed-chip{border:1.5px solid var(--text-soft);background:transparent;color:var(--text-soft);border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:700;cursor:pointer;transition:all .2s}
+.speed-chip.on{border-color:var(--primary);background:var(--primary);color:#fff}
+.rec-zone{margin-top:16px;background:var(--accent-bg);border:1.5px dashed var(--accent-border);border-radius:18px;padding:14px}
+.rec-title{font-size:13px;font-weight:800;color:var(--accent-text);display:flex;align-items:center;gap:6px;justify-content:center}
+.rec-row{display:flex;gap:10px;margin-top:10px}
+.rec-btn{flex:1;border:none;border-radius:12px;padding:12px;font-weight:800;font-size:14px;cursor:pointer;background:var(--primary);color:#fff}
+.rec-btn.stop{background:var(--bad)}
+.rec-btn.play{background:var(--accent-text);color:#fff}
+audio.rec-play{width:100%;margin-top:10px}
+.quiz-zone{margin-top:18px;background:var(--card);border:2px solid var(--primary);border-radius:24px;padding:20px;text-align:center;box-shadow:var(--shadow);animation:pop .3s ease}
+.q-title{font-size:16px;font-weight:900;color:var(--primary);margin-bottom:4px}
+.q-sub{font-size:12.5px;color:var(--text-soft);margin-bottom:14px}
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.q-opts.one-col{grid-template-columns:1fr}
+.q-opt{border:2px solid var(--accent-border);background:var(--accent-bg);border-radius:14px;padding:14px 8px;font-size:14.5px;font-weight:800;color:var(--text);cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:4px;align-items:center}
+.q-opt .q-emoji{font-size:24px}
+.q-opt.correct{border-color:var(--ok);background:rgba(16,185,129,.12)}
+.q-opt.wrong{border-color:var(--bad);background:rgba(239,68,68,.10)}
+.q-feedback{margin-top:12px;font-size:13.5px;font-weight:700;min-height:20px}
+.q-replay{margin-top:10px;font-size:13px;font-weight:700;color:var(--primary);background:none;border:none;text-decoration:underline;cursor:pointer}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);color:var(--text);border-radius:999px;padding:12px 22px;font-size:14px;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:50;transition:transform .4s cubic-bezier(.2,.9,.3,1.2);display:flex;gap:8px;align-items:center;border:1.5px solid var(--accent-border)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.waveform{display:flex;gap:3px;height:26px;align-items:center;justify-content:center;margin-top:12px}
+.waveform-bar{width:4px;border-radius:2px;background:var(--primary);opacity:.25;animation:wave 1s ease-in-out infinite}
+.waveform-bar--active{opacity:1}
+@keyframes wave{0%,100%{height:6px}50%{height:24px}}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,18,34,.7);display:flex;align-items:center;justify-content:center;z-index:60;padding:20px;backdrop-filter:blur(3px)}
+.certificate{background:var(--card);border-radius:24px;padding:12px;max-width:380px;width:100%;animation:pop .4s ease}
+.certificate-border{border:3px double var(--primary);border-radius:18px;padding:26px 20px;text-align:center}
+.certificate-title{font-size:52px}
+.certificate h2{margin:8px 0 6px;color:var(--primary);font-size:20px}
+.certificate-subtitle{font-size:14px;color:var(--text);font-weight:700}
+.certificate-body{font-size:13px;color:var(--text-soft);margin:8px 0 16px}
+footer{margin-top:auto;text-align:center;padding:16px;font-size:11.5px;color:var(--text-soft);opacity:.8}
+.melody-chip{display:inline-flex;align-items:center;gap:6px;background:var(--accent-bg);border:1.5px solid var(--accent-border);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:800;color:var(--accent-text);margin-top:10px}
+@media(max-width:420px){.value{font-size:38px}.emoji{font-size:54px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="h-left">
+    <span class="h-flag">🇺🇸</span>
+    <div class="h-titles">
+      <h1 id="hTitle">English Foundation Trainer</h1>
+      <div class="h-sub" id="hSub">Para hispanohablantes · Nivel A1</div>
+    </div>
+  </div>
+  <div class="h-right">
+    <button class="h-btn" id="langBtn" onclick="toggleLang()">🇪🇸 ES</button>
+    <button class="h-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-card">
+    <span class="p-label" id="pLabel">🏆 Puntos</span>
+    <div class="p-track"><div class="p-fill" id="pFill"></div></div>
+    <span class="p-pts" id="pPts">0</span>
+  </div>
+</div>
+
+<nav class="tabs" id="tabs"></nav>
+
+<main>
+  <div class="card" id="mainCard"></div>
+  <div class="dots" id="dots"></div>
+  <div id="listenZone"></div>
+  <div class="rec-zone" id="recZone">
+    <div class="rec-title" id="recTitle">🎤 <span id="recTitleTxt">Graba tu voz</span></div>
+    <div class="rec-row">
+      <button class="rec-btn" id="recBtn" onclick="toggleRecord()">⏺ <span id="recBtnTxt">Grabar</span></button>
+      <button class="rec-btn play" id="recPlayBtn" onclick="playRecording()" style="display:none">▶️ <span id="recPlayTxt">Escuchar</span></button>
+    </div>
+    <audio class="rec-play" id="recAudio" controls style="display:none"></audio>
+  </div>
+  <div class="quiz-zone" id="quizZone" style="display:none"></div>
+  <div class="row" style="margin-top:14px">
+    <button class="btn btn-ghost" id="prevBtn" onclick="nav(-1)">← <span id="prevTxt">Anterior</span></button>
+    <button class="btn btn-primary" id="nextBtn" onclick="nav(1)"><span id="nextTxt">Siguiente</span> →</button>
+  </div>
+  <button class="btn btn-secondary" id="quizToggle" onclick="toggleQuiz()">🧠 <span id="quizToggleTxt">Modo Quiz</span></button>
+  <footer>Parte del ecosistema Myl AccentBridges 🇲🇽➡️🇺🇸 · Alma &amp; Clyde</footer>
+</main>
+
+<div class="toast" id="toast"></div>
+<div class="modal-overlay" id="certModal" style="display:none" onclick="closeCert(event)">
+  <div class="certificate">
+    <div class="certificate-border">
+      <div class="certificate-title">🎓</div>
+      <h2 id="certTitle">Certificado de Logro</h2>
+      <p class="certificate-subtitle" id="certSub">¡Felicitaciones! ¡Has ganado 100 puntos!</p>
+      <p class="certificate-body" id="certBody">¡Completaste el Entrenador de Inglés Básico!</p>
+      <button class="btn btn-primary" onclick="hideCert()" id="certBtn">Seguir Aprendiendo 🚀</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= DATA ================= */
+const VOWELS=[
+ {value:"A",phonetic:"Ey",phoneticEs:'Como "ey" en "rey" 👑',emoji:"🍎"},
+ {value:"E",phonetic:"Ii",phoneticEs:'Como "ii" en español',emoji:"🐘"},
+ {value:"I",phonetic:"Ai",phoneticEs:'Como "ai" en español',emoji:"🍦"},
+ {value:"O",phonetic:"Ou",phoneticEs:'Como "ou" en español',emoji:"🍊"},
+ {value:"U",phonetic:"Iu",phoneticEs:'Como "iu" en español',emoji:"☂️"}];
+
+const ALPHABET=[
+ {value:"A",phonetic:"Ey",phoneticEs:'Como "ey" en "rey" 👑',emoji:"🍎"},
+ {value:"B",phonetic:"Bi",phoneticEs:'Como "bi"',emoji:"🐝"},
+ {value:"C",phonetic:"Si",phoneticEs:'Como "si"',emoji:"🐱"},
+ {value:"D",phonetic:"Di",phoneticEs:'Como "di"',emoji:"🐶"},
+ {value:"E",phonetic:"Ii",phoneticEs:'Como "ii"',emoji:"🐘"},
+ {value:"F",phonetic:"Ef",phoneticEs:'Como "ef"',emoji:"🐸"},
+ {value:"G",phonetic:"Lli",phoneticEs:'Como "lli" (sonido suave "yi")',emoji:"🦒"},
+ {value:"H",phonetic:"Eich",phoneticEs:'Como "eich"',emoji:"🏠"},
+ {value:"I",phonetic:"Ai",phoneticEs:'Como "ai"',emoji:"🍦"},
+ {value:"J",phonetic:"Yei",phoneticEs:'Como "yei"',emoji:"🃏"},
+ {value:"K",phonetic:"Key",phoneticEs:'Como "key" (rima con rey 👑)',emoji:"🔑"},
+ {value:"L",phonetic:"El",phoneticEs:'Como "el"',emoji:"🦁"},
+ {value:"M",phonetic:"Em",phoneticEs:'Como "em"',emoji:"🐒"},
+ {value:"N",phonetic:"En",phoneticEs:'Como "en"',emoji:"🌙"},
+ {value:"O",phonetic:"Ou",phoneticEs:'Como "ou"',emoji:"🍊"},
+ {value:"P",phonetic:"Pi",phoneticEs:'Como "pi"',emoji:"🐧"},
+ {value:"Q",phonetic:"Kiu",phoneticEs:'Como "kiu"',emoji:"👸"},
+ {value:"R",phonetic:"Ar",phoneticEs:'Como "ar" (relajada, nos vamos a entender 😊)',emoji:"🌹"},
+ {value:"S",phonetic:"Es",phoneticEs:'Como "es"',emoji:"☀️"},
+ {value:"T",phonetic:"Ti",phoneticEs:'Como "ti"',emoji:"🐯"},
+ {value:"U",phonetic:"Iu",phoneticEs:'Como "iu"',emoji:"☂️"},
+ {value:"V",phonetic:"Vi",phoneticEs:'Como "vi"',emoji:"🌋"},
+ {value:"W",phonetic:"Dábliu",phoneticEs:'Como "dábliu"',emoji:"🐋"},
+ {value:"X",phonetic:"Eks",phoneticEs:'Como "eks"',emoji:"✖️"},
+ {value:"Y",phonetic:"Uai",phoneticEs:'Como "uai"',emoji:"🪀"},
+ {value:"Z",phonetic:"Si",phoneticEs:'Como "si" (US) o "sed" (UK)',emoji:"🦓"}];
+
+const NUMBERS=[
+ {value:"One",phonetic:"Uán",phoneticEs:'Como "uán"',emoji:"1️⃣"},
+ {value:"Two",phonetic:"Tu",phoneticEs:'Como "tu"',emoji:"2️⃣"},
+ {value:"Three",phonetic:"Zri",phoneticEs:'La "th" es como una "z" suave',emoji:"3️⃣"},
+ {value:"Four",phonetic:"For",phoneticEs:'Como "for"',emoji:"4️⃣"},
+ {value:"Five",phonetic:"Faiv",phoneticEs:'Como "faiv"',emoji:"5️⃣"},
+ {value:"Six",phonetic:"Siks",phoneticEs:'Como "siks"',emoji:"6️⃣"},
+ {value:"Seven",phonetic:"Séven",phoneticEs:'Como "séven"',emoji:"7️⃣"},
+ {value:"Eight",phonetic:"Eit",phoneticEs:'Como "eit"',emoji:"8️⃣"},
+ {value:"Nine",phonetic:"Náin",phoneticEs:'Como "náin"',emoji:"9️⃣"},
+ {value:"Ten",phonetic:"Ten",phoneticEs:'Como "ten"',emoji:"🔟"}];
+
+const GREETINGS=[
+ {value:"Hello",phonetic:"Jelóu",phoneticEs:'La "h" es muda, "j" suave',translation:"Hola",emoji:"👋"},
+ {value:"Good morning",phonetic:"Gud mórning",phoneticEs:'Como "gud mórning"',translation:"Buenos días",emoji:"🌅"},
+ {value:"Good afternoon",phonetic:"Gud aftérnun",phoneticEs:'Como "gud aftérnun"',translation:"Buenas tardes",emoji:"☀️"},
+ {value:"Good night",phonetic:"Gud náit",phoneticEs:'Como "gud náit"',translation:"Buenas noches",emoji:"🌙"},
+ {value:"Goodbye",phonetic:"Gudbái",phoneticEs:'Como "gudbái"',translation:"Adiós",emoji:"👏"},
+ {value:"Thank you",phonetic:"Zank iu",phoneticEs:'"th" = "z" suave, como "zank iu"',translation:"Gracias",emoji:"🙏"},
+ {value:"Please",phonetic:"Plis",phoneticEs:'Como "plis"',translation:"Por favor",emoji:"😊"},
+ {value:"Sorry",phonetic:"Sóri",phoneticEs:'Como "sóri"',translation:"Lo siento",emoji:"😔"},
+ {value:"Yes",phonetic:"Yes",phoneticEs:'Como "yes"',translation:"Sí",emoji:"✅"},
+ {value:"No",phonetic:"Nou",phoneticEs:'Como "nou"',translation:"No",emoji:"❌"}];
+
+/* ===== MELODY / INTONATION (upgrade AccentBridges) ===== */
+const MELODIES=[
+ {kind:"statement",es_title:"Afirmación",en_title:"Statement",emoji:"💬",
+  es_pattern:"La voz BAJA al final ↘",en_pattern:"The voice FALLS at the end ↘",
+  es_note:"Al decir algo normal, tu voz baja al final — como una flecha que aterriza.",
+  en_note:"In normal statements, your voice falls at the end — like an arrow landing.",
+  example:"She's a teacher.",curve:"fall"},
+ {kind:"question",es_title:"Pregunta de sí/no",en_title:"Yes/No Question",emoji:"❓",
+  es_pattern:"La voz SUBE al final ↗",en_pattern:"The voice RISES at the end ↗",
+  es_note:"Cuando preguntas algo que se responde sí o no, tu voz sube — como sube una escalera.",
+  en_note:"When you ask a yes/no question, your voice goes up — like going up stairs.",
+  example:"Are you ready?",curve:"rise"},
+ {kind:"wh",es_title:"Pregunta con WH (What, Where, When...)",en_title:"WH Question",emoji:"🤔",
+  es_pattern:"También BAJA al final ↘",en_pattern:"Also FALLS at the end ↘",
+  es_note:"Ojo: aunque es pregunta, la voz baja — porque ya sabes qué tipo de respuesta esperas.",
+  en_note:"Careful: even though it's a question, the voice falls — you know what answer you expect.",
+  example:"Where do you live?",curve:"fall"},
+ {kind:"choice",es_title:"Elección (o... o...)",en_title:"Choice (or... or...)",emoji:"🔀",
+  es_pattern:"Sube ↗ en la primera, baja ↘ en la última",en_pattern:"Rises ↗ on the first, falls ↘ on the last",
+  es_note:"Cuando ofreces opciones, tu voz sube en cada opción y baja al llegar a la última.",
+  en_note:"When offering options, your voice rises on each one and falls on the last.",
+  example:"Do you want tea or coffee?",curve:"updown"},
+ {kind:"tag-sure",es_title:"Tag question — SEGURO",en_title:"Tag Question — SURE",emoji:"😎",
+  es_pattern:"Baja ↘ = ya sé la respuesta",en_pattern:"Falls ↘ = I already know the answer",
+  es_note:"Mismas palabras, distinta melodía. Si estoy seguro de que vienes, la voz baja: espero tu 'sí'.",
+  en_note:"Same words, different melody. If I'm sure you're coming, my voice falls: I expect your 'yes'.",
+  example:"You're coming, aren't you?",curve:"fall"},
+ {kind:"tag-unsure",es_title:"Tag question — PREGUNTANDO DE VERDAD",en_title:"Tag Question — REALLY ASKING",emoji:"🤔",
+  es_pattern:"Sube ↗ = no estoy seguro",en_pattern:"Rises ↗ = I'm not sure",
+  es_note:"Aquí la voz sube al final: es una pregunta genuina. ¡La melodía cambia el mensaje!",
+  en_note:"Here the voice rises: it's a genuine question. The melody changes the message!",
+  example:"You're coming... aren't you?",curve:"rise"}];
+
+/* Frases para el quiz de melodía: el TTS sí distingue afirmación vs pregunta por la puntuación */
+const MELODY_QUIZ=[
+ {text:"She's a teacher.",answer:"statement"},
+ {text:"Are you ready?",answer:"question"},
+ {text:"I like coffee.",answer:"statement"},
+ {text:"Do you like it?",answer:"question"},
+ {text:"We're going home.",answer:"statement"},
+ {text:"Is she here?",answer:"question"},
+ {text:"It's a nice day.",answer:"statement"},
+ {text:"Can you help me?",answer:"question"},
+ {text:"You're my friend.",answer:"statement"},
+ {text:"Are you coming?",answer:"question"},
+ {text:"This is my house.",answer:"statement"},
+ {text:"Do you speak English?",answer:"question"}];
+
+const DATA={vowels:VOWELS,alphabet:ALPHABET,numbers:NUMBERS,greetings:GREETINGS,melody:MELODIES};
+
+const I18N={
+ es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{vowels:" Vocales",alphabet:" Alfabeto",numbers:" Números 1-10",greetings:" Saludos",melody:" Melodía"},
+     say:"DÍLO ASÍ:",listen:"🔊 Escuchar",slow:"🐢 Lento",normal:"🚶 Normal",fast:"🏃 Rápido",
+     recTitle:"Graba tu voz",rec:"Grabar",stop:"Detener",play:"Escucharte",
+     prev:"Anterior",next:"Siguiente",quizOn:"🧠 Modo Quiz",quizOff:"✖️ Salir del Quiz",
+     qWordTitle:"¿Cuál escuchaste?",qWordSub:"Toca el botón para oír y elige la palabra correcta",
+     qMelTitle:"¿Afirmación o pregunta?",qMelSub:"Escucha la melodía de la voz y decide",
+     qReplay:"🔊 Escuchar otra vez",correct:"¡Correcto! +1 punto 🎉",wrong:"¡Uy! Tu oído acaba de encontrar su gimnasio 💪",
+     statement:"Afirmación ↘",question:"Pregunta ↗",certTitle:"Certificado de Logro",
+     certSub:"¡Felicitaciones! ¡Has ganado 100 puntos!",certBody:"¡Completaste el Entrenador de Inglés Básico!",certBtn:"Seguir Aprendiendo 🚀"},
+ en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{vowels:" Vowels",alphabet:" Alphabet",numbers:" Numbers 1-10",greetings:" Greetings",melody:" Melody"},
+     say:"SAY IT LIKE:",listen:"🔊 Listen",slow:"🐢 Slow",normal:"🚶 Normal",fast:"🏃 Fast",
+     recTitle:"Record your voice",rec:"Record",stop:"Stop",play:"Play",
+     prev:"Prev",next:"Next",quizOn:"🧠 Quiz Mode",quizOff:"✖️ Exit Quiz",
+     qWordTitle:"Which one did you hear?",qWordSub:"Tap to hear it and pick the right word",
+     qMelTitle:"Statement or question?",qMelSub:"Listen to the melody of the voice and decide",
+     qReplay:"🔊 Listen again",correct:"Correct! +1 point 🎉",wrong:"Oops! Your ear just found its gym 💪",
+     statement:"Statement ↘",question:"Question ↗",certTitle:"Certificate of Achievement",
+     certSub:"Congratulations! You earned 100 points!",certBody:"You completed the English Foundation Trainer!",certBtn:"Keep Learning 🚀"}};
+
+/* ================= STATE ================= */
+let lang="es", theme="light", tab="greetings", idx=0, speed=.9;
+let quizOn=false, quizOpts=null, quizPick=null, melQuiz=null, melPick=null;
+let speaking=false, recorder=null, recChunks=[], recURL=null;
+const stars=["","⭐","⭐⭐","⭐⭐⭐","⭐⭐⭐⭐","⭐⭐⭐⭐⭐","🌟🌟🌟🌟🌟🌟","💫💫💫💫💫💫💫","✨✨✨✨✨✨✨✨","🎯🎯🎯🎯🎯🎯🎯🎯🎯","🏆🏆🏆🏆🏆🏆🏆🏆🏆🏆"];
+const starsIdx=()=>Math.min(10,Math.floor(points()/10));
+
+const lsGet=(k,d)=>{try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+const points=()=>parseInt(lsGet("eft_points","0"),10)||0;
+const setPoints=p=>lsSet("eft_points",String(p));
+const errors=()=>{try{return JSON.parse(lsGet("eft_errors","{}"))}catch(e){return{}}};
+const setErrors=e=>lsSet("eft_errors",JSON.stringify(e));
+
+function t(){return I18N[lang]}
+function list(){return DATA[tab]}
+function card(){return list()[idx]}
+
+/* ================= SPEECH ================= */
+function speak(text,cb){
+  if(!window.speechSynthesis){alert("Tu navegador no soporta voz 😢");if(cb)cb();return}
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang="en-US";u.rate=speed;
+  const vs=speechSynthesis.getVoices().filter(v=>v.lang&&v.lang.startsWith("en"));
+  if(vs.length){const us=vs.find(v=>v.lang==="en-US")||vs[0];u.voice=us}
+  u.onstart=()=>{speaking=true;renderWave(true)};
+  u.onend=()=>{speaking=false;renderWave(false);if(cb)cb()};
+  u.onerror=()=>{speaking=false;renderWave(false);if(cb)cb()};
+  window.speechSynthesis.speak(u);
+}
+
+/* ================= RENDER ================= */
+const $=id=>document.getElementById(id);
+
+function render(){
+  $("hSub").textContent=t().sub;
+  $("pLabel").textContent=t().points;
+  $("pPts").textContent=points();
+  $("pFill").style.width=Math.min(100,points()%100)+"%";
+  $("prevTxt").textContent=t().prev;$("nextTxt").textContent=t().next;
+  $("recTitleTxt").textContent=t().recTitle;
+  $("recBtnTxt").textContent=recorder&&recorder.state==="recording"?t().stop:t().rec;
+  $("recPlayTxt").textContent=t().play;
+  $("quizToggleTxt").textContent=quizOn?t().quizOff:t().quizOn;
+  renderTabs();renderCard();renderDots();renderListen();renderQuiz();
+}
+
+function renderTabs(){
+  const icons={vowels:"🔤",alphabet:"📖",numbers:"🔢",greetings:"👋",melody:"🎵"};
+  $("tabs").innerHTML=Object.keys(DATA).map(k=>
+    `<button class="tab ${k===tab?"active":""}" onclick="setTab('${k}')">${icons[k]}${t().tabs[k]}</button>`).join("");
+}
+
+function curveSVG(type){
+  const c=lang==="es"?"#5d46e2":"#5d46e2";
+  const paths={
+   fall:`<path d="M12 22 Q 50 26 98 52" stroke="${c}" stroke-width="5" fill="none" stroke-linecap="round"/>
+         <path d="M98 52 l-12 -4 M98 52 l-6 -11" stroke="${c}" stroke-width="5" fill="none" stroke-linecap="round"/>`,
+   rise:`<path d="M12 52 Q 50 46 98 20" stroke="${c}" stroke-width="5" fill="none" stroke-linecap="round"/>
+         <path d="M98 20 l-12 4 M98 20 l-6 11" stroke="${c}" stroke-width="5" fill="none" stroke-linecap="round"/>`,
+   updown:`<path d="M8 48 Q 34 18 60 40" stroke="${c}" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M60 40 Q 84 60 104 34" stroke="${c}" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M104 34 l-11 2 M104 34 l-3 10" stroke="${c}" stroke-width="5" fill="none" stroke-linecap="round"/>`};
+  return `<svg class="curve" width="130" height="64" viewBox="0 0 112 64">${paths[type]}</svg>`;
+}
+
+function renderCard(){
+  const c=card();let html="";
+  if(tab==="melody"){
+    html=`<div class="emoji">${c.emoji}</div>
+      <div class="value" style="font-size:26px">${lang==="es"?c.es_title:c.en_title}</div>
+      ${curveSVG(c.curve)}
+      <div class="melody-chip">${lang==="es"?c.es_pattern:c.en_pattern}</div>
+      <div class="say-box">
+        <div class="say-label">${t().say}</div>
+        <div class="say-phon" style="font-size:22px">${c.example}</div>
+      </div>
+      <div class="melody-note">💡 ${lang==="es"?c.es_note:c.en_note}</div>`;
+  }else{
+    html=`<div class="emoji">${c.emoji}</div>
+      <div class="value">${c.value}</div>
+      ${c.translation?`<div class="translation">🇪🇸 ${c.translation}</div>`:""}
+      <div class="say-box">
+        <div class="say-label">${t().say}</div>
+        <div class="say-phon">${c.phonetic}</div>
+        <div class="say-tip">💡 ${lang==="es"?"Hispanohablantes: ":"Spanish speakers: "}${c.phoneticEs}</div>
+      </div>`;
+  }
+  $("mainCard").innerHTML=html;
+}
+
+function renderDots(){
+  $("dots").innerHTML=list().map((_,i)=>
+    `<button class="dot ${i===idx?"on":""}" onclick="go(${i})" aria-label="${i+1}"></button>`).join("");
+}
+
+function renderListen(){
+  const speeds=[[.6,"slow"],[.9,"normal"],[1.1,"fast"]];
+  $("listenZone").innerHTML=`
+    <button class="btn btn-primary" onclick="listenCard()">${t().listen}</button>
+    <div class="speed-row">${speeds.map(([v,k])=>
+      `<button class="speed-chip ${speed===v?"on":""}" onclick="setSpeed(${v})">${t()[k]}</button>`).join("")}</div>
+    <div class="waveform" id="wave">${Array.from({length:12}).map((_,i)=>
+      `<div class="waveform-bar" style="animation-delay:${(i*.08).toFixed(2)}s"></div>`).join("")}</div>`;
+}
+
+function renderWave(on){
+  const w=$("wave");if(!w)return;
+  w.querySelectorAll(".waveform-bar").forEach(b=>b.classList.toggle("waveform-bar--active",!!on));
+}
+
+function renderQuiz(){
+  const z=$("quizZone");
+  if(!quizOn){z.style.display="none";return}
+  z.style.display="block";
+  if(tab==="melody"){
+    if(!melQuiz)melQuiz=MELODY_QUIZ[Math.floor(Math.random()*MELODY_QUIZ.length)];
+    z.innerHTML=`
+      <div class="q-title">${t().qMelTitle}</div>
+      <div class="q-sub">${t().qMelSub}</div>
+      <button class="btn btn-secondary" style="margin-top:0" onclick="speak(melQuiz.text)">${t().listen}</button>
+      <div class="q-opts" style="margin-top:14px">
+        <button class="q-opt ${melPick==="statement"?"correct":melPick==="x"?"wrong":""}" onclick="melAnswer('statement')">${t().statement}</button>
+        <button class="q-opt ${melPick==="question"?"correct":melPick==="x"?"wrong":""}" onclick="melAnswer('question')">${t().question}</button>
+      </div>
+      <div class="q-feedback" id="melFb"></div>
+      <button class="q-replay" onclick="nextMelody()">${lang==="es"?"🔊 Siguiente frase →":"🔊 Next sentence →"}</button>`;
+  }else{
+    if(!quizOpts)buildQuizOpts();
+    z.innerHTML=`
+      <div class="q-title">${t().qWordTitle}</div>
+      <div class="q-sub">${t().qWordSub}</div>
+      <button class="btn btn-secondary" style="margin-top:0" onclick="speak(card().value)">${t().listen}</button>
+      <div class="q-opts" style="margin-top:14px">
+        ${quizOpts.map((o,i)=>`<button class="q-opt ${quizPick===i?"correct":quizPick===i+"x"?"wrong":""}" onclick="quizAnswer(${i})">
+          <span class="q-emoji">${o.emoji||""}</span>${o.value}</button>`).join("")}
+      </div>
+      <div class="q-feedback" id="qFb"></div>`;
+  }
+}
+
+/* ================= ACTIONS ================= */
+const setTab=k=>{tab=k;idx=0;quizOn=false;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;render()};
+const go=i=>{idx=i;quizPick=null;render()};
+const nav=d=>{idx=(idx+d+list().length)%list().length;quizPick=null;render()};
+const setSpeed=v=>{speed=v;render()};
+const listenCard=()=>speak(card().example||card().value);
+const toggleLang=()=>{lang=lang==="es"?"en":"es";$("langBtn").textContent=lang==="es"?"🇪🇸 ES":"🇺🇸 EN";render()};
+const toggleTheme=()=>{theme=theme==="light"?"dark":"light";document.documentElement.setAttribute("data-theme",theme);$("themeBtn").textContent=theme==="light"?"🌙":"☀️"};
+
+function toggleQuiz(){quizOn=!quizOn;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;render();
+  if(quizOn&&tab!=="melody"){setTimeout(()=>speak(card().value),250)}
+  if(quizOn&&tab==="melody"){setTimeout(()=>speak(melQuiz.text),250)}
+}
+
+function buildQuizOpts(){
+  const pool=[...list()],opts=[card()];
+  pool.splice(idx,1);
+  while(opts.length<4&&pool.length){const r=Math.floor(Math.random()*pool.length);opts.push(pool[r]);pool.splice(r,1)}
+  quizOpts=opts.sort(()=>Math.random()-.5);
+}
+
+function toast(msg){
+  const tEl=$("toast");tEl.innerHTML=msg;tEl.classList.add("show");
+  setTimeout(()=>tEl.classList.remove("show"),1800);
+}
+
+function awardPoint(word){
+  const p=points()+1;setPoints(p);
+  $("pPts").textContent=p;$("pFill").style.width=Math.min(100,p%100)+"%";
+  if(p%10===0&&p<100)toast(`⭐ ${stars[Math.min(10,p/10)]}`);
+  if(p>=100){showCert()}
+}
+
+function trackError(word){
+  const e=errors();e[word]=(e[word]||0)+1;setErrors(e);
+}
+
+function quizAnswer(i){
+  if(quizPick!==null)return;
+  const ok=quizOpts[i].value===card().value;
+  quizPick=ok?i:i+"x";
+  const fb=$("qFb");
+  if(ok){awardPoint(card().value);fb.style.color="var(--ok)";fb.textContent=t().correct;
+    setTimeout(()=>{quizOpts=null;quizPick=null;renderQuiz();if(quizOn)setTimeout(()=>speak(card().value),200)},1400)}
+  else{trackError(card().value);fb.style.color="var(--bad)";fb.textContent=t().wrong}
+}
+
+function melAnswer(kind){
+  if(melPick!==null)return;
+  const ok=melQuiz.answer===kind;
+  melPick=ok?kind:"x";
+  const fb=$("melFb");
+  if(ok){awardPoint("melody");fb.style.color="var(--ok)";fb.textContent=t().correct}
+  else{trackError("melody");fb.style.color="var(--bad)";fb.textContent=t().wrong;
+    setTimeout(()=>{speak(melQuiz.text)},900)}
+}
+
+function nextMelody(){
+  let n;do{n=MELODY_QUIZ[Math.floor(Math.random()*MELODY_QUIZ.length)]}while(n.text===melQuiz.text&&MELODY_QUIZ.length>1);
+  melQuiz=n;melPick=null;renderQuiz();setTimeout(()=>speak(melQuiz.text),200);
+}
+
+/* ================= RECORD ================= */
+async function toggleRecord(){
+  const btn=$("recBtn");
+  if(recorder&&recorder.state==="recording"){recorder.stop();return}
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    recChunks=[];recorder=new MediaRecorder(stream);
+    recorder.ondataavailable=e=>recChunks.push(e.data);
+    recorder.onstop=()=>{
+      stream.getTracks().forEach(x=>x.stop());
+      if(recURL)URL.revokeObjectURL(recURL);
+      recURL=URL.createObjectURL(new Blob(recChunks,{type:"audio/webm"}));
+      const au=$("recAudio");au.src=recURL;au.style.display="block";
+      $("recPlayBtn").style.display="block";
+      $("recBtnTxt").textContent=t().rec;$("recBtn").classList.remove("stop");
+      toast(lang==="es"?"🎧 ¡Escúchate! Compara con la maestra":"🎧 Listen to yourself!");
+    };
+    recorder.start();
+    $("recBtn").classList.add("stop");$("recBtnTxt").textContent=t().stop;
+  }catch(e){alert(lang==="es"?"No pude acceder al micrófono 😢":"Couldn't access the microphone 😢")}
+}
+function playRecording(){const au=$("recAudio");if(recURL)au.play()}
+
+/* ================= CERT ================= */
+function showCert(){$("certModal").style.display="flex"}
+function hideCert(){$("certModal").style.display="none"}
+function closeCert(e){if(e.target===$("certModal"))hideCert()}
+
+/* ================= INIT ================= */
+if(lsGet("eft_theme","")==="dark"){theme="dark";document.documentElement.setAttribute("data-theme","dark");$("themeBtn").textContent="☀️"}
+render();
+if(points()>=100)showCert();
+</script>
+</body>
+</html>
