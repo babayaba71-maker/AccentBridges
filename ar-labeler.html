@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Tri-Lingual Live AR Labeler — AccentBridges</title>
-  <!-- v1.7.1 fix THEY=dey (diptongo /eɪ/ como 'rey') + ladder completo: I ai · YOU iu · HE ji · SHE chi · WE ui · THEY dey + bifocal + estabilizador -->
+  <!-- v2.0 fix SUPERFICIES PLANAS: el botón 🧠 ahora envía la imagen al cerebro Gemini AUN SIN detección local — wall/floor/techo/paredes (el detector COCO no los conoce, Gemini sí). Cache por objeto identificado cuando no hay detección. (v1.7.1 fix THEY=dey (diptongo /eɪ/ como 'rey') + ladder completo: I ai · YOU iu · HE ji · SHE chi · WE ui · THEY dey + bifocal + estabilizador -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     html, body { margin: 0; padding: 0; background: #020617; overflow: hidden; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
@@ -763,9 +763,12 @@ let brainBusy = false, lastBrainTime = 0;
 async function brainScan(interactive) {
   if (brainBusy) { if (interactive) toast("🧠 Pensando... espera"); return; }
   if (performance.now() - lastBrainTime < (interactive ? 5000 : 10000)) { if (interactive) toast("⏱️ Rate limit: espera 5s entre escaneos"); return; }
-  if (!lastDetections.length) { if (interactive) toast("Apunta la cámara a un objeto primero 🙂"); return; }
+  // v2.0 FIX SUPERFICIES: el detector local (COCO) no conoce wall/floor/ceiling —
+  // el cerebro Gemini SÍ los distingue, así que ya NO exigimos detección local:
+  // sin objetos detectados enviamos la imagen sola y Gemini nos dice qué hay.
+  if (video.readyState < 2) { if (interactive) toast("Espera a que la cámara arranque 🙂"); return; }
 
-  const mainClass = (lastDetections[0].categories[0].categoryName || "").toLowerCase();
+  const mainClass = lastDetections.length ? (lastDetections[0].categories[0].categoryName || "").toLowerCase() : "";
   if (BRAIN_CACHE.has(mainClass)) {
     if (interactive) showBrainCard(BRAIN_CACHE.get(mainClass));
     return;
@@ -796,7 +799,7 @@ async function brainScan(interactive) {
     } else if (result.error) {
       if (interactive) toast("⚠️ " + (result.detail || result.error));
     } else {
-      BRAIN_CACHE.set(mainClass, result);
+      BRAIN_CACHE.set(mainClass || (result.object || "scene").toLowerCase(), result);
       lastSig = ""; // forzar re-render para que la tarjeta bifocal muestre los detalles
       if (interactive) {
         showBrainCard(result);
