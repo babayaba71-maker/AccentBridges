@@ -176,6 +176,46 @@ const VOWELS=[
  {value:"O",phonetic:"Ou",phoneticEs:'Como "ou" en español',emoji:"🍊"},
  {value:"U",phonetic:"Iu",phoneticEs:'Como "iu" en español',emoji:"☂️"}];
 
+
+/* ===== SOUNDS v2.6 — EL SISTEMA COMPLETO DE VOCALES + LOS 3 Y (Cartilla Americana paso 1) ===== */
+const SOUNDS=[
+ {value:"see",phonetic:"SII",phoneticEs:'Vocal ii LARGA — se estira: "siiii" (como sheep 🐑)',emoji:"🐑"},
+ {value:"ship",phonetic:"SIP",phoneticEs:'Vocal i CORTA — rápida, sin estirar (ship = barco, NO sheep)',emoji:"🚢"},
+ {value:"bed",phonetic:"BED",phoneticEs:'e corta — igual que en español',emoji:"🛏️"},
+ {value:"cat",phonetic:"KAT",phoneticEs:'Entre "e" y "a" — boca BIEN abierta, mandíbula abajo',emoji:"🐱"},
+ {value:"cup",phonetic:"KAP",phoneticEs:'u rápida y relajada — "kap" (no "kiup")',emoji:"☕"},
+ {value:"hot",phonetic:"JAT",phoneticEs:'a PROFUNDA de garganta — "jat"',emoji:"🌶️"},
+ {value:"blue",phonetic:"BLUU",phoneticEs:'u LARGA con labios redondos — "bluuu"',emoji:"💙"},
+ {value:"book",phonetic:"BUK",phoneticEs:'u corta relajada — "buk" (¡dos O, un solo sonido!)',emoji:"📚"},
+ {value:"go",phonetic:"GOU",phoneticEs:'ou — empieza con o y desliza a u',emoji:"🚦"},
+ {value:"rain",phonetic:"REIN",phoneticEs:'ei — rima con "rein" 👑',emoji:"🌧️"},
+ {value:"boy",phonetic:"BOI",phoneticEs:'oi — como en español "boy"',emoji:"👦"},
+ {value:"now",phonetic:"NAU",phoneticEs:'au — "nau" (empieza con a, cierra en u)',emoji:"⏰"},
+ {value:"about",phonetic:"ABAUT",phoneticEs:'SCHWA "uh" — la vocal más común del inglés (Episodio 3 🛋️)',emoji:"🛋️"},
+ {value:"bird",phonetic:"BERD",phoneticEs:'r COLORIDA — la vocal y la r se funden: "berrrd"',emoji:"🐦"},
+ {value:"yes",phonetic:"YES",phoneticEs:'LA Y #1: al INICIO = consonante "ye"',emoji:"✅"},
+ {value:"my",phonetic:"MAI",phoneticEs:'LA Y #2: al FINAL de palabra CORTA = "ai"',emoji:"😎"},
+ {value:"happy",phonetic:"JAPI",phoneticEs:'LA Y #3: al FINAL de palabra LARGA = i corta "i"',emoji:"😊"}];
+
+/* ===== DIGRAPHS v2.6 — DOS LETRAS, UN SONIDO + LA T POSICIONAL (Cartilla Americana paso 3) ===== */
+const DIGRAPHS=[
+ {value:"moon",phonetic:"MUN",phoneticEs:'OO = u LARGA — "mun" (dos O, un sonido)',emoji:"🌙"},
+ {value:"food",phonetic:"FUD",phoneticEs:'OO = u larga — "fud" (igual que moon)',emoji:"🍕"},
+ {value:"feet",phonetic:"FIIT",phoneticEs:'EE = ii larga — "fiit" (dos E, un sonido)',emoji:"🦶"},
+ {value:"train",phonetic:"TREIN",phoneticEs:'AI = ei — "trein" (la I no suena i)',emoji:"🚂"},
+ {value:"boat",phonetic:"BOUT",phoneticEs:'OA = ou — "bout" (la A se esconde)',emoji:"⛵"},
+ {value:"teacher",phonetic:"TII-cher",phoneticEs:'EA = ii — "tii-cher" (¡la A es trampa del ojo, no suena!)',emoji:"👩‍🏫"},
+ {value:"coin",phonetic:"KOIN",phoneticEs:'OI = oi — "koin"',emoji:"🪙"},
+ {value:"house",phonetic:"JAUS",phoneticEs:'OU = au — "jaus" (¡no es "jo-se"!)',emoji:"🏠"},
+ {value:"fish",phonetic:"FISH",phoneticEs:'SH = shhh — "fish" (la S y la H se unen)',emoji:"🐟"},
+ {value:"chair",phonetic:"CHER",phoneticEs:'CH = che — como chi-che chi-cho',emoji:"🪑"},
+ {value:"think",phonetic:"ZINK",phoneticEs:'TH = lengua ENTRE los dientes, aire sin voz — "think"',emoji:"🤔"},
+ {value:"this",phonetic:"DIS",phoneticEs:'TH con VOZ — misma lengua, garganta suena — "dis"',emoji:"👉"},
+ {value:"phone",phonetic:"FON",phoneticEs:'PH = f — "fon" (¡trampa del ojo: P y H suenan F!)',emoji:"📞"},
+ {value:"top",phonetic:"TOP",phoneticEs:'LA T #1: al INICIO — limpia y clara con aire',emoji:"🎯"},
+ {value:"water",phonetic:"WA-DER",phoneticEs:'LA T #2: en MEDIO — flap! golpe suave como la R de "pero" (Episodio 5)',emoji:"💧"},
+ {value:"cat",phonetic:"KAT",phoneticEs:'LA T #3: al FINAL — el aire se CORTA, la T no explota',emoji:"🐈"}];
+
 const ALPHABET=[
  {value:"A",phonetic:"Ey",phoneticEs:'Como "ey" en "rey" 👑',emoji:"🍎"},
  {value:"B",phonetic:"Bi",phoneticEs:'Como "bi"',emoji:"🐝"},
@@ -348,10 +388,10 @@ const MELODY_QUIZ=[
  {text:"This is my house.",answer:"statement"},
  {text:"Do you speak English?",answer:"question"}];
 
-const DATA={vowels:VOWELS,alphabet:ALPHABET,numbers:NUMBERS,greetings:GREETINGS,pronouns:PRONOUNS,phrases:PHRASES,verbs:VERBS,combos:COMBOS,melody:MELODIES};
+const DATA={vowels:VOWELS,sounds:SOUNDS,alphabet:ALPHABET,digraphs:DIGRAPHS,numbers:NUMBERS,greetings:GREETINGS,pronouns:PRONOUNS,phrases:PHRASES,verbs:VERBS,combos:COMBOS,melody:MELODIES};
 
 const I18N={
- es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{vowels:" Vocales",alphabet:" Alfabeto",numbers:" Números",greetings:" Saludos",pronouns:" Pronombres",phrases:" Frases",verbs:" Verbos",combos:" Combos",melody:" Melodía"},
+ es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{vowels:" Vocales",sounds:" Sonidos",alphabet:" Alfabeto",digraphs:" Dígrafos",numbers:" Números",greetings:" Saludos",pronouns:" Pronombres",phrases:" Frases",verbs:" Verbos",combos:" Combos",melody:" Melodía"},
      say:"DÍLO ASÍ:",listen:"🔊 Escuchar",slow:"🐢 Lento",normal:"🚶 Normal",fast:"🏃 Rápido",
      recTitle:"Graba tu voz",rec:"Grabar",stop:"Detener",play:"Escucharte",
      prev:"Anterior",next:"Siguiente",quizOn:"🧠 Modo Quiz",quizOff:"✖️ Salir del Quiz",
@@ -360,7 +400,7 @@ const I18N={
      qReplay:"🔊 Escuchar otra vez",correct:"¡Correcto! +1 punto 🎉",wrong:"¡Uy! Tu oído acaba de encontrar su gimnasio 💪",
      statement:"Afirmación ↘",question:"Pregunta ↗",certTitle:"Certificado de Logro",
      certSub:"¡Felicitaciones! ¡Has ganado 100 puntos!",certBody:"¡Completaste el Entrenador de Inglés Básico!",certBtn:"Seguir Aprendiendo 🚀"},
- en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{vowels:" Vowels",alphabet:" Alphabet",numbers:" Numbers",greetings:" Greetings",pronouns:" Pronouns",phrases:" Phrases",verbs:" Verbs",combos:" Combos",melody:" Melody"},
+ en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{vowels:" Vowels",sounds:" Sounds",alphabet:" Alphabet",digraphs:" Digraphs",numbers:" Numbers",greetings:" Greetings",pronouns:" Pronouns",phrases:" Phrases",verbs:" Verbs",combos:" Combos",melody:" Melody"},
      say:"SAY IT LIKE:",listen:"🔊 Listen",slow:"🐢 Slow",normal:"🚶 Normal",fast:"🏃 Fast",
      recTitle:"Record your voice",rec:"Record",stop:"Stop",play:"Play",
      prev:"Prev",next:"Next",quizOn:"🧠 Quiz Mode",quizOff:"✖️ Exit Quiz",
@@ -420,7 +460,7 @@ function render(){
 }
 
 function renderTabs(){
-  const icons={vowels:"🔤",alphabet:"📖",numbers:"🔢",greetings:"👋",pronouns:"🙋",phrases:"💬",verbs:"🏃",combos:"🧩",melody:"🎵"};
+  const icons={vowels:"🔤",sounds:"🔊",alphabet:"📖",digraphs:"🔗",numbers:"🔢",greetings:"👋",pronouns:"🙋",phrases:"💬",verbs:"🏃",combos:"🧩",melody:"🎵"};
   $("tabs").innerHTML=Object.keys(DATA).map(k=>
     `<button class="tab ${k===tab?"active":""}" onclick="setTab('${k}')">${icons[k]}${t().tabs[k]}</button>`).join("");
 }
