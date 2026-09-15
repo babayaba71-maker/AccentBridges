@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personality Assessment — El Expediente Humano · Myl AccentBridges</title>
+<style>
+:root{--purple:#6366f1;--purple-dark:#4f46e5;--bg:#f9fafb;--card:#fff;--text:#1f2937;--soft:#6b7280;--pink:#fff1f2;--pink-border:#fecdd3;--ok:#10b981}
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center}
+header{width:100%;background:var(--purple);color:#fff;padding:14px 18px}
+.h-wrap{max-width:560px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.h-flag{font-size:28px}
+h1{font-size:19px;font-weight:800}
+.h-sub{font-size:12px;opacity:.9;margin-top:1px}
+main{max-width:560px;width:100%;padding:16px 14px 30px}
+.card{background:var(--card);border-radius:16px;padding:22px 18px;box-shadow:0 2px 10px rgba(0,0,0,.07);text-align:center}
+.blk-chip{display:inline-block;background:var(--pink);border:1.5px solid var(--pink-border);color:#be123c;font-weight:800;font-size:13px;border-radius:999px;padding:6px 14px;margin-bottom:12px}
+.q-text{font-size:16.5px;font-weight:700;margin-bottom:16px;line-height:1.45}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{background:#fff;border:2px solid #e5e7eb;border-radius:12px;padding:13px;font-size:16px;font-weight:700;color:var(--text);cursor:pointer;transition:.15s;text-align:left}
+.opt:active{transform:scale(.98)}
+.opt.sel{border-color:var(--purple);background:#eef2ff}
+.btn{display:block;width:100%;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:800;cursor:pointer;margin-top:12px}
+.btn-primary{background:var(--purple);color:#fff}
+.btn-ghost{background:#fff;border:2px solid #e5e7eb;color:var(--text);font-weight:700}
+.dots{display:flex;justify-content:center;gap:5px;margin:2px 0 12px;flex-wrap:wrap}
+.dot{width:9px;height:9px;border-radius:50%;background:#e5e7eb}
+.dot.on{background:var(--purple)}
+.emoji-big{font-size:48px;line-height:1}
+.arch{font-size:21px;font-weight:900;color:var(--purple);margin:8px 0 2px}
+.arch-sub{font-size:13.5px;color:var(--soft);font-weight:600;margin-bottom:14px}
+.sumbox{background:#fafafa;border:1.5px solid #e5e7eb;border-radius:14px;padding:12px 14px;font-size:13.5px;text-align:left;line-height:1.6;margin-top:12px}
+.sumbox b{color:var(--purple)}
+.hl{background:#eef2ff;border:1.5px solid #c7d2fe;border-radius:12px;padding:10px 13px;font-size:13.5px;text-align:left;color:#3730a3;font-weight:700;margin-top:10px}
+.share{width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px;font-size:12px;margin-top:12px;background:#fafafa;color:var(--soft);white-space:pre-wrap;font-family:inherit}
+footer{text-align:center;font-size:11px;color:var(--soft);padding:12px;opacity:.8}
+.prog{font-size:12px;color:var(--soft);font-weight:700;margin-bottom:10px}
+</style>
+</head>
+<body>
+<header><div class="h-wrap"><span class="h-flag">🎭</span><div><h1>Personality Assessment — El Expediente Humano</h1><div class="h-sub">No es un examen: es una plática · Myl AccentBridges</div></div></div></header>
+<main><div class="card" id="app"></div><footer>Parte del ecosistema Myl AccentBridges 🇲🇽➡️🇺🇸 · Alma &amp; Clyde</footer></main>
+
+<script>
+/* ============ BANCO DE 64 PREGUNTAS (Ada Love, compiladora) ============
+   16 preguntas base × 4 variantes. Cada intento sortea UNA variante por
+   base y JAMÁS repite la del intento anterior (localStorage ab_pers_last).
+   Shuffle de opciones por render. 0 LLM — determinístico. TODAS las
+   respuestas son legítimas: este assessment no evalúa, ESCUCHA. */
+const PBANK={
+  "region_1": [{"texto": "¿De dónde eres? Cuéntame tu tierra 🌎", "opciones": ["De Culiacán, orgulloso 🦁", "De otra parte de Sinaloa 🌵", "De otro estado de México 🇲🇽", "Nací en USA 🇺🇸", "De otro país ✈️"], "tags": ["culiacan", "sinaloa", "mexico_otro_estado", "usa_nacimiento", "extranjero"]}, {"texto": "¿Dónde naciste? Me encanta saber de dónde es la gente 🌟", "opciones": ["Aquí en Culiacán 🏙️", "En un pueblo de Sinaloa 🌾", "Fuera de Sinaloa 🗺️", "Del otro lado (USA) 🇺🇸"], "tags": ["culiacan", "sinaloa_pueblo", "mexico_otro_estado", "usa_nacimiento"]}, {"texto": "¿De qué tierra eres? Se nota en cómo hablas 😄", "opciones": ["Culiacán mero 💯", "Sinaloa, pero de otro municipio 🌵", "De otro rincón de México 🇲🇽", "Nací en USA pero con raíces mexicanas 🌉"], "tags": ["culiacan", "sinaloa", "mexico_otro_estado", "usa_raices_mexicanas"]}, {"texto": "Oye, ¿de dónde eres? Que luego uno nunca sabe si es de aquí o del otro lado 😅", "opciones": ["De aquí, de Culiacán 🏠", "De Sinaloa, de un pueblo cercano 🌾", "De otro estado de la República 🇲🇽", "De USA 🇺🇸", "De otro país 🌎"], "tags": ["culiacan", "sinaloa_pueblo", "mexico_otro_estado", "usa_nacimiento", "extranjero"]}],
+  "region_2": [{"texto": "¿Y ahorita, dónde andas viviendo? 🏠", "opciones": ["En Culiacán 🌆", "En otra ciudad de México 🇲🇽", "En Estados Unidos 🇺🇸", "Entre dos mundos: MX y USA de ida y vuelta 🌉"], "tags": ["vive_culiacan", "vive_mexico", "vive_usa", "movilidad_usa"]}, {"texto": "¿Dónde está tu casa ahorita? Me refiero a donde pones los tacos al llegar 🌮", "opciones": ["Culiacán, mi base 🏙️", "Otra ciudad mexicana 🇲🇽", "En USA, ya pa' allá 🇺🇸", "De las dos: vivo aquí pero trabajo o visito USA 🌉"], "tags": ["vive_culiacan", "vive_mexico", "vive_usa", "movilidad_usa"]}, {"texto": "Si te pregunto '¿dónde vives?', ¿qué me respondes sin pensarlo? 🤔", "opciones": ["¡Aquí nomás, en Culiacán! 🌆", "En México, pero no en Culiacán 🇲🇽", "En USA 🇺🇸", "Tengo pie en los dos países 🌉"], "tags": ["vive_culiacan", "vive_mexico", "vive_usa", "movilidad_usa"]}, {"texto": "¿Tu vida ahorita transcurre en Culiacán o andas del otro lado? 👀", "opciones": ["Culiacán, toda mi vida aquí 🏠", "Otro rincón de México 🇲🇽", "En USA, ya establecido 🇺🇸", "Voy y vengo entre los dos 🌉"], "tags": ["vive_culiacan", "vive_mexico", "vive_usa", "movilidad_usa"]}],
+  "identidad_1": [{"texto": "¿Cuántos años tienes? Lo pregunto para platicar contigo como es 🎂", "opciones": ["Entre 13 y 17 🎒", "Entre 18 y 25 🎓", "Entre 26 y 40 💼", "Entre 41 y 55 ☕", "56 o más, con toda la experiencia 🌟"], "tags": ["edad_13_17", "edad_18_25", "edad_26_40", "edad_41_55", "edad_56_mas"]}, {"texto": "¿Qué tan joven te sientes? Dime tu edad real, no la del alma 😄", "opciones": ["Menos de 18 🎈", "18 a 25 🚀", "26 a 40 💪", "41 a 55 🍵", "Más de 55, en mi mejor época ✨"], "tags": ["edad_menor_18", "edad_18_25", "edad_26_40", "edad_41_55", "edad_55_mas"]}, {"texto": "¿A qué generación perteneces? Nada de juzgar, puro pásala bien 🎉", "opciones": ["Adolescente (13-17) 🎧", "Joven adulto (18-25) 🛹", "Adulto (26-40) 💼", "Adulto con oficio (41-55) 🍵", "Con la experiencia ganada (56+) 🌟"], "tags": ["edad_13_17", "edad_18_25", "edad_26_40", "edad_41_55", "edad_56_mas"]}, {"texto": "¿Cuántos cumpleaños llevas celebrando? 🎂", "opciones": ["Menos de 18 🎈", "18-25 🚀", "26-40 💼", "41-55 ☕", "56+ ✨"], "tags": ["edad_menor_18", "edad_18_25", "edad_26_40", "edad_41_55", "edad_56_mas"]}],
+  "identidad_2": [{"texto": "¿Cómo te identificas? Y si prefieres no decirlo, también está perfecto 🤝", "opciones": ["Hombre 👨", "Mujer 👩", "No binario 🌈", "Prefiero no decirlo 🤝", "Otra identidad 💜"], "tags": ["genero_hombre", "genero_mujer", "genero_no_binario", "genero_nd", "genero_otro"]}, {"texto": "Para platicarte como es, ¿cómo te identificas? Cero etiquetas, puro respeto 🌈", "opciones": ["Mujer 👩", "Hombre 👨", "No binario o fluido 🌊", "Prefiero no compartirlo 🤝"], "tags": ["genero_mujer", "genero_hombre", "genero_no_binario", "genero_nd"]}, {"texto": "¿Cómo te presentas al mundo? Tu respuesta es válida, punto 👏", "opciones": ["Hombre 👨", "Mujer 👩", "No binario 🌈", "Prefiero no decirlo 🤝", "Otra forma de ser 💜"], "tags": ["genero_hombre", "genero_mujer", "genero_no_binario", "genero_nd", "genero_otro"]}, {"texto": "Una personal y sin compromiso: ¿cómo te identificas? 💫", "opciones": ["Mujer 👩", "Hombre 👨", "No binario 🌈", "Me lo guardo, gracias 🤝"], "tags": ["genero_mujer", "genero_hombre", "genero_no_binario", "genero_nd"]}],
+  "motivacion_1": [{"texto": "¿Por qué quieres aprender inglés? Purita curiosidad, cuéntame 🚀", "opciones": ["Por trabajo: quiero mejores chambas 💼", "Por mi familia en USA 👨‍👩‍👧", "Para viajar y no perderme ✈️", "Por amor: suena bonito, ¿no? 💘", "Por orgullo: quiero hacerlo por mí 💪"], "tags": ["motivo_trabajo", "motivo_familia_usa", "motivo_viaje", "motivo_amor", "motivo_orgullo"]}, {"texto": "Si el inglés fuera una llave, ¿qué puerta abrirías primero? 🔑", "opciones": ["La del trabajo de mis sueños 💼", "La de estar más cerca de mi familia en USA 🌉", "La del aeropuerto: ¡a viajar! ✈️", "La del corazón: hablar de amor 💘", "La de sentirme orgulloso de mí 💪"], "tags": ["motivo_trabajo", "motivo_familia_usa", "motivo_viaje", "motivo_amor", "motivo_orgullo"]}, {"texto": "A ver, siendo honestos: ¿por qué estás aquí aprendiendo inglés? 😏", "opciones": ["La escuela me lo pide 🎓", "El billete verde me llama: trabajo 💵", "Tengo familia del otro lado 🌉", "Quiero conocer el mundo ✈️", "Porque YO quiero, porque puedo 💪"], "tags": ["motivo_escuela", "motivo_trabajo", "motivo_familia_usa", "motivo_viaje", "motivo_orgullo"]}, {"texto": "¿Qué te despertó las ganas de aprender inglés? Cuéntame la historia corta 📖", "opciones": ["Una mejor oportunidad de trabajo 💼", "Mis seres queridos en USA 💑", "Un viaje que traigo en mente ✈️", "Alguien especial que habla inglés 💘", "Querer más para mí mismo 💪"], "tags": ["motivo_trabajo", "motivo_familia_usa", "motivo_viaje", "motivo_amor", "motivo_orgullo"]}],
+  "motivacion_2": [{"texto": "Imagina que ya hablas inglés. ¿Qué es lo PRIMERO que haces? 🔥", "opciones": ["Aplico a un mejor trabajo 💼", "Platico con mi familia en USA sin traductor 🌉", "Compro mis vuelos ✈️", "Le digo lo que siento en inglés 💘", "Me pongo la meta de ayudar a alguien más 💪"], "tags": ["meta_trabajo", "meta_familia", "meta_viaje", "meta_amor", "meta_dar"]}, {"texto": "Cuando por fin puedas defender el inglés, ¿cuál es tu primer plan? 🎯", "opciones": ["Una entrevista de trabajo en inglés 💼", "Una llamada larga a mi gente del otro lado 📞", "Un viaje sin miedo ✈️", "Una cita donde me luzca 💘", "Demostrarme que sí pude 💪"], "tags": ["meta_trabajo", "meta_familia", "meta_viaje", "meta_amor", "meta_orgullo"]}, {"texto": "Ponle que amaneces hablando inglés. ¿Qué haces ese día? ☀️", "opciones": ["Me apunto a esa vacante bilingüe 💼", "Le mando mensaje a mi familia en USA 🌉", "Me voy de tour ✈️", "Le hablo a mi crush 😏💘", "Lo celebro a mi manera 🎉"], "tags": ["meta_trabajo", "meta_familia", "meta_viaje", "meta_amor", "meta_celebracion"]}, {"texto": "¿Qué sueño se te hace más real si hablas inglés? 🌟", "opciones": ["Subir en el trabajo 💼", "Acercarme a la familia que está allá 👨‍👩‍👧", "Conocer lugares nuevos ✈️", "Conectar con alguien especial 💘", "Demostrar de qué estoy hecho 💪"], "tags": ["meta_trabajo", "meta_familia", "meta_viaje", "meta_amor", "meta_orgullo"]}],
+  "gustos_1": [{"texto": "¿Qué haces cuando nadie te está mirando? No te juzgo, puro interés 😄", "opciones": ["Juego videojuegos 🎮", "Cocino o como rico 🍳", "Hago ejercicio o deporte 🏃", "Dibujo, escribo o creo algo 🎨", "Puro series y relajo 📺"], "tags": ["hobby_videojuegos", "hobby_cocina", "hobby_deporte", "hobby_arte", "hobby_series"]}, {"texto": "En tu día libre, ¿qué es lo que más disfrutas? ☀️", "opciones": ["Echar la reta con los cuates ⚽", "Perderme en un videojuego 🎮", "Cocinar algo delicioso 🍳", "Oír música tranquilo 🎵", "Ver series o videos 📺"], "tags": ["hobby_deporte", "hobby_videojuegos", "hobby_cocina", "hobby_musica", "hobby_series"]}, {"texto": "¿Qué era lo tuyo en la escuela? Se me hace que algo había 👀", "opciones": ["Los números y las cuentas 🧮", "Las letras: leer y escribir 📚", "El deporte y el movimiento ⚽", "El taller y las manualidades 🛠️", "La música y el arte 🎨"], "tags": ["escolar_numeros", "escolar_letras", "escolar_deporte", "escolar_oficio", "escolar_arte"]}, {"texto": "¿Qué es lo tuyo, eso que haces sin que te lo pidan? 😉", "opciones": ["El fútbol o algún deporte ⚽", "Los videojuegos 🎮", "La cocina, pa' chuparse los dedos 🍳", "La música: oír, cantar o tocar 🎵", "Leer, ver series o aprender cosas 📚"], "tags": ["hobby_deporte", "hobby_videojuegos", "hobby_cocina", "hobby_musica", "hobby_series"]}],
+  "gustos_2": [{"texto": "¿Qué música es la de tu playlist secreta? 🎵", "opciones": ["Corridos y banda 🎺", "Rancheras y clásicos 🤠", "Pop y reggaetón 💃", "Rap y hip-hop 🎤", "Rock, electrónica u otra onda 🎸"], "tags": ["musica_corridos", "musica_rancheras", "musica_pop_reggaeton", "musica_rap", "musica_rock_electronica"]}, {"texto": "Si pones música en el carro, ¿qué suena? 🚗", "opciones": ["Corridos tumbados 🎺", "Banda, la fiesta se respeta 🥁", "Reggaetón y pop para cantar 💃", "Hip-hop en español o inglés 🎤", "Rock o electrónica 🎸"], "tags": ["musica_corridos", "musica_banda", "musica_pop_reggaeton", "musica_rap", "musica_rock_electronica"]}, {"texto": "¿Cuál es el género que te levanta el ánimo siempre? 🌈", "opciones": ["Corridos y música sinaloense 🎺", "Lo clásico: rancheras y boleros 🤠", "Reggaetón para mover el cuerpo 💃", "Rap con letra cuidada 🎤", "Rock, pop alternativo o electrónica 🎸"], "tags": ["musica_corridos", "musica_rancheras", "musica_pop_reggaeton", "musica_rap", "musica_rock_electronica"]}, {"texto": "En una fiesta, ¿qué pones tú si te dejan el control? 🎧", "opciones": ["Corridos, pa' que no falte 🎺", "Banda y todos a bailar 🥁", "Reggaetón y se forma el baile 💃", "Rap, con su flow 🎤", "Rock o electrónica 🎸"], "tags": ["musica_corridos", "musica_banda", "musica_pop_reggaeton", "musica_rap", "musica_rock_electronica"]}],
+  "valores_1": [{"texto": "¿Qué es lo que más te mueve en la vida? Con tacto, pero con honestidad 💛", "opciones": ["Mi familia, siempre 🏡", "Mi fe 💒", "Salir adelante y superarme 💪", "El dinero y lo que construye 💵", "Mis ganas de vivir y disfrutar 🌊"], "tags": ["valor_familia", "valor_fe", "valor_superacion", "valor_dinero", "valor_disfrute"]}, {"texto": "Cuando tomas una decisión grande, ¿qué pesa más en tu corazón? 💭", "opciones": ["¿Qué dirá mi familia? 👨‍👩‍👧", "¿Está bien ante Dios? 💒", "¿Me hace crecer? 🌱", "¿Me deja más estabilidad? 💵", "¿Me hace feliz hoy? 🌞"], "tags": ["valor_familia", "valor_fe", "valor_superacion", "valor_dinero", "valor_disfrute"]}, {"texto": "¿Qué es lo que de verdad te saca adelante en los días difíciles? 🌦️", "opciones": ["Pensar en mi gente 🏡", "Mi fe y mis rezos 💒", "Las ganas de ser alguien 💪", "La visión del futuro que quiero construir 💵", "Puro buen humor y disfrutar lo que hay 🌞"], "tags": ["valor_familia", "valor_fe", "valor_superacion", "valor_dinero", "valor_disfrute"]}, {"texto": "Al final del día, ¿qué te da más orgullo? ✨", "opciones": ["Cuidar a los míos 🏡", "Vivir con fe 💒", "Haber salido adelante contra todo 💪", "Lo que he logrado construir 💵", "Vivir a mi manera 🌊"], "tags": ["valor_familia", "valor_fe", "valor_superacion", "valor_dinero", "valor_disfrute"]}],
+  "valores_2": [{"texto": "Si te caen 500 pesos inesperados, ¿qué haces primero? 💸", "opciones": ["Algo pa' la casa o la familia 🏡", "Los comparto o regalo algo 😇", "Los guardo para mis metas 💰", "Me lo gasto en un gustito que traigo 🍦", "Invierto en algo pa' mí: curso, herramienta 🛠️"], "tags": ["valor_familia", "valor_generosidad", "valor_ahorro", "valor_disfrute", "valor_inversion"]}, {"texto": "¿Cómo decides un gasto grande, como un celular nuevo? 📱", "opciones": ["Pregunto a mi familia qué opinan 👨‍👩‍👧", "Rezo y luego decido 💒", "Comparo todo hasta hallar lo mejor 📊", "Si hay dinero pa' ello, se compra 💵", "Si me va a hacer feliz, adelante 🌞"], "tags": ["valor_familia", "valor_fe", "valor_superacion", "valor_dinero", "valor_disfrute"]}, {"texto": "Si mañana todo sale como quieres, ¿a quién llamas primero? 📞", "opciones": ["A mi pareja o mi familia 👨‍👩‍👧", "A mi compa de toda la vida 🤝", "Le doy gracias a Dios 💒", "A nadie: lo celebro en silencio 🤫", "¡Lo publico pa' que lo vean! 📱"], "tags": ["valor_familia", "valor_amistad", "valor_fe", "valor_intimo", "valor_reconocimiento"]}, {"texto": "¿Qué te da más tranquilidad? 🕊️", "opciones": ["Saber que mi gente está bien 🏡", "Mi fe y mis costumbres 💒", "Saber que estoy creciendo 🌱", "Tener mi lana guardada 💵", "Vivir tranquilo y a gusto 🌞"], "tags": ["valor_familia", "valor_fe", "valor_superacion", "valor_dinero", "valor_disfrute"]}],
+  "personalidad_1": [{"texto": "Te invitan a una fiesta donde casi no conoces a nadie. ¿Qué tal te la pasas? 🎉", "opciones": ["¡La hago buena, conozco a todos! 🕺", "Bien con los que vaya conociendo 😄", "Me pego al rincón con la gente de confianza 🪑", "Sufro un poquito, prefiero mi casita 🏠"], "tags": ["extrovertido", "ambivertido", "timido_social", "introvertido"]}, {"texto": "Después de un día lleno de gente, ¿cómo recargas batería? 🔋", "opciones": ["Con más gente: ahí es donde vivo 🕺", "Con un ratito de calma y ya 😌", "Con música y mi espacio 🎧", "Con mi cama, mi serie y silencio 🛏️"], "tags": ["extrovertido", "ambivertido", "introvertido_leve", "introvertido"]}, {"texto": "En una reunión, ¿dónde te ubican? 📍", "opciones": ["Al centro, contando el chiste 🎤", "En la plática, pero sin ser el show 😄", "Con mis dos cuates de siempre 🤝", "Afuera, respirando tranquilo 🌬️"], "tags": ["extrovertido", "ambivertido", "timido_social", "introvertido"]}, {"texto": "¿Qué te suena más a un sábado perfecto? 🌞", "opciones": ["Pachangón con mucha gente 🎉", "Un plan tranquilo con tres cuates 🍢", "Una junta íntima con pareja o familia 🏡", "Yo, mi música y nadie más 🎧"], "tags": ["extrovertido", "ambivertido", "timido_social", "introvertido"]}],
+  "personalidad_2": [{"texto": "Seamos honestos: cuando algo lo sabes pero te da pena decirlo en voz alta, ¿qué haces? 🤫", "opciones": ["Lo digo sin pena, pa' eso estoy 💪", "Lo digo pero con el corazón acelerado 💓", "Lo escribo o lo digo después ✍️", "Me lo guardo, aunque yo lo sé 🤐"], "tags": ["produccion_suelta", "produccion_nerviosa", "produccion_escrita", "modo_hugo"]}, {"texto": "En clase (o en la vida), ¿cómo participas? 🙋", "opciones": ["Levanto la mano primero ✋", "Participo si el tema me late 😄", "Prefiero escuchar y practicar a solas 🎧", "Participo más por escrito que hablando ✍️"], "tags": ["produccion_suelta", "produccion_selectiva", "modo_hugo_oido", "modo_hugo_escrito"]}, {"texto": "¿Qué tanto te cuesta hablar enfrente de otros, aunque sepas la respuesta? 😳", "opciones": ["Nada: si lo sé, lo digo 🗣️", "Un poco, pero le entro 💪", "Bastante: prefiero escuchar 😬", "Prefiero escribirlo o decirlo en privado 🤫"], "tags": ["produccion_suelta", "produccion_nerviosa", "modo_hugo_oido", "modo_hugo_privado"]}, {"texto": "Si te toca contestar en inglés enfrente de todos, ¿qué pasa por tu mente? 💭", "opciones": ["¡Éxito! Le entro con ganas 🚀", "Se me acelera el corazón pero contesto 💓", "Rezo pa' que no me toque y pienso la respuesta 😬", "La sé, pero la pienso dos veces antes de hablar 🤫"], "tags": ["produccion_suelta", "produccion_nerviosa", "modo_hugo_evita", "modo_hugo_piensa"]}],
+  "pantallas_1": [{"texto": "Siéntete en confianza: ¿en qué app te agarra este mensaje? 📱", "opciones": ["Facebook 📘", "TikTok, y ya me atrapó el algoritmo 🎵", "YouTube 📺", "Instagram 📸", "WhatsApp, lo mío es el chat 💬"], "tags": ["facebook", "tiktok", "youtube", "instagram", "whatsapp"]}, {"texto": "¿Cuál app es la que no te deja dormir? Te guardo el secreto 😄 🌙", "opciones": ["TikTok: 'un video más' y son las 2 am 🎵", "YouTube: los videos se encadenan solos 📺", "Facebook: puro scroll 📘", "Instagram: pura inspiración 📸", "WhatsApp: los grupos no perdonan 💬"], "tags": ["tiktok", "youtube", "facebook", "instagram", "whatsapp"]}, {"texto": "Cuando agarras el teléfono 'un ratito', ¿en qué app se te van las horas? ⏳", "opciones": ["TikTok 🎵", "YouTube 📺", "Facebook 📘", "Instagram 📸", "Juegos u otras apps 🎮"], "tags": ["tiktok", "youtube", "facebook", "instagram", "juegos_otras"]}, {"texto": "¿Cuál es tu plataforma favorita para entretenerte? 🎪", "opciones": ["TikTok: videos cortitos y pa' rriba 🎵", "YouTube: música, películas y todo 📺", "Facebook: mi gente y mis grupos 📘", "Instagram: pura estética 📸", "Otra cosa 🤷"], "tags": ["tiktok", "youtube", "facebook", "instagram", "otra_plataforma"]}],
+  "pantallas_2": [{"texto": "Poniéndole número: ¿cuántas horas al día andas en redes? Sin miedo, aquí nadie juzga 🙈", "opciones": ["Menos de 1 hora 🕐", "1 a 2 horas 🕑", "3 a 4 horas 🕒", "5 a 6 horas 🕔", "No lo confieso... pero son muchas 😅📵"], "tags": ["redes_menos_1h", "redes_1_2h", "redes_3_4h", "redes_5_6h", "redes_6h_mas"]}, {"texto": "De 1 a 5, ¿qué tanto te distrae el teléfono cuando deberías hacer otra cosa? 😅", "opciones": ["1: Cero drama, yo mando 🧘", "2: A veces me distraigo 🤏", "3: La mitad de las veces 😬", "4: Casi siempre me gana el scroll 😵", "5: El teléfono es mi jefe 📱👑"], "tags": ["distraccion_1", "distraccion_2", "distraccion_3", "distraccion_4", "distraccion_5"]}, {"texto": "Sé honesto: ¿cuánto tiempo le dedicas diariamente a las redes? 📊", "opciones": ["Casi nada 🌱", "Un ratito (1-2 horas) 🕑", "Bastante (3-4 horas) 🕒", "Uff (5 horas o más) 📵", "¿Aún se cuenta? Se me pasa volando 😅"], "tags": ["redes_menos_1h", "redes_1_2h", "redes_3_4h", "redes_5h_mas", "redes_sin_cuenta"]}, {"texto": "¿Qué tanto pelea tu teléfono contra tu tiempo de estudio? 🥊", "opciones": ["Ni pelea: estudio tranquilo 🧘", "A ratos me gana 🤏", "Vamos parejo 😬", "Casi siempre gana el teléfono 📱", "El teléfono es campeón invicto 🏆📵"], "tags": ["distraccion_1", "distraccion_2", "distraccion_3", "distraccion_4", "distraccion_5"]}],
+  "sensorial_1": [{"texto": "¿Cómo se te pega mejor lo nuevo? 🧠", "opciones": ["Viéndolo: si lo veo, lo aprendo 👀", "Oyéndolo: explicado o en audio 🎧", "Diciéndolo: hablo y ya se me quedó 🗣️", "Haciéndolo: manos a la obra 🛠️"], "tags": ["ojo_dominante", "oido_dominante", "boca_dominante", "dedos_dominante"]}, {"texto": "Si te enseñan una palabra nueva en inglés, ¿cómo la aprendes más rápido? ⚡", "opciones": ["Viendo cómo se escribe y su imagen 👀", "Escuchándola bien pronunciada 🎧", "Repitiéndola en voz alta 🗣️", "Escribiéndola o tecleándola varias veces ✍️"], "tags": ["ojo_dominante", "oido_dominante", "boca_dominante", "dedos_dominante"]}, {"texto": "En la escuela, ¿cómo te iba mejor en los exámenes? 📝", "opciones": ["Recordaba lo que VEÍA: apuntes y dibujos 👀", "Recordaba lo que ESCUCHABA: la explicación 🎧", "Me aprendía hablando o explicándole a otro 🗣️", "Me aprendía escribiendo y practicando ✍️"], "tags": ["ojo_dominante", "oido_dominante", "boca_dominante", "dedos_dominante"]}, {"texto": "¿Cómo prefieres que te expliquen un tema? 🤝", "opciones": ["Muéstrame cómo es 🎬", "Cuéntame cómo funciona 🎧", "Déjame decirlo yo a mi manera 🗣️", "Dame algo pa' practicar yo solo 🛠️"], "tags": ["ojo_dominante", "oido_dominante", "boca_dominante", "dedos_dominante"]}],
+  "sensorial_2": [{"texto": "Para enseñarte como es, ¿necesitas algún ajuste pa' oír o ver mejor? Toda opción es normal y bienvenida 🤝", "opciones": ["Todo bien por mi lado, gracias 🙌", "A veces prefiero letras más grandes o más luz 💡", "A veces prefiero el audio más alto o más claro 🔊", "Uso audífono o aparato auditivo 🎧", "Uso lentes o tengo baja visión 👓"], "tags": ["sin_ajuste", "ajuste_vision_leve", "ajuste_audio_leve", "audifono", "baja_vision"]}, {"texto": "¿Hay algo que te ayude a aprender mejor? Lo que me digas lo tomamos como dato valioso 💎", "opciones": ["Se me da mejor con texto grande o buen contraste 👓", "Se me da mejor con audio clarito, sin ruido 🔊", "Prefiero responder escribiendo o tocando la pantalla ✍️", "Prefiero respondiendo hablando 🗣️", "Nada especial: todo me sirve 🙌"], "tags": ["ajuste_vision", "ajuste_audio", "produccion_dedos", "produccion_boca", "sin_ajuste"]}, {"texto": "Cuando algo no se oye bien o no se ve bien, ¿qué prefieres que hagamos? 🛠️", "opciones": ["Que lo repitamos o lo escribamos 📝", "Que subamos el volumen o hablemos más despacio 🔊", "Que pongamos letras más grandes 💡", "Yo aviso cuando no entienda, tranquilo 🤝", "Prefiero tener siempre la opción de texto ✍️"], "tags": ["ajuste_repeticion", "ajuste_audio", "ajuste_vision", "sin_ajuste_avisa", "produccion_dedos"]}, {"texto": "Última y con cariño: ¿cómo te va mejor para responder ejercicios? 💜", "opciones": ["Hablando, me fluye 🗣️", "Escribiendo o tocando pantalla, me va cómodo ✍️", "Con las dos: un día hablo, otro escribo 🔁", "Necesito un ajuste especial (te escuchamos sin prisa) 🤝"], "tags": ["produccion_boca", "produccion_dedos", "produccion_mixta", "ajuste_especial"]}]
+};
+const BASES=["region_1","region_2","identidad_1","identidad_2","motivacion_1","motivacion_2","gustos_1","gustos_2","valores_1","valores_2","personalidad_1","personalidad_2","pantallas_1","pantallas_2","sensorial_1","sensorial_2"];
+const BLOQUES={region_1:"Tu tierra 🌎",region_2:"Tu día a día 📍",identidad_1:"Tu edad 🎂",identidad_2:"Tú 🪞",motivacion_1:"Tu motor 🚀",motivacion_2:"Tu meta 🎯",gustos_1:"Cuando nadie te mira 😄",gustos_2:"Tu rumba 🎵",valores_1:"Lo que te mueve 💛",valores_2:"Tu brújula 🧭",personalidad_1:"En la fiesta 🎉",personalidad_2:"Con la gente 🤝",pantallas_1:"Tu app 📱",pantallas_2:"Tu tiempo libre 🕐",sensorial_1:"Cómo aprendes 🧠",sensorial_2:"Tus ajustes 🤝"};
+
+let session=[],answers=[],current=0;
+
+function pickVariant(base){
+  const vs=PBANK[base];let last={};
+  try{last=JSON.parse(localStorage.getItem("ab_pers_last")||"{}")}catch(e){}
+  let idx=Math.floor(Math.random()*vs.length);
+  if(vs.length>1&&last[base]===idx){idx=(idx+1+Math.floor(Math.random()*(vs.length-1)))%vs.length}
+  return idx;
+}
+function shuffle(a){const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
+const app=document.getElementById("app");
+
+function start(){
+  session=BASES.map(base=>{const v=pickVariant(base);return{base,v,q:PBANK[base][v]}});
+  localStorage.setItem("ab_pers_last",JSON.stringify(Object.fromEntries(session.map(s=>[s.base,s.v]))));
+  answers=[];current=0;renderQ();
+}
+function renderQ(){
+  const s=session[current];
+  const pairs=s.q.opciones.map((o,i)=>({o,t:s.q.tags[i]}));
+  const sh=shuffle(pairs);
+  app.innerHTML=`
+   <div class="prog">Pregunta ${current+1} de ${session.length}</div>
+   <div class="dots">${session.map((_,i)=>`<span class="dot ${i<=current?"on":""}"></span>`).join("")}</div>
+   <div class="blk-chip">${BLOQUES[s.base]}</div>
+   <div class="q-text">${s.q.texto}</div>
+   <div class="opts">${sh.map((p,i)=>`<button class="opt" data-t="${p.t}">${p.o}</button>`).join("")}</div>`;
+  app.querySelectorAll(".opt").forEach(btn=>btn.onclick=()=>{
+    answers.push({base:s.base,texto:btn.textContent,tag:btn.dataset.t});
+    current++;
+    if(current<session.length){renderQ()}else{renderResults()}
+  });
+}
+function allTags(){return answers.map(a=>a.tag)}
+function hasAny(tags,re){return tags.some(t=>re.test(t))}
+function renderResults(){
+  const tags=allTags();
+  const byBase=b=>answers.filter(a=>a.base.startsWith(b));
+  // personalidad
+  let pers="ambivertido";
+  const pTags=byBase("personalidad").map(a=>a.tag).join(",");
+  if(/introvertido|timido|modo_hugo/.test(pTags)){pers="introvertido"}
+  else if(/extrovertido/.test(pTags)){pers="extrovertido"}
+  // canal dominante
+  const s1=byBase("sensorial_1")[0];
+  const canalTag=s1?s1.tag:"ojo_dominante";
+  const canal=canalTag.startsWith("ojo")?"ojo":canalTag.startsWith("oido")?"oido":"boca";
+  // plataforma
+  const plat=byBase("pantallas").map(a=>a.tag).find(t=>/^(facebook|tiktok|youtube|instagram|whatsapp|otra)/.test(t))||"redes";
+  // arquetipo (determinístico: canal × personalidad)
+  const ARCH={
+   "ojo-introvertido":["👁🔍","El Detective del Barrio","Calladito, pero lo ves y lo registras TODO. Tu puerta es el OJO — lo que ves se te pega."],
+   "ojo-extrovertido":["👁✨","El Cuentacuentos Visual","Vives compartiendo lo que ves. Tu puerta es el OJO — primero lo ves, luego lo cuentas."],
+   "ojo-ambivertido":["👁🪞","El Observador Social","Tomas el pulso de la sala antes de moverte. Tu puerta es el OJO."],
+   "oido-introvertido":["🎧🤫","La Radio Andante","Hablas poco pero todo entra por el oído — música, palabras, melodías. Silencioso afuera, lleno de sonido adentro."],
+   "oido-extrovertido":["🎧🔥","La Voz del Barrio","Todo entra y sale por el oído — plática, música, chisme bueno. Tu gimnasio es escuchar y soltar."],
+   "oido-ambivertido":["🎧🎚","El DJ del Momento","Lees el ambiente con el oído y pones el tono cuando hace falta."],
+   "boca-introvertido":["🗣🤫","El Poeta Callado","De callado no tienes nada cuando se abre la puerta — lo tuyo sale HABLANDO, aunque sea con confianza primero."],
+   "boca-extrovertido":["🗣👑","La Boca de Oro","Aprendes hablando y enamoras hablando. Tu Mouth Gym ya es casa."],
+   "boca-ambivertido":["🗣🌉","El Comunicador Puente","Conectas mundos con la palabra — hablas cuando importa y escuchas cuando toca."]
+  };
+  const [em,nombre,desc]=ARCH[canal+"-"+pers];
+  const modoHugo=/modo_hugo|introvertido|timido/.test(pTags);
+  const canalTxt={ojo:"👁 OJO — primero lo VES (anclas escritas primero)",oido:"👂 OÍDO — primero lo OYES (audio y quiz de oído primero)",boca:"👅 BOCA — primero lo DICES (Mouth Gym primero)"}[canal];
+  // resumen por bloques
+  const LINES={
+   "region":["Tu tierra","🌎"],"identidad":["Tú","🪞"],"motivacion":["Tu motor","🚀"],"gustos":["Tus gustos","😄"],"valores":["Lo que te mueve","💛"],"personalidad":["Tu personalidad","🤝"],"pantallas":["Tus pantallas","📱"],"sensorial":["Tu perfil sensorial","🧠"]};
+  let sumHtml="";
+  for(const[k,titulo,em2]of Object.entries(LINES)){
+    const rs=byBase(k);
+    if(rs.length)sumHtml+=`<b>${titulo} ${em2}:</b> ${rs.map(r=>r.texto).join(" · ")}<br>`;
+  }
+  const code=answers.map(a=>a.tag).join("|");
+  const shareTxt="🎭 MI EXPEDIENTE HUMANO\n"+em+" "+nombre+"\n"+desc+"\n\n"+sumHtml.replace(/<br>/g,"\n").replace(/<\/?b>/g,"")+"\nPuerta de entrada: "+canalTxt+"\nCódigo para tu coach: "+code+"\n— Personality Assessment · Myl AccentBridges";
+  app.innerHTML=`
+   <div class="emoji-big">${em}</div>
+   <div class="blk-chip">Tu Expediente Humano 📋</div>
+   <div class="arch">${nombre}</div>
+   <div class="arch-sub">${desc}</div>
+   <div class="dots">${session.map(()=>`<span class="dot on"></span>`).join("")}</div>
+   <div class="hl">🚪 Tu puerta de entrada: ${canalTxt}${modoHugo?"\n🤫 Modo Hugo activo: primera viendo, después hablando — sin prisa y con dignidad.":""}</div>
+   <div class="hl">📱 Te encontramos en: ${plat.toUpperCase()} — ahí vive tu contenido.</div>
+   <div class="sumbox">${sumHtml}</div>
+   <textarea class="share" rows="8" id="sharebox">${shareTxt}</textarea>
+   <button class="btn btn-primary" onclick="navigator.clipboard&&navigator.clipboard.writeText(document.getElementById('sharebox').value);this.textContent='¡Copiado!'">📋 Copiar mi expediente</button>
+   <button class="btn btn-ghost" onclick="start()">🔄 Otra vuelta (preguntas nuevas)</button>`;
+}
+function intro(){
+  app.innerHTML=`
+   <div class="emoji-big">🎭</div>
+   <div class="q-text" style="margin-top:8px">Esto <b>no es un examen</b>. Es una plática de 16 preguntas — como te conocería una amiga en el camión.<br><br>Todas las respuestas son legítimas ✅. No hay correctas ni incorrectas: esto no evalúa, <b>ESCUCHA</b>.</div>
+   <div class="hl" style="text-align:left">🕐 3 minutos · 🎲 cada vuelta trae preguntas nuevas · 🔒 todo se queda contigo</div>
+   <button class="btn btn-primary" onclick="start()">Vamos, cuéntame de ti 😄</button>`;
+}
+intro();
+</script>
+</body>
+</html>
