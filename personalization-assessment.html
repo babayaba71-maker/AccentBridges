@@ -137,7 +137,7 @@ function renderResults(){
   const LINES={
    "region":["Tu tierra","🌎"],"identidad":["Tú","🪞"],"motivacion":["Tu motor","🚀"],"gustos":["Tus gustos","😄"],"valores":["Lo que te mueve","💛"],"personalidad":["Tu personalidad","🤝"],"pantallas":["Tus pantallas","📱"],"sensorial":["Tu perfil sensorial","🧠"]};
   let sumHtml="";
-  for(const[k,titulo,em2]of Object.entries(LINES)){
+  for(const[k,pair]of Object.entries(LINES)){const[titulo,em2]=pair;
     const rs=byBase(k);
     if(rs.length)sumHtml+=`<b>${titulo} ${em2}:</b> ${rs.map(r=>r.texto).join(" · ")}<br>`;
   }
