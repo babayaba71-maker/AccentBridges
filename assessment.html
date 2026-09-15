@@ -61,25 +61,101 @@ const DIMS=[
  {id:"eye",name:"Ojo 👁",intro:"Preguntas de lo que VES: anclas, escritura y sílabas. El ojo también entrena."},
  {id:"mouth",name:"Boca 👅",intro:"Vas a GRABAR tu voz diciendo frases. Chrome te califica del 1 al 100. Habla fuerte y claro. ⚠️ IMPORTANTE: si abriste este enlace DENTRO de WhatsApp, no te va a escuchar — cópialo y ábrelo en CHROME puro (fuera de WhatsApp) para que el micrófono funcione."}
 ];
-const Q={
+/* ============ BANCO DE PREGUNTAS v1.1 — anti-memorización ============
+   3 VARIANTES por banda por dimensión (36 preguntas). Cada intento
+   sortea UNA variante por banda y JAMÁS repite la del intento anterior
+   (guardado en localStorage). El shuffle de opciones sigue activo por
+   render. Doctrina: patrones no, medición real. "No es hacerlo duro
+   sino más eficiente" — Seeley, 15-sep-2026. */
+const QBANK={
  ear:[
-  {band:0,ask:"Escucha el sonido. ¿Qué ANCLA es?",audio:"I",opts:["ai","ei","oi"],ans:0,explain:"Era AI — como la queja culichi '¡ay!' 😅. EI es 'ey' de 'rey' y OI es 'oi' de 'oigo'."},
-  {band:1,ask:"Escucha la palabra. ¿Cuál es?",audio:"ship",opts:["ship (barco)","sheep (oveja)","shop (tienda)"],ans:0,explain:"SHIP = i corta (sh-ip). SHEEP = ii larga (sh-iip). La diferencia es la LONGITUD de la vocal."},
-  {band:2,ask:"Escucha el número. ¿Cuál es?",audio:"thirteen",opts:["13 (thir-TIN)","30 (THIR-ti)","14 (for-TIN)"],ans:0,explain:"13 = acento ADELANTE (thir-TIN). 30 = acento ATRÁS (THIR-ti). El acento lo cambia TODO."},
-  {band:3,ask:"Escucha la palabra 'water'. ¿Cómo suena la T?",audio:"water",opts:["Como D suave (flap)","Como T limpia y fuerte","No suena"],ans:0,explain:"WATER = 'ua-der' — la T entre vocales se vuelve FLAP, como la R suave de 'pero'. ¡Ya la tienes desde el español!"}
+  [
+   {ask:"Escucha el sonido. ¿Qué ANCLA es?",audio:"I",opts:["ai","ei","oi"],ans:0,explain:"Era AI — como la queja culichi '¡ay!' 😅. EI es 'ey' de 'rey' y OI es 'oi' de 'oigo'."},
+   {ask:"Escucha la palabra. ¿Cuál es su ANCLA?",audio:"You",opts:["iu","eu","you"],ans:0,explain:"YOU = 'iu' — la o desliza hacia una u rápida, en una sola sílaba. Y lo mejor: tú y ustedes dicen la MISMA palabra."},
+   {ask:"Escucha la palabra. ¿Cuál es su ANCLA?",audio:"She",opts:["chi","shi","si"],ans:0,explain:"SHE se ancla CHI porque 'shi' NO existe en español — chi como chi-che chi-cho 🎯."}
+  ],
+  [
+   {ask:"Escucha la palabra. ¿Cuál es?",audio:"ship",opts:["ship (barco)","sheep (oveja)","shop (tienda)"],ans:0,explain:"SHIP = i corta (sh-ip). SHEEP = ii larga (sh-iip). La diferencia es la LONGITUD de la vocal."},
+   {ask:"Escucha la palabra. ¿Cuál es?",audio:"think",opts:["think (pensar)","sink (hundir)","thing (cosa)"],ans:0,explain:"THINK = lengua ENTRE los dientes. SINK = con s pura. Si la lengua no asoma, suena a sink 🥁."},
+   {ask:"Escucha la palabra. ¿Cuál es?",audio:"very",opts:["very (muy)","berry (baya)","ferry (bote)"],ans:0,explain:"VERY con V (labios + dientes). BERRY con B (labios + labios). Parecidas al oído, pero distintas — el oído va afinando."}
+  ],
+  [
+   {ask:"Escucha el número. ¿Cuál es?",audio:"thirteen",opts:["13 (thir-TIN)","30 (THIR-ti)","14 (for-TIN)"],ans:0,explain:"13 = acento ADELANTE (thir-TIN). 30 = acento ATRÁS (THIR-ti). El acento lo cambia TODO."},
+   {ask:"Escucha el número. ¿Cuál es?",audio:"nineteen",opts:["19 (nine-TIN)","90 (NINE-ti)","9 (nain)"],ans:0,explain:"19 = acento ADELANTE (nine-TIN). 90 = acento ATRÁS (NINE-ti). Mismo truco de la familia -teen / -ty."},
+   {ask:"Escucha el número. ¿Cuál es?",audio:"fifty",opts:["50 (FIF-ti)","15 (fif-TIN)","5 (faiv)"],ans:0,explain:"50 = acento ATRÁS (FIF-ti). 15 = acento ADELANTE (fif-TIN). Tercera ronda de la misma familia — ya se te hace costumbre 🎯."}
+  ],
+  [
+   {ask:"Escucha la palabra 'water'. ¿Cómo suena la T?",audio:"water",opts:["Como D suave (flap)","Como T limpia y fuerte","No suena"],ans:0,explain:"WATER = 'ua-der' — la T entre vocales se vuelve FLAP, como la R suave de 'pero'. ¡Ya la tienes desde el español!"},
+   {ask:"Escucha la palabra 'little'. ¿Cómo suena la TT?",audio:"little",opts:["D suave doble ('liddle')","T limpia doble","Silencio"],ans:0,explain:"LITTLE = 'lidl' — doble flap, otra vez la R suave de 'pero' pero dos veces seguidas 👅."},
+   {ask:"Escucha la frase. ¿Qué es 'gonna'?",audio:"I'm gonna eat",opts:["going to (reducido)","gone (ido)","un arma"],ans:0,explain:"GONNA = 'going to' fundido — connected speech real. El inglés de la calle no dice cada palabra: las derrite ⚡."}
+  ]
  ],
  eye:[
-  {band:0,ask:"El ancla 'uan' es de cuál palabra?",opts:["one (uno)","won (ganó)","no"],ans:0,explain:"ONE = 'uan' — la O se desliza a u+a en una sola voz. La palabra más traicionera del inglés básico 🎯."},
-  {band:1,ask:"¿Cuál se escribe CORRECTAMENTE?",opts:["forty","fourty","fourtee"],ans:0,explain:"FORTY sin u — trampa clásica (four PIERDE la u al hacerse decena). Hasta nativos la tuitean mal 😂."},
-  {band:2,ask:"¿Qué palabra suena como el ancla 'dey'?",opts:["they (ellos)","day (día)","de"],ans:0,explain:"THEY = 'dey' — rima con 'rey' 👑. El diptongo /eɪ/ siempre termina deslizándose en 'y'."},
-  {band:3,ask:"¿Cuál es la sílaba ACENTUADA de 'banana'?",opts:["ba-NA-na","BA-na-na","ba-na-NA"],ans:0,explain:"ba-NA-na 🔵 — la del medio suena fuerte y clara; las otras dos se reducen a 'buh' y 'nuh' (schwa)."}
+  [
+   {ask:"El ancla 'uan' es de cuál palabra?",opts:["one (uno)","won (ganó)","no"],ans:0,explain:"ONE = 'uan' — la O se desliza a u+a en una sola voz. La palabra más traicionera del inglés básico 🎯."},
+   {ask:"¿Cuál es el ANCLA de 'I'?",opts:["ai","ei","io"],ans:0,explain:"I = 'ai' — como la queja culichi '¡ay!'. Dos letras, un solo sonido que ya vives."},
+   {ask:"El ancla 'ji' es de cuál palabra?",opts:["he (él)","she (ella)","we (nosotros)"],ans:0,explain:"HE = 'ji' — la H es MUDA (primo mexicano de la h de hola 🤫). SHE sería 'chi' y WE sería 'ui'."}
+  ],
+  [
+   {ask:"¿Cuál se escribe CORRECTAMENTE?",opts:["forty","fourty","fourtee"],ans:0,explain:"FORTY sin u — trampa clásica (four PIERDE la u al hacerse decena). Hasta nativos la tuitean mal 😂."},
+   {ask:"¿Cuál se escribe CORRECTAMENTE?",opts:["listen","lisen","listhen"],ans:0,explain:"LISTEN con T — pero la T es MUDA: se oye 'li-sen'. Letra muda: prima mexicana de la u de que-so."},
+   {ask:"¿Cuál se escribe CORRECTAMENTE?",opts:["knife","knive","nife"],ans:0,explain:"KNIFE con K muda — se oye 'naif'. El ojo la ve, el oído la ignora: cada vez que la leas, sáltatela 🚫."}
+  ],
+  [
+   {ask:"¿Qué palabra suena como el ancla 'dey'?",opts:["they (ellos)","day (día)","de"],ans:0,explain:"THEY = 'dey' — rima con 'rey' 👑. El diptongo /eɪ/ siempre termina deslizándose en 'y'."},
+   {ask:"¿Qué palabra suena como el ancla 'ui'?",opts:["we (nosotros)","you (tú)","wue"],ans:0,explain:"WE = 'ui' — una sílaba que se desliza de u a i. Y YOU = 'iu' es su espejo al revés."},
+   {ask:"¿Qué palabra suena como 'strit' — SIN la E de contrabando?",opts:["street","estreet","streat"],ans:0,explain:"STREET = 'strit'. El español jamás arranca con s+consonante (e-special, e-strella) — el ancla no contrabandea la E 🚫."}
+  ],
+  [
+   {ask:"¿Cuál es la sílaba ACENTUADA de 'banana'?",opts:["ba-NA-na","BA-na-na","ba-na-NA"],ans:0,explain:"ba-NA-na 🔵 — la del medio suena fuerte y clara; las otras dos se reducen a 'buh' y 'nuh' (schwa)."},
+   {ask:"¿Cuál es la sílaba ACENTUADA de 'photography'?",opts:["pho-TO-gra-phy","PHO-to-gra-phy","pho-to-GRA-phy"],ans:0,explain:"fo-TO-gra-fi — el acento VIAJA con el sufijo. En PHO-to-graph se muda otra vez 🧳."},
+   {ask:"¿Cuál es la sílaba ACENTUADA de 'important'?",opts:["im-POR-tant","IM-por-tant","im-por-TANT"],ans:0,explain:"im-POR-tant — la sílaba fuerte cae ANTES del final (misma familia de acento que -tion)."}
+  ]
  ],
  mouth:[
-  {band:0,target:"I am here",anchor:"ai em jir",explain:"Tu PRIMERA oración real — como el niño que dice '¡agua!'. Sujeto + SER + lugar."},
-  {band:1,target:"I am eating",anchor:"ai em ii-ting",explain:"La FÓRMULA MÁGICA: sujeto + SER + verbo-ing = lo que pasa AHORA 🪄."},
-  {band:2,target:"Betty bought a bit of better butter",anchor:"Beddy bought a bit of bedder budder",explain:"Cinco FLAP T — como la R suave de 'pero'. La lengua toca el techo una vez y ya 👅."},
-  {band:3,target:"The thoughtful mother took a bath in the north",anchor:"de thot-ful ma-der tuk a bat in de nor",explain:"Cinco TH — lengua entre los dientes cada vez. El reto máximo del Episodio 1 🔥."}
+  [
+   {target:"I am here",anchor:"ai em jir",explain:"Tu PRIMERA oración real — como el niño que dice '¡agua!'. Sujeto + SER + lugar."},
+   {target:"You are here",anchor:"iu ar jir",explain:"La misma oración con YOU = iu — tú y ustedes la dicen IGUAL. Sujeto + SER + lugar."},
+   {target:"She is here",anchor:"chi is jir",explain:"SHE = CHI (shi no existe en español — chi-che chi-cho). Sujeto + SER + lugar."}
+  ],
+  [
+   {target:"I am eating",anchor:"ai em ii-ting",explain:"La FÓRMULA MÁGICA: sujeto + SER + verbo-ing = lo que pasa AHORA 🪄."},
+   {target:"He is running",anchor:"ji is ra-ning",explain:"RUNNING dobla la n antes de -ing. La fórmula mágica con HE = ji."},
+   {target:"She is dancing",anchor:"chi is dan-sing",explain:"DANCING — la e muda se cae con -ing (write→writing, dance→dancing) 🪄."}
+  ],
+  [
+   {target:"Betty bought a bit of better butter",anchor:"Beddy bought a bit of bedder budder",explain:"Cinco FLAP T — como la R suave de 'pero'. La lengua toca el techo una vez y ya 👅."},
+   {target:"I need a little bit of water",anchor:"ai nid a liddle bit of ua-der",explain:"LITTLE = 'lidl' y WATER = 'ua-der' — flaps como la R suave de 'pero', dos en una línea 👅."},
+   {target:"The pretty kitty got a lot of butter",anchor:"de pridi kiti got a lot of budder",explain:"PRIDI-KITI-BUDDER: tres flaps en fila. La lengua da saltitos, no martillazos 🎯."}
+  ],
+  [
+   {target:"The thoughtful mother took a bath in the north",anchor:"de thot-ful ma-der tuk a bat in de nor",explain:"Cinco TH — lengua entre los dientes cada vez. El reto máximo del Episodio 1 🔥."},
+   {target:"Her mother and father think together",anchor:"jar ma-der an fa-der tink tu-ge-der",explain:"TH en toda la familia: ma-der y fa-der (sonoros), tink (sordo), tu-GE-der — la palabra que te quedó tarareando 😄."},
+   {target:"Both brothers think this is the best birthday",anchor:"bous bro-ders tink dis is de best bert-dey",explain:"SEIS TH: bous, bro-ders, tink, dis, de, bert-dey. La lengua entre dientes no descansa 🔥."}
+  ]
  ]};
+function pickVariant(pool,last){
+  let idxs=pool.map((_,i)=>i).filter(i=>i!==last);
+  if(!idxs.length)idxs=[0];
+  return idxs[Math.floor(Math.random()*idxs.length)];
+}
+function buildSession(){
+  let last={};
+  try{last=JSON.parse(localStorage.getItem("ab_qbank_last")||"{}")||{}}catch(e){last={}}
+  const picks={},q={};
+  for(const dim of ["ear","eye","mouth"]){
+    q[dim]=[];picks[dim]=[];
+    QBANK[dim].forEach((pool,band)=>{
+      const lastArr=(typeof last[dim]==="object"&&last[dim]!==null)?last[dim]:[];
+      const chosen=pickVariant(pool,lastArr[band]);
+      const v=Object.assign({},pool[chosen]);v.band=band;
+      q[dim].push(v);picks[dim][band]=chosen;
+    });
+  }
+  try{localStorage.setItem("ab_qbank_last",JSON.stringify(picks))}catch(e){}
+  return q;
+}
+let Q=buildSession();
 const DOSE={
  ear:{"A0":"Quiz de Oído diario en el grupo + pestaña Melodía del Trainer","A1":"Episodios diarios + minimal pairs (ship/sheep, think/sink)","A2":"Números y acentos en el Trainer + quizzes con audio","B1":"AccentBridges Pro — la orilla avanzada del puente"},
  eye:{"A0":"Vocales + Alfabeto Americano del Trainer (anclas)","A1":"Números y Frases del Trainer","A2":"WordBank + reglas de acento escritas","B1":"Pro — currículum B1+ completo"},
@@ -119,7 +195,7 @@ function pronScore(alts,target){
 function intro(){
   $("app").innerHTML=`<div class="dim-chip">🧠 Antes de empezar</div>
   <div class="q-text">No tienes UN nivel. Tienes un <b>PERFIL</b>: tu oído, tu ojo y tu boca pueden estar en niveles distintos — y cada uno se entrena en SU escalón.</div>
-  <div class="explain">👂 <b>Oído</b> — percibes los sonidos<br>👁 <b>Ojo</b> — reconoces anclas y escritura<br>👅 <b>Boca</b> — produces las frases<br><br>⏱ 12 preguntas o menos · 🎧 usa audífonos · 📱 mejor en Chrome</div>
+  <div class="explain">👂 <b>Oído</b> — percibes los sonidos<br>👁 <b>Ojo</b> — reconoces anclas y escritura<br>👅 <b>Boca</b> — produces las frases<br><br>⏱ 12 preguntas o menos · 🎧 usa audífonos · 📱 mejor en Chrome · 🎲 cada intento trae preguntas NUEVAS (banco de 36)</div>
   <button class="btn btn-primary" onclick="startDim(0)">Empezar mi expediente →</button>`;
 }
 function startDim(i){
