@@ -80,6 +80,7 @@ audio.rec-play{width:100%;margin-top:10px}
 .q-opt{border:2px solid var(--accent-border);background:var(--accent-bg);border-radius:14px;padding:14px 8px;font-size:14.5px;font-weight:800;color:var(--text);cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:4px;align-items:center}
 .q-opt .q-emoji{font-size:24px}
 .q-opt.correct{border-color:var(--ok);background:rgba(16,185,129,.12)}
+.q-opt.dim{opacity:.45}
 .q-opt.wrong{border-color:var(--bad);background:rgba(239,68,68,.10)}
 .q-feedback{margin-top:12px;font-size:13.5px;font-weight:700;min-height:20px}
 .q-replay{margin-top:10px;font-size:13px;font-weight:700;color:var(--primary);background:none;border:none;text-decoration:underline;cursor:pointer}
@@ -355,6 +356,41 @@ const COMBOS=[
  {value:"He is sleeping",phonetic:"Ji is slii-ping",phoneticEs:"ji + is + slii-ping — el niño que se duerme 😴",translation:"Él está durmiendo",emoji:"👦😴"},
  {value:"She is cooking",phonetic:"Chi is ku-king",phoneticEs:"chi + is + ku-king — a la abuela cocinando 👵",translation:"Ella está cocinando",emoji:"👧🍳"}];
 
+/* ===== HOMÓFONOS — gemelos de sonido (jir/der/tu, descubiertos en el backfill 900) ===== */
+const HOMOPHONES=[
+ {emoji:"🎧📍",es_title:"hear = here",sound:"jir",translation:"oír · aquí",
+  words:[{w:"hear",es:"oír",emoji:"🎧",ex:"I can hear you."},{w:"here",es:"aquí",emoji:"📍",ex:"Come here, please."}],
+  phoneticEs:"El oído americano oye UNA palabra: jir. El ojo español ve DOS. Cuando el sonido es el mismo, el SIGNIFICADO decide cuál va en la frase."},
+ {emoji:"🏠👉",es_title:"their = there",sound:"der",translation:"su · allá",
+  words:[{w:"their",es:"su (de ellos)",emoji:"🏠",ex:"Their house is big."},{w:"there",es:"allá",emoji:"👉",ex:"The book is over there."}],
+  phoneticEs:"Mismo sonido der, distinta palabra: their dice DE QUIÉN es algo; there dice DÓNDE está algo."},
+ {emoji:"🙋🔢",es_title:"too = two",sound:"tu",translation:"también · dos",
+  words:[{w:"too",es:"también",emoji:"🙋",ex:"Me too!"},{w:"two",es:"dos",emoji:"🔢",ex:"I have two brothers."}],
+  phoneticEs:"Mismo sonido tu: too suma un TAMBIÉN; two cuenta DOS. El contexto hace la matemática."},
+ {emoji:"🧠🚫",es_title:"know = no",sound:"nou",translation:"saber · no",
+  words:[{w:"know",es:"saber",emoji:"🧠",ex:"I know the answer."},{w:"no",es:"no",emoji:"🚫",ex:"No, thank you."}],
+  phoneticEs:"La K de know es muda — suena igual que no. Una es conocimiento, la otra es negación."},
+ {emoji:"☀️👦",es_title:"sun = son",sound:"san",translation:"sol · hijo",
+  words:[{w:"sun",es:"sol",emoji:"☀️",ex:"The sun is hot."},{w:"son",es:"hijo",emoji:"👦",ex:"My son is ten."}],
+  phoneticEs:"El cielo y la familia suenan IGUAL: san. La frase te dice si hablan del cielo o del muchacho."},
+ {emoji:"🌊👀",es_title:"sea = see",sound:"sii",translation:"mar · ver",
+  words:[{w:"sea",es:"mar",emoji:"🌊",ex:"Look at the sea."},{w:"see",es:"ver",emoji:"👀",ex:"I can see you."}],
+  phoneticEs:"Sii puede ser el mar o tus ojos. Escucha la frase completa y deja que el significado escoja."}];
+
+const HOMO_QUIZ=[
+ {say:"I can hear you.",correct:"hear",mate:"here",clue:"Si te OIGO → hear 🎧"},
+ {say:"Come here, please.",correct:"here",mate:"hear",clue:"Ven PARA ACÁ → here 📍"},
+ {say:"I have two brothers.",correct:"two",mate:"too",clue:"DOS hermanos → two 🔢"},
+ {say:"Me too!",correct:"too",mate:"two",clue:"Yo TAMBIÉN → too 🙋"},
+ {say:"Their house is big.",correct:"their",mate:"there",clue:"SU casa (de ellos) → their 🏠"},
+ {say:"The book is over there.",correct:"there",mate:"their",clue:"ALLÁ está el libro → there 👉"},
+ {say:"I know the answer.",correct:"know",mate:"no",clue:"Ya SÉ la respuesta → know 🧠"},
+ {say:"No, thank you.",correct:"no",mate:"know",clue:"Negación pura → no 🚫"},
+ {say:"The sun is hot today.",correct:"sun",mate:"son",clue:"El SOL caliente → sun ☀️"},
+ {say:"My son is ten.",correct:"son",mate:"sun",clue:"Mi HIJO de diez años → son 👦"},
+ {say:"Look at the sea.",correct:"sea",mate:"see",clue:"Mira el MAR → sea 🌊"},
+ {say:"I can see you.",correct:"see",mate:"sea",clue:"Te VEO → see 👀"}];
+
 /* ===== MELODY / INTONATION (upgrade AccentBridges) ===== */
 const MELODIES=[
  {kind:"statement",es_title:"Afirmación",en_title:"Statement",emoji:"💬",
@@ -422,10 +458,10 @@ const WARMUP=[
   es_tip:"Quien controla su volumen controla su acento: lo suave entrena la precisión sin lastimar la voz."}
 ];
 
-const DATA={warmup:WARMUP,vowels:VOWELS,sounds:SOUNDS,alphabet:ALPHABET,digraphs:DIGRAPHS,numbers:NUMBERS,greetings:GREETINGS,pronouns:PRONOUNS,phrases:PHRASES,verbs:VERBS,combos:COMBOS,melody:MELODIES};
+const DATA={warmup:WARMUP,vowels:VOWELS,sounds:SOUNDS,alphabet:ALPHABET,digraphs:DIGRAPHS,homofonos:HOMOPHONES,numbers:NUMBERS,greetings:GREETINGS,pronouns:PRONOUNS,phrases:PHRASES,verbs:VERBS,combos:COMBOS,melody:MELODIES};
 
 const I18N={
- es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{warmup:" Calienta",vowels:" Vocales",sounds:" Sonidos",alphabet:" Alfabeto",digraphs:" Dígrafos",numbers:" Números",greetings:" Saludos",pronouns:" Pronombres",phrases:" Frases",verbs:" Verbos",combos:" Combos",melody:" Melodía"},
+ es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{warmup:" Calienta",vowels:" Vocales",sounds:" Sonidos",alphabet:" Alfabeto",digraphs:" Dígrafos",homofonos:" Homófonos",numbers:" Números",greetings:" Saludos",pronouns:" Pronombres",phrases:" Frases",verbs:" Verbos",combos:" Combos",melody:" Melodía"},
      say:"DÍLO ASÍ:",listen:"🔊 Escuchar",slow:"🐢 Lento",normal:"🚶 Normal",fast:"🏃 Rápido",
      recTitle:"Graba tu voz",rec:"Grabar",stop:"Detener",play:"Escucharte",
      prev:"Anterior",next:"Siguiente",quizOn:"🧠 Modo Quiz",quizOff:"✖️ Salir del Quiz",
@@ -434,7 +470,7 @@ const I18N={
      qReplay:"🔊 Escuchar otra vez",correct:"¡Correcto! +1 punto 🎉",wrong:"¡Uy! Tu oído acaba de encontrar su gimnasio 💪",
      statement:"Afirmación ↘",question:"Pregunta ↗",certTitle:"Certificado de Logro",
      certSub:"¡Felicitaciones! ¡Has ganado 100 puntos!",certBody:"¡Completaste el Entrenador de Inglés Básico!",certBtn:"Seguir Aprendiendo 🚀"},
- en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{warmup:" Warm-up",vowels:" Vowels",sounds:" Sounds",alphabet:" Alphabet",digraphs:" Digraphs",numbers:" Numbers",greetings:" Greetings",pronouns:" Pronouns",phrases:" Phrases",verbs:" Verbs",combos:" Combos",melody:" Melody"},
+ en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{warmup:" Warm-up",vowels:" Vowels",sounds:" Sounds",alphabet:" Alphabet",digraphs:" Digraphs",homofonos:" Homophones",numbers:" Numbers",greetings:" Greetings",pronouns:" Pronouns",phrases:" Phrases",verbs:" Verbs",combos:" Combos",melody:" Melody"},
      say:"SAY IT LIKE:",listen:"🔊 Listen",slow:"🐢 Slow",normal:"🚶 Normal",fast:"🏃 Fast",
      recTitle:"Record your voice",rec:"Record",stop:"Stop",play:"Play",
      prev:"Prev",next:"Next",quizOn:"🧠 Quiz Mode",quizOff:"✖️ Exit Quiz",
@@ -563,7 +599,7 @@ function wuFinish(){wuDoneFlags[4]=true;const today=new Date().toISOString().sli
  else{toast("🔥 Rampa completa — boca lista")}}
 
 function renderTabs(){
-  const icons={warmup:"🎤",vowels:"🔤",sounds:"🔊",alphabet:"📖",digraphs:"🔗",numbers:"🔢",greetings:"👋",pronouns:"🙋",phrases:"💬",verbs:"🏃",combos:"🧩",melody:"🎵"};
+  const icons={warmup:"🎤",vowels:"🔤",sounds:"🔊",alphabet:"📖",digraphs:"🔗",homofonos:"👯",numbers:"🔢",greetings:"👋",pronouns:"🙋",phrases:"💬",verbs:"🏃",combos:"🧩",melody:"🎵"};
   $("tabs").innerHTML=Object.keys(DATA).map(k=>
     `<button class="tab ${k===tab?"active":""}" onclick="setTab('${k}')">${icons[k]}${t().tabs[k]}</button>`).join("");
 }
@@ -594,6 +630,21 @@ function renderCard(){
         <div class="say-phon" style="font-size:22px">${c.example}</div>
       </div>
       <div class="melody-note">💡 ${lang==="es"?c.es_note:c.en_note}</div>`;
+  }else if(tab==="homofonos"){
+    html=`<div class="emoji">${c.emoji}</div>
+      <div class="value" style="font-size:28px">${c.es_title}</div>
+      <div class="translation">🇪🇸 ${c.translation}</div>
+      <div class="say-box">
+        <div class="say-label">EL SONIDO GEMELO</div>
+        <div class="say-phon" style="font-size:22px">🔊 ${c.sound}</div>
+      </div>
+      <div class="q-opts" style="margin-top:14px">
+        ${c.words.map(w=>`<button class="q-opt" style="cursor:default"><span class="q-emoji">${w.emoji}</span>${w.w} = ${w.es}</button>`).join("")}
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:12px">
+        ${c.words.map((w,i)=>`<button class="btn btn-secondary" onclick="speak('${w.ex.replace("'","\\'")}')">▶️ ${w.w}</button>`).join("")}
+      </div>
+      <div class="melody-note">💡 ${c.phoneticEs}</div>`;
   }else{
     html=`<div class="emoji">${c.emoji}</div>
       <div class="value">${c.value}</div>
@@ -643,6 +694,18 @@ function renderQuiz(){
       </div>
       <div class="q-feedback" id="melFb"></div>
       <button class="q-replay" onclick="nextMelody()">${lang==="es"?"🔊 Siguiente frase →":"🔊 Next sentence →"}</button>`;
+  }else if(tab==="homofonos"){
+    if(!homoQuiz){let r;do{r=Math.floor(Math.random()*HOMO_QUIZ.length)}while(r===homoLast&&HOMO_QUIZ.length>1);homoLast=r;homoQuiz=HOMO_QUIZ[r]}
+    const pair=[homoQuiz.correct,homoQuiz.mate].sort(()=>Math.random()-.5);
+    z.innerHTML=`
+      <div class="q-title">${lang==="es"?"👂 ¿Cuál palabra escuchaste?":"👂 Which word did you hear?"}</div>
+      <div class="q-sub">${lang==="es"?"Escucha la frase — el SIGNIFICADO es la pista":"Listen to the sentence — meaning is the clue"}</div>
+      <button class="btn btn-secondary" style="margin-top:0" onclick="speak(homoQuiz.say)">${t().listen}</button>
+      <div class="q-opts" style="margin-top:14px">
+        ${pair.map(w=>`<button class="q-opt ${homoPick==="ok"&&w===homoQuiz.correct?"correct":homoPick==="x"&&w===homoPickWord?"wrong":homoPick==="ok"&&w!==homoQuiz.correct?"dim":""}" onclick="homoAnswer('${w}')">${w}</button>`).join("")}
+      </div>
+      <div class="q-feedback" id="homoFb"></div>
+      <button class="q-replay" onclick="nextHomo()">${lang==="es"?"🔊 Siguiente frase →":"🔊 Next sentence →"}</button>`;
   }else{
     if(!quizOpts)buildQuizOpts();
     z.innerHTML=`
@@ -658,7 +721,8 @@ function renderQuiz(){
 }
 
 /* ================= ACTIONS ================= */
-const setTab=k=>{tab=k;idx=0;quizOn=false;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;render()};
+let homoQuiz=null,homoPick=null,homoPickWord=null,homoLast=-1;
+const setTab=k=>{tab=k;idx=0;quizOn=false;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;homoQuiz=null;homoPick=null;homoPickWord=null;homoLast=-1;render()};
 const go=i=>{idx=i;quizPick=null;render()};
 const nav=d=>{idx=(idx+d+list().length)%list().length;quizPick=null;render()};
 const setSpeed=v=>{speed=v;render()};
@@ -666,9 +730,10 @@ const listenCard=()=>speak(card().example||card().value);
 const toggleLang=()=>{lang=lang==="es"?"en":"es";$("langBtn").textContent=lang==="es"?"🇪🇸 ES":"🇺🇸 EN";render()};
 const toggleTheme=()=>{theme=theme==="light"?"dark":"light";document.documentElement.setAttribute("data-theme",theme);$("themeBtn").textContent=theme==="light"?"🌙":"☀️"};
 
-function toggleQuiz(){if(tab==="warmup"){toast("🎤 El calentamiento es práctica libre — sin quiz");return}quizOn=!quizOn;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;render();
-  if(quizOn&&tab!=="melody"){setTimeout(()=>speak(card().value),250)}
+function toggleQuiz(){if(tab==="warmup"){toast("🎤 El calentamiento es práctica libre — sin quiz");return}quizOn=!quizOn;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;homoQuiz=null;homoPick=null;homoPickWord=null;render();
+  if(quizOn&&tab!=="melody"&&tab!=="homofonos"){setTimeout(()=>speak(card().value),250)}
   if(quizOn&&tab==="melody"){setTimeout(()=>speak(melQuiz.text),250)}
+  if(quizOn&&tab==="homofonos"){setTimeout(()=>{if(!homoQuiz){renderQuiz()}if(homoQuiz)speak(homoQuiz.say)},250)}
 }
 
 function buildQuizOpts(){
@@ -689,6 +754,15 @@ function awardPoint(word){
   if(p%10===0&&p<100)toast(`⭐ ${stars[Math.min(10,p/10)]}`);
   if(p>=100){showCert()}
 }
+
+function homoAnswer(w){
+  if(homoPick!==null)return;
+  homoPickWord=w;
+  if(w===homoQuiz.correct){homoPick="ok";awardPoint(homoQuiz.correct);const fb=$("homoFb");if(fb)fb.innerHTML=`<div class="score-msg" style="color:#10b981">✅ ¡Correcto! ${homoQuiz.clue} · +1 ⭐</div>`}
+  else{homoPick="x";trackError(homoQuiz.correct);const fb=$("homoFb");if(fb)fb.innerHTML=`<div class="score-msg" style="color:#ef4444">❌ Era ${homoQuiz.correct} — ${homoQuiz.clue}</div>`}
+}
+function nextHomo(){homoQuiz=null;homoPick=null;homoPickWord=null;renderQuiz();
+  if(quizOn&&tab==="homofonos"){setTimeout(()=>{if(homoQuiz)speak(homoQuiz.say)},250)}}
 
 function trackError(word){
   const e=errors();e[word]=(e[word]||0)+1;setErrors(e);
