@@ -47,6 +47,13 @@ main{max-width:560px;width:100%;padding:16px 14px 30px}
 .share{width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px;font-size:12px;margin-top:12px;background:#fafafa;color:var(--soft)}
 footer{text-align:center;font-size:11px;color:var(--soft);padding:12px;opacity:.8}
 .selfbtn{background:#fff;border:2px solid #e5e7eb;border-radius:12px;padding:12px;font-size:15px;font-weight:700;cursor:pointer;width:100%;margin-top:8px}
+/* ===== CALENTAMIENTO DE CANTANTE — intro de la dimensión Boca ===== */
+.wu-circle-wrap{display:flex;justify-content:center;margin:18px 0 8px}
+.wu-circle{width:80px;height:80px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#a78bfa,var(--purple));box-shadow:0 8px 24px rgba(122,74,255,.3);transform:scale(1)}
+.wu-phase{font-size:14.5px;font-weight:800;color:var(--purple);min-height:20px;margin:2px 0 10px}
+.wu-row{display:flex;gap:10px;margin-top:10px}
+.wu-row .btn{flex:1;margin-top:0}
+.wu-done{font-size:12.5px;color:#10b981;font-weight:700;margin-top:8px;min-height:16px}
 </style>
 </head>
 <body>
@@ -198,9 +205,58 @@ function intro(){
   <div class="explain">👂 <b>Oído</b> — percibes los sonidos<br>👁 <b>Ojo</b> — reconoces anclas y escritura<br>👅 <b>Boca</b> — produces las frases<br><br>⏱ 12 preguntas o menos · 🎧 usa audífonos · 📱 mejor en Chrome · 🎲 cada intento trae preguntas NUEVAS (banco de 36)</div>
   <button class="btn btn-primary" onclick="startDim(0)">Empezar mi expediente →</button>`;
 }
+/* ============ CALENTAMIENTO DE CANTANTE (doctrina Vocalización — rampa de la Boca) ============ */
+let wuAC=null,wuTimers=[];const wuDone=[false,false,false];
+function wuClear(){wuTimers.forEach(clearTimeout);wuTimers=[]}
+function wuAudio(){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;if(!wuAC)wuAC=new AC();if(wuAC.state==="suspended")wuAC.resume();return wuAC}
+function wuTone(freq,dur,type,vol,mod){const ac=wuAudio();if(!ac)return;try{
+ const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=freq;
+ const t=ac.currentTime;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.05);
+ g.gain.setValueAtTime(vol,t+dur-.1);g.gain.linearRampToValueAtTime(0,t+dur);
+ o.connect(g);g.connect(ac.destination);
+ if(mod){const l=ac.createOscillator(),lg=ac.createGain();l.frequency.value=mod;lg.gain.value=vol*.8;l.connect(lg);lg.connect(g.gain);l.start(t);l.stop(t+dur)}
+ o.start(t);o.stop(t+dur)}catch(e){}}
+function wuSetCircle(scale,dur){const c=$("wuCircle");if(!c)return;c.style.transition="transform "+dur+"s ease-in-out";c.style.transform="scale("+scale+")"}
+function wuPhase(txt){const p=$("wuPhase");if(p)p.textContent=txt}
+function wuDoneTxt(){const el=$("wuDone");if(el)el.textContent="✅ "+wuDone.filter(Boolean).length+"/3 listo"}
+function warmupOffer(){
+  $("app").innerHTML=`<div class="dim-chip">🎤 Calentamiento de Cantante</div>
+  <div class="q-text">Antes de grabar tu voz, la boca se calienta como la del cantante: relajada fluye mejor.</div>
+  <div class="explain">🫁 Respiración · 😤 Zumbido · 🫠 Motor de labios<br><br>💡 Lo que vas a oír grabada es la voz que el mundo oye — la única honesta. Con calma suena mejor.</div>
+  <button class="btn btn-primary" onclick="warmupGo()">🎤 Calentar mi boca (~1 min) →</button>
+  <button class="btn btn-primary" style="margin-top:10px" onclick="mouthIntro()">Sin calentamiento, directo →</button>`;
+}
+function warmupGo(){
+  $("app").innerHTML=`<div class="dim-chip">🎤 Calienta tu boca</div>
+  <div class="wu-circle-wrap"><div class="wu-circle" id="wuCircle"></div></div>
+  <div class="wu-phase" id="wuPhase">Elige tu ejercicio 👇</div>
+  <div class="wu-row"><button class="btn btn-primary" onclick="wuBreath()">🫁 Respirar</button>
+  <button class="btn btn-primary" onclick="wuHum()">😤 Zumbido</button>
+  <button class="btn btn-primary" onclick="wuTrill()">🫠 Motor</button></div>
+  <div class="wu-done" id="wuDone"></div>
+  <button class="btn btn-primary" style="margin-top:14px" onclick="mouthIntro()">✅ Boca lista — a la prueba →</button>`;
+}
+function wuBreath(){wuClear();wuPhase("Inhala 4…");wuSetCircle(1.5,4);
+ wuTimers.push(setTimeout(()=>{wuPhase("Sostén 2…")},4000));
+ wuTimers.push(setTimeout(()=>{wuPhase("Suelta 6…");wuSetCircle(1,6)},6000));
+ wuTimers.push(setTimeout(()=>{wuPhase("✅ Aire listo");wuDone[0]=true;wuDoneTxt()},12000))}
+function wuHum(){wuClear();wuPhase("“mmm” — acompaña el zumbido");wuSetCircle(1.35,3.8);wuTone(150,4,"sine",.16);
+ wuTimers.push(setTimeout(()=>{wuSetCircle(1,.4)},4100));
+ wuTimers.push(setTimeout(()=>{wuPhase("✅ Zumbido listo");wuDone[1]=true;wuDoneTxt()},4500))}
+function wuTrill(){wuClear();wuPhase("“brrr” — labios flojitos");wuSetCircle(1.3,2.3);wuTone(85,2.4,"sawtooth",.08,22);
+ wuTimers.push(setTimeout(()=>{wuSetCircle(1,.4)},2500));
+ wuTimers.push(setTimeout(()=>{wuPhase("✅ Motor listo");wuDone[2]=true;wuDoneTxt()},2800))}
+function mouthIntro(){
+  const d=DIMS[dimIdx];
+  $("app").innerHTML=`<div class="dim-chip">Dimensión ${dimIdx+1} de 3 · ${d.name}</div>
+  <div class="q-text">${d.intro}</div>
+  <button class="btn btn-primary" onclick="nextQ()">Entendido →</button>`;
+}
+
 function startDim(i){
   dimIdx=i;qIdx=0;results[DIMS[i].id]={answered:0,level:null};
   const d=DIMS[i];
+  if(d.id==="mouth"){return warmupOffer()}
   $("app").innerHTML=`<div class="dim-chip">Dimensión ${i+1} de 3 · ${d.name}</div>
   <div class="q-text">${d.intro}</div>
   <button class="btn btn-primary" onclick="nextQ()">Entendido →</button>`;
