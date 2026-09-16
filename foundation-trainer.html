@@ -356,6 +356,37 @@ const COMBOS=[
  {value:"He is sleeping",phonetic:"Ji is slii-ping",phoneticEs:"ji + is + slii-ping — el niño que se duerme 😴",translation:"Él está durmiendo",emoji:"👦😴"},
  {value:"She is cooking",phonetic:"Chi is ku-king",phoneticEs:"chi + is + ku-king — a la abuela cocinando 👵",translation:"Ella está cocinando",emoji:"👧🍳"}];
 
+/* ===== EL SAZÓN PELIGROSO 🌶️ (doctrina sellada 15-sep-2026, el gato con botas) ===== */
+const SAZON=[
+ {emoji:"🐱",es_title:"Puss in Boots",say:"Puss in Boots",ancla:"Pus in Buts",sazonada:"Pu-si in Bu-tos",translation:"El Gato con Botas",
+  doctrina:"UNA sílaba cada palabra: Pus / In / Buts. Sílabas CERRADAS. Si el sazón les agrega vocal, el gato inocente se convierte en OTRA palabra muy distinta 😅 que no decimos en clase. El sazón a veces cambia el SIGNIFICADO.",
+  orgullo:"El gato de Antonio Banderas: el personaje más querido de Hollywood con acento DELIBERADO. Fear me if you dare 😼 — el acento bien OWNED es un ASSET, no un defecto."},
+ {emoji:"🌶️",es_title:"El Sazón",say:"book, stop, street",ancla:"sílabas cerradas",sazonada:"sílabas abiertas de más",translation:"la trampa de las codas",
+  doctrina:"El español termina sus sílabas en VOCAL (ca-sa, pa-ne). El inglés las CIERRA con consonantes: book, stop, street. La boca mexicana, por costumbre, le agrega una vocal después de la consonante final — eso es el SAZÓN. Es la misma E de contrabando del e-STREET.",
+  orgullo:"Quitar el sazón no te quita lo mexicano — te lo pone a huevo propio: precisión CON orgullo."},
+ {emoji:"🛣️",es_title:"street",say:"street",ancla:"strit",sazonada:"e-strit",translation:"calle",
+  doctrina:"Una sílaba, cerrada con T. La E de contrabando al inicio es la firma del sazón — el español jamás arranca con s+consonante (e-special, e-strella).",
+  orgullo:"El español tiene e-PECIAL; el inglés arranca limpio: strit."},
+ {emoji:"📖",es_title:"book",say:"book",ancla:"buk",sazonada:"bu-ka",translation:"libro",
+  doctrina:"La K cierra la sílaba. Una sola sílaba. La A extra es sazón puro.",
+  orgullo:"El libro se cierra — la sílaba también."},
+ {emoji:"👢",es_title:"boots",say:"boots",ancla:"buts",sazonada:"bu-tos",translation:"botas",
+  doctrina:"Las botas del gato: UNA sílaba con TS al final. El sazón las convierte en dos — y el gato pierde el paso.",
+  orgullo:"Buts sin vocal: el gato camina en una sílaba."},
+ {emoji:"🌮",es_title:"snack",say:"snack",ancla:"snak",sazonada:"sna-ka",translation:"botana",
+  doctrina:"La K final cierra. Una sílaba. La boca no merienda vocales extra.",
+  orgullo:"Botana en una sílaba, como debe ser."}];
+
+const SAZON_QUIZ=[
+ {say:"Puss in Boots",correct:"Pus in Buts",wrong:"Pu-si in Bu-tos",clue:"Una sílaba cada palabra — el gato inocente 🐱"},
+ {say:"street",correct:"strit",wrong:"e-strit",clue:"La E de contrabando es sazón 🌶️"},
+ {say:"book",correct:"buk",wrong:"bu-ka",clue:"La K cierra la sílaba — una sola"},
+ {say:"stop",correct:"stop",wrong:"es-top",clue:"Arranca limpio, sin E de contrabando"},
+ {say:"boots",correct:"buts",wrong:"bu-tos",clue:"TS final = una sílaba"},
+ {say:"much",correct:"mach",wrong:"ma-chi",clue:"La CH cierra la sílaba"},
+ {say:"snack",correct:"snak",wrong:"sna-ka",clue:"La boca no merienda vocales extra 🌮"},
+ {say:"want",correct:"uant",wrong:"uan-ta",clue:"La NT cierra — una sílaba"}];
+
 /* ===== HOMÓFONOS — gemelos de sonido (jir/der/tu, descubiertos en el backfill 900) ===== */
 const HOMOPHONES=[
  {emoji:"🎧📍",es_title:"hear = here",sound:"jir",translation:"oír · aquí",
@@ -458,10 +489,10 @@ const WARMUP=[
   es_tip:"Quien controla su volumen controla su acento: lo suave entrena la precisión sin lastimar la voz."}
 ];
 
-const DATA={warmup:WARMUP,vowels:VOWELS,sounds:SOUNDS,alphabet:ALPHABET,digraphs:DIGRAPHS,homofonos:HOMOPHONES,numbers:NUMBERS,greetings:GREETINGS,pronouns:PRONOUNS,phrases:PHRASES,verbs:VERBS,combos:COMBOS,melody:MELODIES};
+const DATA={warmup:WARMUP,vowels:VOWELS,sounds:SOUNDS,alphabet:ALPHABET,digraphs:DIGRAPHS,homofonos:HOMOPHONES,sazon:SAZON,numbers:NUMBERS,greetings:GREETINGS,pronouns:PRONOUNS,phrases:PHRASES,verbs:VERBS,combos:COMBOS,melody:MELODIES};
 
 const I18N={
- es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{warmup:" Calienta",vowels:" Vocales",sounds:" Sonidos",alphabet:" Alfabeto",digraphs:" Dígrafos",homofonos:" Homófonos",numbers:" Números",greetings:" Saludos",pronouns:" Pronombres",phrases:" Frases",verbs:" Verbos",combos:" Combos",melody:" Melodía"},
+ es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{warmup:" Calienta",vowels:" Vocales",sounds:" Sonidos",alphabet:" Alfabeto",digraphs:" Dígrafos",homofonos:" Homófonos",sazon:" Sazón",numbers:" Números",greetings:" Saludos",pronouns:" Pronombres",phrases:" Frases",verbs:" Verbos",combos:" Combos",melody:" Melodía"},
      say:"DÍLO ASÍ:",listen:"🔊 Escuchar",slow:"🐢 Lento",normal:"🚶 Normal",fast:"🏃 Rápido",
      recTitle:"Graba tu voz",rec:"Grabar",stop:"Detener",play:"Escucharte",
      prev:"Anterior",next:"Siguiente",quizOn:"🧠 Modo Quiz",quizOff:"✖️ Salir del Quiz",
@@ -470,7 +501,7 @@ const I18N={
      qReplay:"🔊 Escuchar otra vez",correct:"¡Correcto! +1 punto 🎉",wrong:"¡Uy! Tu oído acaba de encontrar su gimnasio 💪",
      statement:"Afirmación ↘",question:"Pregunta ↗",certTitle:"Certificado de Logro",
      certSub:"¡Felicitaciones! ¡Has ganado 100 puntos!",certBody:"¡Completaste el Entrenador de Inglés Básico!",certBtn:"Seguir Aprendiendo 🚀"},
- en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{warmup:" Warm-up",vowels:" Vowels",sounds:" Sounds",alphabet:" Alphabet",digraphs:" Digraphs",homofonos:" Homophones",numbers:" Numbers",greetings:" Greetings",pronouns:" Pronouns",phrases:" Phrases",verbs:" Verbs",combos:" Combos",melody:" Melody"},
+ en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{warmup:" Warm-up",vowels:" Vowels",sounds:" Sounds",alphabet:" Alphabet",digraphs:" Digraphs",homofonos:" Homophones",sazon:" Sazón",numbers:" Numbers",greetings:" Greetings",pronouns:" Pronouns",phrases:" Phrases",verbs:" Verbs",combos:" Combos",melody:" Melody"},
      say:"SAY IT LIKE:",listen:"🔊 Listen",slow:"🐢 Slow",normal:"🚶 Normal",fast:"🏃 Fast",
      recTitle:"Record your voice",rec:"Record",stop:"Stop",play:"Play",
      prev:"Prev",next:"Next",quizOn:"🧠 Quiz Mode",quizOff:"✖️ Exit Quiz",
@@ -599,7 +630,7 @@ function wuFinish(){wuDoneFlags[4]=true;const today=new Date().toISOString().sli
  else{toast("🔥 Rampa completa — boca lista")}}
 
 function renderTabs(){
-  const icons={warmup:"🎤",vowels:"🔤",sounds:"🔊",alphabet:"📖",digraphs:"🔗",homofonos:"👯",numbers:"🔢",greetings:"👋",pronouns:"🙋",phrases:"💬",verbs:"🏃",combos:"🧩",melody:"🎵"};
+  const icons={warmup:"🎤",vowels:"🔤",sounds:"🔊",alphabet:"📖",digraphs:"🔗",homofonos:"👯",sazon:"🌶️",numbers:"🔢",greetings:"👋",pronouns:"🙋",phrases:"💬",verbs:"🏃",combos:"🧩",melody:"🎵"};
   $("tabs").innerHTML=Object.keys(DATA).map(k=>
     `<button class="tab ${k===tab?"active":""}" onclick="setTab('${k}')">${icons[k]}${t().tabs[k]}</button>`).join("");
 }
@@ -630,6 +661,35 @@ function renderCard(){
         <div class="say-phon" style="font-size:22px">${c.example}</div>
       </div>
       <div class="melody-note">💡 ${lang==="es"?c.es_note:c.en_note}</div>`;
+  }else if(tab==="sazon"){
+    html=`<div class="emoji">${c.emoji}</div>
+      <div class="value" style="font-size:28px">${c.es_title}</div>
+      <div class="translation">🇪🇸 ${c.translation}</div>
+      <div class="say-box">
+        <div class="say-label">SIN SAZÓN ✅</div>
+        <div class="say-phon" style="font-size:22px;color:#10b981">🔊 ${c.ancla}</div>
+      </div>
+      <div class="say-box" style="margin-top:10px">
+        <div class="say-label">CON SAZÓN 🌶️❌</div>
+        <div class="say-phon" style="font-size:22px;color:#ef4444">${c.sazonada}</div>
+      </div>
+      ${c.say?`<div style="text-align:center;margin-top:12px">
+        <button class="btn btn-secondary" onclick="speak('${(c.say||"").replace(/'/g,"\\'")}')">▶️ Oír la palabra</button>
+      </div>`:""}
+      <div class="melody-note">💡 ${c.doctrina}</div>
+      <div class="melody-note" style="margin-top:8px">😼 ${c.orgullo}</div>`;
+  }else if(tab==="sazon"){
+    if(!szQuiz){let r;do{r=Math.floor(Math.random()*SAZON_QUIZ.length)}while(r===szLast&&SAZON_QUIZ.length>1);szLast=r;szQuiz=SAZON_QUIZ[r]}
+    const pair=[szQuiz.correct,szQuiz.wrong].sort(()=>Math.random()-.5);
+    z.innerHTML=`
+      <div class="q-title">${lang==="es"?"🌶️ ¿Cuál es la versión SIN sazón?":"🌶️ Which one has no extra seasoning?"}</div>
+      <div class="q-sub">${lang==="es"?"Escucha la palabra — una sílaba cerrada, sin vocales extra":"Listen — one closed syllable, no extra vowels"}</div>
+      <button class="btn btn-secondary" style="margin-top:0" onclick="speak(szQuiz.say)">${t().listen}</button>
+      <div class="q-opts" style="margin-top:14px">
+        ${pair.map(w=>`<button class="q-opt ${szPick==="ok"&&w===szQuiz.correct?"correct":szPick==="x"&&w===szPickWord?"wrong":szPick==="ok"&&w!==szQuiz.correct?"dim":""}" onclick="szAnswer('${w}')">${w}</button>`).join("")}
+      </div>
+      <div class="q-feedback" id="szFb"></div>
+      <button class="q-replay" onclick="nextSazon()">${lang==="es"?"🌶️ Siguiente palabra →":"🌶️ Next word →"}</button>`;
   }else if(tab==="homofonos"){
     html=`<div class="emoji">${c.emoji}</div>
       <div class="value" style="font-size:28px">${c.es_title}</div>
@@ -722,7 +782,8 @@ function renderQuiz(){
 
 /* ================= ACTIONS ================= */
 let homoQuiz=null,homoPick=null,homoPickWord=null,homoLast=-1;
-const setTab=k=>{tab=k;idx=0;quizOn=false;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;homoQuiz=null;homoPick=null;homoPickWord=null;homoLast=-1;render()};
+let szQuiz=null,szPick=null,szPickWord=null,szLast=-1;
+const setTab=k=>{tab=k;idx=0;quizOn=false;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;homoQuiz=null;homoPick=null;homoPickWord=null;homoLast=-1;szQuiz=null;szPick=null;szPickWord=null;szLast=-1;render()};
 const go=i=>{idx=i;quizPick=null;render()};
 const nav=d=>{idx=(idx+d+list().length)%list().length;quizPick=null;render()};
 const setSpeed=v=>{speed=v;render()};
@@ -730,10 +791,11 @@ const listenCard=()=>speak(card().example||card().value);
 const toggleLang=()=>{lang=lang==="es"?"en":"es";$("langBtn").textContent=lang==="es"?"🇪🇸 ES":"🇺🇸 EN";render()};
 const toggleTheme=()=>{theme=theme==="light"?"dark":"light";document.documentElement.setAttribute("data-theme",theme);$("themeBtn").textContent=theme==="light"?"🌙":"☀️"};
 
-function toggleQuiz(){if(tab==="warmup"){toast("🎤 El calentamiento es práctica libre — sin quiz");return}quizOn=!quizOn;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;homoQuiz=null;homoPick=null;homoPickWord=null;render();
-  if(quizOn&&tab!=="melody"&&tab!=="homofonos"){setTimeout(()=>speak(card().value),250)}
+function toggleQuiz(){if(tab==="warmup"){toast("🎤 El calentamiento es práctica libre — sin quiz");return}quizOn=!quizOn;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;homoQuiz=null;homoPick=null;homoPickWord=null;szQuiz=null;szPick=null;szPickWord=null;render();
+  if(quizOn&&tab!=="melody"&&tab!=="homofonos"&&tab!=="sazon"){setTimeout(()=>speak(card().value),250)}
   if(quizOn&&tab==="melody"){setTimeout(()=>speak(melQuiz.text),250)}
   if(quizOn&&tab==="homofonos"){setTimeout(()=>{if(!homoQuiz){renderQuiz()}if(homoQuiz)speak(homoQuiz.say)},250)}
+  if(quizOn&&tab==="sazon"){setTimeout(()=>{if(!szQuiz){renderQuiz()}if(szQuiz)speak(szQuiz.say)},250)}
 }
 
 function buildQuizOpts(){
@@ -763,6 +825,15 @@ function homoAnswer(w){
 }
 function nextHomo(){homoQuiz=null;homoPick=null;homoPickWord=null;renderQuiz();
   if(quizOn&&tab==="homofonos"){setTimeout(()=>{if(homoQuiz)speak(homoQuiz.say)},250)}}
+
+function szAnswer(w){
+  if(szPick!==null)return;
+  szPickWord=w;
+  if(w===szQuiz.correct){szPick="ok";awardPoint(szQuiz.correct);const fb=$("szFb");if(fb)fb.innerHTML=`<div class="score-msg" style="color:#10b981">✅ ¡Esa es! ${szQuiz.clue} · +1 ⭐</div>`}
+  else{szPick="x";trackError(szQuiz.correct);const fb=$("szFb");if(fb)fb.innerHTML=`<div class="score-msg" style="color:#ef4444">❌ Era ${szQuiz.correct} — ${szQuiz.clue}</div>`}
+}
+function nextSazon(){szQuiz=null;szPick=null;szPickWord=null;renderQuiz();
+  if(quizOn&&tab==="sazon"){setTimeout(()=>{if(!szQuiz){renderQuiz()}if(szQuiz)speak(szQuiz.say)},250)}}
 
 function trackError(word){
   const e=errors();e[word]=(e[word]||0)+1;setErrors(e);
