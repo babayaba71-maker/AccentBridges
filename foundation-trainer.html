@@ -105,6 +105,21 @@ footer{margin-top:auto;text-align:center;padding:16px;font-size:11.5px;color:var
 .score-best{font-size:12px;font-weight:800;margin-top:6px}
 .score-stars{font-size:15px;margin-top:2px;letter-spacing:1px}
 @media(max-width:420px){.value{font-size:38px}.emoji{font-size:54px}}
+
+/* ===== CALENTAMIENTO DE CANTANTE v2.7 ===== */
+.wu-desc{font-size:14.5px;color:var(--text-soft);line-height:1.55;margin-top:6px}
+.wu-circle-wrap{display:flex;justify-content:center;margin:20px 0 10px}
+.wu-circle{width:92px;height:92px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#a78bfa,var(--primary));box-shadow:0 10px 30px rgba(93,70,226,.35);transform:scale(1)}
+.wu-phase{font-size:15px;font-weight:800;color:var(--primary);min-height:22px;margin:4px 0 8px}
+.wu-row{display:flex;gap:10px;margin-top:12px}
+.wu-row .btn{margin-top:0}
+.wu-notes{display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.wu-note{border:1.5px solid var(--accent-border);background:var(--accent-bg);color:var(--primary);border-radius:999px;padding:12px 15px;font-weight:800;font-size:15px;cursor:pointer}
+.wu-note:active{transform:scale(.94)}
+.wu-dbs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px}
+.wu-db{border:1.5px solid var(--accent-border);background:var(--accent-bg);border-radius:14px;padding:12px 6px;font-weight:800;font-size:13.5px;cursor:pointer;color:var(--text)}
+.wu-db:active{transform:scale(.95)}
+.wu-mini{font-size:12.5px;color:var(--text-soft);font-style:italic;margin-top:10px}
 </style>
 </head>
 <body>
@@ -388,10 +403,29 @@ const MELODY_QUIZ=[
  {text:"This is my house.",answer:"statement"},
  {text:"Do you speak English?",answer:"question"}];
 
-const DATA={vowels:VOWELS,sounds:SOUNDS,alphabet:ALPHABET,digraphs:DIGRAPHS,numbers:NUMBERS,greetings:GREETINGS,pronouns:PRONOUNS,phrases:PHRASES,verbs:VERBS,combos:COMBOS,melody:MELODIES};
+/* ===== CALENTAMIENTO DE CANTANTE v2.7 — doctrina Vocalización: la relajación del cantante es la rampa del Mouth Gym ===== */
+const WARMUP=[
+ {kind:"breath",emoji:"🫁",value:"mmm",es_title:"Respira con el diafragma",
+  es_desc:"3 ciclos lentos: inhala por la nariz (4 segundos), sostén (2), suelta por la boca (6). El aire va a la panza, no al pecho.",
+  es_tip:"Todo cantante y actor empieza aquí. La voz viaja sobre el aire — sin aire tranquilo no hay voz tranquila."},
+ {kind:"hum",emoji:"😤",value:"mmm",es_title:"Zumbido suave",
+  es_desc:"Cierra la boca, tócate una nota cómoda y mantén el zumbido “mmm” mientras el círculo respira. Baja la nota poquito a poco.",
+  es_tip:"El zumbido despierta las vibraciones de la cara — tu micrófono interno para SENTIR el sonido, no solo oírlo."},
+ {kind:"trill",emoji:"🫠",value:"brrr",es_title:"Motor de labios",
+  es_desc:"Suelta el aire con los labios flojitos: “brrr”, como motorcito. Sube y baja la nota mientras los labios vibran solos.",
+  es_tip:"Labios flojos hablan claro. La tensión es enemiga del acento: el sonido se FLUYE, no se empuja."},
+ {kind:"notes",emoji:"🎵",value:"ma me mi mo mu",es_title:"Entona la escala",
+  es_desc:"Cada botón toca una nota de la escala. Canta “ma” sobre cada nota y sube la escalera. Luego bájala cantando “mu”.",
+  es_tip:"Entonar entrena oído y boca a la vez — la melodía del inglés se monta sobre este control de tu instrumento."},
+ {kind:"decibel",emoji:"🔊",value:"I am learning English.",example:"I am learning English.",phonetic:"ai em LER-ning ING-lish",es_title:"Tres decibeles",
+  es_desc:"Di la frase completa de tres maneras: con fuerza, relajado y suavecito. Escucha el modelo y acompáñalo en cada nivel.",
+  es_tip:"Quien controla su volumen controla su acento: lo suave entrena la precisión sin lastimar la voz."}
+];
+
+const DATA={warmup:WARMUP,vowels:VOWELS,sounds:SOUNDS,alphabet:ALPHABET,digraphs:DIGRAPHS,numbers:NUMBERS,greetings:GREETINGS,pronouns:PRONOUNS,phrases:PHRASES,verbs:VERBS,combos:COMBOS,melody:MELODIES};
 
 const I18N={
- es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{vowels:" Vocales",sounds:" Sonidos",alphabet:" Alfabeto",digraphs:" Dígrafos",numbers:" Números",greetings:" Saludos",pronouns:" Pronombres",phrases:" Frases",verbs:" Verbos",combos:" Combos",melody:" Melodía"},
+ es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{warmup:" Calienta",vowels:" Vocales",sounds:" Sonidos",alphabet:" Alfabeto",digraphs:" Dígrafos",numbers:" Números",greetings:" Saludos",pronouns:" Pronombres",phrases:" Frases",verbs:" Verbos",combos:" Combos",melody:" Melodía"},
      say:"DÍLO ASÍ:",listen:"🔊 Escuchar",slow:"🐢 Lento",normal:"🚶 Normal",fast:"🏃 Rápido",
      recTitle:"Graba tu voz",rec:"Grabar",stop:"Detener",play:"Escucharte",
      prev:"Anterior",next:"Siguiente",quizOn:"🧠 Modo Quiz",quizOff:"✖️ Salir del Quiz",
@@ -400,7 +434,7 @@ const I18N={
      qReplay:"🔊 Escuchar otra vez",correct:"¡Correcto! +1 punto 🎉",wrong:"¡Uy! Tu oído acaba de encontrar su gimnasio 💪",
      statement:"Afirmación ↘",question:"Pregunta ↗",certTitle:"Certificado de Logro",
      certSub:"¡Felicitaciones! ¡Has ganado 100 puntos!",certBody:"¡Completaste el Entrenador de Inglés Básico!",certBtn:"Seguir Aprendiendo 🚀"},
- en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{vowels:" Vowels",sounds:" Sounds",alphabet:" Alphabet",digraphs:" Digraphs",numbers:" Numbers",greetings:" Greetings",pronouns:" Pronouns",phrases:" Phrases",verbs:" Verbs",combos:" Combos",melody:" Melody"},
+ en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{warmup:" Warm-up",vowels:" Vowels",sounds:" Sounds",alphabet:" Alphabet",digraphs:" Digraphs",numbers:" Numbers",greetings:" Greetings",pronouns:" Pronouns",phrases:" Phrases",verbs:" Verbs",combos:" Combos",melody:" Melody"},
      say:"SAY IT LIKE:",listen:"🔊 Listen",slow:"🐢 Slow",normal:"🚶 Normal",fast:"🏃 Fast",
      recTitle:"Record your voice",rec:"Record",stop:"Stop",play:"Play",
      prev:"Prev",next:"Next",quizOn:"🧠 Quiz Mode",quizOff:"✖️ Exit Quiz",
@@ -459,8 +493,77 @@ function render(){
   const sz=$("scoreZone");if(sz)sz.style.display="none";
 }
 
+/* ===== LÓGICA CALENTAMIENTO (WebAudio real: zumbido, motor, notas — 0 dependencias) ===== */
+let wuAC=null,wuTimers=[];const wuDoneFlags=[false,false,false,false,false],wuDbFlags=[false,false,false];
+const wuClear=()=>{wuTimers.forEach(clearTimeout);wuTimers=[]};
+const wuT=(fn,ms)=>{const id=setTimeout(fn,ms);wuTimers.push(id);return id};
+function wuAudio(){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;
+ if(!wuAC)wuAC=new AC();if(wuAC.state==="suspended")wuAC.resume();return wuAC}
+function wuTone(freq,dur,type,vol,mod){const ac=wuAudio();if(!ac)return;try{
+ const o=ac.createOscillator(),g=ac.createGain();o.type=type||"sine";o.frequency.value=freq;
+ g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(vol||.16,ac.currentTime+.06);
+ g.gain.setValueAtTime(vol||.16,ac.currentTime+dur-.1);g.gain.linearRampToValueAtTime(0,ac.currentTime+dur);
+ o.connect(g);g.connect(ac.destination);
+ if(mod){const l=ac.createOscillator(),lg=ac.createGain();l.frequency.value=mod;lg.gain.value=(vol||.16)*.8;l.connect(lg);lg.connect(g.gain);l.start(ac.currentTime);l.stop(ac.currentTime+dur)}
+ o.start(ac.currentTime);o.stop(ac.currentTime+dur)}catch(e){}}
+function wuSpeak(text,vol){try{window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);
+ u.lang="en-US";u.rate=.9;u.volume=vol;const vs=speechSynthesis.getVoices().filter(v=>v.lang&&v.lang.indexOf("en")===0);
+ if(vs.length)u.voice=vs.find(v=>v.lang==="en-US")||vs[0];speechSynthesis.speak(u)}catch(e){}}
+function wuSetCircle(scale,dur){const c=$("wuCircle");if(!c)return;c.style.transition="transform "+dur+"s ease-in-out";c.style.transform="scale("+scale+")"}
+function wuPhase(txt){const p=$("wuPhase");if(p)p.textContent=txt}
+function wuBreath(){wuClear();const cycle=n=>{if(n>3){wuPhase("✅ Respiración lista");wuDoneFlags[0]=true;return}
+ wuPhase("Inhala… ciclo "+n+"/3");wuSetCircle(1.55,4);
+ wuT(()=>{wuPhase("Sostén… ciclo "+n+"/3")},4000);
+ wuT(()=>{wuPhase("Suelta… ciclo "+n+"/3");wuSetCircle(1,6)},6000);
+ wuT(()=>cycle(n+1),12200)};cycle(1)}
+function wuHum(){wuClear();const round=n=>{if(n>3){wuPhase("✅ Zumbido listo");wuDoneFlags[1]=true;return}
+ wuPhase("Zumbido "+n+"/3 — “mmm”");wuSetCircle(1.35,3.8);wuTone(152-(n-1)*12,4,"sine",.15);
+ wuT(()=>{wuSetCircle(1,.4)},4100);wuT(()=>round(n+1),4600)};round(1)}
+function wuTrill(){wuClear();const round=n=>{if(n>3){wuPhase("✅ Labios listos");wuDoneFlags[2]=true;return}
+ wuPhase("Motor "+n+"/3 — “brrr”");wuSetCircle(1.3,2.3);wuTone(85,2.4,"sawtooth",.08,22);
+ wuT(()=>{wuSetCircle(1,.4)},2500);wuT(()=>round(n+1),3000)};round(1)}
+function wuNote(f){wuTone(f,1.1,"sine",.2);wuPhase("Canta “ma” sobre la nota 🎵")}
+function wuDb(kind){wuSpeak("I am learning English.",[1,.6,.25][kind]);
+ wuPhase(["💪 Fuerte — acompáñalo","😌 Relajado — déjalo fluir","🤫 Suavecito — precisión sin esfuerzo"][kind]);
+ wuDbFlags[kind]=true;if(wuDbFlags[0]&&wuDbFlags[1]&&wuDbFlags[2])wuDoneFlags[4]=true}
+function wuCard(c){let widget="";
+ if(c.kind==="breath")widget=`<div class="wu-circle-wrap"><div class="wu-circle" id="wuCircle"></div></div>
+  <div class="wu-phase" id="wuPhase">4 inhala · 2 sostén · 6 suelta</div>
+  <button class="btn btn-secondary" onclick="wuBreath()">▶️ Empezar 3 ciclos</button>`;
+ else if(c.kind==="hum")widget=`<div class="wu-circle-wrap"><div class="wu-circle" id="wuCircle"></div></div>
+  <div class="wu-phase" id="wuPhase">Zumbido cómodo, boca cerrada</div>
+  <div class="wu-row"><button class="btn btn-secondary" onclick="wuTone(150,3.5,'sine',.15)">🔊 Modelo</button>
+  <button class="btn btn-secondary" onclick="wuHum()">▶️ 3 zumbidos</button></div>`;
+ else if(c.kind==="trill")widget=`<div class="wu-circle-wrap"><div class="wu-circle" id="wuCircle"></div></div>
+  <div class="wu-phase" id="wuPhase">Labios flojitos — “brrr”</div>
+  <div class="wu-row"><button class="btn btn-secondary" onclick="wuTone(85,2.5,'sawtooth',.08,22)">🔊 Modelo</button>
+  <button class="btn btn-secondary" onclick="wuTrill()">▶️ 3 motores</button></div>`;
+ else if(c.kind==="notes"){const notes=[["Do",262],["Re",294],["Mi",330],["Sol",392],["La",440]];
+  widget=`<div class="wu-phase" id="wuPhase">Sube la escalera cantando “ma”</div>
+  <div class="wu-notes">${notes.map(([n,f])=>`<button class="wu-note" onclick="wuNote(${f})">${n}</button>`).join("")}</div>
+  <div class="wu-mini">Cuando llegues arriba, bájala cantando “mu” 🎶</div>`}
+ else if(c.kind==="decibel")widget=`<div class="say-box"><div class="say-label">DÍLO ASÍ:</div>
+  <div class="say-phon" style="font-size:22px">${c.phonetic}</div></div>
+  <div class="wu-phase" id="wuPhase">Elige tu nivel de volumen</div>
+  <div class="wu-dbs">
+   <button class="wu-db" onclick="wuDb(0)">💪<br>Fuerte</button>
+   <button class="wu-db" onclick="wuDb(1)">😌<br>Relajado</button>
+   <button class="wu-db" onclick="wuDb(2)">🤫<br>Suavecito</button></div>
+  <div class="wu-mini">Los 3 modelos hablan la frase — acompáñalos en cada nivel</div>`;
+ const isLast=idx>=WARMUP.length-1;
+ return `<div class="emoji">${c.emoji}</div>
+  <div class="value" style="font-size:24px">${c.es_title}</div>
+  <div class="wu-desc">${c.es_desc}</div>${widget}
+  <div class="melody-note">💡 ${c.es_tip}</div>
+  ${isLast?'<button class="btn btn-primary" onclick="wuFinish()">🔥 Terminar rampa</button>'
+          :'<button class="btn btn-primary" onclick="wuNext()">✅ Listo — siguiente</button>'}`}
+function wuNext(){wuDoneFlags[idx]=true;nav(1)}
+function wuFinish(){wuDoneFlags[4]=true;const today=new Date().toISOString().slice(0,10);
+ if(lsGet("eft_warmup","")!==today){lsSet("eft_warmup",today);const p=points()+3;setPoints(p);render();toast("🎤 ¡Rampa completa! +3 puntos — boca lista 🔥")}
+ else{toast("🔥 Rampa completa — boca lista")}}
+
 function renderTabs(){
-  const icons={vowels:"🔤",sounds:"🔊",alphabet:"📖",digraphs:"🔗",numbers:"🔢",greetings:"👋",pronouns:"🙋",phrases:"💬",verbs:"🏃",combos:"🧩",melody:"🎵"};
+  const icons={warmup:"🎤",vowels:"🔤",sounds:"🔊",alphabet:"📖",digraphs:"🔗",numbers:"🔢",greetings:"👋",pronouns:"🙋",phrases:"💬",verbs:"🏃",combos:"🧩",melody:"🎵"};
   $("tabs").innerHTML=Object.keys(DATA).map(k=>
     `<button class="tab ${k===tab?"active":""}" onclick="setTab('${k}')">${icons[k]}${t().tabs[k]}</button>`).join("");
 }
@@ -479,8 +582,9 @@ function curveSVG(type){
 }
 
 function renderCard(){
-  const c=card();let html="";
-  if(tab==="melody"){
+  const c=card();let html="";wuClear();
+  if(tab==="warmup"){html=wuCard(c)}
+  else if(tab==="melody"){
     html=`<div class="emoji">${c.emoji}</div>
       <div class="value" style="font-size:26px">${lang==="es"?c.es_title:c.en_title}</div>
       ${curveSVG(c.curve)}
@@ -562,7 +666,7 @@ const listenCard=()=>speak(card().example||card().value);
 const toggleLang=()=>{lang=lang==="es"?"en":"es";$("langBtn").textContent=lang==="es"?"🇪🇸 ES":"🇺🇸 EN";render()};
 const toggleTheme=()=>{theme=theme==="light"?"dark":"light";document.documentElement.setAttribute("data-theme",theme);$("themeBtn").textContent=theme==="light"?"🌙":"☀️"};
 
-function toggleQuiz(){quizOn=!quizOn;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;render();
+function toggleQuiz(){if(tab==="warmup"){toast("🎤 El calentamiento es práctica libre — sin quiz");return}quizOn=!quizOn;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;render();
   if(quizOn&&tab!=="melody"){setTimeout(()=>speak(card().value),250)}
   if(quizOn&&tab==="melody"){setTimeout(()=>speak(melQuiz.text),250)}
 }
