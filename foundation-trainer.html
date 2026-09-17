@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#5d46e2">
-<title>English Foundation Trainer — Myl AccentBridges</title>
+<title>English Foundation Trainer v3.2 — Myl AccentBridges</title>
+<!-- v3.2 EJÉRCITO COMPLETO: despliegues 2+3 (Magic E+mudas, dígrafos vocálicos, T posicional, clusters) + FIX quiz branches muertos (canto/sazón/realvowels vivían en renderCard inalcanzables desde v2.9 — ahora en renderQuiz). 20 pestañas. -->
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
 <style>
 :root{
@@ -558,6 +559,143 @@ const MELODY_QUIZ=[
  {text:"Do you speak English?",answer:"question"}];
 
 /* ===== CALENTAMIENTO DE CANTANTE v2.7 — doctrina Vocalización: la relajación del cantante es la rampa del Mouth Gym ===== */
+
+/* ===== DESPLIEGUE 2: MAGIC E + LETRAS MUDAS 🎩 (ejército de sonidos, 17-sep-2026) ===== */
+const MAGICE=[
+ {emoji:"🎩",es_title:"La E Mágica",say:"cap, cape",okLabel:"CON MAGIA 🎩 ✅",ok:"cape · KEIP (capa)",badLabel:"SIN MAGIA ❌",bad:"cap · KAP (gorra)",translation:"la E que no suena pero decide",
+  doctrina:"La E del final es MUDA (no se oye) pero TRABAJA: estira la vocal de adelante. La magia no se escucha — se ve en la vocal. Es la E de contrabando del Sazón pero AL REVÉS: aquí la letra extra no suena, pero cambia la palabra.",
+  orgullo:"El mexicano ya conoce el trabajo invisible de letras: en QUI-GUE la U calla para que la G suene fuerte. La Magic E es la prima que en vez de callar, ESTIRA."},
+ {emoji:"🐱",es_title:"cat → Kate",say:"cat, Kate",okLabel:"CON MAGIA 🎩 ✅",ok:"Kate · KEIT",badLabel:"SIN MAGIA ❌",bad:"cat · KAT",translation:"gato → Kate (nombre)",
+  doctrina:"La E convierte el gato en persona 😅. A cortita (KAT) → A larga (KEIT). Una sola letra muda cambia el significado completo.",
+  orgullo:"Cat sin E es el gato; con E, es una señora de Dallas. La E mágica respeta y transforma."},
+ {emoji:"🐭",es_title:"bit → bite",say:"bit, bite",okLabel:"CON MAGIA 🎩 ✅",ok:"bite · BAIT (mordida)",badLabel:"SIN MAGIA ❌",bad:"bit · BIT (pedacito)",translation:"pedacito → mordida",
+  doctrina:"La I cortita se estira a BAIT: la boca se abre. BIT queda chiquito — la vocal decide el tamaño.",
+  orgullo:""},
+ {emoji:"🐰",es_title:"hop → hope",say:"hop, hope",okLabel:"CON MAGIA 🎩 ✅",ok:"hope · JOUP (esperanza)",badLabel:"SIN MAGIA ❌",bad:"hop · JOP (brinco)",translation:"brinco → esperanza",
+  doctrina:"La O cortita se estira a la O que viaja: JOUP. El conejo brinca corto; la esperanza estira la vocal.",
+  orgullo:""},
+ {emoji:"✂️",es_title:"cut → cute",say:"cut, cute",okLabel:"CON MAGIA 🎩 ✅",ok:"cute · KIUT (lindo)",badLabel:"SIN MAGIA ❌",bad:"cut · KAT (cortar)",translation:"cortar → lindo",
+  doctrina:"La a floja de cut se estira a KIUT con la E. Cortar es corto; lindo se estira.",
+  orgullo:""},
+ {emoji:"🔪",es_title:"Mudas: la K y la W",say:"knife, know, write",okLabel:"SUENA ASÍ ✅",ok:"knife → NAIF · know → NOU · write → RAIT",badLabel:"LAS QUE DESCANSAN 🤫",bad:"la K de knife · la K de know · la W de write",translation:"el silencio que trabaja",
+  doctrina:"knife suena NAIF (la K calla), know suena NOU, write suena RAIT (la W calla). Las letras mudas no se oyen — pero las que TRABAJAN (como la Magic E) sí cambian cosas.",
+  orgullo:"El español también tiene mudas: la H de hola. Nadie se asusta de la H muda — la K y la W calladas son las mismas empleadas del silencio."},
+ {emoji:"🎄",es_title:"Mudas: la T",say:"listen, Christmas",okLabel:"SUENA ASÍ ✅",ok:"listen → LI-sen · Christmas → KRIS-mas",badLabel:"LA QUE DESCANSA 🤫",bad:"la T de listen · la T de Christmas",translation:"...",
+  doctrina:"En listen la T calla (LI-sen); en Christmas desaparece (KRIS-mas). No las pronuncies — el inglés ya tiene suficientes T trabajando.",
+  orgullo:""},
+ {emoji:"⏰",es_title:"Mudas: la H",say:"hour, honest",okLabel:"SUENA ASÍ ✅",ok:"hour → AUER · honest → O-niest",badLabel:"LA QUE DESCANSA 🤫",bad:"la H de hour · la H de honest",translation:"...",
+  doctrina:"hour suena igual que our (AUER). honest abre en O. Y aquí el mexicano YA es experto: hola, hospital — la H muda es terreno conocido de primer grado.",
+  orgullo:"La H muda: la primera letra que el español y el inglés apagaron juntos."}];
+
+const ME_QUIZ=[
+ {say:"My cat is black.",correct:"cat",mate:"Kate",clue:"sin E = A cortita — el gato 🐱"},
+ {say:"Kate is my friend.",correct:"Kate",mate:"cat",clue:"la E mágica estira la A: KEIT"},
+ {say:"Take a bite of the taco.",correct:"bite",mate:"bit",clue:"con E la I se estira: BAIT"},
+ {say:"A mosquito bit me.",correct:"bit",mate:"bite",clue:"sin E = I cortita"},
+ {say:"I hope you are well.",correct:"hope",mate:"hop",clue:"la E estira la O: JOUP"},
+ {say:"Rabbits hop fast.",correct:"hop",mate:"hope",clue:"sin E = O cortita (brinco)"},
+ {say:"The baby is cute.",correct:"cute",mate:"cut",clue:"la E estira la a floja: KIUT"},
+ {say:"Cut the paper, please.",correct:"cut",mate:"cute",clue:"sin E = a floja cortita"}];
+
+/* ===== DESPLIEGUE 2b: DÍGRAFOS VOCÁLICOS 🚢 (dos letras, un sonido) ===== */
+const VDIGRAPHS=[
+ {emoji:"🌳",es_title:"EE = ii larga",sound:"ii estirada",translation:"dos letras, un sonido",
+  words:[{w:"see",a:"sii",es:"ver"},{w:"tree",a:"trii",es:"árbol"},{w:"need",a:"niid",es:"necesitar"}],
+  doctrina:"Dos E se sueldan en UNA ii estirada — el grupo vale por una sola letra. La lección de la Cartilla: DOS letras JUNTAS hacen UN sonido."},
+ {emoji:"🍽️",es_title:"EA = ii larga",sound:"ii estirada",translation:"la A se hace a un lado",
+  words:[{w:"eat",a:"iit",es:"comer"},{w:"team",a:"tiim",es:"equipo"},{w:"sea",a:"sii",es:"mar"}],
+  doctrina:"La EA NO suena e-a: la A se hace a un lado y todo suena ii. eat = iit, team = tiim — la misma ii larga de Vocales Reales."},
+ {emoji:"🌕",es_title:"OO larga = uu",sound:"uu larga",translation:"la segunda O manda",
+  words:[{w:"food",a:"fud",es:"comida"},{w:"moon",a:"mun",es:"luna"},{w:"boot",a:"but",es:"bota"}],
+  doctrina:"food, moon, boot: la OO estirada — la u larga de blue. La segunda O es la jefa y se estira."},
+ {emoji:"📕",es_title:"OO cortita = buk",sound:"u relajada",translation:"¡LA GRAN TRAMPA!",
+  words:[{w:"book",a:"buk",es:"libro"},{w:"good",a:"gud",es:"bueno"},{w:"look",a:"luk",es:"mirar"}],
+  doctrina:"MISMA escritura, DOS sonidos: moon (larga) vs book (cortita). La escritura NO decide sola — la PALABRA decide. Es el primo del homógrafo: el ojo ve lo mismo, el oído oye distinto. book/good/look = la u relajada del Sazón."},
+ {emoji:"⛵",es_title:"OA = ou",sound:"la O que viaja",translation:"un solo viaje",
+  words:[{w:"boat",a:"bout",es:"bote"},{w:"road",a:"roud",es:"camino"},{w:"soap",a:"soup",es:"jabón"}],
+  doctrina:"La OA se suelda en la O que viaja: boat = bout, el mismo viaje de go y home. Nada de bo-at — un solo viaje."},
+ {emoji:"🌧️",es_title:"AI / AY = ei",sound:"ei",translation:"AI dentro · AY al final",
+  words:[{w:"rain",a:"rein",es:"lluvia"},{w:"train",a:"trein",es:"tren"},{w:"day",a:"dei",es:"día"},{w:"play",a:"plei",es:"jugar"}],
+  doctrina:"Regla de la casa: AI va DENTRO de la palabra (rain, train); AY va AL FINAL (day, play). Mismo sonido ei — el LUGAR decide la escritura."},
+ {emoji:"🪙",es_title:"OI / OY = oi",sound:"oi redonda",translation:"primos de hoy y doy",
+  words:[{w:"coin",a:"koin",es:"moneda"},{w:"boy",a:"boi",es:"niño"},{w:"toy",a:"toi",es:"juguete"}],
+  doctrina:"El primo mexicano directo: hoy, doy, estoy → boy, toy, coin. El mismo viaje redondo de la O a la I. Y la misma regla de posición: OI dentro, OY al final."},
+ {emoji:"💡",es_title:"IGH = ai (GH mudo)",sound:"ai",translation:"el grupo fantasma",
+  words:[{w:"light",a:"lait",es:"luz"},{w:"night",a:"nait",es:"noche"},{w:"high",a:"jai",es:"alto"}],
+  doctrina:"El GH es MUDO y todo el grupo suena AI: light = lait. Tres letras que valen una — no busques la G ni la H: ya se fueron a dormir."}];
+
+const VD_QUIZ=[
+ {q:"book y moon usan la MISMA OO. ¿Suenan igual?",say:"book. moon.",correct:"NO — book cortita, moon larga",wrong:"Sí, suenan igual",clue:"la escritura no decide — la PALABRA decide"},
+ {q:"¿Cómo se oye la EA de eat?",say:"eat",correct:"ii larga (iit)",wrong:"e cortita (et)",clue:"la A se hace a un lado"},
+ {q:"¿Cómo suena el grupo IGH de light?",say:"light",correct:"AI (lait)",wrong:"IG (lig)",clue:"el GH es mudo — todo el grupo vale una AI"},
+ {q:"¿Dónde va la AI y dónde la AY?",say:"rain, train, day, play",correct:"AI dentro · AY al final",wrong:"AI al final · AY dentro",clue:"rain y train dentro; day y play al final"},
+ {q:"¿Cómo suena la OA de boat?",say:"boat",correct:"ou (bout, un viaje)",wrong:"o-a (bo-at, dos viajes)",clue:"se suelda en la O que viaja"},
+ {q:"¿Qué es boy en mexicano?",say:"boy, toy, coin",correct:"el primo de hoy y doy",wrong:"no tiene primo",clue:"OI dentro (coin) · OY al final (boy)"},
+ {q:"¿Qué suena la EE de tree?",say:"tree",correct:"ii estirada (trii)",wrong:"e cortita (tre)",clue:"dos E sueldas en una ii larga"},
+ {q:"¿Cuál OO suena buk (cortita)?",say:"book. good. look.",correct:"la OO de book",wrong:"la OO de moon",clue:"misma escritura, sonidos distintos — la gran trampa"}];
+
+/* ===== DESPLIEGUE 3: T POSICIONAL 🥁 (la T con 4 empleos) ===== */
+const TPOS=[
+ {emoji:"🥁",es_title:"La T tiene 4 empleos",sound:"una letra, muchos trabajos",say:"top, water, cat, station",
+  doctrina:"La T americana NO es una sola: cambia de trabajo según DÓNDE cae en la palabra. Inicial = limpia con aire. Entre vocales = flap. Final = congelada. Con -ion = SH. La misma camisa, distinto trabajo — como la Y de las 3 personalidades.",
+  ejemplos:[{w:"top",a:"inicial con aire"},{w:"water",a:"flap"},{w:"cat",a:"congelada"},{w:"station",a:"SH"}]},
+ {emoji:"🔝",es_title:"T inicial: con aire",sound:"T explosiva, con puff",say:"top, table, take",
+  doctrina:"La T al inicio va con un poquito de aire, tocando justo detrás de los dientes — no en los dientes como la T española. Truco: pon una servilleta frente a la boca y di top — el papelito debe moverse.",
+  ejemplos:[{w:"top",a:"tap"},{w:"take",a:"teik"},{w:"table",a:"TEI-bel"}]},
+ {emoji:"💧",es_title:"T entre vocales: FLAP",sound:"la joya — como la R de pero",say:"water, better, city",
+  doctrina:"Entre vocales y sin acento, la T se convierte en un golpe suave de lengua: el MISMO movimiento que la R simple de pero mexicano. water = UO-der, better = BE-der, city = SI-di. Si puedes decir pero, puedes decir water. (Episodio 5: el Flap T).",
+  ejemplos:[{w:"water",a:"UO-der"},{w:"better",a:"BE-der"},{w:"city",a:"SI-di"}]},
+ {emoji:"❄️",es_title:"T final: congelada",sound:"lengua toca y se queda",say:"cat, sit, hat",
+  doctrina:"La T final NO se suelta: la lengua toca el techo y se queda ahí, sin soplar. Y JAMÁS le agregues te — cat no es ca-te: la E de contrabando del Sazón vive también en la T final.",
+  ejemplos:[{w:"cat",a:"kat"},{w:"sit",a:"sit"},{w:"hat",a:"jat"}]},
+ {emoji:"🚉",es_title:"T + -ion = SH",sound:"la T que se transforma",say:"nation, station, education",
+  doctrina:"Delante de -ion la T se vuelve SH: nation = NEI-shen, station = STEI-shen, education = e-yu-KEI-shen. Regla generosa: TODAS las -tion la siguen — cientos de primos de la -ción mexicana.",
+  ejemplos:[{w:"nation",a:"NEI-shen"},{w:"station",a:"STEI-shen"},{w:"education",a:"e-yu-KEI-shen"}]},
+ {emoji:"⛰️",es_title:"T de montaña: glottal",sound:"la T que ni toca",say:"mountain, button, important",
+  doctrina:"La más americana de todas: en mountain la T ni llega a tocar — se corta en la garganta: MAU-n. button = BU-n. El oído la oye como un silencio con ritmo. No es flojera: es el RITMO del inglés.",
+  ejemplos:[{w:"mountain",a:"MAU-n"},{w:"button",a:"BU-n"},{w:"important",a:"im-POR-n"}]}];
+
+const TP_QUIZ=[
+ {say:"I need water.",correct:"flap (UO-der)",mate:"T limpia (UA-ter)",clue:"T entre vocales sin acento = el golpe de pero"},
+ {say:"She is my better half.",correct:"flap (BE-der)",mate:"T limpia (BE-ter)",clue:"better = BE-der, la T de pero"},
+ {say:"I live in New York City.",correct:"flap (SI-di)",mate:"T limpia (SI-ti)",clue:"city = SI-di — como pero mexicano"},
+ {say:"Take the top.",correct:"inicial con aire (tap)",mate:"flap (da-p)",clue:"al inicio la T es limpia y explosiva"},
+ {say:"The cat is fat.",correct:"final congelada (kat)",mate:"con sazón (ka-te)",clue:"la lengua toca y se queda — sin E de contrabando"},
+ {say:"The train is at the station.",correct:"SH (STEI-shen)",mate:"flap (STEI-den)",clue:"delante de -ion la T se vuelve SH"},
+ {say:"The mountain is high.",correct:"glottal (MAU-n)",mate:"T limpia (MAUN-tin)",clue:"la T se corta en la garganta"},
+ {say:"English is very important.",correct:"glottal (im-POR-n)",mate:"SH (im-POR-shen)",clue:"important lleva la T de montaña, no la de -ion"}];
+
+/* ===== DESPLIEGUE 3b: CONSONANT CLUSTERS 🧊 (las sílabas trabadas de la cartilla) ===== */
+const CLUSTERS=[
+ {emoji:"🧊",es_title:"Sílabas trabadas",say:"street, school",ancla:"street · strit — UNA sílaba",sazonada:"e-strit — dos golpes con E de contrabando",translation:"la cartilla mexicana: bla-ble-bli",
+  doctrina:"El español JAMÁS arranca palabra con s+consonante — por eso existe e-special y e-strella. El inglés sí arranca: street, school, ski. Son las sílabas trabadas de la cartilla (tra-tre-tri) pero AL INICIO: una sílaba, un solo golpe.",
+  orgullo:"La E de contrabando al inicio es la firma más persistente del sazón. Quitarla es el badge del oído fino."},
+ {emoji:"🛑",es_title:"ST",say:"street, stop, store",ancla:"strit · stop · stor",sazonada:"e-strit · es-top · es-tor",translation:"el arranque doble",
+  doctrina:"ST arranca limpio. street es UNA sílaba que cierra con T — sin arrancar con E. stop y store igual: la S abraza a la T.",
+  orgullo:""},
+ {emoji:"🎙️",es_title:"SP / SK",say:"speak, school, ski",ancla:"spiik · skul · ski",sazonada:"e-spiik · e-skul · e-ski",translation:"la S con abrazo",
+  doctrina:"speak, school, sky: la S abraza a la P o a la K y arrancan JUNTOS. school = skul, sin e- de calentamiento.",
+  orgullo:""},
+ {emoji:"🤝",es_title:"Primos fáciles: BL CL GR",say:"black, class, green",ancla:"blak · klas · grin",sazonada:"bla-ka · kla-sa · gri-na",translation:"TRANSFERENCIA costo cero",
+  doctrina:"Buenas noticias: bl, cl, gr ya viven en la cartilla mexicana (bla-ble-bli, cla-cle-cli). black, class, green, play: el español entrena estos arranques desde primer grado — el Primo Mexicano trabajando a nuestro favor.",
+  orgullo:"No todo es trampa — a veces el español ya hizo la tarea."},
+ {emoji:"🚛",es_title:"El camión: STR / SCR",say:"street, strong, screen",ancla:"strit · strong · skrin",sazonada:"e-sstrong · e-skrin",translation:"tres consonantes de arranque",
+  doctrina:"El camión completo: S+T+R o S+C+R arrancando. street, strong, screen, scream. Tres consonantes en UNA sílaba — el convoy no lleva vagones extra.",
+  orgullo:"Si el camión de 18 llantas arrancara con E, se quedaba sin licencia 😎."},
+ {emoji:"🏁",es_title:"Finales: -ST -SK -ND",say:"best, ask, and",ancla:"best · ask · and",sazonada:"bes-te · as-ka · an-da",translation:"cierra con dos, sin vocal extra",
+  doctrina:"El inglés también CIERRA con clusters: best, ask, must, and. La NT del Sazón (want) tiene hermanos finales. Cierra la sílaba con las dos consonantes — sin vocales de propina.",
+  orgullo:""}];
+
+const CL_QUIZ=[
+ {say:"street",correct:"strit",wrong:"e-strit",clue:"arranca limpio — sin E de contrabando"},
+ {say:"stop",correct:"stop",wrong:"es-top",clue:"una sílaba, un golpe"},
+ {say:"school",correct:"skul",wrong:"e-skul",clue:"la S abraza a la K"},
+ {say:"speak",correct:"spiik",wrong:"e-spiik",clue:"la S abraza a la P"},
+ {say:"ski",correct:"ski",wrong:"e-ski",clue:"dos letras, un arranque"},
+ {say:"best",correct:"best",wrong:"bes-te",clue:"cierra con ST — sin E de propina"},
+ {say:"ask",correct:"ask",wrong:"as-ka",clue:"cierra con SK"},
+ {say:"must",correct:"must",wrong:"mus-ta",clue:"cierra con ST — la hermana del Sazón"}];
+
 const WARMUP=[
  {kind:"breath",emoji:"🫁",value:"mmm",es_title:"Respira con el diafragma",
   es_desc:"3 ciclos lentos: inhala por la nariz (4 segundos), sostén (2), suelta por la boca (6). El aire va a la panza, no al pecho.",
@@ -576,10 +714,10 @@ const WARMUP=[
   es_tip:"Quien controla su volumen controla su acento: lo suave entrena la precisión sin lastimar la voz."}
 ];
 
-const DATA={warmup:WARMUP,vowels:VOWELS,realvowels:REALVOWELS,sounds:SOUNDS,alphabet:ALPHABET,canto:CANTO_CHUNKS,digraphs:DIGRAPHS,homofonos:HOMOPHONES,sazon:SAZON,numbers:NUMBERS,greetings:GREETINGS,pronouns:PRONOUNS,phrases:PHRASES,verbs:VERBS,combos:COMBOS,melody:MELODIES};
+const DATA={warmup:WARMUP,vowels:VOWELS,realvowels:REALVOWELS,vdigraphs:VDIGRAPHS,magice:MAGICE,sounds:SOUNDS,alphabet:ALPHABET,canto:CANTO_CHUNKS,digraphs:DIGRAPHS,tpos:TPOS,clusters:CLUSTERS,homofonos:HOMOPHONES,sazon:SAZON,numbers:NUMBERS,greetings:GREETINGS,pronouns:PRONOUNS,phrases:PHRASES,verbs:VERBS,combos:COMBOS,melody:MELODIES};
 
 const I18N={
- es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{warmup:" Calienta",vowels:" Vocales",realvowels:" Vocales Reales",sounds:" Sonidos",alphabet:" Alfabeto",canto:" Canto",digraphs:" Dígrafos",homofonos:" Homófonos",sazon:" Sazón",numbers:" Números",greetings:" Saludos",pronouns:" Pronombres",phrases:" Frases",verbs:" Verbos",combos:" Combos",melody:" Melodía"},
+ es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{warmup:" Calienta",vowels:" Vocales",realvowels:" Vocales Reales",vdigraphs:" Vocálicas",magice:" Magic E",sounds:" Sonidos",alphabet:" Alfabeto",canto:" Canto",digraphs:" Dígrafos",tpos:" La T",clusters:" Clusters",homofonos:" Homófonos",sazon:" Sazón",numbers:" Números",greetings:" Saludos",pronouns:" Pronombres",phrases:" Frases",verbs:" Verbos",combos:" Combos",melody:" Melodía"},
      say:"DÍLO ASÍ:",listen:"🔊 Escuchar",slow:"🐢 Lento",normal:"🚶 Normal",fast:"🏃 Rápido",
      recTitle:"Graba tu voz",rec:"Grabar",stop:"Detener",play:"Escucharte",
      prev:"Anterior",next:"Siguiente",quizOn:"🧠 Modo Quiz",quizOff:"✖️ Salir del Quiz",
@@ -588,7 +726,7 @@ const I18N={
      qReplay:"🔊 Escuchar otra vez",correct:"¡Correcto! +1 punto 🎉",wrong:"¡Uy! Tu oído acaba de encontrar su gimnasio 💪",
      statement:"Afirmación ↘",question:"Pregunta ↗",certTitle:"Certificado de Logro",
      certSub:"¡Felicitaciones! ¡Has ganado 100 puntos!",certBody:"¡Completaste el Entrenador de Inglés Básico!",certBtn:"Seguir Aprendiendo 🚀"},
- en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{warmup:" Warm-up",vowels:" Vowels",realvowels:" Real Vowels",sounds:" Sounds",alphabet:" Alphabet",canto:" Song",digraphs:" Digraphs",homofonos:" Homophones",sazon:" Sazón",numbers:" Numbers",greetings:" Greetings",pronouns:" Pronouns",phrases:" Phrases",verbs:" Verbs",combos:" Combos",melody:" Melody"},
+ en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{warmup:" Warm-up",vowels:" Vowels",realvowels:" Real Vowels",vdigraphs:" Vowel Pairs",magice:" Magic E",sounds:" Sounds",alphabet:" Alphabet",canto:" Song",digraphs:" Digraphs",tpos:" The T",clusters:" Clusters",homofonos:" Homophones",sazon:" Sazón",numbers:" Numbers",greetings:" Greetings",pronouns:" Pronouns",phrases:" Phrases",verbs:" Verbs",combos:" Combos",melody:" Melody"},
      say:"SAY IT LIKE:",listen:"🔊 Listen",slow:"🐢 Slow",normal:"🚶 Normal",fast:"🏃 Fast",
      recTitle:"Record your voice",rec:"Record",stop:"Stop",play:"Play",
      prev:"Prev",next:"Next",quizOn:"🧠 Quiz Mode",quizOff:"✖️ Exit Quiz",
@@ -717,7 +855,7 @@ function wuFinish(){wuDoneFlags[4]=true;const today=new Date().toISOString().sli
  else{toast("🔥 Rampa completa — boca lista")}}
 
 function renderTabs(){
-  const icons={warmup:"🎤",vowels:"🔤",realvowels:"🎯",sounds:"🔊",alphabet:"📖",canto:"🎶",digraphs:"🔗",homofonos:"👯",sazon:"🌶️",numbers:"🔢",greetings:"👋",pronouns:"🙋",phrases:"💬",verbs:"🏃",combos:"🧩",melody:"🎵"};
+  const icons={warmup:"🎤",vowels:"🔤",realvowels:"🎯",vdigraphs:"🚢",magice:"🎩",sounds:"🔊",alphabet:"📖",canto:"🎶",digraphs:"🔗",tpos:"🥁",clusters:"🧊",homofonos:"👯",sazon:"🌶️",numbers:"🔢",greetings:"👋",pronouns:"🙋",phrases:"💬",verbs:"🏃",combos:"🧩",melody:"🎵"};
   $("tabs").innerHTML=Object.keys(DATA).map(k=>
     `<button class="tab ${k===tab?"active":""}" onclick="setTab('${k}')">${icons[k]}${t().tabs[k]}</button>`).join("");
 }
@@ -792,41 +930,62 @@ function renderCard(){
       </div>`:""}
       <div class="melody-note">💡 ${c.doctrina}</div>
       <div class="melody-note" style="margin-top:8px">😼 ${c.orgullo}</div>`;
-  }else if(tab==="canto"){
-    if(!cqQuiz){let r;do{r=Math.floor(Math.random()*CANTO_QUIZ.length)}while(r===cqLast&&CANTO_QUIZ.length>1);cqLast=r;cqQuiz=CANTO_QUIZ[r]}
-    const pair=[cqQuiz.correct,cqQuiz.wrong].sort(()=>Math.random()-.5);
-    z.innerHTML=`
-      <div class="q-title">🎶 ${cqQuiz.q}</div>
-      ${cqQuiz.say?`<button class="btn btn-secondary" style="margin-top:0" onclick="speak(cqQuiz.say)">🔊 Escuchar</button>`:""}
-      <div class="q-opts" style="margin-top:14px">
-        ${pair.map(w=>`<button class="q-opt ${cqPick==="ok"&&w===cqQuiz.correct?"correct":cqPick==="x"&&w===cqPickWord?"wrong":cqPick==="ok"&&w!==cqQuiz.correct?"dim":""}" onclick="cqAnswer('${w}')">${w}</button>`).join("")}
+    }else if(tab==="magice"){
+    html=`<div class="emoji">${c.emoji}</div>
+      <div class="value" style="font-size:28px">${c.es_title}</div>
+      <div class="translation">🇪🇸 ${c.translation}</div>
+      <div class="say-box">
+        <div class="say-label">${c.okLabel}</div>
+        <div class="say-phon" style="font-size:22px;color:#10b981">${c.ok}</div>
       </div>
-      <div class="q-feedback" id="cqFb"></div>
-      <button class="q-replay" onclick="nextCantoQ()">🎶 Siguiente →</button>`;
-  }else if(tab==="sazon"){
-    if(!szQuiz){let r;do{r=Math.floor(Math.random()*SAZON_QUIZ.length)}while(r===szLast&&SAZON_QUIZ.length>1);szLast=r;szQuiz=SAZON_QUIZ[r]}
-    const pair=[szQuiz.correct,szQuiz.wrong].sort(()=>Math.random()-.5);
-    z.innerHTML=`
-      <div class="q-title">${lang==="es"?"🌶️ ¿Cuál es la versión SIN sazón?":"🌶️ Which one has no extra seasoning?"}</div>
-      <div class="q-sub">${lang==="es"?"Escucha la palabra — una sílaba cerrada, sin vocales extra":"Listen — one closed syllable, no extra vowels"}</div>
-      <button class="btn btn-secondary" style="margin-top:0" onclick="speak(szQuiz.say)">${t().listen}</button>
-      <div class="q-opts" style="margin-top:14px">
-        ${pair.map(w=>`<button class="q-opt ${szPick==="ok"&&w===szQuiz.correct?"correct":szPick==="x"&&w===szPickWord?"wrong":szPick==="ok"&&w!==szQuiz.correct?"dim":""}" onclick="szAnswer('${w}')">${w}</button>`).join("")}
+      <div class="say-box" style="margin-top:10px">
+        <div class="say-label">${c.badLabel}</div>
+        <div class="say-phon" style="font-size:22px;color:#ef4444">${c.bad}</div>
       </div>
-      <div class="q-feedback" id="szFb"></div>
-      <button class="q-replay" onclick="nextSazon()">${lang==="es"?"🌶️ Siguiente palabra →":"🌶️ Next word →"}</button>`;
-  }else if(tab==="realvowels"){
-    if(!rvQuiz){let r;do{r=Math.floor(Math.random()*RV_QUIZ.length)}while(r===rvLast&&RV_QUIZ.length>1);rvLast=r;rvQuiz=RV_QUIZ[r]}
-    const pair=[rvQuiz.correct,rvQuiz.mate].sort(()=>Math.random()-.5);
-    z.innerHTML=`
-      <div class="q-title">${lang==="es"?"👂 ¿Cuál palabra escuchaste?":"👂 Which word did you hear?"}</div>
-      <div class="q-sub">${lang==="es"?"Pareja mínima — escucha el detalle fino del sonido":"Minimal pair — listen for the fine detail"}</div>
-      <button class="btn btn-secondary" style="margin-top:0" onclick="speak(rvQuiz.say)">${t().listen}</button>
-      <div class="q-opts" style="margin-top:14px">
-        ${pair.map(w=>`<button class="q-opt ${rvPick==="ok"&&w===rvQuiz.correct?"correct":rvPick==="x"&&w===rvPickWord?"wrong":rvPick==="ok"&&w!==rvQuiz.correct?"dim":""}" onclick="rvAnswer('${w}')">${w}</button>`).join("")}
+      ${c.say?`<div style="text-align:center;margin-top:12px">
+        <button class="btn btn-secondary" onclick="speak('${(c.say||"").replace(/'/g,"\\'")}')">▶️ Oír la palabra</button>
+      </div>`:""}
+      <div class="melody-note">💡 ${c.doctrina}</div>
+      ${c.orgullo?`<div class="melody-note" style="margin-top:8px">😼 ${c.orgullo}</div>`:""}`;
+  }else if(tab==="vdigraphs"){
+    html=`<div class="emoji">${c.emoji}</div>
+      <div class="value" style="font-size:24px">${c.es_title}</div>
+      <div class="say-box">
+        <div class="say-label">EL SONIDO</div>
+        <div class="say-phon" style="font-size:22px">🔊 ${c.sound}</div>
       </div>
-      <div class="q-feedback" id="rvFb"></div>
-      <button class="q-replay" onclick="nextRV()">${lang==="es"?"🔊 Siguiente frase →":"🔊 Next sentence →"}</button>`;
+      <div class="q-opts" style="margin-top:14px">
+        ${c.words.map(w=>`<button class="q-opt" style="cursor:default" onclick="speak('${w.w.replace(/'/g,"\\'")}')"><span class="q-emoji">▶️</span>${w.w} = ${w.a} · ${w.es}</button>`).join("")}
+      </div>
+      <div class="melody-note">💡 ${c.doctrina}</div>`;
+  }else if(tab==="tpos"){
+    html=`<div class="emoji">${c.emoji}</div>
+      <div class="value" style="font-size:24px">${c.es_title}</div>
+      <div class="say-box">
+        <div class="say-label">EL TRABAJO DE LA T</div>
+        <div class="say-phon" style="font-size:22px">🔊 ${c.sound}</div>
+      </div>
+      <div class="q-opts" style="margin-top:14px">
+        ${c.ejemplos.map(w=>`<button class="q-opt" style="cursor:default" onclick="speak('${w.w.replace(/'/g,"\\'")}')"><span class="q-emoji">▶️</span>${w.w} → ${w.a}</button>`).join("")}
+      </div>
+      <div class="melody-note">💡 ${c.doctrina}</div>`;
+  }else if(tab==="clusters"){
+    html=`<div class="emoji">${c.emoji}</div>
+      <div class="value" style="font-size:28px">${c.es_title}</div>
+      <div class="translation">🇪🇸 ${c.translation}</div>
+      <div class="say-box">
+        <div class="say-label">LIMPIO ✅</div>
+        <div class="say-phon" style="font-size:22px;color:#10b981">🔊 ${c.ancla}</div>
+      </div>
+      <div class="say-box" style="margin-top:10px">
+        <div class="say-label">CON E DE CONTRABANDO 🌶️❌</div>
+        <div class="say-phon" style="font-size:22px;color:#ef4444">${c.sazonada}</div>
+      </div>
+      ${c.say?`<div style="text-align:center;margin-top:12px">
+        <button class="btn btn-secondary" onclick="speak('${(c.say||"").replace(/'/g,"\\'")}')">▶️ Oír las palabras</button>
+      </div>`:""}
+      <div class="melody-note">💡 ${c.doctrina}</div>
+      ${c.orgullo?`<div class="melody-note" style="margin-top:8px">😼 ${c.orgullo}</div>`:""}`;
   }else if(tab==="homofonos"){
     html=`<div class="emoji">${c.emoji}</div>
       <div class="value" style="font-size:28px">${c.es_title}</div>
@@ -903,6 +1062,88 @@ function renderQuiz(){
       </div>
       <div class="q-feedback" id="homoFb"></div>
       <button class="q-replay" onclick="nextHomo()">${lang==="es"?"🔊 Siguiente frase →":"🔊 Next sentence →"}</button>`;
+  }else if(tab==="canto"){
+    if(!cqQuiz){let r;do{r=Math.floor(Math.random()*CANTO_QUIZ.length)}while(r===cqLast&&CANTO_QUIZ.length>1);cqLast=r;cqQuiz=CANTO_QUIZ[r]}
+    const pair=[cqQuiz.correct,cqQuiz.wrong].sort(()=>Math.random()-.5);
+    z.innerHTML=`
+      <div class="q-title">🎶 ${cqQuiz.q}</div>
+      ${cqQuiz.say?`<button class="btn btn-secondary" style="margin-top:0" onclick="speak(cqQuiz.say)">🔊 Escuchar</button>`:""}
+      <div class="q-opts" style="margin-top:14px">
+        ${pair.map(w=>`<button class="q-opt ${cqPick==="ok"&&w===cqQuiz.correct?"correct":cqPick==="x"&&w===cqPickWord?"wrong":cqPick==="ok"&&w!==cqQuiz.correct?"dim":""}" onclick="cqAnswer('${w}')">${w}</button>`).join("")}
+      </div>
+      <div class="q-feedback" id="cqFb"></div>
+      <button class="q-replay" onclick="nextCantoQ()">🎶 Siguiente →</button>`;
+  }else if(tab==="sazon"){
+    if(!szQuiz){let r;do{r=Math.floor(Math.random()*SAZON_QUIZ.length)}while(r===szLast&&SAZON_QUIZ.length>1);szLast=r;szQuiz=SAZON_QUIZ[r]}
+    const pair=[szQuiz.correct,szQuiz.wrong].sort(()=>Math.random()-.5);
+    z.innerHTML=`
+      <div class="q-title">${lang==="es"?"🌶️ ¿Cuál es la versión SIN sazón?":"🌶️ Which one has no extra seasoning?"}</div>
+      <div class="q-sub">${lang==="es"?"Escucha la palabra — una sílaba cerrada, sin vocales extra":"Listen — one closed syllable, no extra vowels"}</div>
+      <button class="btn btn-secondary" style="margin-top:0" onclick="speak(szQuiz.say)">${t().listen}</button>
+      <div class="q-opts" style="margin-top:14px">
+        ${pair.map(w=>`<button class="q-opt ${szPick==="ok"&&w===szQuiz.correct?"correct":szPick==="x"&&w===szPickWord?"wrong":szPick==="ok"&&w!==szQuiz.correct?"dim":""}" onclick="szAnswer('${w}')">${w}</button>`).join("")}
+      </div>
+      <div class="q-feedback" id="szFb"></div>
+      <button class="q-replay" onclick="nextSazon()">${lang==="es"?"🌶️ Siguiente palabra →":"🌶️ Next word →"}</button>`;
+  }else if(tab==="realvowels"){
+    if(!rvQuiz){let r;do{r=Math.floor(Math.random()*RV_QUIZ.length)}while(r===rvLast&&RV_QUIZ.length>1);rvLast=r;rvQuiz=RV_QUIZ[r]}
+    const pair=[rvQuiz.correct,rvQuiz.mate].sort(()=>Math.random()-.5);
+    z.innerHTML=`
+      <div class="q-title">${lang==="es"?"👂 ¿Cuál palabra escuchaste?":"👂 Which word did you hear?"}</div>
+      <div class="q-sub">${lang==="es"?"Pareja mínima — escucha el detalle fino del sonido":"Minimal pair — listen for the fine detail"}</div>
+      <button class="btn btn-secondary" style="margin-top:0" onclick="speak(rvQuiz.say)">${t().listen}</button>
+      <div class="q-opts" style="margin-top:14px">
+        ${pair.map(w=>`<button class="q-opt ${rvPick==="ok"&&w===rvQuiz.correct?"correct":rvPick==="x"&&w===rvPickWord?"wrong":rvPick==="ok"&&w!==rvQuiz.correct?"dim":""}" onclick="rvAnswer('${w}')">${w}</button>`).join("")}
+      </div>
+      <div class="q-feedback" id="rvFb"></div>
+      <button class="q-replay" onclick="nextRV()">${lang==="es"?"🔊 Siguiente frase →":"🔊 Next sentence →"}</button>`;
+  }else if(tab==="magice"){
+    if(!meQuiz){let r;do{r=Math.floor(Math.random()*ME_QUIZ.length)}while(r===meLast&&ME_QUIZ.length>1);meLast=r;meQuiz=ME_QUIZ[r]}
+    const pair=[meQuiz.correct,meQuiz.mate].sort(()=>Math.random()-.5);
+    z.innerHTML=`
+      <div class="q-title">🎩 ¿Cuál palabra escuchaste?</div>
+      <div class="q-sub">La E mágica cambia la palabra — escucha la vocal</div>
+      <button class="btn btn-secondary" style="margin-top:0" onclick="speak(meQuiz.say)">🔊 Escuchar</button>
+      <div class="q-opts" style="margin-top:14px">
+        ${pair.map(w=>`<button class="q-opt ${mePick==="ok"&&w===meQuiz.correct?"correct":mePick==="x"&&w===mePickWord?"wrong":mePick==="ok"&&w!==meQuiz.correct?"dim":""}" onclick="meAnswer('${w}')">${w}</button>`).join("")}
+      </div>
+      <div class="q-feedback" id="meFb"></div>
+      <button class="q-replay" onclick="nextME()">🎩 Siguiente →</button>`;
+  }else if(tab==="vdigraphs"){
+    if(!vdQuiz){let r;do{r=Math.floor(Math.random()*VD_QUIZ.length)}while(r===vdLast&&VD_QUIZ.length>1);vdLast=r;vdQuiz=VD_QUIZ[r]}
+    const pair=[vdQuiz.correct,vdQuiz.wrong].sort(()=>Math.random()-.5);
+    z.innerHTML=`
+      <div class="q-title">🚢 ${vdQuiz.q}</div>
+      ${vdQuiz.say?`<button class="btn btn-secondary" style="margin-top:0" onclick="speak(vdQuiz.say)">🔊 Escuchar</button>`:""}
+      <div class="q-opts" style="margin-top:14px">
+        ${pair.map(w=>`<button class="q-opt ${vdPick==="ok"&&w===vdQuiz.correct?"correct":vdPick==="x"&&w===vdPickWord?"wrong":vdPick==="ok"&&w!==vdQuiz.correct?"dim":""}" onclick="vdAnswer('${w}')">${w}</button>`).join("")}
+      </div>
+      <div class="q-feedback" id="vdFb"></div>
+      <button class="q-replay" onclick="nextVD()">🚢 Siguiente →</button>`;
+  }else if(tab==="tpos"){
+    if(!tpQuiz){let r;do{r=Math.floor(Math.random()*TP_QUIZ.length)}while(r===tpLast&&TP_QUIZ.length>1);tpLast=r;tpQuiz=TP_QUIZ[r]}
+    const pair=[tpQuiz.correct,tpQuiz.mate].sort(()=>Math.random()-.5);
+    z.innerHTML=`
+      <div class="q-title">🥁 ¿Qué T es?</div>
+      <div class="q-sub">Escucha la palabra — la posición decide el trabajo</div>
+      <button class="btn btn-secondary" style="margin-top:0" onclick="speak(tpQuiz.say)">🔊 Escuchar</button>
+      <div class="q-opts" style="margin-top:14px">
+        ${pair.map(w=>`<button class="q-opt ${tpPick==="ok"&&w===tpQuiz.correct?"correct":tpPick==="x"&&w===tpPickWord?"wrong":tpPick==="ok"&&w!==tpQuiz.correct?"dim":""}" onclick="tpAnswer('${w}')">${w}</button>`).join("")}
+      </div>
+      <div class="q-feedback" id="tpFb"></div>
+      <button class="q-replay" onclick="nextTP()">🥁 Siguiente →</button>`;
+  }else if(tab==="clusters"){
+    if(!clQuiz){let r;do{r=Math.floor(Math.random()*CL_QUIZ.length)}while(r===clLast&&CL_QUIZ.length>1);clLast=r;clQuiz=CL_QUIZ[r]}
+    const pair=[clQuiz.correct,clQuiz.wrong].sort(()=>Math.random()-.5);
+    z.innerHTML=`
+      <div class="q-title">🧊 ¿Cuál es la versión LIMPIA?</div>
+      <div class="q-sub">Escucha — una sílaba, sin E de contrabando</div>
+      <button class="btn btn-secondary" style="margin-top:0" onclick="speak(clQuiz.say)">🔊 Escuchar</button>
+      <div class="q-opts" style="margin-top:14px">
+        ${pair.map(w=>`<button class="q-opt ${clPick==="ok"&&w===clQuiz.correct?"correct":clPick==="x"&&w===clPickWord?"wrong":clPick==="ok"&&w!==clQuiz.correct?"dim":""}" onclick="clAnswer('${w}')">${w}</button>`).join("")}
+      </div>
+      <div class="q-feedback" id="clFb"></div>
+      <button class="q-replay" onclick="nextCL()">🧊 Siguiente palabra →</button>`;
   }else{
     if(!quizOpts)buildQuizOpts();
     z.innerHTML=`
@@ -922,7 +1163,11 @@ let homoQuiz=null,homoPick=null,homoPickWord=null,homoLast=-1;
 let szQuiz=null,szPick=null,szPickWord=null,szLast=-1;
 let cantoDir="fwd",cantoPlaying=false,cqQuiz=null,cqPick=null,cqPickWord=null,cqLast=-1;
 let rvQuiz=null,rvPick=null,rvPickWord=null,rvLast=-1;
-const setTab=k=>{tab=k;idx=0;quizOn=false;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;homoQuiz=null;homoPick=null;homoPickWord=null;homoLast=-1;szQuiz=null;szPick=null;szPickWord=null;szLast=-1;cantoPlaying=false;cqQuiz=null;cqPick=null;cqPickWord=null;rvQuiz=null;rvPick=null;rvPickWord=null;render()};
+let meQuiz=null,mePick=null,mePickWord=null,meLast=-1;
+let vdQuiz=null,vdPick=null,vdPickWord=null,vdLast=-1;
+let tpQuiz=null,tpPick=null,tpPickWord=null,tpLast=-1;
+let clQuiz=null,clPick=null,clPickWord=null,clLast=-1;
+const setTab=k=>{tab=k;idx=0;quizOn=false;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;homoQuiz=null;homoPick=null;homoPickWord=null;homoLast=-1;szQuiz=null;szPick=null;szPickWord=null;szLast=-1;cantoPlaying=false;cqQuiz=null;cqPick=null;cqPickWord=null;rvQuiz=null;rvPick=null;rvPickWord=null;meQuiz=null;mePick=null;mePickWord=null;meLast=-1;vdQuiz=null;vdPick=null;vdPickWord=null;vdLast=-1;tpQuiz=null;tpPick=null;tpPickWord=null;tpLast=-1;clQuiz=null;clPick=null;clPickWord=null;clLast=-1;render()};
 const go=i=>{idx=i;quizPick=null;render()};
 const nav=d=>{idx=(idx+d+list().length)%list().length;quizPick=null;render()};
 const setSpeed=v=>{speed=v;render()};
@@ -930,13 +1175,17 @@ const listenCard=()=>speak(card().example||card().value);
 const toggleLang=()=>{lang=lang==="es"?"en":"es";$("langBtn").textContent=lang==="es"?"🇪🇸 ES":"🇺🇸 EN";render()};
 const toggleTheme=()=>{theme=theme==="light"?"dark":"light";document.documentElement.setAttribute("data-theme",theme);$("themeBtn").textContent=theme==="light"?"🌙":"☀️"};
 
-function toggleQuiz(){if(tab==="warmup"){toast("🎤 El calentamiento es práctica libre — sin quiz");return}quizOn=!quizOn;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;homoQuiz=null;homoPick=null;homoPickWord=null;szQuiz=null;szPick=null;szPickWord=null;cqQuiz=null;cqPick=null;cqPickWord=null;rvQuiz=null;rvPick=null;rvPickWord=null;render();
-  if(quizOn&&tab!=="melody"&&tab!=="homofonos"&&tab!=="sazon"&&tab!=="canto"&&tab!=="realvowels"){setTimeout(()=>speak(card().value),250)}
+function toggleQuiz(){if(tab==="warmup"){toast("🎤 El calentamiento es práctica libre — sin quiz");return}quizOn=!quizOn;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;homoQuiz=null;homoPick=null;homoPickWord=null;szQuiz=null;szPick=null;szPickWord=null;cqQuiz=null;cqPick=null;cqPickWord=null;rvQuiz=null;rvPick=null;rvPickWord=null;meQuiz=null;mePick=null;mePickWord=null;vdQuiz=null;vdPick=null;vdPickWord=null;tpQuiz=null;tpPick=null;tpPickWord=null;clQuiz=null;clPick=null;clPickWord=null;render();
+  if(quizOn&&tab!=="melody"&&tab!=="homofonos"&&tab!=="sazon"&&tab!=="canto"&&tab!=="realvowels"&&tab!=="magice"&&tab!=="vdigraphs"&&tab!=="tpos"&&tab!=="clusters"){setTimeout(()=>speak(card().value),250)}
   if(quizOn&&tab==="melody"){setTimeout(()=>speak(melQuiz.text),250)}
   if(quizOn&&tab==="homofonos"){setTimeout(()=>{if(!homoQuiz){renderQuiz()}if(homoQuiz)speak(homoQuiz.say)},250)}
   if(quizOn&&tab==="sazon"){setTimeout(()=>{if(!szQuiz){renderQuiz()}if(szQuiz)speak(szQuiz.say)},250)}
   if(quizOn&&tab==="canto"){setTimeout(()=>{if(!cqQuiz){renderQuiz()}if(cqQuiz&&cqQuiz.say)speak(cqQuiz.say)},250)}
   if(quizOn&&tab==="realvowels"){setTimeout(()=>{if(!rvQuiz){renderQuiz()}if(rvQuiz)speak(rvQuiz.say)},250)}
+  if(quizOn&&tab==="magice"){setTimeout(()=>{if(!meQuiz){renderQuiz()}if(meQuiz)speak(meQuiz.say)},250)}
+  if(quizOn&&tab==="vdigraphs"){setTimeout(()=>{if(!vdQuiz){renderQuiz()}if(vdQuiz&&vdQuiz.say)speak(vdQuiz.say)},250)}
+  if(quizOn&&tab==="tpos"){setTimeout(()=>{if(!tpQuiz){renderQuiz()}if(tpQuiz)speak(tpQuiz.say)},250)}
+  if(quizOn&&tab==="clusters"){setTimeout(()=>{if(!clQuiz){renderQuiz()}if(clQuiz)speak(clQuiz.say)},250)}
 }
 
 function buildQuizOpts(){
@@ -1006,6 +1255,42 @@ function rvAnswer(w){
 }
 function nextRV(){rvQuiz=null;rvPick=null;rvPickWord=null;renderQuiz();
   if(quizOn&&tab==="realvowels"){setTimeout(()=>{if(rvQuiz)speak(rvQuiz.say)},250)}}
+
+function meAnswer(w){
+  if(mePick!==null)return;
+  mePickWord=w;
+  if(w===meQuiz.correct){mePick="ok";awardPoint(meQuiz.correct);const fb=$("meFb");if(fb)fb.innerHTML=`<div class="score-msg" style="color:#10b981">✅ ¡Esa es! ${meQuiz.clue} · +1 ⭐</div>`}
+  else{mePick="x";trackError(meQuiz.correct);const fb=$("meFb");if(fb)fb.innerHTML=`<div class="score-msg" style="color:#ef4444">❌ Era ${meQuiz.correct} — ${meQuiz.clue}</div>`}
+}
+function nextME(){meQuiz=null;mePick=null;mePickWord=null;renderQuiz();
+  if(quizOn&&tab==="magice"){setTimeout(()=>{if(!meQuiz){renderQuiz()}if(meQuiz)speak(meQuiz.say)},250)}}
+
+function vdAnswer(w){
+  if(vdPick!==null)return;
+  vdPickWord=w;
+  if(w===vdQuiz.correct){vdPick="ok";awardPoint("vdigraph");const fb=$("vdFb");if(fb)fb.innerHTML=`<div class="score-msg" style="color:#10b981">✅ ¡Exacto! ${vdQuiz.clue} · +1 ⭐</div>`}
+  else{vdPick="x";trackError("vdigraph");const fb=$("vdFb");if(fb)fb.innerHTML=`<div class="score-msg" style="color:#ef4444">❌ Era: ${vdQuiz.correct} — ${vdQuiz.clue}</div>`}
+}
+function nextVD(){vdQuiz=null;vdPick=null;vdPickWord=null;renderQuiz();
+  if(quizOn&&tab==="vdigraphs"){setTimeout(()=>{if(!vdQuiz){renderQuiz()}if(vdQuiz&&vdQuiz.say)speak(vdQuiz.say)},250)}}
+
+function tpAnswer(w){
+  if(tpPick!==null)return;
+  tpPickWord=w;
+  if(w===tpQuiz.correct){tpPick="ok";awardPoint(tpQuiz.correct);const fb=$("tpFb");if(fb)fb.innerHTML=`<div class="score-msg" style="color:#10b981">✅ ¡Buen oído! ${tpQuiz.clue} · +1 ⭐</div>`}
+  else{tpPick="x";trackError(tpQuiz.correct);const fb=$("tpFb");if(fb)fb.innerHTML=`<div class="score-msg" style="color:#ef4444">❌ Era ${tpQuiz.correct} — ${tpQuiz.clue}</div>`}
+}
+function nextTP(){tpQuiz=null;tpPick=null;tpPickWord=null;renderQuiz();
+  if(quizOn&&tab==="tpos"){setTimeout(()=>{if(!tpQuiz){renderQuiz()}if(tpQuiz)speak(tpQuiz.say)},250)}}
+
+function clAnswer(w){
+  if(clPick!==null)return;
+  clPickWord=w;
+  if(w===clQuiz.correct){clPick="ok";awardPoint(clQuiz.correct);const fb=$("clFb");if(fb)fb.innerHTML=`<div class="score-msg" style="color:#10b981">✅ ¡Limpio! ${clQuiz.clue} · +1 ⭐</div>`}
+  else{clPick="x";trackError(clQuiz.correct);const fb=$("clFb");if(fb)fb.innerHTML=`<div class="score-msg" style="color:#ef4444">❌ Era ${clQuiz.correct} — ${clQuiz.clue}</div>`}
+}
+function nextCL(){clQuiz=null;clPick=null;clPickWord=null;renderQuiz();
+  if(quizOn&&tab==="clusters"){setTimeout(()=>{if(!clQuiz){renderQuiz()}if(clQuiz)speak(clQuiz.say)},250)}}
 
 function trackError(word){
   const e=errors();e[word]=(e[word]||0)+1;setErrors(e);
