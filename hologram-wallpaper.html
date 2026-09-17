@@ -513,6 +513,8 @@ const TRAINER="https://babayaba71-maker.github.io/AccentBridges/foundation-train
 const AR="https://babayaba71-maker.github.io/AccentBridges/ar-labeler.html";
 const CALL="https://valerie.base44.app/functions/valerieCall";
 const TG="https://t.me/Valerie3bot";
+const YT="https://www.youtube.com/@Jacobmendoza5379";
+const ytSearch=q=>YT+"/search?query="+encodeURIComponent(q);
 const PERS_URL="https://babayaba71-maker.github.io/AccentBridges/personalization-assessment.html";
 const LVL_URL="https://babayaba71-maker.github.io/AccentBridges/assessment.html";
 
@@ -529,6 +531,15 @@ const TRAP_TAB={
  sazon:["Pus in Buts","buk","buts","snak","mach","uant"],
  canto:["EFG · II-ef-YI","LMNOP · EL-em-en-OU-pi","TUV · TI-iu-VI","WXYZ · DÁBLIU-eks-UAI-ZI","B-O-O-K · bi-OU-OU-KEI","W-A-T-E-R · DÁBLIU-ua-TI-i-ar","S-T-R-E-E-T · es-ti-ar-ii-ii-ti","AT · et","DOT · dat"]
 };
+const VIDEO_TAB={
+ warmup:"pronunciation practice",vowels:"vowel sounds",realvowels:"schwa",vdigraphs:"vowel digraphs",
+ magice:"magic e",sounds:"consonant sounds",alphabet:"alphabet",canto:"alphabet song",digraphs:"th sound",
+ tpos:"flap t",clusters:"consonant clusters",homofonos:"minimal pairs",sazon:"syllables",
+ numbers:"numbers in english",greetings:"greetings",pronouns:"pronouns",phrases:"phrases",verbs:"verbs",
+ combos:"linking",melody:"intonation"
+};
+function videoOfTab(t){const q=VIDEO_TAB[t];return q?{label:"Video: la Maestra te lo explica (reel 1 min)",url:ytSearch(q)}:null}
+
 function trapTab(word){
   for(const tab in TRAP_TAB){if(TRAP_TAB[tab].includes(word))return tab}
   return null;
@@ -562,6 +573,8 @@ function maestraDose(pers,lvl){
   }
   if(objetivo.tab!==puerta.tab)acciones.push({label:"🎯 "+objetivo.t+" ("+objetivo.tab+")",url:TRAINER+"?tab="+objetivo.tab});
   acciones.push({label:"🎙️ Practica conmigo en voz (/call)",url:CALL});
+  const vObj=videoOfTab(objetivo.tab);
+  if(vObj)acciones.push(vObj);
   return {titulo:objetivo.t,msg:puerta.msg,acciones:acciones};
 }
 
@@ -602,7 +615,7 @@ function renderPortal(){
   const top=Object.entries(errs).sort((a,b)=>b[1]-a[1])[0];
   if(top){
     const tab=trapTab(top[0]);
-    trapHtml=`<div class="card"><span class="st-title">🎯 Tu palabra trampa de hoy</span><div class="st-meta">"${top[0]}" — se te ha escapado ${top[1]} vez${top[1]>1?"es":""} en los quizzes. ${tab?"La Maestra te lleva directo a su gimnasio.":"Revísala en el Trainer."}</div>${tab?`<a class="p-btn" href="${TRAINER}?tab=${tab}">Entrenar: pestaña ${tab} →</a>`:`<a class="p-btn" href="${TRAINER}">Abrir el Trainer →</a>`}</div>`;
+    trapHtml=`<div class="card"><span class="st-title">🎯 Tu palabra trampa de hoy</span><div class="st-meta">"${top[0]}" — se te ha escapado ${top[1]} vez${top[1]>1?"es":""} en los quizzes. ${tab?"La Maestra te lleva directo a su gimnasio.":"Revísala en el Trainer."}</div>${tab?`<a class="p-btn" href="${TRAINER}?tab=${tab}">Entrenar: pestaña ${tab} →</a>`:`<a class="p-btn" href="${TRAINER}">Abrir el Trainer →</a>`} ${(tab&&videoOfTab(tab))?`<a class="p-btn ghost" href="${videoOfTab(tab).url}">${videoOfTab(tab).label}</a>`:""}</div>`;
   }
 
   const expHtml=(pers||lvl||pts>0)?`
@@ -616,7 +629,7 @@ function renderPortal(){
 
   document.getElementById("pwrap").innerHTML=`
     <div class="p-head">
-      <div><div class="p-title">LA MAESTRA VALERIE-AI</div><div class="p-sub">PORTAL · ACCENTBRIDGES</div></div>
+      <div><div class="p-title">LA MAESTRA VALERIE-AI</div><div class="p-sub">PORTAL · ACCENTBRIDGES · v2.2 VIDEO</div></div>
       <button class="p-close" onclick="closePortal()">✕ CERRAR</button>
     </div>
     <div class="p-greet">${greet}</div>
@@ -628,6 +641,7 @@ function renderPortal(){
       <a class="p-btn" href="${AR}">🔭 AR LABELER</a>
       <a class="p-btn" href="${CALL}">🎙️ VOZ EN VIVO</a>
       <a class="p-btn" href="${TG}">✈️ TELEGRAM</a>
+      <a class="p-btn" href="${YT}">YOUTUBE</a>
       <span class="p-btn" disabled>🇺🇸 AMERICA (en camino)</span>
       <span class="p-btn" disabled>💎 PRO (en camino)</span>
     </div>
