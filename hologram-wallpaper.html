@@ -514,6 +514,7 @@ const AR="https://babayaba71-maker.github.io/AccentBridges/ar-labeler.html";
 const CALL="https://valerie.base44.app/functions/valerieCall";
 const TG="https://t.me/+aWV2H9E252QwYTMx"; // grupo AccentBridges (link de invitación, JJ 17-sep)
 const TT="https://www.tiktok.com/@raul.ybarra0";
+const AMERICA="https://speak-native-buddy.lovable.app"; // PronounceAI (app Lovable JJ): minimal pairs con reconocimiento de voz, entonación, grabación, progreso
 const YT="https://www.youtube.com/@Jacobmendoza5379";
 const ytSearch=q=>YT+"/search?query="+encodeURIComponent(q);
 const PERS_URL="https://babayaba71-maker.github.io/AccentBridges/personalization-assessment.html";
@@ -644,7 +645,7 @@ function renderPortal(){
 
   document.getElementById("pwrap").innerHTML=`
     <div class="p-head">
-      <div><div class="p-title">LA MAESTRA VALERIE-AI</div><div class="p-sub">PORTAL · ACCENTBRIDGES · v2.5 REELS EXACTOS</div></div>
+      <div><div class="p-title">LA MAESTRA VALERIE-AI</div><div class="p-sub">PORTAL · ACCENTBRIDGES · v2.6 AMERICA ON</div></div>
       <button class="p-close" onclick="closePortal()">✕ CERRAR</button>
     </div>
     <div class="p-greet">${greet}</div>
@@ -658,7 +659,7 @@ function renderPortal(){
       <a class="p-btn" href="${TG}">✈️ TELEGRAM</a>
       <a class="p-btn" href="${YT}">YOUTUBE</a>
       <a class="p-btn" href="${TT}">🎵 TIKTOK</a>
-      <span class="p-btn" disabled>🇺🇸 AMERICA (en camino)</span>
+      <a class="p-btn" href="${AMERICA}">🇺🇸 AMERICA — pares y voz</a>
       <span class="p-btn" disabled>💎 PRO (en camino)</span>
     </div>
     ${expHtml}
