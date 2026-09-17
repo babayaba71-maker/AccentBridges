@@ -356,6 +356,58 @@ const COMBOS=[
  {value:"He is sleeping",phonetic:"Ji is slii-ping",phoneticEs:"ji + is + slii-ping — el niño que se duerme 😴",translation:"Él está durmiendo",emoji:"👦😴"},
  {value:"She is cooking",phonetic:"Chi is ku-king",phoneticEs:"chi + is + ku-king — a la abuela cocinando 👵",translation:"Ella está cocinando",emoji:"👧🍳"}];
 
+/* ===== VOCALES REALES 🎯 (despliegue 1 del ejército de sonidos, JJ 16-sep-2026) ===== */
+const REALVOWELS=[
+ {emoji:"🪑",es_title:"i LARGA vs i CORTITA",sound:"SII-t vs SI-t",
+  pares:[{w:"seat",a:"SII-t",es:"asiento"},{w:"sit",a:"SI-t",es:"sentarse"}],
+  doctrina:"La i LARGA va con sonrisa y lengua alta (seat); la i CORTITA es relajada, boca floja (sit). El español tiene UNA sola i — el inglés tiene DOS."},
+ {emoji:"🛏️",es_title:"E vs Æ (bed vs bad)",sound:"bed vs BA-ed",
+  pares:[{w:"bed",a:"bed",es:"cama"},{w:"bad",a:"ba-ed",es:"malo"}],
+  doctrina:"æ = la a y la e FUNDIDAS en una sola boca bien abierta. bad no es bed ni la a pura del español — es entre las dos."},
+ {emoji:"📘",es_title:"u LARGA vs u CORTITA",sound:"BLUU vs BUK",
+  pares:[{w:"blue",a:"bluu",es:"azul"},{w:"book",a:"buk",es:"libro"}],
+  doctrina:"La u de book es cortita y relajada — ya la cazaste en el Sazón: BUK, sin vocal de más. blue va larga y redonda."},
+ {emoji:"☕",es_title:"La A FLOJA /ʌ/",sound:"kap, lov",
+  pares:[{w:"cup",a:"kap",es:"taza"},{w:"love",a:"lov",es:"amor"}],
+  doctrina:"Ni a ni u: una a perezosa que sale sin esfuerzo. sun, love, blood, cup — todos viven de la misma a floja."},
+ {emoji:"🚗",es_title:"La O que se DESLIZA /oʊ/",sound:"gou, houm",
+  pares:[{w:"go",a:"gou",es:"ve / anda"},{w:"home",a:"houm",es:"casa"}],
+  doctrina:"La o americana NUNCA es pura: se desliza a u al final — GOU, NOU (know), HOUM. La o del español se queda quieta; la americana viaja."},
+ {emoji:"🍌",es_title:"La SCHWA /ə/ — la vocal secreta",sound:"ba-NA-na, a-BOUT",
+  pares:[{w:"banana",a:"ba-NA-na",es:"plátano"},{w:"about",a:"a-BOUT",es:"acerca de"}],
+  doctrina:"La vocal más común del inglés (Episodio 3): TODA sílaba sin acento colapsa a 'uh'. ba-NA-na esconde DOS schwas — el inglés lee beats, no letras."},
+ {emoji:"🐦",es_title:"ER con R AMERICANA /ɝ/",sound:"berd, werk",
+  pares:[{w:"bird",a:"berd",es:"pájaro"},{w:"work",a:"werk",es:"trabajo"}],
+  doctrina:"La er con la R americana de la Lección 2: lengua ATRÁS sin tocar. BERD, WERK — vocal y R fundidas en un solo músculo."},
+ {emoji:"🙋",es_title:"Diptongo AI /aɪ/",sound:"mai, taim",
+  pares:[{w:"my",a:"mai",es:"mi"},{w:"time",a:"taim",es:"tiempo"}],
+  doctrina:"La a deslizándose a i — es la I del Abecedario Americano (y la Y de my). like, time, night: el mismo viaje."},
+ {emoji:"📢",es_title:"Diptongo AU /aʊ/",sound:"nau, jaus",
+  pares:[{w:"now",a:"nau",es:"ahora"},{w:"house",a:"jaus",es:"casa"}],
+  doctrina:"La a deslizándose a u. now NO es 'no' — lleva el viaje completo a-u. out, about, house: mismo boleto."},
+ {emoji:"👦",es_title:"Diptongo OI /ɔɪ/",sound:"boi, toi",
+  pares:[{w:"boy",a:"boi",es:"niño"},{w:"toy",a:"toi",es:"juguete"}],
+  doctrina:"O redonda terminando en i — ¡primo mexicano DIRECTO: hoy, doy, voy! El único diptongo que el español ya trae de fábrica."},
+ {emoji:"🪀",es_title:"LA Y — personalidad 1: AI",sound:"mai, flai",
+  pares:[{w:"my",a:"mai",es:"mi"},{w:"fly",a:"flai",es:"volar"}],
+  doctrina:"Al FINAL de palabra corta, la Y grita AI: my, fly, why, by. La Y del Abecedario Americano en su papel más fuerte."},
+ {emoji:"😀",es_title:"LA Y — personalidad 2: i cortita",sound:"JA-pii, BEI-bii",
+  pares:[{w:"happy",a:"ja-pii",es:"feliz"},{w:"baby",a:"bei-bii",es:"bebé"}],
+  doctrina:"Al final de palabra LARGA, la Y descansa en i cortita — la MISMA i relajada de sit. happy, baby, city: la Y se queda tranquila."},
+ {emoji:"✅",es_title:"LA Y — personalidad 3: consonante /j/",sound:"yes, iu",
+  pares:[{w:"yes",a:"yes",es:"sí"},{w:"you",a:"iu",es:"tú"}],
+  doctrina:"Al INICIO de palabra, la Y es consonante: una i rápida pegada a la vocal que sigue — yes, you, yard. ¡Ojo: NO es la J de juice /dʒ/! La Y se desliza; la J frenar."}];
+
+const RV_QUIZ=[
+ {say:"I sit here.",correct:"sit",mate:"seat",clue:"i CORTITA relajada — boca floja, sin sonrisa"},
+ {say:"That was bad.",correct:"bad",mate:"bed",clue:"æ = a y e fundidas, boca bien abierta"},
+ {say:"Read the book.",correct:"book",mate:"blue",clue:"u cortita relajada — BUK, la del Sazón"},
+ {say:"Give me a cup.",correct:"cup",mate:"cop",clue:"a floja perezosa /ʌ/ — ni a ni u"},
+ {say:"That is my car.",correct:"my",mate:"me",clue:"Y al final de palabra corta = AI"},
+ {say:"I am happy.",correct:"happy",mate:"hippie",clue:"æ al inicio (ja-) vs i cortita (ji-) — y la Y final descansa en i"},
+ {say:"I need it now.",correct:"now",mate:"no",clue:"AU = viaje completo a→u, no te quedes en la o"},
+ {say:"The boy has a toy.",correct:"boy",mate:"buy",clue:"OI redonda — primo mexicano de hoy y doy"}];
+
 /* ===== EL CANTO EN CHUNKS 🎶 (doctrina ABC-kindergarten + pentatónico, JJ 16-sep-2026) ===== */
 const CANTO_CHUNKS=[
  {letters:"ABCD",ancla:"EI-bi-si-DAI",note:"El arranque del canto — cuatro golpes de voz sueldos."},
@@ -524,10 +576,10 @@ const WARMUP=[
   es_tip:"Quien controla su volumen controla su acento: lo suave entrena la precisión sin lastimar la voz."}
 ];
 
-const DATA={warmup:WARMUP,vowels:VOWELS,sounds:SOUNDS,alphabet:ALPHABET,canto:CANTO_CHUNKS,digraphs:DIGRAPHS,homofonos:HOMOPHONES,sazon:SAZON,numbers:NUMBERS,greetings:GREETINGS,pronouns:PRONOUNS,phrases:PHRASES,verbs:VERBS,combos:COMBOS,melody:MELODIES};
+const DATA={warmup:WARMUP,vowels:VOWELS,realvowels:REALVOWELS,sounds:SOUNDS,alphabet:ALPHABET,canto:CANTO_CHUNKS,digraphs:DIGRAPHS,homofonos:HOMOPHONES,sazon:SAZON,numbers:NUMBERS,greetings:GREETINGS,pronouns:PRONOUNS,phrases:PHRASES,verbs:VERBS,combos:COMBOS,melody:MELODIES};
 
 const I18N={
- es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{warmup:" Calienta",vowels:" Vocales",sounds:" Sonidos",alphabet:" Alfabeto",canto:" Canto",digraphs:" Dígrafos",homofonos:" Homófonos",sazon:" Sazón",numbers:" Números",greetings:" Saludos",pronouns:" Pronombres",phrases:" Frases",verbs:" Verbos",combos:" Combos",melody:" Melodía"},
+ es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{warmup:" Calienta",vowels:" Vocales",realvowels:" Vocales Reales",sounds:" Sonidos",alphabet:" Alfabeto",canto:" Canto",digraphs:" Dígrafos",homofonos:" Homófonos",sazon:" Sazón",numbers:" Números",greetings:" Saludos",pronouns:" Pronombres",phrases:" Frases",verbs:" Verbos",combos:" Combos",melody:" Melodía"},
      say:"DÍLO ASÍ:",listen:"🔊 Escuchar",slow:"🐢 Lento",normal:"🚶 Normal",fast:"🏃 Rápido",
      recTitle:"Graba tu voz",rec:"Grabar",stop:"Detener",play:"Escucharte",
      prev:"Anterior",next:"Siguiente",quizOn:"🧠 Modo Quiz",quizOff:"✖️ Salir del Quiz",
@@ -536,7 +588,7 @@ const I18N={
      qReplay:"🔊 Escuchar otra vez",correct:"¡Correcto! +1 punto 🎉",wrong:"¡Uy! Tu oído acaba de encontrar su gimnasio 💪",
      statement:"Afirmación ↘",question:"Pregunta ↗",certTitle:"Certificado de Logro",
      certSub:"¡Felicitaciones! ¡Has ganado 100 puntos!",certBody:"¡Completaste el Entrenador de Inglés Básico!",certBtn:"Seguir Aprendiendo 🚀"},
- en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{warmup:" Warm-up",vowels:" Vowels",sounds:" Sounds",alphabet:" Alphabet",canto:" Song",digraphs:" Digraphs",homofonos:" Homophones",sazon:" Sazón",numbers:" Numbers",greetings:" Greetings",pronouns:" Pronouns",phrases:" Phrases",verbs:" Verbs",combos:" Combos",melody:" Melody"},
+ en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{warmup:" Warm-up",vowels:" Vowels",realvowels:" Real Vowels",sounds:" Sounds",alphabet:" Alphabet",canto:" Song",digraphs:" Digraphs",homofonos:" Homophones",sazon:" Sazón",numbers:" Numbers",greetings:" Greetings",pronouns:" Pronouns",phrases:" Phrases",verbs:" Verbs",combos:" Combos",melody:" Melody"},
      say:"SAY IT LIKE:",listen:"🔊 Listen",slow:"🐢 Slow",normal:"🚶 Normal",fast:"🏃 Fast",
      recTitle:"Record your voice",rec:"Record",stop:"Stop",play:"Play",
      prev:"Prev",next:"Next",quizOn:"🧠 Quiz Mode",quizOff:"✖️ Exit Quiz",
@@ -665,7 +717,7 @@ function wuFinish(){wuDoneFlags[4]=true;const today=new Date().toISOString().sli
  else{toast("🔥 Rampa completa — boca lista")}}
 
 function renderTabs(){
-  const icons={warmup:"🎤",vowels:"🔤",sounds:"🔊",alphabet:"📖",canto:"🎶",digraphs:"🔗",homofonos:"👯",sazon:"🌶️",numbers:"🔢",greetings:"👋",pronouns:"🙋",phrases:"💬",verbs:"🏃",combos:"🧩",melody:"🎵"};
+  const icons={warmup:"🎤",vowels:"🔤",realvowels:"🎯",sounds:"🔊",alphabet:"📖",canto:"🎶",digraphs:"🔗",homofonos:"👯",sazon:"🌶️",numbers:"🔢",greetings:"👋",pronouns:"🙋",phrases:"💬",verbs:"🏃",combos:"🧩",melody:"🎵"};
   $("tabs").innerHTML=Object.keys(DATA).map(k=>
     `<button class="tab ${k===tab?"active":""}" onclick="setTab('${k}')">${icons[k]}${t().tabs[k]}</button>`).join("");
 }
@@ -712,6 +764,17 @@ function renderCard(){
     </div>
     <div class="melody-note">💡 ${ch.note}</div>
     <div class="melody-note" style="margin-top:8px">🧠 ${cantoDir==="rev"?"MODO PENTATÓNICO ◀️ — el canto adelante es MÚSCULO; el revés es CEREBRO: cada letra se recupera de verdad, sin pilotear en automático. Como el músico que practica la escala hacia arriba Y hacia abajo.":"DOCTRINA DEL CHUNK: el inglés se habla en CHUNKS — pedazos sueldos, no letras sueltas. El ABC song es el primer chunk-canto del kindergarten — y el DELETEREO real se hace igual: \u201CHow do you spell your name?\u201D se contesta cantando las letras. Canta todo y luego prueba el revés ◀️"}</div>`;
+  }else if(tab==="realvowels"){
+    html=`<div class="emoji">${c.emoji}</div>
+      <div class="value" style="font-size:24px">${c.es_title}</div>
+      <div class="say-box">
+        <div class="say-label">EL SONIDO</div>
+        <div class="say-phon" style="font-size:22px">🔊 ${c.sound}</div>
+      </div>
+      <div class="q-opts" style="margin-top:14px">
+        ${c.pares.map(w=>`<button class="q-opt" style="cursor:default" onclick="speak('${w.w.replace(/'/g,"\\'")}')"><span class="q-emoji">▶️</span>${w.w} = ${w.a} · ${w.es}</button>`).join("")}
+      </div>
+      <div class="melody-note">💡 ${c.doctrina}</div>`;
   }else if(tab==="sazon"){
     html=`<div class="emoji">${c.emoji}</div>
       <div class="value" style="font-size:28px">${c.es_title}</div>
@@ -752,6 +815,18 @@ function renderCard(){
       </div>
       <div class="q-feedback" id="szFb"></div>
       <button class="q-replay" onclick="nextSazon()">${lang==="es"?"🌶️ Siguiente palabra →":"🌶️ Next word →"}</button>`;
+  }else if(tab==="realvowels"){
+    if(!rvQuiz){let r;do{r=Math.floor(Math.random()*RV_QUIZ.length)}while(r===rvLast&&RV_QUIZ.length>1);rvLast=r;rvQuiz=RV_QUIZ[r]}
+    const pair=[rvQuiz.correct,rvQuiz.mate].sort(()=>Math.random()-.5);
+    z.innerHTML=`
+      <div class="q-title">${lang==="es"?"👂 ¿Cuál palabra escuchaste?":"👂 Which word did you hear?"}</div>
+      <div class="q-sub">${lang==="es"?"Pareja mínima — escucha el detalle fino del sonido":"Minimal pair — listen for the fine detail"}</div>
+      <button class="btn btn-secondary" style="margin-top:0" onclick="speak(rvQuiz.say)">${t().listen}</button>
+      <div class="q-opts" style="margin-top:14px">
+        ${pair.map(w=>`<button class="q-opt ${rvPick==="ok"&&w===rvQuiz.correct?"correct":rvPick==="x"&&w===rvPickWord?"wrong":rvPick==="ok"&&w!==rvQuiz.correct?"dim":""}" onclick="rvAnswer('${w}')">${w}</button>`).join("")}
+      </div>
+      <div class="q-feedback" id="rvFb"></div>
+      <button class="q-replay" onclick="nextRV()">${lang==="es"?"🔊 Siguiente frase →":"🔊 Next sentence →"}</button>`;
   }else if(tab==="homofonos"){
     html=`<div class="emoji">${c.emoji}</div>
       <div class="value" style="font-size:28px">${c.es_title}</div>
@@ -846,7 +921,8 @@ function renderQuiz(){
 let homoQuiz=null,homoPick=null,homoPickWord=null,homoLast=-1;
 let szQuiz=null,szPick=null,szPickWord=null,szLast=-1;
 let cantoDir="fwd",cantoPlaying=false,cqQuiz=null,cqPick=null,cqPickWord=null,cqLast=-1;
-const setTab=k=>{tab=k;idx=0;quizOn=false;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;homoQuiz=null;homoPick=null;homoPickWord=null;homoLast=-1;szQuiz=null;szPick=null;szPickWord=null;szLast=-1;cantoPlaying=false;cqQuiz=null;cqPick=null;cqPickWord=null;render()};
+let rvQuiz=null,rvPick=null,rvPickWord=null,rvLast=-1;
+const setTab=k=>{tab=k;idx=0;quizOn=false;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;homoQuiz=null;homoPick=null;homoPickWord=null;homoLast=-1;szQuiz=null;szPick=null;szPickWord=null;szLast=-1;cantoPlaying=false;cqQuiz=null;cqPick=null;cqPickWord=null;rvQuiz=null;rvPick=null;rvPickWord=null;render()};
 const go=i=>{idx=i;quizPick=null;render()};
 const nav=d=>{idx=(idx+d+list().length)%list().length;quizPick=null;render()};
 const setSpeed=v=>{speed=v;render()};
@@ -854,12 +930,13 @@ const listenCard=()=>speak(card().example||card().value);
 const toggleLang=()=>{lang=lang==="es"?"en":"es";$("langBtn").textContent=lang==="es"?"🇪🇸 ES":"🇺🇸 EN";render()};
 const toggleTheme=()=>{theme=theme==="light"?"dark":"light";document.documentElement.setAttribute("data-theme",theme);$("themeBtn").textContent=theme==="light"?"🌙":"☀️"};
 
-function toggleQuiz(){if(tab==="warmup"){toast("🎤 El calentamiento es práctica libre — sin quiz");return}quizOn=!quizOn;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;homoQuiz=null;homoPick=null;homoPickWord=null;szQuiz=null;szPick=null;szPickWord=null;cqQuiz=null;cqPick=null;cqPickWord=null;render();
-  if(quizOn&&tab!=="melody"&&tab!=="homofonos"&&tab!=="sazon"&&tab!=="canto"){setTimeout(()=>speak(card().value),250)}
+function toggleQuiz(){if(tab==="warmup"){toast("🎤 El calentamiento es práctica libre — sin quiz");return}quizOn=!quizOn;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;homoQuiz=null;homoPick=null;homoPickWord=null;szQuiz=null;szPick=null;szPickWord=null;cqQuiz=null;cqPick=null;cqPickWord=null;rvQuiz=null;rvPick=null;rvPickWord=null;render();
+  if(quizOn&&tab!=="melody"&&tab!=="homofonos"&&tab!=="sazon"&&tab!=="canto"&&tab!=="realvowels"){setTimeout(()=>speak(card().value),250)}
   if(quizOn&&tab==="melody"){setTimeout(()=>speak(melQuiz.text),250)}
   if(quizOn&&tab==="homofonos"){setTimeout(()=>{if(!homoQuiz){renderQuiz()}if(homoQuiz)speak(homoQuiz.say)},250)}
   if(quizOn&&tab==="sazon"){setTimeout(()=>{if(!szQuiz){renderQuiz()}if(szQuiz)speak(szQuiz.say)},250)}
   if(quizOn&&tab==="canto"){setTimeout(()=>{if(!cqQuiz){renderQuiz()}if(cqQuiz&&cqQuiz.say)speak(cqQuiz.say)},250)}
+  if(quizOn&&tab==="realvowels"){setTimeout(()=>{if(!rvQuiz){renderQuiz()}if(rvQuiz)speak(rvQuiz.say)},250)}
 }
 
 function buildQuizOpts(){
@@ -920,6 +997,15 @@ function cqAnswer(w){
 }
 function nextCantoQ(){cqQuiz=null;cqPick=null;cqPickWord=null;renderQuiz();
   if(quizOn&&tab==="canto"){setTimeout(()=>{if(!cqQuiz){renderQuiz()}if(cqQuiz&&cqQuiz.say)speak(cqQuiz.say)},250)}}
+
+function rvAnswer(w){
+  if(rvPick!==null)return;
+  rvPickWord=w;
+  if(w===rvQuiz.correct){rvPick="ok";awardPoint(rvQuiz.correct);const fb=$("rvFb");if(fb)fb.innerHTML=`<div class="score-msg" style="color:#10b981">✅ ¡Oído fino! ${rvQuiz.clue} · +1 ⭐</div>`}
+  else{rvPick="x";trackError(rvQuiz.correct);const fb=$("rvFb");if(fb)fb.innerHTML=`<div class="score-msg" style="color:#ef4444">❌ Era ${rvQuiz.correct} — ${rvQuiz.clue}</div>`}
+}
+function nextRV(){rvQuiz=null;rvPick=null;rvPickWord=null;renderQuiz();
+  if(quizOn&&tab==="realvowels"){setTimeout(()=>{if(rvQuiz)speak(rvQuiz.say)},250)}}
 
 function trackError(word){
   const e=errors();e[word]=(e[word]||0)+1;setErrors(e);
