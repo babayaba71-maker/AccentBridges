@@ -532,6 +532,17 @@ const TRAP_TAB={
  sazon:["Pus in Buts","buk","buts","snak","mach","uant"],
  canto:["EFG · II-ef-YI","LMNOP · EL-em-en-OU-pi","TUV · TI-iu-VI","WXYZ · DÁBLIU-eks-UAI-ZI","B-O-O-K · bi-OU-OU-KEI","W-A-T-E-R · DÁBLIU-ua-TI-i-ar","S-T-R-E-E-T · es-ti-ar-ii-ii-ti","AT · et","DOT · dat"]
 };
+/* ---- BOVEDA DE REELS EXACTOS (videos oficiales JJ/Valerie, transcritos y catalogados 17-sep) ---- */
+const MP="https://base44.app/api/apps/69c78b20df328cd2f8bbcc29/files/mp/public/69c78b20df328cd2f8bbcc29/";
+const VIDEO_EXACT={
+ melody:MP+"f8ef880e8_022d57697_video_1351300650545329.mp4",
+ realvowels:MP+"95d7e6b01_039b26c59_video_1421251156576454.mp4",
+ tpos:MP+"0f456d688_d9bdf8e94_video_1077604988253730.mp4",
+ combos:MP+"3446fe3ce_f9fbb6850_video_1748831389367989.mp4"
+};
+const REEL_INTRO=MP+"1d1764cc5_cfa10eba1_video_1631084568581995.mp4";
+const REEL_PROMO=MP+"625964f60_bbeca3dd6_video_1404732311567455.mp4";
+
 const VIDEO_TAB={
  warmup:"pronunciation practice",vowels:"vowel sounds",realvowels:"schwa",vdigraphs:"vowel digraphs",
  magice:"magic e",sounds:"consonant sounds",alphabet:"alphabet",canto:"alphabet song",digraphs:"th sound",
@@ -539,7 +550,10 @@ const VIDEO_TAB={
  numbers:"numbers in english",greetings:"greetings",pronouns:"pronouns",phrases:"phrases",verbs:"verbs",
  combos:"linking",melody:"intonation"
 };
-function videoOfTab(t){const q=VIDEO_TAB[t];return q?{label:"Video: la Maestra te lo explica (reel 1 min)",url:ytSearch(q)}:null}
+function videoOfTab(t){
+  if(VIDEO_EXACT[t])return {label:"Video: la Maestra te lo explica — REEL EXACTO (1 min)",url:VIDEO_EXACT[t]};
+  const q=VIDEO_TAB[t];return q?{label:"Video: la Maestra te lo explica (reel 1 min)",url:ytSearch(q)}:null
+}
 
 function trapTab(word){
   for(const tab in TRAP_TAB){if(TRAP_TAB[tab].includes(word))return tab}
@@ -608,7 +622,7 @@ function renderPortal(){
       ${dose.acciones.map((a,i)=>`<a class="p-btn ${i===0?"gold":""}" href="${a.url}">${a.label}</a>`).join("")}
     </div>`;
   }else{
-    doseHtml=`<div class="card"><span class="st-num">3</span><span class="st-title">Tu dosis de hoy 💊</span><div class="st-meta">${pers?"Completa tu Level Assessment y la dosis se prepara sola.":"Un paso a la vez: primero te conozco, luego mido, luego dosifico. La persona antes que el pronóstico."}</div></div>`;
+    doseHtml=`<div class="card"><span class="st-num">3</span><span class="st-title">Tu dosis de hoy 💊</span><div class="st-meta">${pers?"Completa tu Level Assessment y la dosis se prepara sola.":"Un paso a la vez: primero te conozco, luego mido, luego dosifico. La persona antes que el pronóstico."}</div><a class="p-btn" href="${REEL_INTRO}">Mira que es AccentBridges — 1 min</a><a class="p-btn ghost" href="${REEL_PROMO}">Hasta donde llega el metodo — A1 a C1</a></div>`;
   }
 
   // palabra trampa
@@ -630,7 +644,7 @@ function renderPortal(){
 
   document.getElementById("pwrap").innerHTML=`
     <div class="p-head">
-      <div><div class="p-title">LA MAESTRA VALERIE-AI</div><div class="p-sub">PORTAL · ACCENTBRIDGES · v2.3 VIDEO+TIKTOK</div></div>
+      <div><div class="p-title">LA MAESTRA VALERIE-AI</div><div class="p-sub">PORTAL · ACCENTBRIDGES · v2.5 REELS EXACTOS</div></div>
       <button class="p-close" onclick="closePortal()">✕ CERRAR</button>
     </div>
     <div class="p-greet">${greet}</div>
