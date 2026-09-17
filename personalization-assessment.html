@@ -142,6 +142,7 @@ function renderResults(){
     if(rs.length)sumHtml+=`<b>${titulo} ${em2}:</b> ${rs.map(r=>r.texto).join(" · ")}<br>`;
   }
   const code=answers.map(a=>a.tag).join("|");
+  try{localStorage.setItem("ab_pers_result",JSON.stringify({date:new Date().toISOString(),canal:canal,pers:pers,modo_hugo:modoHugo,arquetipo:nombre,plataforma:plat,code:code}))}catch(e){}
   const shareTxt="🎭 MI EXPEDIENTE HUMANO\n"+em+" "+nombre+"\n"+desc+"\n\n"+sumHtml.replace(/<br>/g,"\n").replace(/<\/?b>/g,"")+"\nPuerta de entrada: "+canalTxt+"\nCódigo para tu coach: "+code+"\n— Personality Assessment · Myl AccentBridges";
   app.innerHTML=`
    <div class="emoji-big">${em}</div>

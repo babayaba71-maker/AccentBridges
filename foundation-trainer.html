@@ -1448,6 +1448,7 @@ function closeCert(e){if(e.target===$("certModal"))hideCert()}
 if(lsGet("eft_theme","")==="dark"){theme="dark";document.documentElement.setAttribute("data-theme","dark");$("themeBtn").textContent="☀️"}
 render();
 if(points()>=100)showCert();
+try{const tParam=new URLSearchParams(location.search).get("tab");if(tParam&&DATA[tParam]){setTab(tParam)}}catch(e){}
 </script>
 </body>
 </html>
