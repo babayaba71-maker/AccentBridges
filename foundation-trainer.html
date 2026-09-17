@@ -356,6 +356,41 @@ const COMBOS=[
  {value:"He is sleeping",phonetic:"Ji is slii-ping",phoneticEs:"ji + is + slii-ping — el niño que se duerme 😴",translation:"Él está durmiendo",emoji:"👦😴"},
  {value:"She is cooking",phonetic:"Chi is ku-king",phoneticEs:"chi + is + ku-king — a la abuela cocinando 👵",translation:"Ella está cocinando",emoji:"👧🍳"}];
 
+/* ===== EL CANTO EN CHUNKS 🎶 (doctrina ABC-kindergarten + pentatónico, JJ 16-sep-2026) ===== */
+const CANTO_CHUNKS=[
+ {letters:"ABCD",ancla:"EI-bi-si-DAI",note:"El arranque del canto — cuatro golpes de voz sueldos."},
+ {letters:"EFG",ancla:"II-ef-YI",note:"Tres letras, un solo swing."},
+ {letters:"HIJK",ancla:"EICH-ai-YEI-KEI",note:"La H es EICH y la J es YEI — las dos que el español no tiene."},
+ {letters:"LMNOP",ancla:"EL-em-en-OU-pi",note:"EL CHUNK LEGENDARIO: 5 letras sueldas en un golpe — los niños gringos cantan tan junto que muchos creen que 'LMNOP' es UNA sola letra 😂. Eso es un chunk: las piezas se funden."},
+ {letters:"QRS",ancla:"KIU-ar-ES",note:"La Q es KIU — igual que en kiu-bo 😎."},
+ {letters:"TUV",ancla:"TI-iu-VI",note:"Cortito y redondo — prepárate para el cierre."},
+ {letters:"WXYZ",ancla:"DÁBLIU-eks-UAI-ZI",note:"El cierre: la W es DÁBLIU, la más larga de todas."}];
+
+const CANTO_REV=[
+ {letters:"ZYXW",ancla:"ZI-UAI-EKS-DÁBLIU",note:"El revés arranca donde el canto termina."},
+ {letters:"VUT",ancla:"VI-iu-TI",note:"Reversa de TUV."},
+ {letters:"SRQ",ancla:"ES-ar-KIU",note:"Reversa de QRS — aquí el cerebro ya no puede pilotear en automático."},
+ {letters:"PONML",ancla:"pi-OU-en-em-EL",note:"La reversa del chunk legendario — 5 letras AL REVÉS."},
+ {letters:"KJIH",ancla:"KEI-YEI-ai-EICH",note:"Reversa de HIJK."},
+ {letters:"GFE",ancla:"yi-ef-II",note:"Reversa de EFG."},
+ {letters:"DCBA",ancla:"DAI-si-bi-EI",note:"La última parada del revés — de vuelta a la A."}];
+
+const CANTO_QUIZ=[
+ {q:"Después de ABCD (EI-bi-si-DAI) viene...",say:"A B C D",correct:"EFG · II-ef-YI",wrong:"QRS · KIU-ar-ES",clue:"El segundo chunk del canto"},
+ {q:"Después de HIJK (EICH-ai-YEI-KEI) viene...",say:"H I J K",correct:"LMNOP · EL-em-en-OU-pi",wrong:"TUV · TI-iu-VI",clue:"El chunk legendario de 5 letras"},
+ {q:"Después de TUV (TI-iu-VI) viene...",say:"T U V",correct:"WXYZ · DÁBLIU-eks-UAI-ZI",wrong:"EFG · II-ef-YI",clue:"El chunk que cierra el canto"},
+ {q:"◀️ Al revés, después de ZYXW (ZI-UAI-EKS-DÁBLIU) viene...",say:"Z Y X W",correct:"VUT · VI-iu-TI",wrong:"PONML · pi-OU-en-em-EL",clue:"Es la reversa del chunk TUV"},
+ {q:"◀️ Al revés, después de SRQ (ES-ar-KIU) viene...",say:"S R Q",correct:"PONML · pi-OU-en-em-EL",wrong:"KJIH · KEI-YEI-ai-EICH",clue:"La reversa del legendario LMNOP"},
+ {q:"◀️ Al revés, después de GFE (yi-ef-II) viene...",say:"G F E",correct:"DCBA · DAI-si-bi-EI",wrong:"VUT · VI-iu-TI",clue:"El chunk que cierra el revés"},
+ {q:"¿Cuál es el chunk MÁS largo del canto?",say:"L M N O P",correct:"LMNOP · 5 letras sueldas",wrong:"WXYZ · 4 letras",clue:"Cinco piezas fundidas en un solo golpe de voz"},
+ {q:"¿Por qué los niños gringos creen que LMNOP es UNA letra?",say:"L M N O P",correct:"Porque el chunk suelda las piezas 😂",wrong:"Porque son cinco vocales",clue:"El chunk es tan fuerte que las partes se funden — como gonna o wanna"},
+ {q:"🎹 ¿How do you spell BOOK? — deletrea en chunks",say:"Book. B, O, O, K.",correct:"B-O-O-K · bi-OU-OU-KEI",wrong:"B-O-K · bi-OU-KEI",clue:"Dos O y la K final cierra la sílaba"},
+ {q:"🎹 ¿How do you spell WATER?",say:"Water. W, A, T, E, R.",correct:"W-A-T-E-R · DÁBLIU-ua-TI-i-ar",wrong:"G-U-A-T-E-R",clue:"El español ve 'gua' — el inglés deletrea W (DÁBLIU)"},
+ {q:"🎹 ¿How do you spell STREET?",say:"Street. S, T, R, E, E, T.",correct:"S-T-R-E-E-T · es-ti-ar-ii-ii-ti",wrong:"E-S-T-R-I-T",clue:"Sin E de contrabando — se deletrea limpio"},
+ {q:"📧 En un email, ¿cómo se dice @?",say:"My email is J J at gmail dot com",correct:"AT · et",wrong:"ARROBA",clue:"El gringo dice AT — arroba se queda en español"},
+ {q:"📧 En un email, ¿cómo se dice el punto (.)?",say:"J J at gmail dot com",correct:"DOT · dat",wrong:"PUNTO",clue:"Se deletrea: YOT dat GMEIL dat COM"}];
+
+
 /* ===== EL SAZÓN PELIGROSO 🌶️ (doctrina sellada 15-sep-2026, el gato con botas) ===== */
 const SAZON=[
  {emoji:"🐱",es_title:"Puss in Boots",say:"Puss in Boots",ancla:"Pus in Buts",sazonada:"Pu-si in Bu-tos",translation:"El Gato con Botas",
@@ -489,10 +524,10 @@ const WARMUP=[
   es_tip:"Quien controla su volumen controla su acento: lo suave entrena la precisión sin lastimar la voz."}
 ];
 
-const DATA={warmup:WARMUP,vowels:VOWELS,sounds:SOUNDS,alphabet:ALPHABET,digraphs:DIGRAPHS,homofonos:HOMOPHONES,sazon:SAZON,numbers:NUMBERS,greetings:GREETINGS,pronouns:PRONOUNS,phrases:PHRASES,verbs:VERBS,combos:COMBOS,melody:MELODIES};
+const DATA={warmup:WARMUP,vowels:VOWELS,sounds:SOUNDS,alphabet:ALPHABET,canto:CANTO_CHUNKS,digraphs:DIGRAPHS,homofonos:HOMOPHONES,sazon:SAZON,numbers:NUMBERS,greetings:GREETINGS,pronouns:PRONOUNS,phrases:PHRASES,verbs:VERBS,combos:COMBOS,melody:MELODIES};
 
 const I18N={
- es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{warmup:" Calienta",vowels:" Vocales",sounds:" Sonidos",alphabet:" Alfabeto",digraphs:" Dígrafos",homofonos:" Homófonos",sazon:" Sazón",numbers:" Números",greetings:" Saludos",pronouns:" Pronombres",phrases:" Frases",verbs:" Verbos",combos:" Combos",melody:" Melodía"},
+ es:{sub:"Para hispanohablantes · Nivel A1",points:"🏆 Puntos",tabs:{warmup:" Calienta",vowels:" Vocales",sounds:" Sonidos",alphabet:" Alfabeto",canto:" Canto",digraphs:" Dígrafos",homofonos:" Homófonos",sazon:" Sazón",numbers:" Números",greetings:" Saludos",pronouns:" Pronombres",phrases:" Frases",verbs:" Verbos",combos:" Combos",melody:" Melodía"},
      say:"DÍLO ASÍ:",listen:"🔊 Escuchar",slow:"🐢 Lento",normal:"🚶 Normal",fast:"🏃 Rápido",
      recTitle:"Graba tu voz",rec:"Grabar",stop:"Detener",play:"Escucharte",
      prev:"Anterior",next:"Siguiente",quizOn:"🧠 Modo Quiz",quizOff:"✖️ Salir del Quiz",
@@ -501,7 +536,7 @@ const I18N={
      qReplay:"🔊 Escuchar otra vez",correct:"¡Correcto! +1 punto 🎉",wrong:"¡Uy! Tu oído acaba de encontrar su gimnasio 💪",
      statement:"Afirmación ↘",question:"Pregunta ↗",certTitle:"Certificado de Logro",
      certSub:"¡Felicitaciones! ¡Has ganado 100 puntos!",certBody:"¡Completaste el Entrenador de Inglés Básico!",certBtn:"Seguir Aprendiendo 🚀"},
- en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{warmup:" Warm-up",vowels:" Vowels",sounds:" Sounds",alphabet:" Alphabet",digraphs:" Digraphs",homofonos:" Homophones",sazon:" Sazón",numbers:" Numbers",greetings:" Greetings",pronouns:" Pronouns",phrases:" Phrases",verbs:" Verbs",combos:" Combos",melody:" Melody"},
+ en:{sub:"For Spanish Speakers · A1 Level",points:"🏆 Points",tabs:{warmup:" Warm-up",vowels:" Vowels",sounds:" Sounds",alphabet:" Alphabet",canto:" Song",digraphs:" Digraphs",homofonos:" Homophones",sazon:" Sazón",numbers:" Numbers",greetings:" Greetings",pronouns:" Pronouns",phrases:" Phrases",verbs:" Verbs",combos:" Combos",melody:" Melody"},
      say:"SAY IT LIKE:",listen:"🔊 Listen",slow:"🐢 Slow",normal:"🚶 Normal",fast:"🏃 Fast",
      recTitle:"Record your voice",rec:"Record",stop:"Stop",play:"Play",
      prev:"Prev",next:"Next",quizOn:"🧠 Quiz Mode",quizOff:"✖️ Exit Quiz",
@@ -630,7 +665,7 @@ function wuFinish(){wuDoneFlags[4]=true;const today=new Date().toISOString().sli
  else{toast("🔥 Rampa completa — boca lista")}}
 
 function renderTabs(){
-  const icons={warmup:"🎤",vowels:"🔤",sounds:"🔊",alphabet:"📖",digraphs:"🔗",homofonos:"👯",sazon:"🌶️",numbers:"🔢",greetings:"👋",pronouns:"🙋",phrases:"💬",verbs:"🏃",combos:"🧩",melody:"🎵"};
+  const icons={warmup:"🎤",vowels:"🔤",sounds:"🔊",alphabet:"📖",canto:"🎶",digraphs:"🔗",homofonos:"👯",sazon:"🌶️",numbers:"🔢",greetings:"👋",pronouns:"🙋",phrases:"💬",verbs:"🏃",combos:"🧩",melody:"🎵"};
   $("tabs").innerHTML=Object.keys(DATA).map(k=>
     `<button class="tab ${k===tab?"active":""}" onclick="setTab('${k}')">${icons[k]}${t().tabs[k]}</button>`).join("");
 }
@@ -661,6 +696,22 @@ function renderCard(){
         <div class="say-phon" style="font-size:22px">${c.example}</div>
       </div>
       <div class="melody-note">💡 ${lang==="es"?c.es_note:c.en_note}</div>`;
+  }else if(tab==="canto"){
+    const cl=cantoDir==="rev"?CANTO_REV:CANTO_CHUNKS;const ch=cl[idx%cl.length];
+    html=`<div style="display:flex;justify-content:center;gap:8px;margin-bottom:6px">
+      <button class="btn btn-secondary" style="opacity:${cantoDir==="fwd"?1:.5}" onclick="cantoDir='fwd';render()">🎶 Adelante</button>
+      <button class="btn btn-secondary" style="opacity:${cantoDir==="rev"?1:.5}" onclick="cantoDir='rev';render()">◀️ Al revés</button>
+    </div>
+    <div class="emoji">🎶</div>
+    <div class="value" style="font-size:34px;letter-spacing:6px">${ch.letters}</div>
+    <div class="translation">🇪🇸 ${ch.ancla}</div>
+    <div style="text-align:center;margin-top:10px">
+      <button class="btn btn-secondary" onclick="speak('${ch.letters.split("").join(" ")}')">▶️ Escuchar</button>
+      <button class="btn btn-secondary" onclick="singCanto()">🎤 Cantar todo</button>
+      ${cantoPlaying?'<button class="btn btn-secondary" onclick="stopCanto()">⏹ Parar</button>':""}
+    </div>
+    <div class="melody-note">💡 ${ch.note}</div>
+    <div class="melody-note" style="margin-top:8px">🧠 ${cantoDir==="rev"?"MODO PENTATÓNICO ◀️ — el canto adelante es MÚSCULO; el revés es CEREBRO: cada letra se recupera de verdad, sin pilotear en automático. Como el músico que practica la escala hacia arriba Y hacia abajo.":"DOCTRINA DEL CHUNK: el inglés se habla en CHUNKS — pedazos sueldos, no letras sueltas. El ABC song es el primer chunk-canto del kindergarten — y el DELETEREO real se hace igual: \u201CHow do you spell your name?\u201D se contesta cantando las letras. Canta todo y luego prueba el revés ◀️"}</div>`;
   }else if(tab==="sazon"){
     html=`<div class="emoji">${c.emoji}</div>
       <div class="value" style="font-size:28px">${c.es_title}</div>
@@ -678,6 +729,17 @@ function renderCard(){
       </div>`:""}
       <div class="melody-note">💡 ${c.doctrina}</div>
       <div class="melody-note" style="margin-top:8px">😼 ${c.orgullo}</div>`;
+  }else if(tab==="canto"){
+    if(!cqQuiz){let r;do{r=Math.floor(Math.random()*CANTO_QUIZ.length)}while(r===cqLast&&CANTO_QUIZ.length>1);cqLast=r;cqQuiz=CANTO_QUIZ[r]}
+    const pair=[cqQuiz.correct,cqQuiz.wrong].sort(()=>Math.random()-.5);
+    z.innerHTML=`
+      <div class="q-title">🎶 ${cqQuiz.q}</div>
+      ${cqQuiz.say?`<button class="btn btn-secondary" style="margin-top:0" onclick="speak(cqQuiz.say)">🔊 Escuchar</button>`:""}
+      <div class="q-opts" style="margin-top:14px">
+        ${pair.map(w=>`<button class="q-opt ${cqPick==="ok"&&w===cqQuiz.correct?"correct":cqPick==="x"&&w===cqPickWord?"wrong":cqPick==="ok"&&w!==cqQuiz.correct?"dim":""}" onclick="cqAnswer('${w}')">${w}</button>`).join("")}
+      </div>
+      <div class="q-feedback" id="cqFb"></div>
+      <button class="q-replay" onclick="nextCantoQ()">🎶 Siguiente →</button>`;
   }else if(tab==="sazon"){
     if(!szQuiz){let r;do{r=Math.floor(Math.random()*SAZON_QUIZ.length)}while(r===szLast&&SAZON_QUIZ.length>1);szLast=r;szQuiz=SAZON_QUIZ[r]}
     const pair=[szQuiz.correct,szQuiz.wrong].sort(()=>Math.random()-.5);
@@ -783,7 +845,8 @@ function renderQuiz(){
 /* ================= ACTIONS ================= */
 let homoQuiz=null,homoPick=null,homoPickWord=null,homoLast=-1;
 let szQuiz=null,szPick=null,szPickWord=null,szLast=-1;
-const setTab=k=>{tab=k;idx=0;quizOn=false;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;homoQuiz=null;homoPick=null;homoPickWord=null;homoLast=-1;szQuiz=null;szPick=null;szPickWord=null;szLast=-1;render()};
+let cantoDir="fwd",cantoPlaying=false,cqQuiz=null,cqPick=null,cqPickWord=null,cqLast=-1;
+const setTab=k=>{tab=k;idx=0;quizOn=false;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;homoQuiz=null;homoPick=null;homoPickWord=null;homoLast=-1;szQuiz=null;szPick=null;szPickWord=null;szLast=-1;cantoPlaying=false;cqQuiz=null;cqPick=null;cqPickWord=null;render()};
 const go=i=>{idx=i;quizPick=null;render()};
 const nav=d=>{idx=(idx+d+list().length)%list().length;quizPick=null;render()};
 const setSpeed=v=>{speed=v;render()};
@@ -791,11 +854,12 @@ const listenCard=()=>speak(card().example||card().value);
 const toggleLang=()=>{lang=lang==="es"?"en":"es";$("langBtn").textContent=lang==="es"?"🇪🇸 ES":"🇺🇸 EN";render()};
 const toggleTheme=()=>{theme=theme==="light"?"dark":"light";document.documentElement.setAttribute("data-theme",theme);$("themeBtn").textContent=theme==="light"?"🌙":"☀️"};
 
-function toggleQuiz(){if(tab==="warmup"){toast("🎤 El calentamiento es práctica libre — sin quiz");return}quizOn=!quizOn;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;homoQuiz=null;homoPick=null;homoPickWord=null;szQuiz=null;szPick=null;szPickWord=null;render();
-  if(quizOn&&tab!=="melody"&&tab!=="homofonos"&&tab!=="sazon"){setTimeout(()=>speak(card().value),250)}
+function toggleQuiz(){if(tab==="warmup"){toast("🎤 El calentamiento es práctica libre — sin quiz");return}quizOn=!quizOn;quizOpts=null;quizPick=null;melQuiz=null;melPick=null;homoQuiz=null;homoPick=null;homoPickWord=null;szQuiz=null;szPick=null;szPickWord=null;cqQuiz=null;cqPick=null;cqPickWord=null;render();
+  if(quizOn&&tab!=="melody"&&tab!=="homofonos"&&tab!=="sazon"&&tab!=="canto"){setTimeout(()=>speak(card().value),250)}
   if(quizOn&&tab==="melody"){setTimeout(()=>speak(melQuiz.text),250)}
   if(quizOn&&tab==="homofonos"){setTimeout(()=>{if(!homoQuiz){renderQuiz()}if(homoQuiz)speak(homoQuiz.say)},250)}
   if(quizOn&&tab==="sazon"){setTimeout(()=>{if(!szQuiz){renderQuiz()}if(szQuiz)speak(szQuiz.say)},250)}
+  if(quizOn&&tab==="canto"){setTimeout(()=>{if(!cqQuiz){renderQuiz()}if(cqQuiz&&cqQuiz.say)speak(cqQuiz.say)},250)}
 }
 
 function buildQuizOpts(){
@@ -834,6 +898,28 @@ function szAnswer(w){
 }
 function nextSazon(){szQuiz=null;szPick=null;szPickWord=null;renderQuiz();
   if(quizOn&&tab==="sazon"){setTimeout(()=>{if(!szQuiz){renderQuiz()}if(szQuiz)speak(szQuiz.say)},250)}}
+
+function singCanto(){
+  stopCanto();cantoPlaying=true;
+  const cl=cantoDir==="rev"?CANTO_REV:CANTO_CHUNKS;
+  function step(i){
+    if(!cantoPlaying)return;
+    if(i>=cl.length){cantoPlaying=false;render();toast("🎶 ¡Canto completo!");return}
+    idx=i;render();
+    const txt=cl[i].letters.split("").join(" ");
+    setTimeout(()=>{if(!cantoPlaying)return;speak(txt,()=>setTimeout(()=>step(i+1),200))},120);
+  }
+  step(0);
+}
+function stopCanto(){cantoPlaying=false;try{window.speechSynthesis.cancel()}catch(e){}render()}
+function cqAnswer(w){
+  if(cqPick!==null)return;
+  cqPickWord=w;
+  if(w===cqQuiz.correct){cqPick="ok";awardPoint(cqQuiz.correct);const fb=$("cqFb");if(fb)fb.innerHTML=`<div class="score-msg" style="color:#10b981">✅ ¡Exacto! ${cqQuiz.clue} · +1 ⭐</div>`}
+  else{cqPick="x";trackError(cqQuiz.correct);const fb=$("cqFb");if(fb)fb.innerHTML=`<div class="score-msg" style="color:#ef4444">❌ Era ${cqQuiz.correct} — ${cqQuiz.clue}</div>`}
+}
+function nextCantoQ(){cqQuiz=null;cqPick=null;cqPickWord=null;renderQuiz();
+  if(quizOn&&tab==="canto"){setTimeout(()=>{if(!cqQuiz){renderQuiz()}if(cqQuiz&&cqQuiz.say)speak(cqQuiz.say)},250)}}
 
 function trackError(word){
   const e=errors();e[word]=(e[word]||0)+1;setErrors(e);
