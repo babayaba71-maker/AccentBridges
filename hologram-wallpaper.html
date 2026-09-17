@@ -591,6 +591,9 @@ function maestraDose(pers,lvl){
   acciones.push({label:"🎙️ Practica conmigo en voz (/call)",url:CALL});
   const vObj=videoOfTab(objetivo.tab);
   if(vObj)acciones.push(vObj);
+  // América: el gimnasio de pares mínimos con micrófono — posicionamiento A2-medio a B1-alto (JJ 17-sep)
+  const best=Math.max(...["ear","eye","mouth"].map(d=>ORDEN[lvl[d]]!==undefined?ORDEN[lvl[d]]:0));
+  if(best>=2)acciones.push({label:"🇺🇸 Ya meritas AMERICA — pares con microfono (A2m a B1a)",url:AMERICA});
   return {titulo:objetivo.t,msg:puerta.msg,acciones:acciones};
 }
 
