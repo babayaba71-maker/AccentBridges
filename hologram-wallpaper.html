@@ -514,7 +514,8 @@ const AR="https://babayaba71-maker.github.io/AccentBridges/ar-labeler.html";
 const CALL="https://valerie.base44.app/functions/valerieCall";
 const TG="https://t.me/+aWV2H9E252QwYTMx"; // grupo AccentBridges (link de invitación, JJ 17-sep)
 const TT="https://www.tiktok.com/@raul.ybarra0";
-const AMERICA="https://speak-native-buddy.lovable.app"; // PronounceAI (app Lovable JJ): minimal pairs con reconocimiento de voz, entonación, grabación, progreso
+const AMERICA="https://speak-native-buddy.lovable.app";
+const PALACE="https://pronunciation-palace.lovable.app"; // PronunLab: trabalenguas con score (evidencia sobrino A-bajo 70-100%), diptongos/trifongos, shadowing, quiz, ranks // PronounceAI (app Lovable JJ): minimal pairs con reconocimiento de voz, entonación, grabación, progreso
 const YT="https://www.youtube.com/@Jacobmendoza5379";
 const ytSearch=q=>YT+"/search?query="+encodeURIComponent(q);
 const PERS_URL="https://babayaba71-maker.github.io/AccentBridges/personalization-assessment.html";
@@ -594,6 +595,9 @@ function maestraDose(pers,lvl){
   // América: el gimnasio de pares mínimos con micrófono — posicionamiento A2-medio a B1-alto (JJ 17-sep)
   const best=Math.max(...["ear","eye","mouth"].map(d=>ORDEN[lvl[d]]!==undefined?ORDEN[lvl[d]]:0));
   if(best>=2)acciones.push({label:"🇺🇸 Ya meritas AMERICA — pares con microfono (A2m a B1a)",url:AMERICA});
+  // Palace: laboratorio B1a a B2b (grade target JJ) — trabalenguas con score, gimnasio lengua+cerebro que funciona desde A-bajo (evidencia sobrino 70-100%)
+  if(best>=3)acciones.push({label:"👑 PALACE te espera — el laboratorio (B1a a B2b)",url:PALACE});
+  if(weak==="mouth")acciones.push({label:"👅 Trabalenguas con score — lengua Y cerebro",url:PALACE});
   return {titulo:objetivo.t,msg:puerta.msg,acciones:acciones};
 }
 
@@ -648,7 +652,7 @@ function renderPortal(){
 
   document.getElementById("pwrap").innerHTML=`
     <div class="p-head">
-      <div><div class="p-title">LA MAESTRA VALERIE-AI</div><div class="p-sub">PORTAL · ACCENTBRIDGES · v2.6 AMERICA ON</div></div>
+      <div><div class="p-title">LA MAESTRA VALERIE-AI</div><div class="p-sub">PORTAL · ACCENTBRIDGES · v2.8 PALACE ON</div></div>
       <button class="p-close" onclick="closePortal()">✕ CERRAR</button>
     </div>
     <div class="p-greet">${greet}</div>
@@ -663,7 +667,7 @@ function renderPortal(){
       <a class="p-btn" href="${YT}">YOUTUBE</a>
       <a class="p-btn" href="${TT}">🎵 TIKTOK</a>
       <a class="p-btn" href="${AMERICA}">🇺🇸 AMERICA — pares y voz</a>
-      <span class="p-btn" disabled>💎 PRO (en camino)</span>
+      <a class="p-btn" href="${PALACE}">👑 PALACE — trabalenguas y lab</a>
     </div>
     ${expHtml}
     <div class="foot">CERO LLM PARA DECIDIR · REGLAS LEGIBLES EN EL ARCHIVO<br>LA MAESTRA EVOLUCIONA CONTIGO — MYL ACCENTBRIDGES 🔥</div>`;
