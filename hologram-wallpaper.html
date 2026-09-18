@@ -685,12 +685,12 @@ function openValerie1(){
     sc.id="bp-inject"; sc.src="https://cdn.botpress.cloud/webchat/v3.6/inject.js";
     sc.onload=function(){
       try{
-        window.Botpress.init({configUrl:V1CFG});
-        setTimeout(function(){try{window.Botpress.open&&window.Botpress.open()}catch(e){}},800);
+        window.botpress.init({configUrl:V1CFG});
+        setTimeout(function(){try{window.botpress.open&&window.botpress.open()}catch(e){}},800);
       }catch(e){alert("Valerie 1 no pudo despertar — intenta de nuevo 🤖")}
     };
     document.body.appendChild(sc);
-  }else{try{window.Botpress.open&&window.Botpress.open()}catch(e){}}
+  }else{try{window.botpress.open&&window.botpress.open()}catch(e){}}
 }
 function openPortal(){const p=document.getElementById("portal");p.classList.add("show");renderPortal()}
 if(location.hash==="#portal"||location.hash==="#maestra"){openPortal()}
