@@ -605,13 +605,26 @@ if (wakeBtn) {
     wakeBtn.disabled = true;
   } else {
     wakeBtn.addEventListener("click", () => {
-      initAudio();
-      wakeArmed = !wakeArmed;
-      if (wakeArmed) { startWakeRecog(); wakeBtn.textContent = "🎙️ ESCUCHANDO…"; }
-      else { stopWakeRecog(); wakeBtn.textContent = "🎙️ ESCUCHAR \"EY VALERIE\""; }
-      controls.classList.remove("show");
+      toggleWakeFromFab();
     });
   }
+}
+
+/* ---- FAB siempre visible de wake word ---- */
+function toggleWakeFromFab() {
+  const fab = document.getElementById("wakefab");
+  const wbtn = document.getElementById("btn-wake");
+  if (!("SpeechRecognition" in window || "webkitSpeechRecognition" in window)) {
+    fab.textContent = "🎙️ NO DISPONIBLE AQUÍ";
+    return;
+  }
+  initAudio();
+  wakeArmed = !wakeArmed;
+  if (wakeArmed) { startWakeRecog(); }
+  else { stopWakeRecog(); }
+  const label = wakeArmed ? "🎙️ ESCUCHANDO…" : "🎙️ EY VALERIE";
+  fab.textContent = label;
+  if (wbtn) wbtn.textContent = wakeArmed ? "🎙️ ESCUCHANDO…" : '🎙️ ESCUCHAR "EY VALERIE"';
 }
 
 /* ---- Saludo hablado de Valerie 1 al despertar ---- */
@@ -832,6 +845,7 @@ function openPortal(){const p=document.getElementById("portal");p.classList.add(
 if(location.hash==="#portal"||location.hash==="#maestra"){openPortal()}
 function closePortal(){document.getElementById("portal").classList.remove("show")}
 </script>
+<button id="wakefab" style="position:fixed;bottom:66px;right:14px;z-index:40;background:rgba(20,10,40,.82);color:#ccfbf1;border:1px solid #2dd4bf;border-radius:999px;padding:10px 16px;font-size:13px;font-weight:700;letter-spacing:.5px;cursor:pointer;backdrop-filter:blur(6px)" onclick="toggleWakeFromFab()">🎙️ EY VALERIE</button>
 <button id="v1fab" style="position:fixed;bottom:14px;right:14px;z-index:40;background:rgba(20,10,40,.82);color:#ffd7ee;border:1px solid #ff4fa3;border-radius:999px;padding:10px 16px;font-size:13px;font-weight:700;letter-spacing:.5px;cursor:pointer;backdrop-filter:blur(6px)" onclick="openValerie1()">🗣️ VALERIE 1</button>
 </body>
 </html>
