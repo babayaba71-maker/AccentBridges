@@ -67,7 +67,7 @@
 </head>
 <body>
 <canvas id="cv"></canvas>
-<img id="valerieFace" src="valerie-face-aura.png" alt="" style="position:fixed;pointer-events:none;opacity:0;transition:opacity 1.6s ease;object-fit:contain;filter:drop-shadow(0 0 40px rgba(45,212,191,.55)) drop-shadow(0 0 90px rgba(45,212,191,.3)) saturate(1.05);z-index:6;">
+<img id="valerieFace" src="valerie-face-aura.png" alt="" style="position:fixed;pointer-events:none;opacity:0;transition:opacity 1.6s ease;object-fit:contain;filter:saturate(1.05) contrast(1.03) brightness(1.02);z-index:6;">
 
 <div id="hud">
   <div id="clock">--:--</div>
@@ -543,6 +543,9 @@ setTimeout(() => { if (state === S.ACTIVE) setState(S.DEMAT); }, 16000);
    ============================================================ */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 let wakeRecog = null, wakeArmed = false, lastWakeAt = 0;
+let wakeStarting = false;       // evita "ya está iniciado" al reintentar muy rápido
+let notAllowedStreak = 0;       // solo desarma tras VARIOS rechazos reales seguidos
+let lastNotAllowedAt = 0;
 const brainEl = document.getElementById("brain");
 const wakeBtn = document.getElementById("btn-wake");
 
@@ -550,6 +553,12 @@ function setBrain(txt, on) {
   if (!brainEl) return;
   brainEl.textContent = txt;
   brainEl.parentElement.className = on ? "on" : "";
+}
+
+function setWakeButtonsText(txt) {
+  if (wakeBtn) wakeBtn.textContent = txt;
+  const fab = document.getElementById("wakefab");
+  if (fab) fab.textContent = txt;
 }
 
 function onWakeHeard() {
@@ -569,32 +578,49 @@ function onWakeHeard() {
 }
 
 function startWakeRecog() {
-  if (!SR) return;
+  if (!SR || wakeStarting) return;
+  wakeStarting = true;
   try {
     wakeRecog = new SR();
     wakeRecog.lang = "es-MX";
     wakeRecog.continuous = true;
     wakeRecog.interimResults = true;
+    wakeRecog.onstart = () => { wakeStarting = false; notAllowedStreak = 0; setBrain("ESCUCHANDO…", true); };
     wakeRecog.onresult = e => {
+      notAllowedStreak = 0;
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const t = e.results[i][0].transcript.toLowerCase();
         if (/valer/.test(t) || /balery|balrry/.test(t)) { onWakeHeard(); break; }
       }
     };
     wakeRecog.onerror = ev => {
+      wakeStarting = false;
       if (ev.error === "not-allowed" || ev.error === "service-not-allowed") {
-        wakeArmed = false; setBrain("MIC BLOQUEADO", false);
-        wakeBtn && (wakeBtn.textContent = "🎙️ ESCUCHAR \"EY VALERIE\"");
+        // El navegador dispara "not-allowed" TAMBIÉN mientras el diálogo de permiso
+        // sigue abierto (antes de que el usuario responda) — eso NO es un rechazo real.
+        // Solo desarmamos si se repite varias veces seguidas en poco tiempo (rechazo de verdad).
+        const now = performance.now();
+        notAllowedStreak = (now - lastNotAllowedAt < 4000) ? notAllowedStreak + 1 : 1;
+        lastNotAllowedAt = now;
+        if (notAllowedStreak >= 3) {
+          wakeArmed = false; setBrain("MIC BLOQUEADO", false);
+          setWakeButtonsText('🎙️ ESCUCHAR "EY VALERIE"');
+          return;
+        }
+        // no fue rechazo confirmado — el bucle de reinicio (onend) lo vuelve a intentar
       }
-      // "no-speech"/"network" son normales — el bucle de reinicio los absorbe
+      // "no-speech"/"network"/"aborted" son normales — el bucle de reinicio los absorbe
     };
-    wakeRecog.onend = () => { if (wakeArmed) { try { wakeRecog.start(); } catch (e) {} } };
+    wakeRecog.onend = () => {
+      wakeStarting = false;
+      if (wakeArmed) setTimeout(() => { if (wakeArmed) startWakeRecog(); }, 300);
+    };
     wakeRecog.start();
-    setBrain("ESCUCHANDO…", true);
-  } catch (e) { wakeArmed = false; }
+  } catch (e) { wakeStarting = false; }
 }
 
 function stopWakeRecog() {
+  notAllowedStreak = 0;
   if (wakeRecog) { try { wakeRecog.onend = null; wakeRecog.stop(); } catch (e) {} wakeRecog = null; }
   setBrain("STANDBY", false);
 }
@@ -625,6 +651,12 @@ function toggleWakeFromFab() {
   const label = wakeArmed ? "🎙️ ESCUCHANDO…" : "🎙️ EY VALERIE";
   fab.textContent = label;
   if (wbtn) wbtn.textContent = wakeArmed ? "🎙️ ESCUCHANDO…" : '🎙️ ESCUCHAR "EY VALERIE"';
+}
+
+/* ---- Arnés de QA temporal: ?debugwake=1 dispara el wake sin voz real
+   (para verificar visualmente el reveal de la foto sin depender del mic) ---- */
+if (new URLSearchParams(location.search).has("debugwake")) {
+  setTimeout(() => { wakeArmed = true; setBrain("ESCUCHANDO…", true); onWakeHeard(); }, 1200);
 }
 
 /* ---- Saludo hablado de Valerie 1 al despertar ---- */
@@ -804,7 +836,7 @@ function renderPortal(){
 
   document.getElementById("pwrap").innerHTML=`
     <div class="p-head">
-      <div><div class="p-title">LA MAESTRA VALERIE-AI</div><div class="p-sub">PORTAL · ACCENTBRIDGES · v3.2 EY VALERIE WAKE WORD ON</div></div>
+      <div><div class="p-title">LA MAESTRA VALERIE-AI</div><div class="p-sub">PORTAL · ACCENTBRIDGES · v3.2.2 WAKE FIX + AURA LIMPIA</div></div>
       <button class="p-close" onclick="closePortal()">✕ CERRAR</button>
     </div>
     <div class="p-greet">${greet}</div>
