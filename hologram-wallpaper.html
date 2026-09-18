@@ -67,6 +67,7 @@
 </head>
 <body>
 <canvas id="cv"></canvas>
+<img id="valerieFace" src="valerie-face-aura.png" alt="" style="position:fixed;pointer-events:none;opacity:0;transition:opacity 1.6s ease;object-fit:contain;filter:drop-shadow(0 0 40px rgba(45,212,191,.55)) drop-shadow(0 0 90px rgba(45,212,191,.3)) saturate(1.05);z-index:6;">
 
 <div id="hud">
   <div id="clock">--:--</div>
@@ -90,6 +91,7 @@
   <button class="ctl gold" onclick="window.open('https://babayaba71-maker.github.io/AccentBridges/ar-labeler.html','_blank')">🔭 AR LABELER</button>
   <button class="ctl gold" onclick="window.open('https://valerie.base44.app/functions/valerieCall','_blank')">🎙️ /CALL</button>
   <button class="ctl" id="btn-snd">🔊 SONIDO</button>
+  <button class="ctl gold" id="btn-wake">🎙️ ESCUCHAR "EY VALERIE"</button>
   <button class="ctl gold" onclick="openPortal()">🚪 PORTAL DE LA MAESTRA</button>
 </div>
 
@@ -108,6 +110,22 @@ function resize() {
   cv.width = W * DPR; cv.height = H * DPR;
   cv.style.width = W + "px"; cv.style.height = H + "px";
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  updateFaceBox();
+}
+/* Alinea el retrato de Valerie con la misma caja donde converge la silueta
+   de partículas (SIL space 300x470) — así el aura de partículas y la foto
+   real materializan en el mismo lugar exacto. */
+function updateFaceBox() {
+  const faceEl = document.getElementById("valerieFace");
+  if (!faceEl) return;
+  const o = { x: W / 2, y: H / 2 };
+  const silScale = Math.min(W / 340, H / 530) * 0.95;
+  const silOffX = o.x - 150 * silScale;
+  const silOffY = o.y - 235 * silScale;
+  faceEl.style.left = silOffX + "px";
+  faceEl.style.top = (silOffY - 18 * silScale) + "px";
+  faceEl.style.width = (300 * silScale) + "px";
+  faceEl.style.height = (470 * silScale) + "px";
 }
 window.addEventListener("resize", resize);
 resize();
@@ -175,11 +193,20 @@ const stateEl = document.getElementById("state-label");
 function setState(s) {
   state = s; stateT = 0;
   if (s === S.MAT) matSound();
-  if (s === S.DEMAT) dematSound();
+  if (s === S.DEMAT) { dematSound(); hideFace(); }
   stateEl.textContent = s === S.PASSIVE ? "● PRESENCIA PASIVA"
     : s === S.MAT ? "◉ MATERIALIZANDO…"
     : s === S.ACTIVE ? "★ VALERIE PRESENTE"
     : "◌ DESVANECIENDO…";
+}
+let pendingWakeGreeting = false;
+function revealFace() {
+  const el = document.getElementById("valerieFace");
+  if (el) { updateFaceBox(); el.style.opacity = "1"; }
+}
+function hideFace() {
+  const el = document.getElementById("valerieFace");
+  if (el) el.style.opacity = "0";
 }
 
 /* ---- Loop ---- */
@@ -283,8 +310,11 @@ function frame(now) {
   }
 
   // flash al completar materialización
-  if (state === S.MAT && stateT >= 3) setState(S.ACTIVE);
-  if (state === S.DEMAT && stateT >= 2.5) setState(S.PASSIVE);
+  if (state === S.MAT && stateT >= 3) {
+    setState(S.ACTIVE);
+    if (pendingWakeGreeting) { pendingWakeGreeting = false; revealFace(); speakWakeGreeting(); }
+  }
+  if (state === S.DEMAT && stateT >= 2.5) { setState(S.PASSIVE); hideFace(); }
 
   requestAnimationFrame(frame);
 }
@@ -497,6 +527,112 @@ document.getElementById("btn-snd").addEventListener("click", () => {
 /* ---- Auto-materialización de bienvenida (4s después de abrir) ---- */
 setTimeout(() => { if (state === S.PASSIVE) setState(S.MAT); }, 4000);
 setTimeout(() => { if (state === S.ACTIVE) setState(S.DEMAT); }, 16000);
+
+/* ============================================================
+   WAKE WORD — "Ey, Valerie" (18-sep-2026, pedido JJ "Seeley")
+   Web Speech API (SpeechRecognition). Escucha en bucle; al oír
+   "valer..." (valerie/valery/valeria — tolerante a acento):
+     1) materializa el orbe → revela la FOTO REAL con aura holográfica
+     2) Valerie 1 se presenta por voz (SpeechSynthesis)
+     3) abre su webchat para continuar la conversación
+   LÍMITE HONESTO: solo funciona con la página/PWA ABIERTA y en
+   PRIMER PLANO (pantalla encendida) — el navegador no deja
+   micrófono activo con la app en segundo plano o pantalla apagada.
+   Requiere un toque inicial en "🎙️ ESCUCHAR" para pedir permiso
+   de micrófono (regla del navegador, no se puede saltar).
+   ============================================================ */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let wakeRecog = null, wakeArmed = false, lastWakeAt = 0;
+const brainEl = document.getElementById("brain");
+const wakeBtn = document.getElementById("btn-wake");
+
+function setBrain(txt, on) {
+  if (!brainEl) return;
+  brainEl.textContent = txt;
+  brainEl.parentElement.className = on ? "on" : "";
+}
+
+function onWakeHeard() {
+  const now = performance.now();
+  if (now - lastWakeAt < 8000) return; // cooldown anti-repetición
+  lastWakeAt = now;
+  setBrain("¡DESPERTÉ!", true);
+  blip();
+  if (state === S.PASSIVE) {
+    pendingWakeGreeting = true;
+    setState(S.MAT);
+  } else if (state === S.ACTIVE) {
+    // ya materializada — solo repite el saludo/abre el chat
+    speakWakeGreeting();
+  }
+  setTimeout(() => { if (wakeArmed) setBrain("ESCUCHANDO…", true); }, 2500);
+}
+
+function startWakeRecog() {
+  if (!SR) return;
+  try {
+    wakeRecog = new SR();
+    wakeRecog.lang = "es-MX";
+    wakeRecog.continuous = true;
+    wakeRecog.interimResults = true;
+    wakeRecog.onresult = e => {
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript.toLowerCase();
+        if (/valer/.test(t) || /balery|balrry/.test(t)) { onWakeHeard(); break; }
+      }
+    };
+    wakeRecog.onerror = ev => {
+      if (ev.error === "not-allowed" || ev.error === "service-not-allowed") {
+        wakeArmed = false; setBrain("MIC BLOQUEADO", false);
+        wakeBtn && (wakeBtn.textContent = "🎙️ ESCUCHAR \"EY VALERIE\"");
+      }
+      // "no-speech"/"network" son normales — el bucle de reinicio los absorbe
+    };
+    wakeRecog.onend = () => { if (wakeArmed) { try { wakeRecog.start(); } catch (e) {} } };
+    wakeRecog.start();
+    setBrain("ESCUCHANDO…", true);
+  } catch (e) { wakeArmed = false; }
+}
+
+function stopWakeRecog() {
+  if (wakeRecog) { try { wakeRecog.onend = null; wakeRecog.stop(); } catch (e) {} wakeRecog = null; }
+  setBrain("STANDBY", false);
+}
+
+if (wakeBtn) {
+  if (!SR) {
+    wakeBtn.textContent = "🎙️ NO DISPONIBLE EN ESTE NAVEGADOR";
+    wakeBtn.disabled = true;
+  } else {
+    wakeBtn.addEventListener("click", () => {
+      initAudio();
+      wakeArmed = !wakeArmed;
+      if (wakeArmed) { startWakeRecog(); wakeBtn.textContent = "🎙️ ESCUCHANDO…"; }
+      else { stopWakeRecog(); wakeBtn.textContent = "🎙️ ESCUCHAR \"EY VALERIE\""; }
+      controls.classList.remove("show");
+    });
+  }
+}
+
+/* ---- Saludo hablado de Valerie 1 al despertar ---- */
+let voicesCache = [];
+function loadVoices() { voicesCache = speechSynthesis.getVoices(); }
+loadVoices();
+if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = loadVoices;
+
+function speakWakeGreeting() {
+  if (!("speechSynthesis" in window)) { openValerie1(); return; }
+  try {
+    const u = new SpeechSynthesisUtterance('Ey, ¿cómo puedo ayudarte? Soy Valerie 1, y hoy voy a estar asistiéndote.');
+    u.lang = "es-MX"; u.rate = 0.98; u.pitch = 1.05;
+    const v = voicesCache.find(v => /^es/i.test(v.lang) && /female|mujer|helena|paulina|mónica|monica/i.test(v.name))
+           || voicesCache.find(v => /^es/i.test(v.lang));
+    if (v) u.voice = v;
+    u.onend = () => setTimeout(openValerie1, 350);
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  } catch (e) { openValerie1(); }
+}
 </script>
 
 <div id="portal"><div class="p-wrap" id="pwrap"></div></div>
@@ -655,7 +791,7 @@ function renderPortal(){
 
   document.getElementById("pwrap").innerHTML=`
     <div class="p-head">
-      <div><div class="p-title">LA MAESTRA VALERIE-AI</div><div class="p-sub">PORTAL · ACCENTBRIDGES · v3.1 VALERIE 1 PRESENTADORA ON</div></div>
+      <div><div class="p-title">LA MAESTRA VALERIE-AI</div><div class="p-sub">PORTAL · ACCENTBRIDGES · v3.2 EY VALERIE WAKE WORD ON</div></div>
       <button class="p-close" onclick="closePortal()">✕ CERRAR</button>
     </div>
     <div class="p-greet">${greet}</div>
