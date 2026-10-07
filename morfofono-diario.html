@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Morfofono Diario — organizador A0-bajo</title>
+<meta name="description" content="Organizador diario del método de alfabetización A0-bajo: oído primero, morfología después, letra al final. Seis capas con compuertas, ficha diaria y ruta de 12 semanas." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#f3efe6; --surface:#faf7f0; --surface-2:#ebe4d6; --ink:#1c1915;
+  --muted:#6b6458; --faint:#8c8376; --accent:#3d5a73; --accent-fg:#faf7f0;
+  --accent-soft:#dfe6ec; --border:#ddd4c4; --good:#3d5c45; --warn:#8a5a32; --bad:#8a3a32;
+  --shadow:0 0 0 1px rgba(28,25,21,.06),0 1px 2px -1px rgba(28,25,21,.06),0 2px 4px 0 rgba(28,25,21,.04);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Source Sans 3",system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:"Newsreader",Palatino,serif;letter-spacing:-.03em;line-height:1.15;font-weight:500;margin:0}
+p{margin:0}
+button{font:inherit;cursor:pointer}
+input[type=text],textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--border);border-radius:.5rem;padding:.5rem .65rem;width:100%}
+.wrap{max-width:44rem;margin:0 auto;padding:1rem 1rem 6rem}
+header.top{padding:.5rem 0 1.25rem}
+header.top b{font-family:"Newsreader",serif;font-size:1.6rem;font-weight:500;display:block}
+header.top span{font-size:.78rem;color:var(--muted)}
+.doctrine{background:var(--accent-soft);border-radius:.7rem;padding:.7rem .9rem;font-size:.85rem;color:var(--accent);margin:.9rem 0}
+.doctrine b{font-weight:600}
+.card{background:var(--surface);border-radius:.8rem;box-shadow:var(--shadow);padding:1rem;margin:.75rem 0}
+.cap{display:flex;gap:.85rem;align-items:flex-start}
+.cap .n{flex-shrink:0;width:2.3rem;height:2.3rem;border-radius:99px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:.95rem}
+.cap.ok .n{background:var(--good);color:var(--surface)}
+.cap h3{font-size:1.05rem}
+.cap .min{font-size:.72rem;color:var(--faint);font-weight:500;letter-spacing:.02em;text-transform:uppercase}
+.cap .what{font-size:.9rem;color:var(--muted);margin-top:.15rem}
+.cap .gate{font-size:.8rem;color:var(--good);margin-top:.4rem;font-weight:500}
+.cap .gate i{font-style:normal;background:var(--good);color:var(--surface);border-radius:.35rem;padding:.05rem .4rem;margin-right:.35rem;font-size:.72rem}
+.cap .fail{color:var(--bad)}
+.field{margin-top:.6rem}
+.field label{display:block;font-size:.75rem;color:var(--faint);margin-bottom:.25rem;font-weight:500;text-transform:uppercase;letter-spacing:.03em}
+.chk{display:flex;align-items:center;gap:.55rem;margin-top:.6rem;font-size:.88rem;cursor:pointer;user-select:none}
+.chk input{width:1.05rem;height:1.05rem;accent-color:var(--good)}
+.pares{display:flex;align-items:center;gap:.7rem;margin-top:.6rem}
+.pares input[type=range]{flex:1;accent-color:var(--accent)}
+.pares output{min-width:3.2rem;text-align:center;font-weight:600;background:var(--surface-2);border-radius:.4rem;padding:.2rem .3rem}
+select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--border);border-radius:.5rem;padding:.5rem .65rem;width:100%}
+.verdict{border-radius:.8rem;padding:1rem;margin:.9rem 0;font-size:.92rem}
+.verdict b{display:block;margin-bottom:.25rem}
+.verdict.go{background:#e3ead9;color:var(--good);box-shadow:var(--shadow)}
+.verdict.stay{background:#f0e4d3;color:var(--warn);box-shadow:var(--shadow)}
+.verdict.fix{background:#efded7;color:var(--bad);box-shadow:var(--shadow)}
+.actions{display:flex;gap:.6rem;flex-wrap:wrap;margin:1rem 0}
+.btn{border:0;border-radius:.6rem;padding:.65rem 1rem;font-weight:600;background:var(--accent);color:var(--accent-fg)}
+.btn.ghost{background:var(--surface-2);color:var(--ink)}
+.btn.small{padding:.4rem .7rem;font-size:.85rem}
+h2.sec{margin:1.6rem 0 .4rem;font-size:1.25rem}
+.sub{color:var(--muted);font-size:.85rem;margin-bottom:.6rem}
+.week{cursor:default}
+.week .wk{font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.week h3{margin:.2rem 0}
+.week .ex{font-size:.85rem;color:var(--muted)}
+.week .out{font-size:.85rem;color:var(--good);margin-top:.35rem;font-weight:500}
+.week .no{font-size:.85rem;color:var(--warn);margin-top:.2rem}
+.week.cur{outline:2px solid var(--accent)}
+.ficha{background:var(--surface);border-radius:.7rem;box-shadow:var(--shadow);padding:.8rem .9rem;margin:.55rem 0;font-size:.85rem}
+.ficha code{font-family:"Source Sans 3",monospace;font-size:.78rem;background:var(--surface-2);border-radius:.4rem;padding:.55rem .6rem;display:block;margin-top:.45rem;white-space:pre-wrap;word-break:break-word}
+.ficha .meta{display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.ficha .del{border:0;background:none;color:var(--faint);font-size:.75rem;text-decoration:underline;padding:0}
+.chips{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.6rem}
+.chip{border:1px solid var(--border);background:var(--surface-2);border-radius:99px;padding:.3rem .75rem;font-size:.82rem;cursor:pointer;user-select:none;display:flex;align-items:center;gap:.45rem}
+.chip b{font-weight:600}
+.chip .st{font-size:.68rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;border-radius:.3rem;padding:.05rem .35rem;background:var(--surface);color:var(--muted)}
+.chip .st.s2{background:#f0e4d3;color:var(--warn)}
+.chip .st.s3{background:#e3ead9;color:var(--good)}
+.chip .st.s4{background:#efded7;color:var(--bad)}
+nav.bottom{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:5}
+nav.bottom button{flex:1;border:0;background:none;padding:.65rem .25rem .8rem;font-size:.72rem;font-weight:600;color:var(--muted)}
+nav.bottom button.on{color:var(--accent)}
+nav.bottom button span{display:block;font-size:1.1rem;font-weight:500}
+.view{display:none}
+.view.on{display:block}
+.note{font-size:.78rem;color:var(--faint);margin-top:.5rem}
+@media print{nav.bottom{display:none}.view{display:block!important}.card{box-shadow:none;border:1px solid var(--border)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <b>Morfofono Diario</b>
+    <span id="today">—</span>
+  </header>
+
+  <!-- ============ HOY ============ -->
+  <section class="view on" id="v-hoy">
+    <div class="doctrine"><b>Regla de la casa:</b> una sesión no abre más de un sonido nuevo o un morfema nuevo. Si una capa falla, no se pasa a la siguiente.</div>
+
+    <div class="card">
+      <div class="field">
+        <label for="weekSel">Ítem de la ruta de hoy</label>
+        <select id="weekSel"></select>
+      </div>
+      <p class="note" id="weekHint"></p>
+    </div>
+
+    <div id="capas"></div>
+
+    <div class="verdict" id="verdict" hidden></div>
+
+    <div class="actions">
+      <button class="btn" id="save">Marcar el día como hecho</button>
+      <button class="btn ghost" id="reset">Limpiar sesión</button>
+    </div>
+    <p class="note">Sesión presencial: 25–35 min (0–4 oído · 4–9 boca · 9–17 letra · 17–25 forma · 25–32 frase · 32–35 registro). Dosis en casa: 8–12 min con las capas de repaso. Si hay fatiga, se corta en la capa que ya falló. No se compensa con listas de palabras.</p>
+    <p class="note">No entra todavía: tablas de tiempos, phrasal verbs, ortografía irregular (enough, though), traducción frase a frase, ni gramática con metalenguaje. Conocer <i>hello</i> de oído no cuenta como lectura.</p>
+  </section>
+
+  <!-- ============ RUTA ============ -->
+  <section class="view" id="v-ruta">
+    <h2 class="sec">Ruta de 12 semanas</h2>
+    <p class="sub">Las semanas 1 a 4 son solo fonología. El morfema aparece cuando la base ya se puede leer. De semana se cambia solo con al menos 5 días hechos y promedio de pares de 8 o más.</p>
+    <div id="ruta"></div>
+  </section>
+
+  <!-- ============ FICHAS ============ -->
+  <section class="view" id="v-fichas">
+    <h2 class="sec">Fichas</h2>
+    <p class="sub">Una línea por día. Las celdas de decisión son pares y error; lo demás es contexto.</p>
+    <div class="actions">
+      <button class="btn ghost small" id="copyAll">Copiar todas</button>
+      <button class="btn ghost small" id="exportBtn">Exportar JSON</button>
+      <button class="btn ghost small" id="importBtn">Importar JSON</button>
+      <button class="btn ghost small" id="wipe">Borrar todo</button>
+    </div>
+    <input type="file" id="importFile" accept=".json" hidden />
+    <div id="fichas"></div>
+  </section>
+
+  <!-- ============ BANCOS ============ -->
+  <section class="view" id="v-bancos">
+    <h2 class="sec">Sonidos trampa desde el español</h2>
+    <p class="sub">Toca el estado para cambiarlo: nuevo → repaso → estable → falla.</p>
+    <div class="chips" id="bankSounds"></div>
+    <h2 class="sec">Morfemas, en este orden y no antes</h2>
+    <p class="sub">-er aquí es «el que hace», no el comparativo.</p>
+    <div class="chips" id="bankMorph"></div>
+  </section>
+</div>
+
+<nav class="bottom">
+  <button data-v="v-hoy" class="on"><span>◐</span>HOY</button>
+  <button data-v="v-ruta"><span>→</span>RUTA</button>
+  <button data-v="v-fichas"><span>▤</span>FICHAS</button>
+  <button data-v="v-bancos"><span>◈</span>BANCOS</button>
+</nav>
+
+<script>
+(function(){
+"use strict";
+var KEY="morfofono-diario-v1";
+var STATES=["nuevo","repaso","estable","falla"];
+
+var ROUTE=[
+ {w:1, foco:"Vocales compartidas y m, n, s, t, p", ex:"mat, sat, pin, nap, sit", out:"8 palabras CVC nuevas", no:"No avanzar si la vocal sale como en español.", s:"Vocales compartidas", g:"m · n · s · t · p", m:"—"},
+ {w:2, foco:"o corta, e corta, c/k, d, g, f, b", ex:"dog, bed, cap, fin, bag", out:"Segmentar 3 sonidos en orden", no:"No avanzar si no segmenta en orden.", s:"o y e cortas", g:"c/k · d · g · f · b", m:"—"},
+ {w:3, foco:"Contrastes que el español junta", ex:"ship/sheep, cat/cut", out:"8 de 10 en pares", no:"No avanzar si adivina por contexto.", s:"ship vs sheep", g:"i corta vs ee", m:"—"},
+ {w:4, foco:"th, sh, ch, h, v (no b)", ex:"thin, ship, chat, hat, van", out:"th y v aislados", no:"Trampa típica: th como t o s, v como b.", s:"th y v", g:"th · sh · ch · h · v", m:"—"},
+ {w:5, foco:"w, r inglesa, ng + PRIMER morfema", ex:"cats, lips (plural -s /s/)", out:"Se oye la -s final", no:"No avanzar si no se oye la -s final.", s:"w · r · ng", g:"w · r · ng", m:"-s plural /s/"},
+ {w:6, foco:"Grupos st, bl, cl, tr + -s sonora", ex:"dogs, beds (-s /z/)", out:"Leer st sin «e» inicial", no:"No avanzar si lee «estop».", s:"Grupos iniciales", g:"st · bl · cl · tr", m:"-s sonora /z/"},
+ {w:7, foco:"Finales nd, nt, mp + -ing", ex:"sitting, jumping", out:"Separar sit + ing", no:"No avanzar si traga la consonante final.", s:"Grupos finales", g:"nd · nt · mp", m:"-ing"},
+ {w:8, foco:"-ed no siempre se lee «ed»", ex:"walked /t/, played /d/", out:"Dos alomorfos dominados", no:"No avanzar si lee «wa-ked».", s:"-ed /t/ y /d/", g:"-ed", m:"-ed /t/, /d/"},
+ {w:9, foco:"wanted /ɪd/ y -es /ɪz/", ex:"wanted, boxes, buses", out:"Tres alomorfos, no un solo patrón", no:"No avanzar si -ed siempre suena igual.", s:"-ed /ɪd/ · -es /ɪz/", g:"-es", m:"-ed /ɪd/, -es /ɪz/"},
+ {w:10, foco:"un- y -er", ex:"unhappy, unlock, teacher, player", out:"-er = «el que hace»", no:"-er aquí NO es el comparativo.", s:"un- y -er", g:"un- · -er", m:"un-, -er"},
+ {w:11, foco:"Una familia entera", ex:"play, plays, played, playing, player", out:"Armar 4 formas desde la base", no:"No avanzar si solo lee la base.", s:"Familia de una base", g:"base + morfemas", m:"familia"},
+ {w:12, foco:"Frases decodificables", ex:"The cat is sitting on the bed.", out:"4 frases en voz alta, sin adivinar", no:"No avanzar si adivina por la primera letra.", s:"Frases", g:"todas", m:"todas"}
+];
+
+var CAPS=[
+ {n:1, t:"Oído", min:"0–4 min", what:"10 pares mínimos. El alumno señala, no traduce.", gate:"8 de 10 sin mirar la letra", kind:"pares"},
+ {n:2, t:"Boca", min:"4–9 min", what:"Un gesto: th con la lengua entre los dientes, v con el labio, vocal corta.", gate:"Repite el sonido aislado 5 veces", kind:"chk", key:"boca"},
+ {n:3, t:"Letra", min:"9–17 min", what:"Un grafema estable. Que lo lea en 4 palabras nuevas.", gate:"Lee el grafema sin adivinar por la primera letra", kind:"chk", key:"letra"},
+ {n:4, t:"Forma", min:"17–25 min · desde la semana 5", what:"Una parte: -s, -ed, -ing, un-, -er. Separa base + parte y dice qué cambió.", gate:"Separa base + parte", kind:"chk", key:"forma"},
+ {n:5, t:"Uso", min:"25–32 min", what:"Una frase armada solo con piezas ya leídas.", gate:"La lee sin adivinar por la primera letra", kind:"chk", key:"uso"},
+ {n:6, t:"Registro", min:"32–35 min", what:"El error que se repitió, no el acierto.", gate:"El día queda marcado como hecho", kind:"err"}
+];
+
+var TRAPS=["i corta vs ee","a de cat","u de cut","th sordo","th sonoro","sh","v","h","w","r inglesa","ng"];
+var MORPHS=["-s /s/","-s /z/","-ing","-ed /t/","-ed /d/","-ed /ɪd/","-es /ɪz/","un-","-er (el que hace)","familia de una base"];
+
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
+function saveState(){ localStorage.setItem(KEY, JSON.stringify(S)); }
+var S=load();
+S.days=S.days||[]; S.banks=S.banks||{sounds:{},morph:{}};
+
+var $=function(id){ return document.getElementById(id); };
+function el(tag,cls,html){ var e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e; }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
+
+/* ---------- HOY ---------- */
+var sel=$("weekSel");
+ROUTE.forEach(function(r){ var o=document.createElement("option"); o.value=r.w; o.textContent="Semana "+r.w+" · "+r.foco; sel.appendChild(o); });
+if(S.lastWeek) sel.value=S.lastWeek;
+
+function currentRoute(){ return ROUTE[(parseInt(sel.value,10)||1)-1]; }
+
+var capasBox=$("capas");
+CAPS.forEach(function(c){
+  var card=el("div","card");
+  var cap=el("div","cap"); cap.id="cap"+c.n;
+  cap.appendChild(el("div","n",c.n));
+  var body=el("div");
+  body.appendChild(el("div",null,"<span class=\"min\">"+c.min+"</span> <h3>"+c.t+"</h3>"));
+  body.appendChild(el("p","what",c.what));
+  body.appendChild(el("div","gate","<i>"+(c.n===6?"REGISTRO":"COMPUERTA")+"</i>"+esc(c.gate)));
+  if(c.kind==="pares"){
+    body.appendChild(el("div","pares","<label for=\"pares\">Pares correctos de 10</label><input type=\"range\" id=\"pares\" min=\"0\" max=\"10\" value=\"0\" oninput=\"this.nextElementSibling.textContent=this.value+'/10'\"><output>0/10</output>"));
+  } else if(c.kind==="chk"){
+    var f=el("div","field");
+    f.innerHTML="<label class=\"chk\"><input type=\"checkbox\" id=\"chk-"+c.key+"\"> Logrado</label>";
+    body.appendChild(f);
+  } else if(c.kind==="err"){
+    body.appendChild(el("div","field","<label for=\"errIn\">Error que se repitió</label><input type=\"text\" id=\"errIn\" placeholder=\"se come la -s final…\">"));
+    body.appendChild(el("div","field","<label for=\"notaIn\">Nota de una línea</label><input type=\"text\" id=\"notaIn\" placeholder=\"mañana repetir -s, no abrir -ing\">"));
+  }
+  cap.appendChild(body);
+  card.appendChild(cap);
+  capasBox.appendChild(card);
+});
+
+function addField(cardIdx,label,id,ph){
+  var f=el("div","field");
+  f.innerHTML="<label for=\""+id+"\">"+label+"</label><input type=\"text\" id=\""+id+"\" placeholder=\""+ph+"\">";
+  capasBox.children[cardIdx].appendChild(f);
+}
+addField(2,"Palabras nuevas leídas","wordsIn","cats, lips, maps");
+addField(4,"Frase del día","fraseIn","The cat is sitting on the bed.");
+
+function refreshCaps(){
+  var r=currentRoute();
+  // prefill letra/forma context via weekHint + placeholders
+  $("weekHint").innerHTML="<b>Semana "+r.w+":</b> "+esc(r.foco)+" — "+esc(r.ex)+". Meta: "+esc(r.out)+". "+esc(r.no);
+  var forma=document.getElementById("chk-forma");
+  forma.parentElement.parentElement.parentElement.style.opacity = r.w>=5 ? "1" : ".45";
+  $("verdict").hidden=false; renderVerdict();
+}
+sel.addEventListener("change",function(){ S.lastWeek=parseInt(sel.value,10); saveState(); refreshCaps(); });
+
+function paresVal(){ return parseInt(document.getElementById("pares").value,10)||0; }
+function chkVal(k){ return document.getElementById("chk-"+k).checked; }
+
+function renderVerdict(){
+  var v=$("verdict"), p=paresVal(), r=currentRoute();
+  var boca=chkVal("boca"), letra=chkVal("letra");
+  var cls,txt;
+  if(p>=8 && boca && letra){
+    cls="go"; txt="<b>Mañana: siguiente ítem de la ruta.</b> Pares "+p+"/10 y boca estable. Cerrar forma y uso si quedaron pendientes antes de avanzar.";
+  } else if(p>=8){
+    cls="fix"; txt="<b>Pares "+p+"/10, pero hay capa sin cerrar.</b> Mañana: mismo ítem, cerrar la capa que falta (boca/letra). Cero morfema nuevo.";
+  } else {
+    cls="stay"; txt="<b>Mañana: MISMO sonido con otras palabras. Cero morfema nuevo.</b> Pares "+p+"/10 — el oído todavía no es dueño del sonido. No se compensa con listas.";
+  }
+  v.className="verdict "+cls; v.innerHTML=txt+" <span class=\"note\">"+ (r.w<5?"Forma se abre desde la semana 5; antes, más letra.":"") +"</span>";
+}
+capasBox.addEventListener("input",renderVerdict);
+capasBox.addEventListener("change",renderVerdict);
+
+$("save").addEventListener("click",function(){
+  var r=currentRoute();
+  var d={
+    date:new Date().toISOString().slice(0,10),
+    week:r.w, sonido:r.s, grafema:r.g, morfema:r.m,
+    words:document.getElementById("wordsIn").value.trim(),
+    frase:document.getElementById("fraseIn").value.trim(),
+    pares:paresVal(),
+    boca:chkVal("boca"), letra:chkVal("letra"), forma:chkVal("forma"), uso:chkVal("uso"),
+    err:document.getElementById("errIn").value.trim(),
+    nota:document.getElementById("notaIn").value.trim(),
+    done:true
+  };
+  S.days.push(d); saveState();
+  renderFichas();
+  document.querySelector("nav.bottom button[data-v=v-fichas]").click();
+});
+$("reset").addEventListener("click",function(){
+  document.getElementById("pares").value=0; document.querySelector(".pares output").textContent="0/10";
+  ["boca","letra","forma","uso"].forEach(function(k){ document.getElementById("chk-"+k).checked=false; });
+  ["wordsIn","fraseIn","errIn","notaIn"].forEach(function(i){ document.getElementById(i).value=""; });
+  renderVerdict();
+});
+
+/* ---------- RUTA ---------- */
+var rutaBox=$("ruta");
+ROUTE.forEach(function(r){
+  var c=el("div","card week");
+  c.id="week-"+r.w;
+  c.innerHTML="<span class=\"wk\">Semana "+r.w+"</span><h3>"+esc(r.foco)+"</h3><p class=\"ex\">Palabras: <i>"+esc(r.ex)+"</i></p><p class=\"out\">Salida: "+esc(r.out)+"</p><p class=\"no\">"+esc(r.no)+"</p>";
+  rutaBox.appendChild(c);
+});
+
+/* ---------- FICHAS ---------- */
+function fichaLine(d){
+  return d.date+" · "+d.week+" · "+d.sonido+" · "+d.grafema+" · "+d.morfema+" · "+(d.words||"—")+" · "+d.pares+"/10 · "+(d.err||"—")+" · sí · "+(d.nota||"—");
+}
+function renderFichas(){
+  var box=$("fichas"); box.innerHTML="";
+  if(!S.days.length){ box.appendChild(el("p","note","Aún no hay días. Llena la sesión de HOY y márcala como hecha.")); return; }
+  S.days.slice().reverse().forEach(function(d,i){
+    var f=el("div","ficha");
+    var head=el("div","meta","<b>Semana "+d.week+" · "+esc(d.date)+"</b>");
+    var del=el("button","del","borrar");
+    del.addEventListener("click",function(){ S.days.splice(S.days.length-1-i,1); saveState(); renderFichas(); });
+    head.appendChild(del);
+    f.appendChild(head);
+    f.appendChild(el("code",null,esc(fichaLine(d))));
+    box.appendChild(f);
+  });
+}
+$("copyAll").addEventListener("click",function(){
+  var txt=S.days.map(fichaLine).join("\n");
+  if(navigator.clipboard) navigator.clipboard.writeText(txt);
+  else{ var t=document.createElement("textarea"); t.value=txt; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
+});
+$("exportBtn").addEventListener("click",function(){
+  var blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+  var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="morfofono-diario.json"; a.click();
+});
+$("importBtn").addEventListener("click",function(){ $("importFile").click(); });
+$("importFile").addEventListener("change",function(e){
+  var f=e.target.files[0]; if(!f) return;
+  var rd=new FileReader();
+  rd.onload=function(){ try{ S=JSON.parse(rd.result); if(!S.days)S.days=[]; if(!S.banks)S.banks={sounds:{},morph:{}}; saveState(); renderFichas(); renderBanks(); }catch(err){ alert("Archivo no válido"); } };
+  rd.readAsText(f);
+});
+$("wipe").addEventListener("click",function(){ if(confirm("¿Borrar todas las fichas?")){ S.days=[]; saveState(); renderFichas(); } });
+
+/* ---------- BANCOS ---------- */
+function renderBanks(){
+  ["sounds","morph"].forEach(function(kind){
+    var box=$(kind==="sounds"?"bankSounds":"bankMorph");
+    box.innerHTML="";
+    (kind==="sounds"?TRAPS:MORPHS).forEach(function(name){
+      var st=(S.banks[kind][name]||0);
+      var chip=el("button","chip","<b>"+esc(name)+"</b><span class=\"st s"+(st+1)+"\">"+STATES[st]+"</span>");
+      chip.addEventListener("click",function(){
+        S.banks[kind][name]=(st+1)%4; saveState(); renderBanks();
+      });
+      box.appendChild(chip);
+    });
+  });
+}
+
+/* ---------- NAV ---------- */
+document.querySelectorAll("nav.bottom button").forEach(function(b){
+  b.addEventListener("click",function(){
+    document.querySelectorAll("nav.bottom button").forEach(function(x){ x.classList.remove("on"); });
+    b.classList.add("on");
+    document.querySelectorAll(".view").forEach(function(v){ v.classList.remove("on"); });
+    $(b.dataset.v).classList.add("on");
+    if(b.dataset.v==="v-ruta"){
+      document.querySelectorAll(".week").forEach(function(w){ w.classList.remove("cur"); });
+      var cur=document.getElementById("week-"+(S.lastWeek||1)); if(cur) cur.classList.add("cur");
+    }
+    window.scrollTo(0,0);
+  });
+});
+
+/* ---------- INIT ---------- */
+$("today").textContent=new Date().toLocaleDateString("es-MX",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+refreshCaps(); renderFichas(); renderBanks();
+})();
+</script>
+</body>
+</html>
