@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Morfofono Diario — organizador A0-bajo</title>
-<meta name="description" content="Organizador diario del método de alfabetización A0-bajo: oído primero, morfología después, letra al final. Seis capas con compuertas, ficha diaria y ruta de 12 semanas." />
+<title>Morfofono Diario — organizador A0</title>
+<meta name="description" content="Organizador diario del método de alfabetización A0-bajo y A0-alto: oído primero, morfología después, letra al final. Seis capas con compuertas, ficha diaria y rutas semana 1 a 17." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
@@ -21,6 +21,7 @@ h1,h2,h3{font-family:"Newsreader",Palatino,serif;letter-spacing:-.03em;line-heig
 p{margin:0}
 button{font:inherit;cursor:pointer}
 input[type=text],textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--border);border-radius:.5rem;padding:.5rem .65rem;width:100%}
+select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--border);border-radius:.5rem;padding:.5rem .65rem;width:100%}
 .wrap{max-width:44rem;margin:0 auto;padding:1rem 1rem 6rem}
 header.top{padding:.5rem 0 1.25rem}
 header.top b{font-family:"Newsreader",serif;font-size:1.6rem;font-weight:500;display:block}
@@ -36,15 +37,14 @@ header.top span{font-size:.78rem;color:var(--muted)}
 .cap .what{font-size:.9rem;color:var(--muted);margin-top:.15rem}
 .cap .gate{font-size:.8rem;color:var(--good);margin-top:.4rem;font-weight:500}
 .cap .gate i{font-style:normal;background:var(--good);color:var(--surface);border-radius:.35rem;padding:.05rem .4rem;margin-right:.35rem;font-size:.72rem}
-.cap .fail{color:var(--bad)}
 .field{margin-top:.6rem}
 .field label{display:block;font-size:.75rem;color:var(--faint);margin-bottom:.25rem;font-weight:500;text-transform:uppercase;letter-spacing:.03em}
 .chk{display:flex;align-items:center;gap:.55rem;margin-top:.6rem;font-size:.88rem;cursor:pointer;user-select:none}
 .chk input{width:1.05rem;height:1.05rem;accent-color:var(--good)}
 .pares{display:flex;align-items:center;gap:.7rem;margin-top:.6rem}
 .pares input[type=range]{flex:1;accent-color:var(--accent)}
+.pares label{font-size:.75rem;color:var(--faint);font-weight:500;text-transform:uppercase;letter-spacing:.03em;min-width:6.5rem}
 .pares output{min-width:3.2rem;text-align:center;font-weight:600;background:var(--surface-2);border-radius:.4rem;padding:.2rem .3rem}
-select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--border);border-radius:.5rem;padding:.5rem .65rem;width:100%}
 .verdict{border-radius:.8rem;padding:1rem;margin:.9rem 0;font-size:.92rem}
 .verdict b{display:block;margin-bottom:.25rem}
 .verdict.go{background:#e3ead9;color:var(--good);box-shadow:var(--shadow)}
@@ -56,13 +56,16 @@ select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid 
 .btn.small{padding:.4rem .7rem;font-size:.85rem}
 h2.sec{margin:1.6rem 0 .4rem;font-size:1.25rem}
 .sub{color:var(--muted);font-size:.85rem;margin-bottom:.6rem}
-.week{cursor:default}
 .week .wk{font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
 .week h3{margin:.2rem 0}
 .week .ex{font-size:.85rem;color:var(--muted)}
 .week .out{font-size:.85rem;color:var(--good);margin-top:.35rem;font-weight:500}
 .week .no{font-size:.85rem;color:var(--warn);margin-top:.2rem}
 .week.cur{outline:2px solid var(--accent)}
+.gatecard{border-left:3px solid var(--accent)}
+.gatecard .lbl{font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.gatecard .txt{font-family:"Newsreader",serif;font-size:1.05rem;margin:.3rem 0}
+.gatecard .why{font-size:.85rem;color:var(--muted)}
 .ficha{background:var(--surface);border-radius:.7rem;box-shadow:var(--shadow);padding:.8rem .9rem;margin:.55rem 0;font-size:.85rem}
 .ficha code{font-family:"Source Sans 3",monospace;font-size:.78rem;background:var(--surface-2);border-radius:.4rem;padding:.55rem .6rem;display:block;margin-top:.45rem;white-space:pre-wrap;word-break:break-word}
 .ficha .meta{display:flex;justify-content:space-between;align-items:center;gap:.5rem}
@@ -93,7 +96,7 @@ nav.bottom button span{display:block;font-size:1.1rem;font-weight:500}
 
   <!-- ============ HOY ============ -->
   <section class="view on" id="v-hoy">
-    <div class="doctrine"><b>Regla de la casa:</b> una sesión no abre más de un sonido nuevo o un morfema nuevo. Si una capa falla, no se pasa a la siguiente.</div>
+    <div class="doctrine"><b>Regla de la casa:</b> una sesión no abre más de un sonido nuevo o un morfema nuevo. Si una capa falla, no se pasa a la siguiente. Si la marca pide un sonido que no se posee, esa palabra no se usa.</div>
 
     <div class="card">
       <div class="field">
@@ -112,14 +115,29 @@ nav.bottom button span{display:block;font-size:1.1rem;font-weight:500}
       <button class="btn ghost" id="reset">Limpiar sesión</button>
     </div>
     <p class="note">Sesión presencial: 25–35 min (0–4 oído · 4–9 boca · 9–17 letra · 17–25 forma · 25–32 frase · 32–35 registro). Dosis en casa: 8–12 min con las capas de repaso. Si hay fatiga, se corta en la capa que ya falló. No se compensa con listas de palabras.</p>
-    <p class="note">No entra todavía: tablas de tiempos, phrasal verbs, ortografía irregular (enough, though), traducción frase a frase, ni gramática con metalenguaje. Conocer <i>hello</i> de oído no cuenta como lectura.</p>
+    <p class="note">Sigue cerrado: abecedario en orden, tablas de tiempos, phrasal verbs, ortografía opaca (enough, though, colonel), traducción frase a frase, gramática con metalenguaje. Conocer <i>hello</i> de oído no cuenta como lectura.</p>
   </section>
 
   <!-- ============ RUTA ============ -->
   <section class="view" id="v-ruta">
-    <h2 class="sec">Ruta de 12 semanas</h2>
+    <h2 class="sec">Ruta A0-bajo · 12 semanas</h2>
     <p class="sub">Las semanas 1 a 4 son solo fonología. El morfema aparece cuando la base ya se puede leer. De semana se cambia solo con al menos 5 días hechos y promedio de pares de 8 o más.</p>
-    <div id="ruta"></div>
+    <div id="ruta-bajo"></div>
+
+    <h2 class="sec">Ruta A0-alto · 5 semanas</h2>
+    <p class="sub">Cuatro semanas de Grok + una de clusters (ADN AccentBridges). Aquí la letra ya entró, pero el oído sigue mandando: cada equipo se OYE primero y solo después se ven las marcas.</p>
+    <div class="card gatecard">
+      <span class="lbl">Compuerta de entrada</span>
+      <p class="txt">The cat is sitting on the ship. Ten cats jumped.</p>
+      <p class="why">Se lee en voz alta, sin adivinar. Si esa línea se traba, no se sube de nivel: se repite el grafema que falló.</p>
+    </div>
+    <div id="ruta-alto"></div>
+    <div class="card gatecard">
+      <span class="lbl">Texto de salida · día 35</span>
+      <p class="txt">A cat sat on a mat. The cat said, “I can see the ship.” Ten cats jumped. He is sitting. The ducks kicked. She was hoping. They have a boat. Do not quit.</p>
+      <p class="why">Se sale de A0-alto si esa lectura sale por sonidos y morfemas, con said, was, have, they, do reconocidas como excepciones y no «arregladas» a la fuerza. Si hoping se lee hope-ing, o boat se lee bot, no hay nivel siguiente: se reabre ese día.</p>
+      <p class="why">Después no es A1 de gramática: es la primera palabra de dos sílabas con schwa escrito (about, teacher) y un segundo párrafo, todavía controlado.</p>
+    </div>
   </section>
 
   <!-- ============ FICHAS ============ -->
@@ -144,6 +162,12 @@ nav.bottom button span{display:block;font-size:1.1rem;font-weight:500}
     <h2 class="sec">Morfemas, en este orden y no antes</h2>
     <p class="sub">-er aquí es «el que hace», no el comparativo.</p>
     <div class="chips" id="bankMorph"></div>
+    <h2 class="sec">Nuevas trampas A0-alto</h2>
+    <p class="sub">La e muda, las dos casas de la oo y el equipo igh.</p>
+    <div class="chips" id="bankAlto"></div>
+    <h2 class="sec">Irregulares de oído</h2>
+    <p class="sub">Formas enteras que rompen el código. Se oyen el día anterior a verse: «esta no obedece». No se parten.</p>
+    <div class="chips" id="bankSight"></div>
   </section>
 </div>
 
@@ -160,37 +184,45 @@ nav.bottom button span{display:block;font-size:1.1rem;font-weight:500}
 var KEY="morfofono-diario-v1";
 var STATES=["nuevo","repaso","estable","falla"];
 
+/* w: índice global 1-17. lvl: "bajo" (1-12) | "alto" (13-17). */
 var ROUTE=[
- {w:1, foco:"Vocales compartidas y m, n, s, t, p", ex:"mat, sat, pin, nap, sit", out:"8 palabras CVC nuevas", no:"No avanzar si la vocal sale como en español.", s:"Vocales compartidas", g:"m · n · s · t · p", m:"—"},
- {w:2, foco:"o corta, e corta, c/k, d, g, f, b", ex:"dog, bed, cap, fin, bag", out:"Segmentar 3 sonidos en orden", no:"No avanzar si no segmenta en orden.", s:"o y e cortas", g:"c/k · d · g · f · b", m:"—"},
- {w:3, foco:"Contrastes que el español junta", ex:"ship/sheep, cat/cut", out:"8 de 10 en pares", no:"No avanzar si adivina por contexto.", s:"ship vs sheep", g:"i corta vs ee", m:"—"},
- {w:4, foco:"th, sh, ch, h, v (no b)", ex:"thin, ship, chat, hat, van", out:"th y v aislados", no:"Trampa típica: th como t o s, v como b.", s:"th y v", g:"th · sh · ch · h · v", m:"—"},
- {w:5, foco:"w, r inglesa, ng + PRIMER morfema", ex:"cats, lips (plural -s /s/)", out:"Se oye la -s final", no:"No avanzar si no se oye la -s final.", s:"w · r · ng", g:"w · r · ng", m:"-s plural /s/"},
- {w:6, foco:"Grupos st, bl, cl, tr + -s sonora", ex:"dogs, beds (-s /z/)", out:"Leer st sin «e» inicial", no:"No avanzar si lee «estop».", s:"Grupos iniciales", g:"st · bl · cl · tr", m:"-s sonora /z/"},
- {w:7, foco:"Finales nd, nt, mp + -ing", ex:"sitting, jumping", out:"Separar sit + ing", no:"No avanzar si traga la consonante final.", s:"Grupos finales", g:"nd · nt · mp", m:"-ing"},
- {w:8, foco:"-ed no siempre se lee «ed»", ex:"walked /t/, played /d/", out:"Dos alomorfos dominados", no:"No avanzar si lee «wa-ked».", s:"-ed /t/ y /d/", g:"-ed", m:"-ed /t/, /d/"},
- {w:9, foco:"wanted /ɪd/ y -es /ɪz/", ex:"wanted, boxes, buses", out:"Tres alomorfos, no un solo patrón", no:"No avanzar si -ed siempre suena igual.", s:"-ed /ɪd/ · -es /ɪz/", g:"-es", m:"-ed /ɪd/, -es /ɪz/"},
- {w:10, foco:"un- y -er", ex:"unhappy, unlock, teacher, player", out:"-er = «el que hace»", no:"-er aquí NO es el comparativo.", s:"un- y -er", g:"un- · -er", m:"un-, -er"},
- {w:11, foco:"Una familia entera", ex:"play, plays, played, playing, player", out:"Armar 4 formas desde la base", no:"No avanzar si solo lee la base.", s:"Familia de una base", g:"base + morfemas", m:"familia"},
- {w:12, foco:"Frases decodificables", ex:"The cat is sitting on the bed.", out:"4 frases en voz alta, sin adivinar", no:"No avanzar si adivina por la primera letra.", s:"Frases", g:"todas", m:"todas"}
+ {w:1, lvl:"bajo", foco:"Vocales compartidas y m, n, s, t, p", ex:"mat, sat, pin, nap, sit", out:"8 palabras CVC nuevas", no:"No avanzar si la vocal sale como en español.", s:"Vocales compartidas", g:"m · n · s · t · p", m:"—"},
+ {w:2, lvl:"bajo", foco:"o corta, e corta, c/k, d, g, f, b", ex:"dog, bed, cap, fin, bag", out:"Segmentar 3 sonidos en orden", no:"No avanzar si no segmenta en orden.", s:"o y e cortas", g:"c/k · d · g · f · b", m:"—"},
+ {w:3, lvl:"bajo", foco:"Contrastes que el español junta", ex:"ship/sheep, cat/cut", out:"8 de 10 en pares", no:"No avanzar si adivina por contexto.", s:"ship vs sheep", g:"i corta vs ee", m:"—"},
+ {w:4, lvl:"bajo", foco:"th, sh, ch, h, v (no b)", ex:"thin, ship, chat, hat, van", out:"th y v aislados", no:"Trampa típica: th como t o s, v como b.", s:"th y v", g:"th · sh · ch · h · v", m:"—"},
+ {w:5, lvl:"bajo", foco:"w, r inglesa, ng + PRIMER morfema", ex:"cats, lips (plural -s /s/)", out:"Se oye la -s final", no:"No avanzar si no se oye la -s final.", s:"w · r · ng", g:"w · r · ng", m:"-s plural /s/"},
+ {w:6, lvl:"bajo", foco:"Grupos st, bl, cl, tr + -s sonora", ex:"dogs, beds (-s /z/)", out:"Leer st sin «e» inicial", no:"No avanzar si lee «estop».", s:"Grupos iniciales", g:"st · bl · cl · tr", m:"-s sonora /z/"},
+ {w:7, lvl:"bajo", foco:"Finales nd, nt, mp + -ing", ex:"sitting, jumping", out:"Separar sit + ing", no:"No avanzar si traga la consonante final.", s:"Grupos finales", g:"nd · nt · mp", m:"-ing"},
+ {w:8, lvl:"bajo", foco:"-ed no siempre se lee «ed»", ex:"walked /t/, played /d/", out:"Dos alomorfos dominados", no:"No avanzar si lee «wa-ked».", s:"-ed /t/ y /d/", g:"-ed", m:"-ed /t/, /d/"},
+ {w:9, lvl:"bajo", foco:"wanted /ɪd/ y -es /ɪz/", ex:"wanted, boxes, buses", out:"Tres alomorfos, no un solo patrón", no:"No avanzar si -ed siempre suena igual.", s:"-ed /ɪd/ · -es /ɪz/", g:"-es", m:"-ed /ɪd/, -es /ɪz/"},
+ {w:10, lvl:"bajo", foco:"un- y -er", ex:"unhappy, unlock, teacher, player", out:"-er = «el que hace»", no:"-er aquí NO es el comparativo.", s:"un- y -er", g:"un- · -er", m:"un-, -er"},
+ {w:11, lvl:"bajo", foco:"Una familia entera", ex:"play, plays, played, playing, player", out:"Armar 4 formas desde la base", no:"No avanzar si solo lee la base.", s:"Familia de una base", g:"base + morfemas", m:"familia"},
+ {w:12, lvl:"bajo", foco:"Frases decodificables", ex:"The cat is sitting on the bed.", out:"4 frases en voz alta, sin adivinar", no:"No avanzar si adivina por la primera letra.", s:"Frases", g:"todas", m:"todas"},
+ {w:13, lvl:"alto", foco:"La e muda es una familia (a_e, i_e, o_e, u_e)", ex:"mat/mate, cap/cape, bit/bite, hop/hope, cut/cute", out:"Las cuatro familias, 8/10", no:"No avanzar si dice la e final o bite sale como bit. Día 6: la e SE CAE al partir (hope→hoping).", s:"Magic E", g:"a_e · i_e · o_e · u_e", m:"e-drop con -ing (día 6)"},
+ {w:14, lvl:"alto", foco:"Dos letras, un sonido ya oído (ai/ay, ee/ea, oa/ow, oo, igh)", ex:"rain, day, sheep, boat, food vs book, light", out:"Un equipo por sonido, 8/10", no:"No avanzar si la oo tiene una sola casa o igh se lee letra a letra. Oír primero, ver las marcas después. No al revés.", s:"Dígrafos vocálicos", g:"ai · ay · ee · ea · oa · ow · oo · igh", m:"—"},
+ {w:15, lvl:"alto", foco:"La consonante que cierra la palabra (ck, qu, ng, nk, th, wh)", ex:"back, queen, sing, sink, thin, when", out:"Morfemas sobre grafemas nuevos: /s/, /t/, /ɪŋ/ oídos", no:"No avanzar si th sale como t, s o d, o qu es una k española sola. what no entra: es irregular.", s:"Cierran", g:"ck · qu · ng · nk · wh", m:"-s, -ed, -ing sobre bases nuevas"},
+ {w:16, lvl:"alto", foco:"Irregulares de oído: formas enteras que rompen el código", ex:"was, said, have, give, do, to, you, they, of", out:"Texto corto con excepciones dentro de frase decodificable", no:"Se oyen enteras el día anterior a verse. No se parten. No se avanzan si se «arreglan» a la fuerza. was no es ways; said no es sayed.", s:"Sight words de oído", g:"was · said · have · do · they · of", m:"-ed, -ing, -s sobre bases ya escritas"},
+ {w:17, lvl:"alto", foco:"Los cierrapuertas: clusters ST, SP, SK, STR", ex:"stop, spot, ski, street, best, must", out:"Leer st sin «e» inicial; finales st, sp, sk", no:"No avanzar si lee «estop» o agrega E de contrabando. El hábito culichi más persistente se mata aquí.", s:"Clusters", g:"st · sp · sk · str", m:"—"}
 ];
 
 var CAPS=[
  {n:1, t:"Oído", min:"0–4 min", what:"10 pares mínimos. El alumno señala, no traduce.", gate:"8 de 10 sin mirar la letra", kind:"pares"},
  {n:2, t:"Boca", min:"4–9 min", what:"Un gesto: th con la lengua entre los dientes, v con el labio, vocal corta.", gate:"Repite el sonido aislado 5 veces", kind:"chk", key:"boca"},
  {n:3, t:"Letra", min:"9–17 min", what:"Un grafema estable. Que lo lea en 4 palabras nuevas.", gate:"Lee el grafema sin adivinar por la primera letra", kind:"chk", key:"letra"},
- {n:4, t:"Forma", min:"17–25 min · desde la semana 5", what:"Una parte: -s, -ed, -ing, un-, -er. Separa base + parte y dice qué cambió.", gate:"Separa base + parte", kind:"chk", key:"forma"},
+ {n:4, t:"Forma", min:"17–25 min", what:"Una parte: -s, -ed, -ing, un-, -er. Separa base + parte y dice qué cambió.", gate:"Separa base + parte", kind:"chk", key:"forma"},
  {n:5, t:"Uso", min:"25–32 min", what:"Una frase armada solo con piezas ya leídas.", gate:"La lee sin adivinar por la primera letra", kind:"chk", key:"uso"},
  {n:6, t:"Registro", min:"32–35 min", what:"El error que se repitió, no el acierto.", gate:"El día queda marcado como hecho", kind:"err"}
 ];
 
 var TRAPS=["i corta vs ee","a de cat","u de cut","th sordo","th sonoro","sh","v","h","w","r inglesa","ng"];
 var MORPHS=["-s /s/","-s /z/","-ing","-ed /t/","-ed /d/","-ed /ɪd/","-es /ɪz/","un-","-er (el que hace)","familia de una base"];
+var ALTOTRAPS=["Magic E","e cae al partir (-ing)","oo dos casas (food/book)","ai · ay","igh fantasma","ck","qu /kw/","wh = /w/","clusters st/sk/str"];
+var SIGHTS=["was","said","have","give","do","to","you","they","of"];
 
 function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
 function saveState(){ localStorage.setItem(KEY, JSON.stringify(S)); }
 var S=load();
-S.days=S.days||[]; S.banks=S.banks||{sounds:{},morph:{}};
+S.days=S.days||[]; S.banks=S.banks||{sounds:{},morph:{},alto:{},sight:{}};
 
 var $=function(id){ return document.getElementById(id); };
 function el(tag,cls,html){ var e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e; }
@@ -198,10 +230,20 @@ function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&am
 
 /* ---------- HOY ---------- */
 var sel=$("weekSel");
-ROUTE.forEach(function(r){ var o=document.createElement("option"); o.value=r.w; o.textContent="Semana "+r.w+" · "+r.foco; sel.appendChild(o); });
-if(S.lastWeek) sel.value=S.lastWeek;
+(function(){
+  var gB=document.createElement("optgroup"); gB.label="A0-bajo · semanas 1–12";
+  var gA=document.createElement("optgroup"); gA.label="A0-alto · semanas 1–5";
+  ROUTE.forEach(function(r){
+    var o=document.createElement("option"); o.value=r.w;
+    o.textContent=(r.lvl==="alto" ? "Alto S"+(r.w-12) : "Semana "+r.w)+" · "+r.foco;
+    (r.lvl==="alto"?gA:gB).appendChild(o);
+  });
+  sel.appendChild(gB); sel.appendChild(gA);
+})();
+if(S.lastWeek) sel.value=Math.min(S.lastWeek,17);
 
 function currentRoute(){ return ROUTE[(parseInt(sel.value,10)||1)-1]; }
+function weekLabel(r){ return r.lvl==="alto" ? "A0-alto S"+(r.w-12) : "S"+r.w; }
 
 var capasBox=$("capas");
 CAPS.forEach(function(c){
@@ -237,10 +279,9 @@ addField(4,"Frase del día","fraseIn","The cat is sitting on the bed.");
 
 function refreshCaps(){
   var r=currentRoute();
-  // prefill letra/forma context via weekHint + placeholders
-  $("weekHint").innerHTML="<b>Semana "+r.w+":</b> "+esc(r.foco)+" — "+esc(r.ex)+". Meta: "+esc(r.out)+". "+esc(r.no);
+  $("weekHint").innerHTML="<b>"+weekLabel(r)+": "+esc(r.foco)+"</b> — "+esc(r.ex)+". Meta: "+esc(r.out)+". "+esc(r.no);
   var forma=document.getElementById("chk-forma");
-  forma.parentElement.parentElement.parentElement.style.opacity = r.w>=5 ? "1" : ".45";
+  forma.parentElement.parentElement.parentElement.style.opacity = (r.w>=5) ? "1" : ".45";
   $("verdict").hidden=false; renderVerdict();
 }
 sel.addEventListener("change",function(){ S.lastWeek=parseInt(sel.value,10); saveState(); refreshCaps(); });
@@ -259,7 +300,7 @@ function renderVerdict(){
   } else {
     cls="stay"; txt="<b>Mañana: MISMO sonido con otras palabras. Cero morfema nuevo.</b> Pares "+p+"/10 — el oído todavía no es dueño del sonido. No se compensa con listas.";
   }
-  v.className="verdict "+cls; v.innerHTML=txt+" <span class=\"note\">"+ (r.w<5?"Forma se abre desde la semana 5; antes, más letra.":"") +"</span>";
+  v.className="verdict "+cls; v.innerHTML=txt+" <span class=\"note\">"+ (r.w<5?"Forma se abre desde la semana 5; antes, más letra.":(r.lvl==="alto"?"A0-alto: la letra ya entró, pero el oído sigue mandando. Oír primero, ver las marcas después.":"")) +"</span>";
 }
 capasBox.addEventListener("input",renderVerdict);
 capasBox.addEventListener("change",renderVerdict);
@@ -268,7 +309,8 @@ $("save").addEventListener("click",function(){
   var r=currentRoute();
   var d={
     date:new Date().toISOString().slice(0,10),
-    week:r.w, sonido:r.s, grafema:r.g, morfema:r.m,
+    week:r.w, wlabel:weekLabel(r),
+    sonido:r.s, grafema:r.g, morfema:r.m,
     words:document.getElementById("wordsIn").value.trim(),
     frase:document.getElementById("fraseIn").value.trim(),
     pares:paresVal(),
@@ -289,24 +331,28 @@ $("reset").addEventListener("click",function(){
 });
 
 /* ---------- RUTA ---------- */
-var rutaBox=$("ruta");
-ROUTE.forEach(function(r){
-  var c=el("div","card week");
-  c.id="week-"+r.w;
-  c.innerHTML="<span class=\"wk\">Semana "+r.w+"</span><h3>"+esc(r.foco)+"</h3><p class=\"ex\">Palabras: <i>"+esc(r.ex)+"</i></p><p class=\"out\">Salida: "+esc(r.out)+"</p><p class=\"no\">"+esc(r.no)+"</p>";
-  rutaBox.appendChild(c);
-});
+function renderRuta(){
+  var bajo=$("ruta-bajo"); var alto=$("ruta-alto");
+  bajo.innerHTML=""; alto.innerHTML="";
+  ROUTE.forEach(function(r){
+    var c=el("div","card week");
+    c.id="week-"+r.w;
+    c.innerHTML="<span class=\"wk\">"+weekLabel(r)+"</span><h3>"+esc(r.foco)+"</h3><p class=\"ex\">Se lee: <i>"+esc(r.ex)+"</i></p><p class=\"out\">Salida: "+esc(r.out)+"</p><p class=\"no\">"+esc(r.no)+"</p>";
+    (r.lvl==="alto"?alto:bajo).appendChild(c);
+  });
+}
+renderRuta();
 
 /* ---------- FICHAS ---------- */
 function fichaLine(d){
-  return d.date+" · "+d.week+" · "+d.sonido+" · "+d.grafema+" · "+d.morfema+" · "+(d.words||"—")+" · "+d.pares+"/10 · "+(d.err||"—")+" · sí · "+(d.nota||"—");
+  return d.date+" · "+(d.wlabel||d.week)+" · "+d.sonido+" · "+d.grafema+" · "+d.morfema+" · "+(d.words||"—")+" · "+d.pares+"/10 · "+(d.err||"—")+" · sí · "+(d.nota||"—");
 }
 function renderFichas(){
   var box=$("fichas"); box.innerHTML="";
   if(!S.days.length){ box.appendChild(el("p","note","Aún no hay días. Llena la sesión de HOY y márcala como hecha.")); return; }
   S.days.slice().reverse().forEach(function(d,i){
     var f=el("div","ficha");
-    var head=el("div","meta","<b>Semana "+d.week+" · "+esc(d.date)+"</b>");
+    var head=el("div","meta","<b>"+esc(d.wlabel||("S"+d.week))+" · "+esc(d.date)+"</b>");
     var del=el("button","del","borrar");
     del.addEventListener("click",function(){ S.days.splice(S.days.length-1-i,1); saveState(); renderFichas(); });
     head.appendChild(del);
@@ -328,20 +374,22 @@ $("importBtn").addEventListener("click",function(){ $("importFile").click(); });
 $("importFile").addEventListener("change",function(e){
   var f=e.target.files[0]; if(!f) return;
   var rd=new FileReader();
-  rd.onload=function(){ try{ S=JSON.parse(rd.result); if(!S.days)S.days=[]; if(!S.banks)S.banks={sounds:{},morph:{}}; saveState(); renderFichas(); renderBanks(); }catch(err){ alert("Archivo no válido"); } };
+  rd.onload=function(){ try{ S=JSON.parse(rd.result); if(!S.days)S.days=[]; if(!S.banks)S.banks={sounds:{},morph:{},alto:{},sight:{}}; saveState(); renderFichas(); renderBanks(); }catch(err){ alert("Archivo no válido"); } };
   rd.readAsText(f);
 });
 $("wipe").addEventListener("click",function(){ if(confirm("¿Borrar todas las fichas?")){ S.days=[]; saveState(); renderFichas(); } });
 
 /* ---------- BANCOS ---------- */
+var BANKS=[["sounds","bankSounds",TRAPS],["morph","bankMorph",MORPHS],["alto","bankAlto",ALTOTRAPS],["sight","bankSight",SIGHTS]];
 function renderBanks(){
-  ["sounds","morph"].forEach(function(kind){
-    var box=$(kind==="sounds"?"bankSounds":"bankMorph");
+  BANKS.forEach(function(b){
+    var kind=b[0], box=$(b[1]), list=b[2];
     box.innerHTML="";
-    (kind==="sounds"?TRAPS:MORPHS).forEach(function(name){
-      var st=(S.banks[kind][name]||0);
+    list.forEach(function(name){
+      var st=(S.banks[kind] && S.banks[kind][name])||0;
       var chip=el("button","chip","<b>"+esc(name)+"</b><span class=\"st s"+(st+1)+"\">"+STATES[st]+"</span>");
       chip.addEventListener("click",function(){
+        if(!S.banks[kind])S.banks[kind]={};
         S.banks[kind][name]=(st+1)%4; saveState(); renderBanks();
       });
       box.appendChild(chip);
