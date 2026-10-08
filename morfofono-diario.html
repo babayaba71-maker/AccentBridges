@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Morfofono Diario — organizador A0</title>
-<meta name="description" content="Organizador diario del método de alfabetización A0-bajo y A0-alto: oído primero, morfología después, letra al final. Seis capas con compuertas, ficha diaria y rutas semana 1 a 17." />
+<meta name="description" content="Organizador diario del método de alfabetización A0-bajo y A0-alto: oído primero, morfología después, letra al final. Seis capas con compuertas, ficha diaria y rutas semana 1 a 19 (A0-bajo 12 + A0-medio 2 + A0-alto 5)." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
@@ -126,6 +126,10 @@ nav.bottom button span{display:block;font-size:1.1rem;font-weight:500}
     <p class="sub">Las semanas 1 a 4 son solo fonología. El morfema aparece cuando la base ya se puede leer. De semana se cambia solo con al menos 5 días hechos y promedio de pares de 8 o más.</p>
     <div id="ruta-bajo"></div>
 
+    <h2 class="sec">Ruta A0-medio · 2 semanas</h2>
+    <p class="sub">Puerta: solo si «The cat sat» se lee sin adivinar. Aquí la letra dibuja golpes que ya se oyeron: primero b, d, f, l, h en CVC; después los dígrafos sh, ch, th, ng — dos letras, UN solo sonido.</p>
+    <div id="ruta-medio"></div>
+
     <h2 class="sec">Ruta A0-alto · 5 semanas</h2>
     <p class="sub">Cuatro semanas de Grok + una de clusters (ADN AccentBridges). Aquí la letra ya entró, pero el oído sigue mandando: cada equipo se OYE primero y solo después se ven las marcas.</p>
     <div class="card gatecard">
@@ -191,6 +195,9 @@ nav.bottom button span{display:block;font-size:1.1rem;font-weight:500}
     <h2 class="sec">Morfemas, en este orden y no antes</h2>
     <p class="sub">-er aquí es «el que hace», no el comparativo.</p>
     <div class="chips" id="bankMorph"></div>
+    <h2 class="sec">Trampas A0-medio</h2>
+    <p class="sub">La letra dibuja sonidos que ya se oyeron. Dos letras pueden ser UN sonido.</p>
+    <div class="chips" id="bankMedio"></div>
     <h2 class="sec">Nuevas trampas A0-alto</h2>
     <p class="sub">La e muda, las dos casas de la oo y el equipo igh.</p>
     <div class="chips" id="bankAlto"></div>
@@ -228,11 +235,13 @@ var ROUTE=[
  {w:10, lvl:"bajo", foco:"un- y -er", ex:"unhappy, unlock, teacher, player", out:"-er = «el que hace»", no:"-er aquí NO es el comparativo.", s:"un- y -er", g:"un- · -er", m:"un-, -er"},
  {w:11, lvl:"bajo", foco:"Una familia entera", ex:"play, plays, played, playing, player", out:"Armar 4 formas desde la base", no:"No avanzar si solo lee la base.", s:"Familia de una base", g:"base + morfemas", m:"familia"},
  {w:12, lvl:"bajo", foco:"Frases decodificables", ex:"The cat is sitting on the bed.", out:"4 frases en voz alta, sin adivinar", no:"No avanzar si adivina por la primera letra.", s:"Frases", g:"todas", m:"todas"},
- {w:13, lvl:"alto", foco:"La e muda es una familia (a_e, i_e, o_e, u_e)", ex:"mat/mate, cap/cape, bit/bite, hop/hope, cut/cute", out:"Las cuatro familias, 8/10", no:"No avanzar si dice la e final o bite sale como bit. Día 6: la e SE CAE al partir (hope→hoping).", s:"Magic E", g:"a_e · i_e · o_e · u_e", m:"e-drop con -ing (día 6)"},
- {w:14, lvl:"alto", foco:"Dos letras, un sonido ya oído (ai/ay, ee/ea, oa/ow, oo, igh)", ex:"rain, day, sheep, boat, food vs book, light", out:"Un equipo por sonido, 8/10", no:"No avanzar si la oo tiene una sola casa o igh se lee letra a letra. Oír primero, ver las marcas después. No al revés.", s:"Dígrafos vocálicos", g:"ai · ay · ee · ea · oa · ow · oo · igh", m:"—"},
- {w:15, lvl:"alto", foco:"La consonante que cierra la palabra (ck, qu, ng, nk, th, wh)", ex:"back, queen, sing, sink, thin, when", out:"Morfemas sobre grafemas nuevos: /s/, /t/, /ɪŋ/ oídos", no:"No avanzar si th sale como t, s o d, o qu es una k española sola. what no entra: es irregular.", s:"Cierran", g:"ck · qu · ng · nk · wh", m:"-s, -ed, -ing sobre bases nuevas"},
- {w:16, lvl:"alto", foco:"Irregulares de oído: formas enteras que rompen el código", ex:"was, said, have, give, do, to, you, they, of", out:"Texto corto con excepciones dentro de frase decodificable", no:"Se oyen enteras el día anterior a verse. No se parten. No se avanzan si se «arreglan» a la fuerza. was no es ways; said no es sayed.", s:"Sight words de oído", g:"was · said · have · do · they · of", m:"-ed, -ing, -s sobre bases ya escritas"},
- {w:17, lvl:"alto", foco:"Los cierrapuertas: clusters ST, SP, SK, STR", ex:"stop, spot, ski, street, best, must", out:"Leer st sin «e» inicial; finales st, sp, sk", no:"No avanzar si lee «estop» o agrega E de contrabando. El hábito culichi más persistente se mata aquí.", s:"Clusters", g:"st · sp · sk · str", m:"—"}
+ {w:13, lvl:"medio", foco:"Más letras CVC: b, d, f, l, h (sonidos ya oídos)", ex:"bat, bad, dad, fan, lap, pal, hat", out:"8/10 en CVC nuevas sin adivinar", no:"La b y la d golpean de verdad, no se abren como en español. No avanzar si la l final se vuelve u o la h se calla.", s:"letras que ya se oyeron", g:"b · d · f · l · h", m:"—"},
+ {w:14, lvl:"medio", foco:"Dígrafos en tinta: sh, ch, th, ng (dos letras, un sonido)", ex:"ship, chat, thin, sing, thing", out:"Los cuatro dígrafos, 8/10", no:"No avanzar si se lee letra a letra o sing sale sin-guh. sh ancho, ch golpe+roce, th lengua visible, ng sin g fantasma.", s:"dígrafos", g:"sh · ch · th · ng", m:"-s sobre dígrafo (ships)"},
+ {w:15, lvl:"alto", foco:"La e muda es una familia (a_e, i_e, o_e, u_e)", ex:"mat/mate, cap/cape, bit/bite, hop/hope, cut/cute", out:"Las cuatro familias, 8/10", no:"No avanzar si dice la e final o bite sale como bit. Día 6: la e SE CAE al partir (hope→hoping).", s:"Magic E", g:"a_e · i_e · o_e · u_e", m:"e-drop con -ing (día 6)"},
+ {w:16, lvl:"alto", foco:"Dos letras, un sonido ya oído (ai/ay, ee/ea, oa/ow, oo, igh)", ex:"rain, day, sheep, boat, food vs book, light", out:"Un equipo por sonido, 8/10", no:"No avanzar si la oo tiene una sola casa o igh se lee letra a letra. Oír primero, ver las marcas después. No al revés.", s:"Dígrafos vocálicos", g:"ai · ay · ee · ea · oa · ow · oo · igh", m:"—"},
+ {w:17, lvl:"alto", foco:"La consonante que cierra la palabra (ck, qu, ng, nk, th, wh)", ex:"back, queen, sing, sink, thin, when", out:"Morfemas sobre grafemas nuevos: /s/, /t/, /ɪŋ/ oídos", no:"No avanzar si th sale como t, s o d, o qu es una k española sola. what no entra: es irregular.", s:"Cierran", g:"ck · qu · ng · nk · wh", m:"-s, -ed, -ing sobre bases nuevas"},
+ {w:18, lvl:"alto", foco:"Irregulares de oído: formas enteras que rompen el código", ex:"was, said, have, give, do, to, you, they, of", out:"Texto corto con excepciones dentro de frase decodificable", no:"Se oyen enteras el día anterior a verse. No se parten. No se avanzan si se «arreglan» a la fuerza. was no es ways; said no es sayed.", s:"Sight words de oído", g:"was · said · have · do · they · of", m:"-ed, -ing, -s sobre bases ya escritas"},
+ {w:19, lvl:"alto", foco:"Los cierrapuertas: clusters ST, SP, SK, STR", ex:"stop, spot, ski, street, best, must", out:"Leer st sin «e» inicial; finales st, sp, sk", no:"No avanzar si lee «estop» o agrega E de contrabando. El hábito culichi más persistente se mata aquí.", s:"Clusters", g:"st · sp · sk · str", m:"—"}
 ];
 
 var CAPS=[
@@ -246,6 +255,7 @@ var CAPS=[
 
 var TRAPS=["i corta vs ee","a de cat","u de cut","th sordo","th sonoro","sh","v","h","w","r inglesa","ng"];
 var MORPHS=["-s /s/","-s /z/","-ing","-ed /t/","-ed /d/","-ed /ɪd/","-es /ɪz/","un-","-er (el que hace)","familia de una base"];
+var MEDTRAPS=["b golpea (no se abre como en español)","d con golpe entre vocales","l final no se vuelve u","h soplo (ni jota ni silencio)","sh: dos letras, un aire","ch: golpe + roce","th: la lengua se ve","ng: sin g fantasma"];
 var ALTOTRAPS=["Magic E","e cae al partir (-ing)","oo dos casas (food/book)","ai · ay","igh fantasma","ck","qu /kw/","wh = /w/","clusters st/sk/str"];
 var SIGHTS=["was","said","have","give","do","to","you","they","of"];
 
@@ -262,18 +272,19 @@ function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&am
 var sel=$("weekSel");
 (function(){
   var gB=document.createElement("optgroup"); gB.label="A0-bajo · semanas 1–12";
-  var gA=document.createElement("optgroup"); gA.label="A0-alto · semanas 1–5";
+  var gM=document.createElement("optgroup"); gM.label="A0-medio · semanas 13–14";
+  var gA=document.createElement("optgroup"); gA.label="A0-alto · semanas 15–19";
   ROUTE.forEach(function(r){
     var o=document.createElement("option"); o.value=r.w;
-    o.textContent=(r.lvl==="alto" ? "Alto S"+(r.w-12) : "Semana "+r.w)+" · "+r.foco;
-    (r.lvl==="alto"?gA:gB).appendChild(o);
+    o.textContent=(r.lvl==="alto" ? "Alto S"+(r.w-14) : (r.lvl==="medio" ? "Medio S"+(r.w-12) : "Semana "+r.w))+" · "+r.foco;
+    (r.lvl==="alto"?gA:(r.lvl==="medio"?gM:gB)).appendChild(o);
   });
-  sel.appendChild(gB); sel.appendChild(gA);
+  sel.appendChild(gB); sel.appendChild(gM); sel.appendChild(gA);
 })();
-if(S.lastWeek) sel.value=Math.min(S.lastWeek,17);
+if(S.lastWeek) sel.value=Math.min(S.lastWeek,19);
 
 function currentRoute(){ return ROUTE[(parseInt(sel.value,10)||1)-1]; }
-function weekLabel(r){ return r.lvl==="alto" ? "A0-alto S"+(r.w-12) : "S"+r.w; }
+function weekLabel(r){ return r.lvl==="alto" ? "A0-alto S"+(r.w-14) : (r.lvl==="medio" ? "A0-medio S"+(r.w-12) : "S"+r.w); }
 
 var capasBox=$("capas");
 CAPS.forEach(function(c){
@@ -330,7 +341,7 @@ function renderVerdict(){
   } else {
     cls="stay"; txt="<b>Mañana: MISMO sonido con otras palabras. Cero morfema nuevo.</b> Pares "+p+"/10 — el oído todavía no es dueño del sonido. No se compensa con listas.";
   }
-  v.className="verdict "+cls; v.innerHTML=txt+" <span class=\"note\">"+ (r.w<5?"Forma se abre desde la semana 5; antes, más letra.":(r.lvl==="alto"?"A0-alto: la letra ya entró, pero el oído sigue mandando. Oír primero, ver las marcas después.":"")) +"</span>";
+  v.className="verdict "+cls; v.innerHTML=txt+" <span class=\"note\">"+ (r.w<5?"Forma se abre desde la semana 5; antes, más letra.":(r.lvl==="alto"?"A0-alto: la letra ya entró, pero el oído sigue mandando. Oír primero, ver las marcas después.":(r.lvl==="medio"?"A0-medio: la letra dibuja golpes que ya se oyeron. Dos letras pueden ser UN sonido.":""))) +"</span>";
 }
 capasBox.addEventListener("input",renderVerdict);
 capasBox.addEventListener("change",renderVerdict);
@@ -362,13 +373,13 @@ $("reset").addEventListener("click",function(){
 
 /* ---------- RUTA ---------- */
 function renderRuta(){
-  var bajo=$("ruta-bajo"); var alto=$("ruta-alto");
-  bajo.innerHTML=""; alto.innerHTML="";
+  var bajo=$("ruta-bajo"); var medio=$("ruta-medio"); var alto=$("ruta-alto");
+  bajo.innerHTML=""; if(medio)medio.innerHTML=""; alto.innerHTML="";
   ROUTE.forEach(function(r){
     var c=el("div","card week");
     c.id="week-"+r.w;
     c.innerHTML="<span class=\"wk\">"+weekLabel(r)+"</span><h3>"+esc(r.foco)+"</h3><p class=\"ex\">Se lee: <i>"+esc(r.ex)+"</i></p><p class=\"out\">Salida: "+esc(r.out)+"</p><p class=\"no\">"+esc(r.no)+"</p>";
-    (r.lvl==="alto"?alto:bajo).appendChild(c);
+    (r.lvl==="alto"?alto:(r.lvl==="medio"?medio:bajo)).appendChild(c);
   });
 }
 renderRuta();
@@ -410,7 +421,7 @@ $("importFile").addEventListener("change",function(e){
 $("wipe").addEventListener("click",function(){ if(confirm("¿Borrar todas las fichas?")){ S.days=[]; saveState(); renderFichas(); } });
 
 /* ---------- BANCOS ---------- */
-var BANKS=[["sounds","bankSounds",TRAPS],["morph","bankMorph",MORPHS],["alto","bankAlto",ALTOTRAPS],["sight","bankSight",SIGHTS]];
+var BANKS=[["sounds","bankSounds",TRAPS],["morph","bankMorph",MORPHS],["medio","bankMedio",MEDTRAPS],["alto","bankAlto",ALTOTRAPS],["sight","bankSight",SIGHTS]];
 function renderBanks(){
   BANKS.forEach(function(b){
     var kind=b[0], box=$(b[1]), list=b[2];
@@ -446,12 +457,16 @@ var BQ_WORDS={
  10:["unhappy","unlock","teacher","player","singer"],
  11:["play","plays","played","playing","player"],
  12:["cat","sitting","bed","ship","jumped"],
- 13:["mat","mate","cap","cape","bit","bite","hop","hope"],
- 14:["rain","day","sheep","boat","food","book","light"],
- 15:["back","queen","sing","sink","thin","when"],
- 16:["was","said","have","give","do","they"],
- 17:["stop","spot","ski","street","best","must"]
+ 13:["bat","dad","fan","lap","pal","hat"],
+ 14:["ship","chat","thin","sing","thing","chin"],
+ 15:["mat","mate","cap","cape","bit","bite","hop","hope"],
+ 16:["rain","day","sheep","boat","food","book","light"],
+ 17:["back","queen","sing","sink","thin","when"],
+ 18:["was","said","have","give","do","they"],
+ 19:["stop","spot","ski","street","best","must"]
 };
+var BQ_SPLIT={ship:["sh","i","p"],chat:["ch","a","t"],chin:["ch","i","n"],thin:["th","i","n"],thing:["th","i","ng"],sing:["s","i","ng"],rain:["r","ai","n"],day:["d","ay"],sheep:["sh","ee","p"],boat:["b","oa","t"],food:["f","oo","d"],book:["b","oo","k"],light:["l","igh","t"],back:["ba","ck"],queen:["qu","ee","n"],sink:["s","i","nk"],when:["wh","e","n"]};
+function bqSplit(word){ return (BQ_SPLIT[word]||word.split("")).join(" · "); }
 var BQ_DISC={
  1:[["mat","met"],["pin","pan"],["sit","set"]],
  2:[["bed","bad"],["dog","dug"],["cap","cup"]],
@@ -465,11 +480,13 @@ var BQ_DISC={
  10:[["teacher","teach her"],["happy","unhappy"]],
  11:[["plays","plates"],["playing","plain"]],
  12:[["cat","cut"],["bed","bad"]],
- 13:[["mate","mat"],["bit","bite"],["cut","cute"]],
- 14:[["food","book"],["light","lit"],["ship","sheep"]],
- 15:[["thin","tin"],["queen","keen"],["when","win"]],
- 16:[["was","ways"],["said","sad"],["they","day"]],
- 17:[["stop","top"],["ski","key"],["street","seat"]]
+ 13:[["bat","pat"],["dad","sad"],["fan","van"],["lap","lit"],["hat","hot"]],
+ 14:[["ship","sip"],["chat","cat"],["thin","tin"],["sing","sin"],["thing","thin"]],
+ 15:[["mate","mat"],["bit","bite"],["cut","cute"]],
+ 16:[["food","book"],["light","lit"],["ship","sheep"]],
+ 17:[["thin","tin"],["queen","keen"],["when","win"]],
+ 18:[["was","ways"],["said","sad"],["they","day"]],
+ 19:[["stop","top"],["ski","key"],["street","seat"]]
 };
 S.bq=S.bq||{};
 function bqState(w){ if(!S.bq[w])S.bq[w]={discBest:0,ctx:{},lec:{},escBest:0,escN:0}; return S.bq[w]; }
@@ -494,10 +511,10 @@ function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
   var s=$("bqWeek");
   ROUTE.forEach(function(r){
     var o=document.createElement("option"); o.value=r.w;
-    o.textContent=(r.lvl==="alto" ? "Alto S"+(r.w-12) : "Semana "+r.w)+" · "+r.foco;
+    o.textContent=(r.lvl==="alto" ? "Alto S"+(r.w-14) : (r.lvl==="medio" ? "Medio S"+(r.w-12) : "Semana "+r.w))+" · "+r.foco;
     s.appendChild(o);
   });
-  s.value=Math.min(S.lastWeek||1,17);
+  s.value=Math.min(S.lastWeek||1,19);
   s.addEventListener("change",function(){ S.lastWeek=parseInt(s.value,10); saveState(); renderBloques(); });
 })();
 
@@ -643,7 +660,7 @@ function bqBlock3(w,r,st){
   var box=el("div");
   BQ_WORDS[w].forEach(function(word){
     var row=el("div","chk");
-    var span=el("b",null,esc(word.split("").join(" · ")));
+    var span=el("b",null,esc(bqSplit(word)));
     span.style.minWidth="9rem"; span.style.fontFamily="monospace";
     var okB=el("button","chip","<b>la leí entera</b>");
     okB.addEventListener("click",function(){ st.lec[word]=1; saveState(); renderBloques(); });
