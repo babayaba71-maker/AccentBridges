@@ -84,6 +84,8 @@ nav.bottom button span{display:block;font-size:1.1rem;font-weight:500}
 .view{display:none}
 .view.on{display:block}
 .note{font-size:.78rem;color:var(--faint);margin-top:.5rem}
+.chk .btn{flex-shrink:0}
+.chk b{font-weight:600}
 @media print{nav.bottom{display:none}.view{display:block!important}.card{box-shadow:none;border:1px solid var(--border)}}
 </style>
 </head>
@@ -154,6 +156,28 @@ nav.bottom button span{display:block;font-size:1.1rem;font-weight:500}
     <div id="fichas"></div>
   </section>
 
+  <!-- ============ BLOQUES ============ -->
+  <section class="view" id="v-bloques">
+    <h2 class="sec">Bloques interactivos</h2>
+    <p class="sub">La lección del día partida en 4 bloques cortos con feedback inmediato. Orden sellado: oído puro → contexto → lectura → escritura. Audio puro, sin videos: el oído no necesita pantalla.</p>
+    <div class="card">
+      <div class="field">
+        <label for="bqWeek">Semana de la ruta</label>
+        <select id="bqWeek"></select>
+      </div>
+      <p class="note" id="bqHint"></p>
+      <div class="chips" id="bqStatus"></div>
+    </div>
+    <div id="bqHost"></div>
+    <div class="card" id="bqExportCard" hidden>
+      <div class="field">
+        <label for="bqExport">Sesión lista para el expediente (copia este JSON)</label>
+        <textarea id="bqExport" rows="4" readonly></textarea>
+      </div>
+      <p class="note">Formato PracticeSession: cuando el router ABVC lo pida, este registro fluye directo al expediente del estudiante.</p>
+    </div>
+  </section>
+
   <!-- ============ BANCOS ============ -->
   <section class="view" id="v-bancos">
     <h2 class="sec">Sonidos trampa desde el español</h2>
@@ -174,6 +198,7 @@ nav.bottom button span{display:block;font-size:1.1rem;font-weight:500}
 <nav class="bottom">
   <button data-v="v-hoy" class="on"><span>◐</span>HOY</button>
   <button data-v="v-ruta"><span>→</span>RUTA</button>
+  <button data-v="v-bloques"><span>▶</span>BLOQUES</button>
   <button data-v="v-fichas"><span>▤</span>FICHAS</button>
   <button data-v="v-bancos"><span>◈</span>BANCOS</button>
 </nav>
@@ -397,6 +422,273 @@ function renderBanks(){
   });
 }
 
+/* ---------- BLOQUES INTERACTIVOS (v3: migración de lecciones a bloques) ---------- */
+/* Estructura migrada: cada semana de la ruta ahora vive como 4 bloques con
+   feedback: 1 oído puro (discriminación), 2 contexto (escucha+repite),
+   3 lectura (letra), 4 escritura (dictado). Los datos de la lección no se
+   inventaron: salen de la misma ruta y de los bancos ya sellados. */
+
+var BQ_WORDS={
+ 1:["mat","sat","pin","nap","sit","hat"],
+ 2:["dog","bed","cap","fin","bag","pen"],
+ 3:["ship","sheep","cat","cut","sit","seat"],
+ 4:["thin","ship","chat","hat","van","then"],
+ 5:["cats","lips","maps","win","ring","sing"],
+ 6:["stop","black","clap","tree","dogs","beds"],
+ 7:["hand","sand","ant","jump","sitting","jumping"],
+ 8:["walked","played","jumped","kicked","asked"],
+ 9:["wanted","needed","boxes","buses","washes"],
+ 10:["unhappy","unlock","teacher","player","singer"],
+ 11:["play","plays","played","playing","player"],
+ 12:["cat","sitting","bed","ship","jumped"],
+ 13:["mat","mate","cap","cape","bit","bite","hop","hope"],
+ 14:["rain","day","sheep","boat","food","book","light"],
+ 15:["back","queen","sing","sink","thin","when"],
+ 16:["was","said","have","give","do","they"],
+ 17:["stop","spot","ski","street","best","must"]
+};
+var BQ_DISC={
+ 1:[["mat","met"],["pin","pan"],["sit","set"]],
+ 2:[["bed","bad"],["dog","dug"],["cap","cup"]],
+ 3:[["cat","cut"],["ship","sheep"],["sit","seat"]],
+ 4:[["thin","tin"],["van","ban"],["ship","sip"]],
+ 5:[["cat","cats"],["win","wing"]],
+ 6:[["stop","top"],["black","back"],["tree","three"]],
+ 7:[["hand","and"],["jump","jumped"]],
+ 8:[["walked","washed"],["played","plate"]],
+ 9:[["boxes","box"],["wanted","want"]],
+ 10:[["teacher","teach her"],["happy","unhappy"]],
+ 11:[["plays","plates"],["playing","plain"]],
+ 12:[["cat","cut"],["bed","bad"]],
+ 13:[["mate","mat"],["bit","bite"],["cut","cute"]],
+ 14:[["food","book"],["light","lit"],["ship","sheep"]],
+ 15:[["thin","tin"],["queen","keen"],["when","win"]],
+ 16:[["was","ways"],["said","sad"],["they","day"]],
+ 17:[["stop","top"],["ski","key"],["street","seat"]]
+};
+S.bq=S.bq||{};
+function bqState(w){ if(!S.bq[w])S.bq[w]={discBest:0,ctx:{},lec:{},escBest:0,escN:0}; return S.bq[w]; }
+
+function tts(text,rate){
+  if(!("speechSynthesis" in window)){ return false; }
+  try{
+    speechSynthesis.cancel();
+    var u=new SpeechSynthesisUtterance(text);
+    u.lang="en-US"; u.rate=rate||0.85;
+    var vs=speechSynthesis.getVoices()||[];
+    for(var i=0;i<vs.length;i++){ if(vs[i].lang && vs[i].lang.indexOf("en-US")===0){ u.voice=vs[i]; break; } }
+    speechSynthesis.speak(u);
+    return true;
+  }catch(e){ return false; }
+}
+function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t; } return a; }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+/* selector de semana de bloques */
+(function(){
+  var s=$("bqWeek");
+  ROUTE.forEach(function(r){
+    var o=document.createElement("option"); o.value=r.w;
+    o.textContent=(r.lvl==="alto" ? "Alto S"+(r.w-12) : "Semana "+r.w)+" · "+r.foco;
+    s.appendChild(o);
+  });
+  s.value=Math.min(S.lastWeek||1,17);
+  s.addEventListener("change",function(){ S.lastWeek=parseInt(s.value,10); saveState(); renderBloques(); });
+})();
+
+function renderBloques(){
+  var w=parseInt($("bqWeek").value,10)||1, r=ROUTE[w-1], st=bqState(w);
+  $("bqHint").innerHTML="<b>"+weekLabel(r)+": "+esc(r.foco)+"</b> — "+esc(r.ex)+". Compuerta de la semana: "+esc(r.no);
+  renderBqStatus(w);
+  var host=$("bqHost"); host.innerHTML="";
+  host.appendChild(bqBlock1(w,r,st));
+  host.appendChild(bqBlock2(w,r,st));
+  host.appendChild(bqBlock3(w,r,st));
+  host.appendChild(bqBlock4(w,r,st));
+}
+function renderBqStatus(w){
+  var st=bqState(w);
+  var defs=[["1 · Oído puro",st.discBest>=8?"ok":(st.discBest>0?"run":"new"),st.discBest+"/10"],
+            ["2 · Contexto",Object.keys(st.ctx).length>=BQ_WORDS[w].length?"ok":(Object.keys(st.ctx).length?"run":"new"),Object.keys(st.ctx).length+"/"+BQ_WORDS[w].length],
+            ["3 · Lectura",Object.keys(st.lec).length>=BQ_WORDS[w].length?"ok":(Object.keys(st.lec).length?"run":"new"),Object.keys(st.lec).length+"/"+BQ_WORDS[w].length],
+            ["4 · Escritura",st.escN>0&&st.escBest>=st.escN-1?"ok":(st.escN?"run":"new"),st.escBest+"/"+Math.max(st.escN,1)]];
+  var box=$("bqStatus"); box.innerHTML="";
+  defs.forEach(function(d){
+    var chip=el("button","chip","<b>"+esc(d[0])+"</b><span class=\"st "+(d[1]==="ok"?"s3":(d[1]==="run"?"s2":""))+"\">"+(d[1]==="ok"?"compuerta":(d[1]==="run"?"en curso":"nuevo"))+" · "+d[2]+"</span>");
+    box.appendChild(chip);
+  });
+}
+
+function bqBlock1(w,r,st){
+  var card=el("div","card");
+  card.appendChild(el("p","min","BLOQUE 1 · OÍDO PURO · 2 MIN"));
+  card.appendChild(el("h3",null,"Discriminación: ¿cuál escuchaste?"));
+  card.appendChild(el("p","what","10 rondas de pares mínimos. Toca escuchar, elige la palabra que oíste. Sin mirar la letra: primero suena, después se ve. Compuerta: 8 de 10."));
+  var stage=el("div","field");
+  var playBtn=el("button","btn","🔊 Escuchar");
+  var opts=el("div","chips"); opts.style.marginTop=".6rem";
+  var fb=el("p","note","");
+  var score=el("p",null,"Ronda 0 de 10 · Aciertos: 0");
+  var rd={i:0,ok:0,cur:null,pair:null};
+  playBtn.addEventListener("click",function(){ if(rd.cur) tts(rd.cur); });
+  function newRound(){
+    rd.i++; rd.pair=pick(BQ_DISC[w]); rd.cur=pick(rd.pair);
+    var pair=shuffle(rd.pair);
+    opts.innerHTML="";
+    pair.forEach(function(word){
+      var b=el("button","chip","<b>"+esc(word)+"</b>");
+      b.addEventListener("click",function(){
+        if(!rd.cur){ return; }
+        if(word===rd.cur){ rd.ok++; fb.innerHTML="✅ Era <b>"+esc(rd.cur)+"</b>."; tts(rd.cur); }
+        else{ fb.innerHTML="❌ Era <b>"+esc(rd.cur)+"</b>, no «"+esc(word)+"». Vuelve a escucharlo."; tts(rd.cur); }
+        if(word!==rd.cur){ setTimeout(function(){ tts(rd.cur); },900); }
+        rd.cur=null;
+        setTimeout(function(){ if(rd.i<10){ newRound(); } else { finish(); } },1100);
+      });
+      opts.appendChild(b);
+    });
+    fb.textContent="";
+    score.textContent="Ronda "+rd.i+" de 10 · Aciertos: "+rd.ok;
+    tts(rd.cur);
+  }
+  function finish(){
+    opts.innerHTML=""; fb.textContent=""; playBtn.textContent="🔊 Escuchar (ya no hay ronda)";
+    var passed=rd.ok>=8;
+    if(rd.ok>st.discBest){ st.discBest=rd.ok; saveState(); }
+    var v=el("div","verdict "+(passed?"go":"stay"));
+    v.innerHTML=passed
+      ? "<b>"+rd.ok+"/10 · compuerta abierta.</b> El oído ya distingue "+esc(r.s)+". Pasa al bloque 2: contexto."
+      : "<b>"+rd.ok+"/10 · todavía no.</b> "+esc(r.no)+" Repite el bloque mañana con las mismas parejas.";
+    card.appendChild(v);
+    var again=el("button","btn small","Otra tanda de 10");
+    again.addEventListener("click",function(){ v.remove(); again.remove(); playBtn.textContent="🔊 Escuchar"; rd.i=0; rd.ok=0; newRound(); });
+    card.appendChild(again);
+    bqExport(w,r,rd.ok/10,passed,"discriminacion: "+rd.ok+"/10");
+    renderBqStatus(w);
+  }
+  stage.appendChild(playBtn);
+  card.appendChild(stage); card.appendChild(opts); card.appendChild(score); card.appendChild(fb);
+  var start=el("button","btn","Empezar las 10 rondas");
+  start.addEventListener("click",function(){ start.remove(); newRound(); });
+  card.appendChild(start);
+  return card;
+}
+
+function bqBlock2(w,r,st){
+  var card=el("div","card");
+  card.appendChild(el("p","min","BLOQUE 2 · EN CONTEXTO · 3 MIN"));
+  card.appendChild(el("h3",null,"Escucha y repite en voz alta"));
+  card.appendChild(el("p","what","Cada palabra suena sola. El alumno la repite fuerte. Sin grabar: el espejo es la boca. Marca cómo salió."));
+  var box=el("div");
+  BQ_WORDS[w].forEach(function(word){
+    var row=el("div","chk");
+    var b=el("button","btn small","🔊 "+esc(word));
+    b.style.minWidth="7.5rem";
+    b.addEventListener("click",function(){ tts(word); });
+    var okB=el("button","chip","<b>salieron</b>");
+    okB.addEventListener("click",function(){ st.ctx[word]=1; saveState(); renderBloques(); });
+    var noB=el("button","chip","<b>me costó</b>");
+    noB.addEventListener("click",function(){ st.ctx[word]=2; saveState(); renderBloques(); });
+    row.appendChild(b); row.appendChild(okB); row.appendChild(noB);
+    box.appendChild(row);
+  });
+  card.appendChild(box);
+  return card;
+}
+
+function bqBlock3(w,r,st){
+  var card=el("div","card");
+  card.appendChild(el("p","min","BLOQUE 3 · LECTURA · 2 MIN"));
+  card.appendChild(el("h3",null,"Ahora sí: la letra"));
+  card.appendChild(el("p","what","El sonido ya se posee. Se ve la palabra partida en sonidos y se lee en voz alta, sin adivinar por la primera letra."));
+  var box=el("div");
+  BQ_WORDS[w].forEach(function(word){
+    var row=el("div","chk");
+    var span=el("b",null,esc(word.split("").join(" · ")));
+    span.style.minWidth="9rem"; span.style.fontFamily="monospace";
+    var okB=el("button","chip","<b>la leí entera</b>");
+    okB.addEventListener("click",function(){ st.lec[word]=1; saveState(); renderBloques(); });
+    var noB=el("button","chip","<b>me trabé</b>");
+    noB.addEventListener("click",function(){ st.lec[word]=2; saveState(); renderBloques(); tts(word); });
+    row.appendChild(span); row.appendChild(okB); row.appendChild(noB);
+    box.appendChild(row);
+  });
+  card.appendChild(box);
+  return card;
+}
+
+function bqBlock4(w,r,st){
+  var card=el("div","card");
+  card.appendChild(el("p","min","BLOQUE 4 · ESCRITURA · 2 MIN"));
+  card.appendChild(el("h3",null,"Dictado"));
+  card.appendChild(el("p","what","Suena la palabra, se escribe. Si sale mal, se ve la diferencia letra por letra. Consolidación: la frase del día."));
+  var words=shuffle(BQ_WORDS[w]).slice(0,4);
+  var idx=0, ok=0;
+  var stage=el("div","field");
+  var playBtn=el("button","btn","🔊 Escuchar");
+  var input=el("input"); input.type="text"; input.placeholder="escribe lo que oíste…"; input.autocapitalize="off"; input.autocomplete="off";
+  var fb=el("p","note","");
+  var send=el("button","btn small","Checar");
+  function diffMark(a,b){
+    var out="", n=Math.max(a.length,b.length);
+    for(var i=0;i<n;i++){
+      if(a[i]===b[i]){ out+=esc(a[i]||""); }
+      else{ out+="<span style=\"background:#efded7;color:#8a3a32;border-radius:.25rem;padding:0 .15rem\">"+esc(b[i]||"_")+"</span>"; }
+    }
+    return out;
+  }
+  function next(){
+    if(idx>=words.length){ return finish(); }
+    playBtn.textContent="🔊 Escuchar ("+(idx+1)+"/"+words.length+")";
+    input.value=""; fb.textContent="";
+    tts(words[idx]);
+  }
+  playBtn.addEventListener("click",function(){ if(idx<words.length) tts(words[idx]); });
+  function check(){
+    if(idx>=words.length){ return; }
+    var want=words[idx], got=(input.value||"").trim().toLowerCase().replace(/\s+/g," ");
+    if(got===want){ ok++; fb.innerHTML="✅ <b>"+esc(want)+"</b> — sonido, letra y mano de acuerdo."; }
+    else{ fb.innerHTML="❌ Era <b>"+esc(want)+"</b>. Tú escribiste: <b>"+diffMark(want,got)+"</b> (en rojo, la letra que falló)."; tts(want); }
+    idx++;
+    setTimeout(next,1200);
+  }
+  send.addEventListener("click",check);
+  input.addEventListener("keydown",function(e){ if(e.key==="Enter"){ check(); } });
+  function finish(){
+    stage.innerHTML=""; fb.textContent="";
+    var passed=ok>=3;
+    if(ok>st.escBest){ st.escBest=ok; st.escN=words.length; saveState(); }
+    var v=el("div","verdict "+(passed?"go":"stay"));
+    v.innerHTML=passed
+      ? "<b>"+ok+"/"+words.length+" · dictado pasado.</b> La palabra ya viaja del oído a la mano. Día cerrado."
+      : "<b>"+ok+"/"+words.length+" · el dictado stilla.</b> Repite mañana: mismo sonido, otras palabras. Cero morfema nuevo.";
+    card.appendChild(v);
+    bqExport(w,r,ok/words.length,passed,"dictado: "+ok+"/"+words.length);
+    renderBqStatus(w);
+  }
+  stage.appendChild(playBtn);
+  var wrap=el("div","field"); wrap.appendChild(input); wrap.appendChild(send); send.style.marginTop=".5rem";
+  stage.appendChild(wrap);
+  card.appendChild(stage); card.appendChild(fb);
+  setTimeout(next,50);
+  return card;
+}
+
+function bqExport(w,r,accuracy,passed,detail){
+  var st=bqState(w);
+  var rec={
+    topic:"Morfofono "+weekLabel(r)+" — "+r.foco,
+    location:"Culiacán",
+    accuracy:Math.round(accuracy*100),
+    passed:!!passed,
+    spokenText:detail,
+    date:new Date().toISOString().slice(0,10)
+  };
+  var box=$("bqExportCard"); box.hidden=false;
+  $("bqExport").value=JSON.stringify(rec,null,1);
+}
+
+
 /* ---------- NAV ---------- */
 document.querySelectorAll("nav.bottom button").forEach(function(b){
   b.addEventListener("click",function(){
@@ -414,7 +706,7 @@ document.querySelectorAll("nav.bottom button").forEach(function(b){
 
 /* ---------- INIT ---------- */
 $("today").textContent=new Date().toLocaleDateString("es-MX",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
-refreshCaps(); renderFichas(); renderBanks();
+refreshCaps(); renderFichas(); renderBanks(); renderBloques();
 })();
 </script>
 </body>
