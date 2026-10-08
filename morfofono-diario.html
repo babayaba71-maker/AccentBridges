@@ -165,16 +165,21 @@ nav.bottom button span{display:block;font-size:1.1rem;font-weight:500}
         <label for="bqWeek">Semana de la ruta</label>
         <select id="bqWeek"></select>
       </div>
+      <div class="field">
+        <label for="bqName">Tu nombre para el expediente</label>
+        <input type="text" id="bqName" placeholder="Estudiante 0" />
+      </div>
       <p class="note" id="bqHint"></p>
       <div class="chips" id="bqStatus"></div>
     </div>
     <div id="bqHost"></div>
     <div class="card" id="bqExportCard" hidden>
+      <p class="note" id="bqSendStatus"><b>Expediente:</b> cada bloque terminado se envía solo. Aquí queda el respaldo.</p>
       <div class="field">
-        <label for="bqExport">Sesión lista para el expediente (copia este JSON)</label>
+        <label for="bqExport">Respaldo de la última sesión (JSON)</label>
         <textarea id="bqExport" rows="4" readonly></textarea>
       </div>
-      <p class="note">Formato PracticeSession: cuando el router ABVC lo pida, este registro fluye directo al expediente del estudiante.</p>
+      <p class="note">Formato PracticeSession, el mismo que lee el router ABVC y el Maestro.</p>
     </div>
   </section>
 
@@ -578,13 +583,46 @@ function bqBlock2(w,r,st){
   var card=el("div","card");
   card.appendChild(el("p","min","BLOQUE 2 · EN CONTEXTO · 3 MIN"));
   card.appendChild(el("h3",null,"Escucha y repite en voz alta"));
-  card.appendChild(el("p","what","Cada palabra suena sola. El alumno la repite fuerte. Sin grabar: el espejo es la boca. Marca cómo salió."));
+  card.appendChild(el("p","what","Cada palabra suena sola. El alumno la repite fuerte. Con el botón 🎤 el teléfono escucha y dice si salió. Marca cómo salió."));
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition||null;
   var box=el("div");
+  if(!SR){
+    card.appendChild(el("p","note","🎤 Tu navegador no soporta reconocimiento de voz (Chrome de Android sí). Usa la autoevaluación de abajo."));
+  }
   BQ_WORDS[w].forEach(function(word){
     var row=el("div","chk");
     var b=el("button","btn small","🔊 "+esc(word));
     b.style.minWidth="7.5rem";
     b.addEventListener("click",function(){ tts(word); });
+    if(SR){
+      var mic=el("button","chip","<b>🎤 repítela</b>");
+      mic.addEventListener("click",function(){
+        var old=mic.innerHTML;
+        mic.innerHTML="<b>🎧 escuchando…</b>";
+        tts(word);
+        var rec=new SR(); rec.lang="en-US"; rec.interimResults=false; rec.maxAlternatives=1;
+        var done=false;
+        rec.onresult=function(e){
+          done=true;
+          var heard=(e.results[0][0].transcript||"");
+          var q=normTxt(heard), t=normTxt(word);
+          var fb2=document.getElementById("bq-lr-"+w);
+          if(q===t||q.indexOf(t)>=0||t.indexOf(q)>=0){
+            st.ctx[word]=1; saveState();
+            if(fb2){ fb2.innerHTML="✅ Te oí «"+esc(heard)+"» — salió."; }
+          } else {
+            st.ctx[word]=2; saveState();
+            if(fb2){ fb2.innerHTML="❌ Te oí «"+esc(heard)+"», no «"+esc(word)+"». Otra vez."; tts(word); }
+          }
+          mic.innerHTML=old;
+          renderBqStatus(w);
+        };
+        rec.onerror=function(){ if(!done){ mic.innerHTML=old; } };
+        rec.onend=function(){ if(!done){ mic.innerHTML=old; } };
+        try{ rec.start(); }catch(e){ mic.innerHTML=old; }
+      });
+      row.appendChild(mic);
+    }
     var okB=el("button","chip","<b>salieron</b>");
     okB.addEventListener("click",function(){ st.ctx[word]=1; saveState(); renderBloques(); });
     var noB=el("button","chip","<b>me costó</b>");
@@ -592,6 +630,7 @@ function bqBlock2(w,r,st){
     row.appendChild(b); row.appendChild(okB); row.appendChild(noB);
     box.appendChild(row);
   });
+  if(SR){ card.appendChild(el("p","note",'<span id="bq-lr-'+w+'">🎤 Toca «repítela», escucha la palabra y dila fuerte.</span>')); }
   card.appendChild(box);
   return card;
 }
@@ -674,18 +713,43 @@ function bqBlock4(w,r,st){
   return card;
 }
 
+var BQ_EP="https://valerie.base44.app/functions/logMorfofonoSession";
+var BQ_KEY="ABVC-PILOTO-2026";
+S.bqSent=S.bqSent||{};
+function normTxt(s){ return String(s||"").toLowerCase().replace(/[^a-z0-9\s]/g,"").replace(/\s+/g," ").trim(); }
 function bqExport(w,r,accuracy,passed,detail){
-  var st=bqState(w);
+  var kind=detail.indexOf("discriminacion")===0?"disc":"esc";
+  var sid="w"+w+"-"+kind+"-"+Date.now();
   var rec={
     topic:"Morfofono "+weekLabel(r)+" — "+r.foco,
     location:"Culiacán",
     accuracy:Math.round(accuracy*100),
     passed:!!passed,
     spokenText:detail,
+    challengeSentence:r.ex||"",
+    userId:(($("bqName")&&$("bqName").value.trim())||"Estudiante 0"),
+    sessionId:sid,
     date:new Date().toISOString().slice(0,10)
   };
   var box=$("bqExportCard"); box.hidden=false;
   $("bqExport").value=JSON.stringify(rec,null,1);
+  var st=$("bqSendStatus");
+  if(S.bqSent[sid]){ return; }  /* dedup cliente: nunca re-enviar la misma sesion */
+  st.innerHTML="<b>Expediente:</b> enviando…";
+  fetch(BQ_EP,{
+    method:"POST",
+    headers:{"Content-Type":"application/json","api_key":BQ_KEY},
+    body:JSON.stringify(rec)
+  }).then(function(res){ return res.json(); }).then(function(j){
+    if(j&&j.ok){
+      S.bqSent[sid]=1; saveState();
+      st.innerHTML="<b>Expediente:</b> ✅ enviado y guardado (id "+(j.id||"—").slice(0,8)+"). El Maestro ya lo puede leer.";
+    } else {
+      st.innerHTML="<b>Expediente:</b> ⚠️ el servidor no aceptó el registro — copia el JSON de respaldo y mándaselo a tu coach.";
+    }
+  }).catch(function(){
+    st.innerHTML="<b>Expediente:</b> ⚠️ sin conexión — el JSON de respaldo queda arriba para copiarlo.";
+  });
 }
 
 
@@ -706,6 +770,9 @@ document.querySelectorAll("nav.bottom button").forEach(function(b){
 
 /* ---------- INIT ---------- */
 $("today").textContent=new Date().toLocaleDateString("es-MX",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+var bqNameEl=$("bqName");
+if(S.studentName){ bqNameEl.value=S.studentName; }
+bqNameEl.addEventListener("input",function(){ S.studentName=bqNameEl.value.trim(); saveState(); });
 refreshCaps(); renderFichas(); renderBanks(); renderBloques();
 })();
 </script>
