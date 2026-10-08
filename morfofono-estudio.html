@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Morfofono — de A0-bajo a A1-bajo</title>
+<meta name="description" content="Estudio de alfabetización en inglés: de A0-bajo a A1-bajo. Oído primero, morfología, y el código solo cuando el sonido ya se posee." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg:#f3efe6; --surface:#faf7f0; --surface-2:#ebe4d6; --ink:#1c1915;
+  --muted:#6b6458; --faint:#8c8376; --accent:#3d5a73; --accent-fg:#faf7f0;
+  --accent-soft:#dfe6ec; --border:#ddd4c4; --good:#3d5c45; --warn:#8a5a32;
+  --shadow: 0 0 0 1px rgba(28,25,21,.06), 0 1px 2px -1px rgba(28,25,21,.06), 0 2px 4px 0 rgba(28,25,21,.04);
+  --shadow-h: 0 0 0 1px rgba(28,25,21,.1), 0 1px 2px -1px rgba(28,25,21,.08), 0 6px 16px -8px rgba(28,25,21,.12);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Source Sans 3",system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:"Newsreader",Palatino,serif;letter-spacing:-.03em;line-height:1.15;text-wrap:balance;font-weight:500;margin:0}
+p{margin:0;text-wrap:pretty}
+button,a.btn{font:inherit;cursor:pointer}
+button:disabled{opacity:.4;cursor:default}
+.wrap{max-width:72rem;margin:0 auto;min-height:100dvh;display:flex}
+aside{width:14rem;flex-shrink:0;border-right:1px solid var(--border);padding:1.5rem 1rem;position:sticky;top:0;height:100dvh;display:flex;flex-direction:column}
+.brand{padding:0 .5rem 2rem}
+.brand b{font-family:"Newsreader",serif;font-size:1.5rem;font-weight:500;display:block}
+.brand span{font-size:.75rem;color:var(--muted)}
+nav.side{display:flex;flex-direction:column;gap:.25rem;flex:1;overflow-y:auto}
+nav.side button, nav.bottom a, nav.side a{
+  display:flex;align-items:center;gap:.7rem;height:2.75rem;padding:0 .75rem;border:0;border-radius:.5rem;
+  background:transparent;color:var(--muted);text-decoration:none;font-weight:500;font-size:.9rem;text-align:left;width:100%
+}
+nav.side button.on, nav.bottom a.on{background:var(--accent-soft);color:var(--accent)}
+nav.side button:hover, nav.bottom a:hover{background:var(--surface-2);color:var(--ink)}
+.prog{background:var(--surface);padding:.75rem;border-radius:.7rem;box-shadow:var(--shadow);margin-top:auto}
+.prog .bar{height:.4rem;background:var(--surface-2);border-radius:99px;overflow:hidden;margin:.5rem 0}
+.prog .bar>i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
+.main{flex:1;min-width:0;padding:1.25rem 1rem 7rem}
+@media(min-width:800px){.main{padding:2rem 2rem 2.5rem}}
+.top{display:none}
+@media(max-width:799px){
+  aside{display:none}
+  .top{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding:.75rem 1rem;background:var(--surface)}
+  .top b{font-family:"Newsreader",serif;font-size:1.15rem}
+  nav.bottom{position:fixed;inset:auto 0 0 0;display:flex;justify-content:space-around;border-top:1px solid var(--border);background:rgba(250,247,240,.95);backdrop-filter:blur(8px);padding:.35rem .4rem calc(.35rem + env(safe-area-inset-bottom));z-index:20}
+  nav.bottom a{flex-direction:column;gap:.15rem;height:auto;font-size:.65rem;padding:.35rem .2rem;align-items:center}
+}
+@media(min-width:800px){nav.bottom{display:none}}
+.page{max-width:42rem;margin:0 auto}
+.kicker{font-size:.75rem;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.muted{color:var(--muted)} .faint{color:var(--faint);font-size:.75rem}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem}
+.chip,.speak, .card{background:var(--surface);box-shadow:var(--shadow);border-radius:.6rem}
+.chip{padding:.4rem .7rem;font-size:.9rem}
+.chip b{color:var(--accent);font-weight:600}
+.speak{border:0;padding:.45rem .8rem;font-size:.9rem;color:var(--ink);display:inline-flex;align-items:center;gap:.4rem}
+.speak:hover{box-shadow:var(--shadow-h);background:var(--surface-2)}
+.badge{display:inline-flex;align-items:center;padding:.15rem .5rem;border-radius:.4rem;background:var(--surface-2);font-size:.75rem;color:var(--muted)}
+.badge.acc{background:var(--accent-soft);color:var(--accent)}
+.row{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+.step{width:100%;display:flex;gap:.75rem;text-align:left;border:0;background:var(--surface);box-shadow:var(--shadow);border-radius:.7rem;padding:.85rem 1rem;margin:.45rem 0}
+.step.on{background:rgba(223,230,236,.7)}
+.dot{width:1.5rem;height:1.5rem;border-radius:99px;flex-shrink:0;display:grid;place-items:center;margin-top:.1rem;color:var(--faint);border:1px solid var(--border)}
+.step.on .dot{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;height:2.75rem;padding:0 1rem;border-radius:.5rem;border:0;font-weight:500;font-size:.9rem;text-decoration:none;color:var(--ink)}
+.btn.pri{background:var(--accent);color:var(--accent-fg)}
+.btn.sec{background:var(--surface);box-shadow:var(--shadow)}
+.btn.ghost{background:transparent}
+.btn.sm{height:2.25rem;padding:0 .75rem;font-size:.85rem}
+.grid{display:grid;gap:.6rem}
+.lesson-link,.ph,.mh{display:block;padding:.85rem 1rem;background:var(--surface);box-shadow:var(--shadow);border-radius:.7rem;text-decoration:none;color:inherit;border:0;width:100%;text-align:left}
+.lesson-link:hover,.ph:hover,.mh:hover{box-shadow:var(--shadow-h)}
+.lesson-link.on{outline:2px solid var(--accent)}
+textarea{width:100%;min-height:5.5rem;border:0;border-radius:.6rem;background:var(--surface);box-shadow:var(--shadow);padding:.75rem;font:inherit;resize:vertical;color:var(--ink)}
+label.lab{display:block;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin:1rem 0 .35rem}
+.drill-score{font-variant-numeric:tabular-nums;color:var(--faint);font-size:.85rem}
+.flash-good{outline:2px solid var(--good)!important;background:rgba(61,92,69,.08)!important}
+.flash-bad{outline:2px solid var(--warn)!important;background:rgba(138,90,50,.08)!important}
+.ipa{font-family:"Newsreader",serif;font-size:1.6rem;color:var(--accent)}
+.week-h{margin:1.4rem 0 .5rem;font-size:1.15rem}
+hr.sep{border:0;border-top:1px solid var(--border);margin:1.5rem 0}
+.note{background:var(--surface);padding:1rem 1.15rem;border-radius:.8rem;box-shadow:var(--shadow);margin-top:1rem}
+svg.i{width:1rem;height:1rem;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.interactive-card{background:var(--surface);padding:1.25rem;border-radius:.8rem;box-shadow:var(--shadow);margin:1rem 0;border:1px solid var(--border)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <aside>
+    <div class="brand"><b>Morfofono</b><span>De A0-bajo a A1-bajo</span></div>
+    <nav class="side" id="side-nav"></nav>
+    <div class="prog">
+      <p class="faint" id="prog-label">Progreso general</p>
+      <div class="bar"><i id="prog-bar" style="width:0%"></i></div>
+      <p class="faint" id="prog-num">0 / 57 días</p>
+    </div>
+  </aside>
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div class="top">
+      <div><b>Morfofono</b><p class="faint" id="top-sub">A0 a A1</p></div>
+    </div>
+    <main class="main"><div class="page" id="app"></div></main>
+  </div>
+</div>
+<nav class="bottom" id="bot-nav"></nav>
+
+<script>
+const DATA = {
+  "LESSONS": [
+    {"day":1,"week":1,"phase":"oido","title":"El sonido no es la letra","hook":"Antes de alfabetizar, se despega el oído del ojo.","why":"En A0-bajo el error más caro es empezar por el abecedario. El inglés no es un código transparente: a se lee de cinco maneras. El método empieza por lo que el niño o el adulto ya tiene: la boca y el oído. Hoy no se muestra ninguna letra inglesa.","minutes":40,"phonemeIds":["schwa"],"morphemeIds":[],"steps":[{"id":"s1","name":"Contrato del método","minutes":6,"how":"Explica: primero oímos, luego partimos palabras, al final vemos letras. El aprendiz no pide «cómo se escribe» todavía. Si lo pide, se anota y se aplaza."},{"id":"s2","name":"Mapa sonoro L1","minutes":8,"how":"El aprendiz nombra los sonidos del español que conoce (5 vocales, las consonantes de su variedad). Se deja escrito: esto es lo que YA posee."},{"id":"s3","name":"Tres palabras a ciegas","minutes":10,"how":"Tú dices cat, what, yacht. El aprendiz solo escucha. No se escribe. Se pregunta: ¿cuántos sonidos distintos oíste al final? El punto es la extrañeza, no la respuesta correcta."},{"id":"s4","name":"Regla de oro","minutes":8,"how":"Acordar: cada día hay un sonido o una parte. Poca cantidad, mucha repetición. Cerrar con un gesto: mano en la oreja = modo oído."},{"id":"s5","name":"Nota del método","minutes":8,"how":"Escribe qué resistencia apareció (ansiedad por las letras, traducción, prisa). Eso es dato, no fallo."}],"listen":["cat","what","yacht","one","two"],"methodPrompt":"¿El aprendiz pidió letras? ¿Cómo se pospuso sin frustrar?","level":"a0-bajo"},
+    {"day":2,"week":1,"phase":"oido","title":"Voz y sordera","hook":"La garganta es el primer instrumento de alfabetización.","why":"El inglés distingue pares por la voz (pat/bat, fan/van). El español también, pero el aprendiz no lo siente. Hoy se instala la categoría voiced/voiceless SIN símbolos IPA todavía: solo la mano en la garganta.","minutes":40,"phonemeIds":["p","b","f","v"],"morphemeIds":[],"steps":[{"id":"s1","name":"Mano en la garganta","minutes":8,"how":"Aaa (vibra) vs sss (no vibra). Luego bbb vs ppp, vvv vs fff. El aprendiz clasifica: motor encendido / apagado."},{"id":"s2","name":"Pares al oído","minutes":10,"how":"Tú dices pat / bat, fan / van, cap / cab. El aprendiz levanta un dedo si cambió el motor. No se pide repetir aún."},{"id":"s3","name":"Eco con voz","minutes":10,"how":"Ahora sí: eco. Se corrige solo el rasgo de voz, no la vocal ni el acento."},{"id":"s4","name":"Puente al español","minutes":6,"how":"Comparar p/b españoles. Nombrar que en inglés ese contraste es más nítido y, al inicio, la p lleva soplo."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿Sintió la vibración? Si no, usar un globo contra los labios o una hoja de papel para el soplo."}],"listen":["pat","bat","fan","van","cap","cab"],"methodPrompt":"¿La categoría voz/sordera se sostuvo sin IPA? ¿Hizo falta un apoyo táctil?","level":"a0-bajo"},
+    {"day":3,"week":1,"phase":"oido","title":"Cinco contra quince","hook":"El español cabe en una palma; el inglés, en un mapa.","why":"El choque vocálico es la raíz de la ininteligibilidad. Hoy no se enseñan las quince: se instala el hecho. El aprendiz debe salir sabiendo que su i, e, a, o, u no alcanzan.","minutes":40,"phonemeIds":["i","ɪ","æ"],"morphemeIds":[],"steps":[{"id":"s1","name":"Las cinco del español","minutes":6,"how":"Decir i e a o u con claridad. Celebrarlas: son un sistema perfecto… para el español."},{"id":"s2","name":"Tres ovejas","minutes":12,"how":"sheep / ship / shape. Solo escuchar dos veces cada una. Preguntar: ¿cuántas palabras distintas? Si dice dos, repetir. El oído se entrena, no se explica."},{"id":"s3","name":"Boca de gato","minutes":10,"how":"Mostrar /æ/ de cat con mandíbula baja. El aprendiz imita el gesto aunque el sonido salga mal. El gesto precede al fonema limpio."},{"id":"s4","name":"Promesa de la semana 2","minutes":6,"how":"«La semana que viene entramos a cada vocal. Hoy solo aceptamos que hay más de cinco.»"},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿Cuántas repeticiones hizo falta para oír tres palabras y no dos?"}],"listen":["sheep","ship","shape","cat","cut","cot"],"methodPrompt":"¿El aprendiz aceptó que su sistema vocálico no basta, o defendió las cinco?","level":"a0-bajo"},
+    {"day":4,"week":1,"phase":"oido","title":"El inglés aplasta","hook":"El español cuenta sílabas; el inglés cuenta golpes de sentido.","why":"La prosodia no es adorno. Un A0 que silabea te-le-pho-ne no sonará inglés aunque acierte cada vocal. Hoy: estrés vs sílaba, palmas, y la idea de reducción. Todavía sin schwa nombrado como IPA.","minutes":40,"phonemeIds":["schwa"],"morphemeIds":[],"steps":[{"id":"s1","name":"Palmas en español","minutes":6,"how":"ca-sa, te-lé-fo-no, com-pu-ta-do-ra. Cada sílaba pesa parecido."},{"id":"s2","name":"Palmas en inglés","minutes":10,"how":"TELephone, comPUter, PHOtograph vs phoTOgraphy. Una sílaba fuerte, las otras se encogen."},{"id":"s3","name":"La palabra que se come","minutes":10,"how":"Frase: I want to go to the store. Marcar want, go, store. El resto se aplasta. El aprendiz solo señala las fuertes."},{"id":"s4","name":"Eco rítmico","minutes":8,"how":"Repetir la frase a medio tempo, exagerando el contraste fuerte/débil. No se corrigen vocales."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿El ritmo se entendió como música o se volvió a silabear?"}],"listen":["telephone","computer","photograph","photography","I want to go to the store"],"methodPrompt":"¿Funcionó marcar solo las sílabas fuertes, o hizo falta un dibujo de ondas?","level":"a0-bajo"},
+    {"day":5,"week":1,"phase":"oido","title":"Schwa, el sonido invisible","hook":"El sonido más común del inglés casi no existe en español.","why":"Sin schwa no hay inglés hablado ni morfología débil (-ful, a, the, -er). Hoy se nombra, se siente y se busca en palabras conocidas de oído. Símbolo: ə. Primera y última vez que un símbolo se introduce por necesidad, no por alfabeto.","minutes":40,"phonemeIds":["schwa"],"morphemeIds":[],"steps":[{"id":"s1","name":"Boca muerta","minutes":6,"how":"Relajar mandíbula, lengua al centro, un gruñido mínimo: ə. Contraste con a, e, o españolas bien formadas."},{"id":"s2","name":"Buscar schwa","minutes":12,"how":"about, sofa, support, the, banana. El aprendiz toca la mesa cada vez que oye la sílaba débil."},{"id":"s3","name":"the débil","minutes":10,"how":"the book, the apple. En the book, the es /ðə/. Se oye, no se escribe."},{"id":"s4","name":"Símbolo ə","minutes":6,"how":"Mostrar ə como dibujo de una e girada. «Este dibujo es un sonido, no una letra del abecedario.»"},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿El símbolo ayudó o distrajo? Anótalo: decide si el IPA entra ya o se aplaza."}],"listen":["about","sofa","support","the book","banana","problem"],"methodPrompt":"¿El schwa se sintió como sonido propio o como «vocal mal pronunciada»?","level":"a0-bajo"},
+    {"day":6,"week":1,"phase":"oido","title":"Igual o distinto","hook":"El oído se entrena con juicios, no con repetición ciega.","why":"La discriminación same/different es el ejercicio más poderoso del A0. No exige hablar. Hoy se instala el protocolo que se usará el resto del método: oír A, oír B, decidir.","minutes":40,"phonemeIds":["i","ɪ","æ","ʌ"],"morphemeIds":[],"steps":[{"id":"s1","name":"Protocolo","minutes":5,"how":"Tú dices dos palabras. El aprendiz dice igual o distinto. Luego se revela. Sin ver labios si es posible (mano delante de la boca o audio)."},{"id":"s2","name":"Bloque fácil","minutes":8,"how":"Pares groseros: cat/dog, sun/moon, vs cat/cat. Calibrar el juego."},{"id":"s3","name":"Bloque vocálico","minutes":12,"how":"sheep/ship, cat/cut, fool/full, bed/bad. Diez ítems. Anotar aciertos."},{"id":"s4","name":"Un par difícil","minutes":8,"how":"Repetir solo el par que falló, con gesto de boca, y volver a juzgar."},{"id":"s5","name":"Nota del método","minutes":7,"how":"Guarda el porcentaje. Es la línea base del oído. Se compara en el día 14 y 28."}],"listen":["sheep","ship","cat","cut","fool","full","bed","bad"],"methodPrompt":"¿Cuál fue el par más opaco? Ese par abre la semana 2.","level":"a0-bajo"},
+    {"day":7,"week":1,"phase":"oido","title":"Diario de sonidos","hook":"Cerrar la semana sin letras, con un oído más fino.","why":"La síntesis no es examen: es inventario. El aprendiz nombra lo que ahora puede oír. El método se ajusta con esos datos.","minutes":40,"phonemeIds":["schwa","i","ɪ","æ"],"morphemeIds":[],"steps":[{"id":"s1","name":"Inventario oral","minutes":10,"how":"Preguntar: ¿qué sonidos nuevos existen en inglés que no tienes en español? Anotar con sus palabras, no con IPA si no ayuda."},{"id":"s2","name":"Reescucha","minutes":10,"how":"Repetir los pares del día 6. Comparar el porcentaje. Celebrar el delta, no el absoluto."},{"id":"s3","name":"Gesto ancla","minutes":8,"how":"Crear un gesto por rasgo: soplo, motor, mandíbula de gato, boca muerta de schwa. Los gestos viajan a la semana 2."},{"id":"s4","name":"Carta a la semana 2","minutes":6,"how":"Juntos, una frase: «La semana que viene entramos a cada vocal con boca y pares»."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿Se sostuvo la prohibición de letras siete días? Si se rompió, ¿por qué y con qué efecto?"}],"listen":["sheep","ship","cat","about","the"],"methodPrompt":"¿El oído mejoró medible? ¿Qué gesto ancla se queda?","level":"a0-bajo"},
+    {"day":8,"week":2,"phase":"vocales","title":"/i/ y /ɪ/: sheep y ship","hook":"La i española es una. El inglés parte esa i en dos.","why":"Este par predice acento hispano más que cualquier consonante. Se enseña tensa/laxa, no larga/corta (la duración es secundaria y engaña).","minutes":40,"phonemeIds":["i","ɪ"],"morphemeIds":[],"steps":[{"id":"s1","name":"Gesto tenso / laxo","minutes":6,"how":"Sonrisa tensa + lengua alta = /i/. Boca relajada, lengua un poco más baja = /ɪ/. El aprendiz hace los dos gestos en silencio."},{"id":"s2","name":"Pares","minutes":12,"how":"sheep/ship, leave/live, reach/rich, beat/bit. Primero igual/distinto, luego eco de la palabra tensa, luego la laxa."},{"id":"s3","name":"Frase mínima","minutes":10,"how":"I see the ship. I want to live. El rasgo se corrige; el resto se deja."},{"id":"s4","name":"Trampas","minutes":6,"how":"Advertir: en español live y leave colapsan. Nombrar la trampa en voz alta."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿Se entendió tensa/laxa mejor que larga/corta?"}],"listen":["sheep","ship","leave","live","beat","bit","reach","rich"],"methodPrompt":"¿Qué metáfora funcionó: cuerda tensa, sonrisa, o duración?","level":"a0-bajo"},
+    {"day":9,"week":2,"phase":"vocales","title":"/æ/: el gato que no existe","hook":"Ni a ni e. Hay que abrir un cuarto nuevo en la boca.","why":"/æ/ no está en el español. Si no se instala ahora, cat, man, bad, apple se oirán como e o a y el vocabulario colapsará.","minutes":40,"phonemeIds":["æ","ɛ","ɑ"],"morphemeIds":[],"steps":[{"id":"s1","name":"Mandíbula","minutes":6,"how":"Bajar la mandíbula más que para a española, comisuras hacia los lados. Espejo o cámara."},{"id":"s2","name":"Ancla cat","minutes":8,"how":"Una sola palabra ancla: cat. Diez ecos lentos. Si sale e, bajar más la mandíbula. Si sale a de padre, adelantar la lengua."},{"id":"s3","name":"Familia","minutes":12,"how":"man, bad, apple, hat, bag. Igual/distinto con bed/bad, men/man, hot/hat."},{"id":"s4","name":"Frase","minutes":8,"how":"The cat is bad. A slow, ugly, clear /æ/ es mejor que una e bonita."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿El espejo ayudó más que el oído? Anótalo para próximos sonidos nuevos."}],"listen":["cat","man","bad","apple","hat","bag","bed","men"],"methodPrompt":"¿Mandíbula, espejo o par mínimo fue el ancla que destrabó /æ/?","level":"a0-bajo"},
+    {"day":10,"week":2,"phase":"vocales","title":"/ɑ/ /ʌ/ /ə/: tres vocales, una niebla","hook":"Cot, cut y about no son la misma a.","why":"Hispanohablantes colapsan este triángulo. Se enseña como mapa espacial: atrás-abierta, centro-corta, centro-débil.","minutes":40,"phonemeIds":["ɑ","ʌ","schwa"],"morphemeIds":[],"steps":[{"id":"s1","name":"Mapa en la mesa","minutes":8,"how":"Tres puntos: atrás /ɑ/ (hot), centro /ʌ/ (cut), débil /ə/ (about). El aprendiz señala mientras oye."},{"id":"s2","name":"Pares","minutes":12,"how":"hot/hut, cot/cut, not/nut, dog/dug. Luego about vs a bout exagerado."},{"id":"s3","name":"Schwa en medio","minutes":8,"how":"support, problem, banana. Tocar la mesa en la sílaba débil."},{"id":"s4","name":"Una frase","minutes":6,"how":"The cup is hot. cup = /ʌ/, hot = /ɑ/, the = /ə/."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿El mapa espacial (adelante/atrás) sirvió más que las palabras ancla?"}],"listen":["hot","cut","about","cup","not","nut","support"],"methodPrompt":"¿Se sostuvieron tres categorías o colapsaron a dos?","level":"a0-bajo"},
+    {"day":11,"week":2,"phase":"vocales","title":"/u/ y /ʊ/: fool y full","hook":"Otra i-tensa partida en dos, ahora atrás y redonda.","why":"El patrón tenso/laxo se reutiliza. El método gana si el aprendiz reconoce el patrón, no si memoriza otro par.","minutes":40,"phonemeIds":["u","ʊ"],"morphemeIds":[],"steps":[{"id":"s1","name":"Patrón conocido","minutes":6,"how":"«Es el mismo contraste de sheep/ship, ahora con labios redondos.» Nombrar la transferencia."},{"id":"s2","name":"Labios","minutes":8,"how":"fool: labios muy redondos y tensos. full: menos redondeo, más corto. Sin voz primero, solo gesto."},{"id":"s3","name":"Pares","minutes":12,"how":"fool/full, pool/pull, food/good (este último también cambia calidad; se usa con cuidado), Luke/look."},{"id":"s4","name":"Frase","minutes":8,"how":"The book is too full. Corregir solo /u/ y /ʊ/."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿La analogía tenso/laxo se transfirió sola?"}],"listen":["fool","full","pool","pull","food","look","book"],"methodPrompt":"¿Reutilizar el patrón tenso/laxo aceleró o confundió?","level":"a0-bajo"},
+    {"day":12,"week":2,"phase":"vocales","title":"/ɛ/ y /eɪ/: bed y day","hook":"La e española quiere ser las dos y no es ninguna.","why":"bed es más abierta y no desliza. day desliza. El error clásico es decir de para day y bei para bed.","minutes":40,"phonemeIds":["ɛ","eɪ"],"morphemeIds":[],"steps":[{"id":"s1","name":"Fija vs desliza","minutes":8,"how":"Mano plana = vocal fija /ɛ/. Mano que viaja = diptongo /eɪ/. El aprendiz gesticula al oír."},{"id":"s2","name":"Pares","minutes":12,"how":"bed/bade, wet/wait, pepper/paper, sell/sale, men/main."},{"id":"s3","name":"Anclas","minutes":8,"how":"bed para /ɛ/, day para /eɪ/. Recitar cinco de cada familia."},{"id":"s4","name":"Frase","minutes":6,"how":"Wait in bed. Dos sonidos, una frase."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿El gesto de viaje explicó el diptongo mejor que «es ei»?"}],"listen":["bed","day","wait","wet","paper","pepper","sale","sell"],"methodPrompt":"¿Se instó a escribir ei? Resiste. El deslizamiento es de boca, no de letras.","level":"a0-bajo"},
+    {"day":13,"week":2,"phase":"vocales","title":"Diptongos que viajan","hook":"El movimiento es el sonido: my, now, boy, go.","why":"Los diptongos ingleses se enseñan como trayectos, no como dos letras. El español tiene ai, au, oi, pero go no es o.","minutes":40,"phonemeIds":["aɪ","aʊ","ɔɪ","oʊ"],"morphemeIds":[],"steps":[{"id":"s1","name":"Cuatro viajes","minutes":8,"how":"my, now, boy, go. El aprendiz dibuja en el aire la dirección de cada uno."},{"id":"s2","name":"go no es o","minutes":10,"how":"Contraste go vs una o española sostenida. El cierre hacia u es obligatorio."},{"id":"s3","name":"Familias","minutes":10,"how":"time like I; house now out; boy coin; home boat no."},{"id":"s4","name":"Frase","minutes":6,"how":"My boy goes out now. Exagerar los cuatro viajes."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿Cuál diptongo se aplanó más? Suele ser /oʊ/."}],"listen":["my","time","now","house","boy","coin","go","home"],"methodPrompt":"¿El dibujo en el aire estabilizó /oʊ/?","level":"a0-bajo"},
+    {"day":14,"week":2,"phase":"vocales","title":"Mapa vocálico","hook":"Recitar el mapa con la boca, no con la vista.","why":"Cierre de la semana 2: un recorrido por el espacio vocálico y una nueva medición same/different contra el día 6.","minutes":40,"phonemeIds":["i","ɪ","æ","ɑ","ʌ","schwa","u","ʊ","ɛ","eɪ","oʊ"],"morphemeIds":[],"steps":[{"id":"s1","name":"Recorrido","minutes":12,"how":"De adelante a atrás, de tensa a laxa: i ɪ eɪ ɛ æ ʌ ə ɑ oʊ u ʊ. Cada una con su palabra ancla."},{"id":"s2","name":"Medición","minutes":12,"how":"Mismos pares del día 6 más cat/cut, fool/full. Comparar aciertos."},{"id":"s3","name":"Anclas fijas","minutes":8,"how":"Elegir UNA palabra ancla por vocal y no cambiarla el resto del método."},{"id":"s4","name":"Nota del método","minutes":8,"how":"Actualiza la línea base. Si un par sigue bajo 70%, se reabre en semana 3 como calentamiento, no como tema nuevo."}],"listen":["sheep","ship","cat","cut","cot","fool","full","bed","day","go","about"],"methodPrompt":"Lista de anclas definitivas y pares que siguen opacos.","level":"a0-bajo"},
+    {"day":15,"week":3,"phase":"consonantes","title":"El soplo: /p t k/","hook":"Sin soplo, la p inglesa suena b para un oído nativo.","why":"La aspiración es el rasgo que el español no entrena. Una hoja de papel delante de la boca convierte lo abstracto en visible.","minutes":40,"phonemeIds":["p","t","k"],"morphemeIds":[],"steps":[{"id":"s1","name":"Hoja de papel","minutes":8,"how":"pen, tea, key. La hoja debe moverse. Luego cap, hat, back (posición final: poco soplo). El contraste enseña la regla: soplo fuerte al inicio de sílaba tónica."},{"id":"s2","name":"Español vs inglés","minutes":8,"how":"papa vs paper, taza vs tea, casa vs key. Nombrar: mismo cierre, distinto aire."},{"id":"s3","name":"Pares sorda/sonora","minutes":12,"how":"pat/bat, ten/den, coat/goat. El soplo Y la voz. Un rasgo a la vez si se satura: hoy prioriza soplo."},{"id":"s4","name":"Frase","minutes":6,"how":"Take a cup of tea. Tres soplos."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿La hoja fue suficiente o hizo falta una vela / un globo?"}],"listen":["pen","paper","tea","key","pat","bat","coat","goat"],"methodPrompt":"¿El aprendiz sintió el soplo o solo lo vio en la hoja?","level":"a0-bajo"},
+    {"day":16,"week":3,"phase":"consonantes","title":"Cierres de verdad: /b d g/","hook":"Entre vocales, el español abre; el inglés golpea.","why":"Cada, nada, lago se pronuncian con aproximantes. bed, did, go necesitan oclusión. Si no, very y berry se vuelven aún más difíciles mañana.","minutes":40,"phonemeIds":["b","d","t"],"morphemeIds":[],"steps":[{"id":"s1","name":"Toque completo","minutes":8,"how":"bbb, ddd, ggg con un golpecito que se puede palpar. Contraste con la β de haba."},{"id":"s2","name":"Entre vocales","minutes":10,"how":"a baby, a dog, a bag. Exigir el cierre. Grabar un eco y reescuchar."},{"id":"s3","name":"Finales","minutes":10,"how":"cab, bad, bag. El español pierde finales: hoy se sostienen. Un palito en el aire por cada consonante final oída."},{"id":"s4","name":"Frase","minutes":6,"how":"A big dog. Tres cierres."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿El problema fue el cierre o la voz? No los corrijas a la vez."}],"listen":["baby","dog","bag","cab","bad","big"],"methodPrompt":"¿Dónde se suavizó más: entre vocales o al final?","level":"a0-bajo"},
+    {"day":17,"week":3,"phase":"consonantes","title":"/v/ no es /b/","hook":"Diente sobre labio. El contraste que el español no tiene.","why":"Es la consonante que más delata al hispanohablante después de las vocales. Se enseña táctil: el diente tiene que tocar.","minutes":40,"phonemeIds":["v","b","f"],"morphemeIds":[],"steps":[{"id":"s1","name":"Tacto","minutes":6,"how":"Dientes superiores sobre el labio inferior. Aire con voz: vvvvv. Luego fffff sin voz."},{"id":"s2","name":"Pares","minutes":12,"how":"bat/vat, berry/very, ban/van, boat/vote. Igual/distinto y luego eco solo de /v/."},{"id":"s3","name":"En medio y final","minutes":10,"how":"seven, love, have, leave. El /v/ final no se convierte en /b/ ni se cae."},{"id":"s4","name":"Frase","minutes":6,"how":"Very big love. Exagerar el diente."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿Un espejo en el diente funcionó más que el par mínimo?"}],"listen":["very","berry","van","ban","love","have","vote","boat"],"methodPrompt":"¿Cuántos ítems hizo falta para un /v/ estable en inicial?","level":"a0-bajo"},
+    {"day":18,"week":3,"phase":"consonantes","title":"/θ/ y /ð/: la lengua se ve","hook":"Think no es tink ni sink. This no es dis.","why":"Sonido más icónico y más evitado. Se enseña con lengua visible, sin vergüenza. /θ/ sorda, /ð/ sonora: el rasgo de voz del día 2 vuelve.","minutes":40,"phonemeIds":["θ","ð","s","t"],"morphemeIds":[],"steps":[{"id":"s1","name":"Lengua fuera","minutes":6,"how":"Un poco, no teatral. Aire: think. Aire + voz: this."},{"id":"s2","name":"Pares sordos","minutes":10,"how":"think/sink, three/tree, bath/bass, thick/tick."},{"id":"s3","name":"Pares sonoros","minutes":10,"how":"this/dis, they/day, mother (el medio). the book, the apple."},{"id":"s4","name":"Frase","minutes":8,"how":"I think this is the thing. Cuatro th. Calidad antes que velocidad."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿Resistencia estética a sacar la lengua? Nómbrala: es cultural, no articulatoria."}],"listen":["think","sink","three","tree","this","the","mother","thing"],"methodPrompt":"¿Cuál sustitución dominó: /t/, /s/, /d/ o /f/?","level":"a0-bajo"},
+    {"day":19,"week":3,"phase":"consonantes","title":"/s z ʃ ʒ/: el aire cambia de forma","hook":"Una s española no cubre cuatro fonemas ingleses.","why":"El plural y la 3ª persona dependen de /s/ vs /z/. ship vs sip depende de /ʃ/. Hoy se instalan las cuatro fricativas; la morfología de la semana 5 ya tiene oído.","minutes":40,"phonemeIds":["s","z","ʃ","ʒ"],"morphemeIds":[],"steps":[{"id":"s1","name":"Cuatro aires","minutes":8,"how":"s fina, z con voz, sh ancha y labios salientes, zh igual con voz (measure)."},{"id":"s2","name":"s vs z","minutes":10,"how":"sip/zip, price/prize, bus/buzz, ice/eyes. Mano en garganta."},{"id":"s3","name":"s vs sh","minutes":10,"how":"sip/ship, see/she, mess/mesh. Labios."},{"id":"s4","name":"measure","minutes":6,"how":"Una ancla para /ʒ/: measure, vision, usual. No se busca productividad, solo el oído."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿/z/ o /ʃ/ costó más? Eso predice el día 30 (plural)."}],"listen":["sip","zip","ship","she","prize","price","measure","vision"],"methodPrompt":"¿El rasgo de voz en /z/ ya estaba del día 2, o hubo que reinstalarlo?","level":"a0-bajo"},
+    {"day":20,"week":3,"phase":"consonantes","title":"/tʃ/ /dʒ/ y /h/","hook":"chair no es share. job no es hob. house no es ouse.","why":"Tres trampas distintas: africada vs fricativa, j española vs /dʒ/, h muda vs soplo suave.","minutes":40,"phonemeIds":["tʃ","dʒ","h","ʃ","j"],"morphemeIds":[],"steps":[{"id":"s1","name":"Golpe + roce","minutes":8,"how":"chair = t + sh fusionados. share = solo sh. El aprendiz siente el golpe en chair."},{"id":"s2","name":"j no es jota","minutes":10,"how":"job, jump, age, judge. Contraste con la /x/ de jamón. Y con yes (/j/), que no tiene golpe."},{"id":"s3","name":"h soplo","minutes":10,"how":"house, hello, hat. Ni silencio ni jota. Empañar un vidrio."},{"id":"s4","name":"Frase","minutes":6,"how":"He has a cheap job. h, tʃ, dʒ."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿yes vs job se confundieron? Es yeísmo africado: se nombra si aparece."}],"listen":["chair","share","job","yes","house","hello","jump","age"],"methodPrompt":"¿La h se calló, se hizo jota, o salió el soplo suave?","level":"a0-bajo"},
+    {"day":21,"week":3,"phase":"consonantes","title":"/ɹ/ /ŋ/ /w/ /j/","hook":"Cuatro sonidos que el español toca de otra manera.","why":"Cierre de consonantes: r sin toque, ng sin g, w redonda, y sin golpe.","minutes":40,"phonemeIds":["ɹ","ŋ","w","j"],"morphemeIds":[],"steps":[{"id":"s1","name":"r sin toque","minutes":8,"how":"Lengua retraída, sin vibrar ni golpear. red, right, very, car (si el acento modelo suena la r final)."},{"id":"s2","name":"sing sin g","minutes":8,"how":"sing, thing, going. Parar en el velo. Contraste con sin y con finger (aquí sí hay g)."},{"id":"s3","name":"w y y","minutes":10,"how":"we, win, queen; yes, you, yellow. Labios vs lengua. Contraste very/wary si el grupo aguanta."},{"id":"s4","name":"Recorrido","minutes":8,"how":"Una palabra ancla por consonante nueva de la semana. Eco lento."},{"id":"s5","name":"Nota del método","minutes":6,"how":"Inventario: qué consonantes ya son estables y cuáles se reabren en calentamientos."}],"listen":["red","right","sing","thing","we","yes","going","you"],"methodPrompt":"¿La r se hizo toque, vibrante, o aproximante?","level":"a0-bajo"},
+    {"day":22,"week":4,"phase":"ritmo","title":"No dejes caer el final","hook":"El español ama las sílabas abiertas. El inglés cierra.","why":"cat, stop, felt, world: el significado vive en esa consonante final. A0 que la come se vuelve ininteligible.","minutes":40,"phonemeIds":["p","t","k","n","m","l"],"morphemeIds":[],"steps":[{"id":"s1","name":"Contar cierres","minutes":8,"how":"Tú dices cat, stop, felt. El aprendiz levanta tantos dedos como sonidos oye. Se revela el recuento."},{"id":"s2","name":"Eco final","minutes":12,"how":"Lista CVC: cat cap cab can cam. Solo se acepta si el final se oye. Grabar."},{"id":"s3","name":"Grupos finales","minutes":10,"how":"stop, felt, world, asked (preview). No se exige perfección de asked; sí de stop y felt."},{"id":"s4","name":"Frase","minutes":4,"how":"Stop the cat. Dos finales."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿El recuento de sonidos (conciencia fonémica) fue más potente que el eco?"}],"listen":["cat","cap","cab","stop","felt","can","cam"],"methodPrompt":"¿Qué coda se cayó más: oclusiva, nasal o l?","level":"a0-bajo"},
+    {"day":23,"week":4,"phase":"ritmo","title":"School no es escola","hook":"El español añade e- delante de s+consonante. Hoy se corta.","why":"Prosthesis: e-school, e-spain, e-stop. Es un hábito silábico, no un error de letra. Se reentrena el ataque.","minutes":40,"phonemeIds":["s"],"morphemeIds":[],"steps":[{"id":"s1","name":"Diagnóstico","minutes":6,"how":"El aprendiz dice school, Spain, stop, street. Anotar si aparece e-."},{"id":"s2","name":"Ataque s-","minutes":12,"how":"Sostener sss y luego soltar cool: sss-kool → school. Igual con stop, Spain, speak, small."},{"id":"s3","name":"Pares trampa","minutes":10,"how":"school vs a school (el artículo no es la e prostética). El aprendiz distingue the school / a school / school."},{"id":"s4","name":"Frase","minutes":6,"how":"Stop at school. Cero e- prostética."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿El sostener sss funcionó, o hizo falta tapar la boca al inicio de la e?"}],"listen":["school","Spain","stop","speak","small","street"],"methodPrompt":"¿La e prostética bajó en eco lento? ¿Y en frase rápida?","level":"a0-bajo"},
+    {"day":24,"week":4,"phase":"ritmo","title":"Grupos: str, spl, thr","hook":"Tres consonantes seguidas sin vocal de apoyo.","why":"Después de school, se sube la carga: street, split, three. Se construye por acrecentamiento, no por la palabra entera.","minutes":40,"phonemeIds":["s","θ","ɹ","l"],"morphemeIds":[],"steps":[{"id":"s1","name":"Acrecentar","minutes":10,"how":"t → tr → str → street. p → pl → spl → split. t → th → thr → three."},{"id":"s2","name":"Lista corta","minutes":12,"how":"street, strong, spring, split, splash, three, throw. Calidad > cantidad."},{"id":"s3","name":"Finales duros","minutes":8,"how":"asks, wants (preview de morfología). Se oye la s final aunque la palabra sea difícil."},{"id":"s4","name":"Nota del método","minutes":10,"how":"El acrecentamiento es un procedimiento del método: anótalo como receta reutilizable."}],"listen":["street","strong","split","splash","three","throw","spring"],"methodPrompt":"¿El acrecentamiento evitó la vocal de apoyo mejor que el modelo completo?","level":"a0-bajo"},
+    {"day":25,"week":4,"phase":"ritmo","title":"Palabras que se encogen","hook":"to, for, and, of, the: schwa en el habla real.","why":"La morfología gramatical se oye débil. Si el A0 las pronuncia plenas, el ritmo se rompe. Hoy: forma fuerte vs forma débil, de oído.","minutes":40,"phonemeIds":["schwa","ð"],"morphemeIds":[],"steps":[{"id":"s1","name":"Fuertes y débiles","minutes":8,"how":"the (ðə) vs THE (ði). to (tə) vs TO. a (ə). of (əv)."},{"id":"s2","name":"Frase rítmica","minutes":12,"how":"I want to go to the store. Palmas en want, go, store. El resto, schwa."},{"id":"s3","name":"and","minutes":8,"how":"cats and dogs → /ən/. No se lee and letra a letra (aún no leemos)."},{"id":"s4","name":"Eco de frase","minutes":6,"how":"Una sola frase, tres veces, cada vez más natural."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿Enseñar formas débiles tan pronto asustó o liberó?"}],"listen":["I want to go to the store","a cup of tea","cats and dogs","for the boy"],"methodPrompt":"¿El aprendiz aceptó que the no suena di, o se resistió?","level":"a0-bajo"},
+    {"day":26,"week":4,"phase":"ritmo","title":"REcord no es reCORD","hook":"El acento de palabra cambia el significado y la vocal.","why":"En REcord (nombre) la primera es fuerte; en reCORD (verbo), la segunda. El schwa se come la débil. Esto prepara la morfología: la parte fuerte es a menudo la raíz.","minutes":40,"phonemeIds":["schwa"],"morphemeIds":[],"steps":[{"id":"s1","name":"Pares de acento","minutes":12,"how":"REcord / reCORD, PREsent / preSENT, OBject / obJECT. El aprendiz señala 1 o 2."},{"id":"s2","name":"Schwa en la débil","minutes":10,"how":"La sílaba no fuerte se vuelve ə. Decirlo en voz alta: eso es el mismo schwa del día 5."},{"id":"s3","name":"Compuestos","minutes":8,"how":"GREENhouse vs green HOUSE. Preview de compuestos de la semana 6."},{"id":"s4","name":"Nota del método","minutes":10,"how":"¿Se entendió que el acento es significado, no adorno?"}],"listen":["record","present","object","greenhouse"],"methodPrompt":"¿Hizo falta glosa (nombre/verbo) o el oído bastó?","level":"a0-bajo"},
+    {"day":27,"week":4,"phase":"ritmo","title":"La frase tiene montañas","hook":"Palabras de contenido altas; palabras de función, valle.","why":"Se generaliza el día 25 a cualquier frase corta del repertorio. El A0 no construye frases libres: las recita con relieve correcto.","minutes":40,"phonemeIds":["schwa"],"morphemeIds":[],"steps":[{"id":"s1","name":"Marcar montañas","minutes":8,"how":"Frases dadas: She PLAYS the PIANO. The CAT is on the BED. Subrayar fuertes."},{"id":"s2","name":"Valle de función","minutes":10,"how":"the, is, on, a, to se dicen débiles. Si se pronuncian plenas, la frase «no camina»."},{"id":"s3","name":"Pregunta vs dicho","minutes":10,"how":"It's a cat. vs It's a cat? La subida final. Un rasgo prosódico, no vocabulario nuevo."},{"id":"s4","name":"Nota del método","minutes":12,"how":"Graba una frase del día 1 y una de hoy. El contraste es evidencia del método."}],"listen":["She plays the piano","The cat is on the bed","It's a cat"],"methodPrompt":"¿La grabación de progreso se volvió hábito? Si no, instálala.","level":"a0-bajo"},
+    {"day":28,"week":4,"phase":"ritmo","title":"El oído a mitad de camino","hook":"Cuatro semanas sin alfabeto. Medir, no celebrar en vacío.","why":"Reescucha de pares, coda final, s- inicial, una frase rítmica. El método decide qué reabrir antes de entrar a morfemas.","minutes":40,"phonemeIds":["schwa","æ","ɪ","v","θ"],"morphemeIds":[],"steps":[{"id":"s1","name":"Batería de oído","minutes":14,"how":"12 pares (vocales + v/b + th/s + sheep/ship). Anotar %."},{"id":"s2","name":"Coda y s-","minutes":10,"how":"stop, felt, school, street. Criterio: sin e- y con final audible."},{"id":"s3","name":"Frase testigo","minutes":8,"how":"I want to go to the store. Relieve correcto."},{"id":"s4","name":"Puerta a morfemas","minutes":8,"how":"Explicar: «Ahora las partes de la palabra. El oído ya sabe /s z t d ŋ ə/. Por eso podemos partir cats y jumped.»"}],"listen":["sheep","ship","very","berry","think","sink","school","stop","I want to go to the store"],"methodPrompt":"Lista de rasgo(s) que se reabren 5 minutos al inicio de cada día de la semana 5.","level":"a0-bajo"},
+    {"day":29,"week":5,"phase":"flexion","title":"El morfema: átomo de significado","hook":"Las palabras se parten. El significado vive en las piezas.","why":"El hispanohablante ya es experto en morfología (cant-aba-mos). Se transfiere esa inteligencia al inglés, que parece «sin gramática» y no lo es. Hoy: pieza libre vs pieza atada. Todavía se OYE más de lo que se ve.","minutes":40,"phonemeIds":[],"morphemeIds":["plural-s","un"],"steps":[{"id":"s1","name":"Puente L1","minutes":8,"how":"cantar / cant- / -aba / -mos. El aprendiz ya sabe partir. «Vamos a hacer lo mismo en inglés.»"},{"id":"s2","name":"Libre y atada","minutes":10,"how":"cat es libre. -s de cats está atada: no se dice sola con significado de plural (en este nivel). un- de unhappy está atada."},{"id":"s3","name":"Partir de oído","minutes":12,"how":"cats, dogs, unhappy, replay, teacher. El aprendiz dice cuántas piezas y qué significa cada una. Tú confirmas."},{"id":"s4","name":"Promesa","minutes":4,"how":"Esta semana: -s, -ed, -ing. Tres letras. Siete sonidos. El oído ya los tiene."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿La analogía con la conjugación española iluminó o empujó a traducir desinencias?"}],"listen":["cats","dogs","unhappy","replay","teacher"],"methodPrompt":"¿Partir de oído funcionó antes de ver la palabra escrita?","level":"a0-bajo"},
+    {"day":30,"week":5,"phase":"flexion","title":"Plural -s: una letra, tres sonidos","hook":"/s/ cats, /z/ dogs, /ɪz/ boxes.","why":"Aquí el método se justifica: sin fonología, el aprendiz lee -s y dice /s/ siempre. Con fonología, el plural se oye. Se enseña la regla por el oído, luego se nombra.","minutes":40,"phonemeIds":["s","z"],"morphemeIds":["plural-s"],"steps":[{"id":"s1","name":"Oír tres finales","minutes":8,"how":"cats, dogs, boxes. ¿Cuántos sonidos distintos al final? Descubrir tres."},{"id":"s2","name":"Regla","minutes":10,"how":"Tras sorda: /s/ (cat-s). Tras sonora: /z/ (dog-s). Tras sibilante: /ɪz/ (box-es). La voz del día 2 decide."},{"id":"s3","name":"Clasificar","minutes":12,"how":"maps, pens, hats, days, buses, watches, apples, books. El aprendiz asigna el sonido, luego oye el modelo."},{"id":"s4","name":"Frase","minutes":4,"how":"The cats and the dogs. /s/ y /z/ en una línea."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿Se dio la regla antes o después del descubrimiento? El método prefiere después."}],"listen":["cats","dogs","boxes","maps","pens","buses","watches","apples"],"methodPrompt":"¿La regla se indujo o hubo que darla? Anota el orden real.","level":"a0-bajo"},
+    {"day":31,"week":5,"phase":"flexion","title":"Él camina: la otra -s","hook":"walks, runs, watches: misma fonología, otro significado.","why":"No se enseña como «gramática de presente». Se enseña como morfema que suena igual que el plural y significa 3ª persona. El oído ya hizo el trabajo.","minutes":40,"phonemeIds":["s","z"],"morphemeIds":["3sg-s","plural-s"],"steps":[{"id":"s1","name":"Mismo sonido, otro sentido","minutes":8,"how":"cats vs walks. Ambos /s/. Uno es «más de uno», otro es «él/ella». El aprendiz los oye iguales y los glosa distintos."},{"id":"s2","name":"Tres otra vez","minutes":12,"how":"walks /s/, runs /z/, watches /ɪz/. Clasificar: sits, plays, kisses, needs, jumps, goes."},{"id":"s3","name":"Frase","minutes":10,"how":"The dog runs. She watches. He jumps. Persona + morfema, sin tabla de conjugación."},{"id":"s4","name":"Nota del método","minutes":10,"how":"¿Confundieron plural y 3ª? Si sí, usar siempre una glosa oral: «más de uno» vs «él»."}],"listen":["walks","runs","watches","sits","plays","kisses","jumps","goes"],"methodPrompt":"¿Hizo falta la tabla o bastó el morfema glosado?","level":"a0-bajo"},
+    {"day":32,"week":5,"phase":"flexion","title":"Pasado -ed: /t/ /d/ /ɪd/","hook":"jumped, played, wanted. No se lee e-d.","why":"Segundo pilar. El error mundial es pronunciar -ed como sílaba siempre. El método lo evita porque el oído de /t d/ ya existe.","minutes":40,"phonemeIds":["t"],"morphemeIds":["past-ed"],"steps":[{"id":"s1","name":"Oír tres","minutes":8,"how":"jumped, played, wanted. Tres finales. Descubrir."},{"id":"s2","name":"Regla","minutes":10,"how":"Tras sorda: /t/. Tras sonora: /d/. Tras t/d: /ɪd/. Voz otra vez."},{"id":"s3","name":"Clasificar","minutes":12,"how":"kissed, loved, needed, washed, called, started, helped, lived, waited."},{"id":"s4","name":"Frase","minutes":4,"how":"I jumped and I played. I wanted tea."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿Apareció la sílaba espuria jump-ed? Cómo se cortó."}],"listen":["jumped","played","wanted","kissed","loved","needed","washed","called"],"methodPrompt":"¿La analogía con -s (tres alófonos) se transfirió sola?","level":"a0-bajo"},
+    {"day":33,"week":5,"phase":"flexion","title":"-ing y el velo","hook":"playing se oye /ɪŋ/, no /in/ ni /ing-guh/.","why":"Conecta el fonema /ŋ/ del día 21 con un morfema productivo. Gerundio y progresivo se tratan como un solo significado A0: «en curso / la acción como cosa».","minutes":40,"phonemeIds":["ŋ","ɪ"],"morphemeIds":["ing"],"steps":[{"id":"s1","name":"Ancla ng","minutes":6,"how":"sing, thing. Sin g final. Luego playing, going, running."},{"id":"s2","name":"Pieza","minutes":10,"how":"play + ing, go + ing. El duplicado de running se nombra después, de oído: se oye una n más larga, no se explica la ortografía aún."},{"id":"s3","name":"Uso","minutes":12,"how":"I am playing. Playing is fun. Dos funciones, una pieza. Frases dadas, no libres."},{"id":"s4","name":"Nota del método","minutes":12,"how":"¿Se filtró la pregunta «por qué two n»? Aplazar la letra es parte del método: anota la presión."}],"listen":["playing","going","running","sing","thing","I am playing"],"methodPrompt":"¿La g fantasma de -ing reapareció?","level":"a0-bajo"},
+    {"day":34,"week":5,"phase":"flexion","title":"Más y el más: -er / -est","hook":"bigger, biggest. Una escala, dos piezas.","why":"Se enseña el par, no las palabras. La duplicación de g se oye (la vocal se acorta) y se deja para el código de la semana 6.","minutes":40,"phonemeIds":[],"morphemeIds":["er-comp","est"],"steps":[{"id":"s1","name":"Escala","minutes":8,"how":"big → bigger → biggest. fast → faster → fastest. Siempre en trío."},{"id":"s2","name":"Glosa","minutes":10,"how":" -er = más. -est = el más. Contraste con more / most: A0 usa -er/-est en cortas; more se muestra como alternativa oída, no como regla."},{"id":"s3","name":"Oír la base","minutes":12,"how":"happy / happier: la y se oye i. El aprendiz parte: happi + er."},{"id":"s4","name":"Nota del método","minutes":10,"how":"¿Se mezcló con el -er de teacher? Si aparece, se nombra: «mañana el otro -er»."}],"listen":["bigger","biggest","faster","fastest","happier","happiest"],"methodPrompt":"¿El trío estable (base, -er, -est) evitó listas sueltas?","level":"a0-bajo"},
+    {"day":35,"week":5,"phase":"flexion","title":"'s y las contracciones","hook":"El apóstrofo no es un sonido. Es una marca de pieza.","why":"cat's /s z ɪz/ otra vez. he's = he + is. El A0 oye una pieza y aprende que el habla junta lo que la página (luego) partirá con un signo.","minutes":40,"phonemeIds":["s","z","schwa"],"morphemeIds":["poss"],"steps":[{"id":"s1","name":"Posesivo de oído","minutes":10,"how":"the cat's milk, the dog's bed, the boss's key. Tres sonidos de s. Glosa: de."},{"id":"s2","name":"Contracciones","minutes":12,"how":"he's, she's, it's, that's. Oír he is vs he's. El schwa o la i reducida. No se escribe todavía; se puede mostrar el apóstrofo como «marca de pieza comida»."},{"id":"s3","name":"Síntesis de la semana","minutes":10,"how":"Inventario de piezas: -s -es -ed -ing -er -est 's. Cada una con un sonido ancla."},{"id":"s4","name":"Nota del método","minutes":8,"how":"¿Cinco días de flexión saturaron? Si sí, el día 36 empieza más lento."}],"listen":["cat's","dog's","he's","it's","that's","the cat's milk"],"methodPrompt":"¿El apóstrofo se entendió como marca o se pidió «la letra que falta»?","level":"a0-bajo"},
+    {"day":36,"week":6,"phase":"derivacion","title":"un- re- dis-: el principio cambia el sentido","hook":"Una pieza delante, un significado nuevo.","why":"La derivación es el puente hacia vocabulario masivo. A0 no memoriza unhappy: opera un- + happy. Se usa el parentesco con in-/re-/des- del español.","minutes":40,"phonemeIds":["ʌ"],"morphemeIds":["un","re","dis"],"steps":[{"id":"s1","name":"Operar","minutes":8,"how":"happy → unhappy. lock → unlock. play → replay. like → dislike. El aprendiz hace la operación en voz alta."},{"id":"s2","name":"Glosa L1","minutes":8,"how":"un- ≈ in-/des-; re- ≈ re-; dis- ≈ des-. Se celebra la transferencia, se advierten falsos amigos (resign ≠ resignar siempre). En A0, solo los transparentes."},{"id":"s3","name":"Partir","minutes":12,"how":"unfair, reread, disconnect, unclear, redo. Número de piezas + glosa."},{"id":"s4","name":"Nota del método","minutes":12,"how":"¿Operar fue más rápido que traducir la palabra entera? Esa es la evidencia de morphology-first."}],"listen":["unhappy","unlock","replay","reread","dislike","unfair"],"methodPrompt":"¿La operación se volvió hábito o se tradujo la palabra llena?","level":"a0-bajo"},
+    {"day":37,"week":6,"phase":"derivacion","title":"-ly -ful -less -ness -er","hook":"El final convierte: adjetivo, adverbio, nombre, agente.","why":"Cinco sufijos productivos. Se enseñan por la función, con schwa en las sílabas débiles. El -er agente se distingue del comparativo por la base (verbo vs adjetivo).","minutes":40,"phonemeIds":["schwa"],"morphemeIds":["ly","ful","less","ness","er-agent","er-comp"],"steps":[{"id":"s1","name":"Cinco funciones","minutes":10,"how":"slow → slowly (manera). hope → hopeful / hopeless (lleno / sin). kind → kindness (cualidad). teach → teacher (quien)."},{"id":"s2","name":"El otro -er","minutes":8,"how":"teacher vs bigger. Pregunta ancla: ¿la base es verbo o adjetivo?"},{"id":"s3","name":"Schwa final","minutes":10,"how":"hopeful, kindness, teacher. Las segundas sílabas se comen. Relacionar con el día 5."},{"id":"s4","name":"Partir","minutes":6,"how":"unhelpful, happily, homelessness (si el grupo aguanta: tres piezas)."},{"id":"s5","name":"Nota del método","minutes":6,"how":"¿Cuántos sufijos es demasiados en un día? Recorta a tres si el oído se cierra."}],"listen":["slowly","hopeful","hopeless","kindness","teacher","bigger","unhelpful"],"methodPrompt":"¿Se distinguió -er agente de -er comparativo con la pregunta de la base?","level":"a0-bajo"},
+    {"day":38,"week":6,"phase":"derivacion","title":"Sol + flor = sunflower","hook":"Dos raíces. El acento dice cuál manda.","why":"El compuesto es morfología sin afijo. El acento en la primera raíz (SUNflower) es la pista de que es una palabra, no una frase.","minutes":40,"phonemeIds":[],"morphemeIds":["compound"],"steps":[{"id":"s1","name":"Partir","minutes":10,"how":"sun+flower, bed+room, note+book, rain+coat, black+board, tooth+brush. Glosa de cada raíz."},{"id":"s2","name":"Acento","minutes":10,"how":"SUNflower vs sun FLOWer (una flor al sol). El aprendiz marca la montaña. El acento es la frontera de la palabra."},{"id":"s3","name":"Inventar","minutes":10,"how":"Con raíces ya oídas: book+bag, hand+bag. A0 puede componer si las raíces son suyas."},{"id":"s4","name":"Nota del método","minutes":10,"how":"¿El acento enseñó la estructura mejor que el espacio en blanco (que aún no escribimos)?"}],"listen":["sunflower","bedroom","notebook","raincoat","toothbrush","blackboard"],"methodPrompt":"¿Componer con raíces conocidas produjo formas naturales o calcos del español?","level":"a0-bajo"},
+    {"day":39,"week":6,"phase":"derivacion","title":"a, an, the: piezas mínimas","hook":"Los artículos se oyen schwa. an es un arreglo de boca, no de letra.","why":"a cat /ə/. an apple /ən/ porque apple empieza por vocal. the /ðə/ o /ði/. Se enseña por el oído y el ataque de la palabra siguiente. La regla «an + vocal» es fonológica, y por eso entra ahora, no en el abecedario.","minutes":40,"phonemeIds":["schwa","ð"],"morphemeIds":[],"steps":[{"id":"s1","name":"Tres piezas","minutes":8,"how":"a, an, the. Todas débiles. Glosa: uno no concreto, uno (ante vocal), el conocido."},{"id":"s2","name":"an es de oído","minutes":12,"how":"a cat, an apple, a house, an hour (hour empieza por vocal sonora: /aʊər/). Si hour es demasiado, quédate con apple, egg, orange."},{"id":"s3","name":"the","minutes":10,"how":"the book /ðə/, the apple /ði/. La boca abre más ante vocal. Misma lógica que a/an."},{"id":"s4","name":"Nota del método","minutes":10,"how":"¿Se coló la regla escrita «an + a,e,i,o,u»? Prefiere «an + palabra que empieza por vocal SONORA». Hour vs house es el test."}],"listen":["a cat","an apple","the book","the apple","a house"],"methodPrompt":"¿Hour/house se usó? Si sí, ¿la regla sonora venció a la regla de letras?","level":"a0-bajo"},
+    {"day":40,"week":6,"phase":"derivacion","title":"El código, por fin","hook":"La letra llega cuando el sonido ya es de casa.","why":"Principio del método: el grafema representa un fonema poseído. Hoy se abre el código con un conjunto cerrado: los sonidos estables de las semanas 1–4 y unas pocas letras. No el abecedario en orden.","minutes":40,"phonemeIds":["æ","i","ɪ","p","t","k","s","m","n"],"morphemeIds":[],"steps":[{"id":"s1","name":"Contrato","minutes":6,"how":"«Vamos a dibujar sonidos que ya oyes.» Mostrar 8–10 grafemas, no 26. Ejemplo: m n p t a (de cat) i (de sit) ee (de see) s."},{"id":"s2","name":"Sonido → marca","minutes":12,"how":"Tú dices /m/. El aprendiz señala o traza m. Luego /æ/. Luego junta: m-a-t, mat. Siempre oído primero."},{"id":"s3","name":"Marca → sonido","minutes":12,"how":"Tú muestras mat, sit, pan, ten, see. El aprendiz sintetiza en voz alta. Si duda, se vuelve al oído (tú dices la palabra)."},{"id":"s4","name":"Nota del método","minutes":10,"how":"¿Apareció la tentación del abecedario cantado? Resiste. El orden a-b-c no es el orden del método."}],"listen":["mat","sit","pan","ten","see","man","tap"],"methodPrompt":"¿La síntesis CVC salió porque el oído estaba listo, o se volvió a deletrear a la española?","level":"a0-bajo"},
+    {"day":41,"week":6,"phase":"derivacion","title":"CVC con lo poseído","hook":"Leer es reencontrar un sonido conocido.","why":"Se lee un set controlado: palabras de tres sonidos ya enseñados. Si una letra pide un sonido no poseído, esa palabra no entra. El texto se somete al oído, no al revés.","minutes":40,"phonemeIds":["æ","ɪ","p","t","k","s","m","n","b","d"],"morphemeIds":["plural-s"],"steps":[{"id":"s1","name":"Banco CVC","minutes":10,"how":"mat sit pan ten man tap cap cat bat bad sad. Leer, luego oír el modelo, luego leer otra vez."},{"id":"s2","name":"Plural poseído","minutes":10,"how":"cats, caps, pans, mats. Aplicar /s/ o /z/ según la voz de la base. Primera lectura morfológica real."},{"id":"s3","name":"Una línea","minutes":12,"how":"The cat sat. A man taps. Ten pans. Texto mínimo, ritmo de frase (día 27) + código (día 40) + morfema (día 30)."},{"id":"s4","name":"Nota del método","minutes":8,"how":"Esa línea es el producto del método. Grábala. Compárala con el día 1."}],"listen":["mat","sit","cat","cats","The cat sat","A man taps","Ten pans"],"methodPrompt":"¿La línea se leyó por sonidos o se adivinó por contexto? A0 debe sonar, no adivinar.","level":"a0-bajo"},
+    {"day":42,"week":6,"phase":"derivacion","title":"Texto controlado y retrospectiva","hook":"Cerrar el ciclo A0-bajo: oído, partes, código, frase.","why":"Un texto de ~40 palabras solo con sonidos y morfemas enseñados. Después, retrospectiva del método: qué se queda, qué se cambia, qué se abre en A0-alto.","minutes":40,"phonemeIds":["schwa","æ","s","z"],"morphemeIds":["plural-s","past-ed","ing"],"steps":[{"id":"s1","name":"Leer","minutes":12,"how":"Texto: «A cat sat on a mat. The cat taps a pan. Ten cats ran. A man wanted a cup. He is sitting. The dogs jumped.» Ayuda de oído si se traba. No se añade vocabulario de socorro."},{"id":"s2","name":"Reescucha","minutes":8,"how":"Tú lees el mismo texto. El aprendiz sigue las montañas rítmicas y los morfemas finales."},{"id":"s3","name":"Retrospectiva","minutes":12,"how":"Tres preguntas: ¿qué sonido sigue opaco? ¿qué pieza morfológica ya opera sola? ¿cuándo entran las letras que faltan (sh, th, ee, silent e)?"},{"id":"s4","name":"Plan A0-alto","minutes":8,"how":"Escribir el próximo ciclo: vocales tensas con marca (silent e, teams), th/sh en código, irregulares de alta frecuencia de OÍDO (was, said, of). El método no se acaba: se abre."}],"listen":["A cat sat on a mat","The cat taps a pan","Ten cats ran","He is sitting","The dogs jumped"],"methodPrompt":"Documento de cierre: sonidos opacos, morfemas operativos, primer bloque del siguiente ciclo.","level":"a0-bajo"},
+    {"day":43,"week":7,"phase":"medio-cvc","title":"b que ya se oyó","hook":"El sonido /b/ entra en tinta.","why":"Puerta de A0-medio: solo si The cat sat se lee sin adivinar. Hoy la b de bat, bad, bag. Si el cierre se suaviza, se vuelve al oído, no a otra letra.","minutes":30,"phonemeIds":[],"morphemeIds":[],"steps":[{"id":"s1","name":"Oído","minutes":8,"how":"Oír bat/pat y bag/back. Mano en la garganta: b vibra."},{"id":"s2","name":"Marca","minutes":8,"how":"Mostrar b. «Esto dibuja el golpe que ya oyes.» No se canta el abecedario."},{"id":"s3","name":"Leer","minutes":10,"how":"bat, bad, bag, cab. Luego The bag is bad."},{"id":"s4","name":"Nota del método","minutes":4,"how":"Si cab pierde la b, mañana se repite este grafema."}],"listen":["bat","bad","bag","cab"],"methodPrompt":"¿La b final de cab se oyó, o se cayó?","level":"a0-medio"},
+    {"day":44,"week":7,"phase":"medio-cvc","title":"d entre vocales","hook":"La d inglesa cierra; la española se abre.","why":"dad, did, sad. Entre vocales el español dice una d floja. Aquí hay golpe.","minutes":30,"phonemeIds":[],"morphemeIds":[],"steps":[{"id":"s1","name":"Oído","minutes":8,"how":"Oír dad, did, sad. Contraste con una d española de cada."},{"id":"s2","name":"Marca","minutes":8,"how":"Señalar d al inicio y al final."},{"id":"s3","name":"Leer","minutes":10,"how":"dad, did, sad, mad. A sad man."},{"id":"s4","name":"Nota del método","minutes":4,"how":"Si dad se suaviza, no se abre f mañana."}],"listen":["dad","did","sad","mad"],"methodPrompt":"¿El golpe se sostuvo en dad?","level":"a0-medio"},
+    {"day":45,"week":7,"phase":"medio-cvc","title":"f, diente y aire","hook":"f ya se oyó junto a v. Hoy se escribe.","why":"fat, fit, fan. El diente toca el labio. Sin voz.","minutes":30,"phonemeIds":[],"morphemeIds":[],"steps":[{"id":"s1","name":"Oído","minutes":8,"how":"Oír fan/van. Solo se escribe la sorda."},{"id":"s2","name":"Marca","minutes":8,"how":"f. Diente sobre labio, aire."},{"id":"s3","name":"Leer","minutes":10,"how":"fat, fit, fan, if."},{"id":"s4","name":"Nota del método","minutes":4,"how":"Si f sale como v, se anota y se repite."}],"listen":["fat","fit","fan","if"],"methodPrompt":"¿if conservó la f final?","level":"a0-medio"},
+    {"day":46,"week":7,"phase":"medio-cvc","title":"l que no se vuelve u","hook":"La l final no es una vocal.","why":"lap, lit, let, pal. El español a veces se come la l o la vuelve u.","minutes":30,"phonemeIds":[],"morphemeIds":[],"steps":[{"id":"s1","name":"Oído","minutes":8,"how":"Oír pal, lit, lap. Contar el cierre final."},{"id":"s2","name":"Marca","minutes":8,"how":"l. Punta de la lengua en el reborde."},{"id":"s3","name":"Leer","minutes":10,"how":"lap, lit, let, pal."},{"id":"s4","name":"Nota del método","minutes":4,"how":"Si la l final vocaliza, se queda en este día."}],"listen":["lap","lit","let","pal"],"methodPrompt":"¿pal terminó en l o en u?","level":"a0-medio"},
+    {"day":47,"week":7,"phase":"medio-cvc","title":"h: soplo, no jota, no silencio","hook":"La h española es muda. Esta no.","why":"hat, hit, hot. Ni ouse ni jota. Un soplo suave.","minutes":30,"phonemeIds":[],"morphemeIds":[],"steps":[{"id":"s1","name":"Oído","minutes":8,"how":"Oír hat/at. El soplo es el contraste."},{"id":"s2","name":"Marca","minutes":8,"how":"h. Empañar un vidrio, sin roce rasposo."},{"id":"s3","name":"Leer","minutes":10,"how":"hat, hit, hot. The hat is hot."},{"id":"s4","name":"Nota del método","minutes":4,"how":"Si hot pierde la h, no se pasa a la línea mixta."}],"listen":["hat","hit","hot"],"methodPrompt":"¿La h se calló o se hizo j?","level":"a0-medio"},
+    {"day":48,"week":7,"phase":"medio-cvc","title":"Línea CVC nueva","hook":"Juntar solo lo que ya se lee.","why":"Una frase con b, d, f, l, h y las vocales cortas ya poseídas. Cero palabra de socorro.","minutes":30,"phonemeIds":[],"morphemeIds":[],"steps":[{"id":"s1","name":"Oído","minutes":8,"how":"El adulto lee la línea. El aprendiz señala cada final que oye."},{"id":"s2","name":"Marca","minutes":8,"how":"Sin grafema nuevo. Solo los de esta semana."},{"id":"s3","name":"Leer","minutes":10,"how":"A fat cat sat. The man has a hat. Dad is sad."},{"id":"s4","name":"Nota del método","minutes":4,"how":"Anotar el grafema que se cayó. Ese abre el día 7."}],"listen":["A fat cat sat","The man has a hat","Dad is sad"],"methodPrompt":"¿Se leyó por sonidos o por la primera letra?","level":"a0-medio"},
+    {"day":49,"week":7,"phase":"medio-cvc","title":"Medir el CVC","hook":"Ocho de diez, o no hay dígrafo.","why":"Cierre de la semana. Si un grafema está bajo 8/10, la semana 8 no empieza.","minutes":26,"phonemeIds":[],"morphemeIds":[],"steps":[{"id":"s1","name":"Banco","minutes":12,"how":"Diez palabras mezcladas de la semana. Leer, oír, leer."},{"id":"s2","name":"Criterio","minutes":8,"how":"8/10 sin adivinar. Si no, el mismo grafema mañana, otras palabras."},{"id":"s3","name":"Nota del método","minutes":6,"how":"Escribir el grafema débil. No compensar con sh."}],"listen":["bat","dad","fan","pal","hat","cab","if"],"methodPrompt":"¿Qué grafema se reabre?","level":"a0-medio"},
+    {"day":50,"week":8,"phase":"medio-di","title":"sh ya se oyó","hook":"ship no es sip ni chip.","why":"El sonido /ʃ/ es de la semana 3. Hoy dos letras dibujan un solo sonido.","minutes":30,"phonemeIds":[],"morphemeIds":[],"steps":[{"id":"s1","name":"Oído","minutes":8,"how":"Oír ship/sip y ship/chip. Decidir igual o distinto."},{"id":"s2","name":"Marca","minutes":8,"how":"sh. «Dos letras, un aire ancho.»"},{"id":"s3","name":"Leer","minutes":10,"how":"ship, shop, fish, she."},{"id":"s4","name":"Nota del método","minutes":4,"how":"Si se lee s+h, se repite."}],"listen":["ship","shop","fish","she"],"methodPrompt":"¿sh se leyó letra a letra?","level":"a0-medio"},
+    {"day":51,"week":8,"phase":"medio-di","title":"ch: golpe más roce","hook":"chat no es shat.","why":"chair ya se oyó. La marca ch guarda el golpe.","minutes":30,"phonemeIds":[],"morphemeIds":[],"steps":[{"id":"s1","name":"Oído","minutes":8,"how":"Oír chat/cat y chip/ship."},{"id":"s2","name":"Marca","minutes":8,"how":"ch. Un golpe y un roce, no dos sonidos sueltos."},{"id":"s3","name":"Leer","minutes":10,"how":"chat, chip, much, chin."},{"id":"s4","name":"Nota del método","minutes":4,"how":"Si ch se suaviza a sh, no se abre th."}],"listen":["chat","chip","much","chin"],"methodPrompt":"¿much conservó el golpe final?","level":"a0-medio"},
+    {"day":52,"week":8,"phase":"medio-di","title":"th en tinta","hook":"La lengua ya salía. Ahora se ve.","why":"thin, this, the, three. th sorda y th sonora, la misma marca. La voz decide.","minutes":30,"phonemeIds":[],"morphemeIds":[],"steps":[{"id":"s1","name":"Oído","minutes":8,"how":"Oír thin/tin y this/dis. Mano en la garganta."},{"id":"s2","name":"Marca","minutes":8,"how":"th. Lengua visible. No es t ni s."},{"id":"s3","name":"Leer","minutes":10,"how":"thin, this, the, three. The thin cat."},{"id":"s4","name":"Nota del método","minutes":4,"how":"Si la lengua no sale, la letra no se da por aprendida."}],"listen":["thin","this","the","three"],"methodPrompt":"¿thin salió tink o sink?","level":"a0-medio"},
+    {"day":53,"week":8,"phase":"medio-di","title":"ng sin g fantasma","hook":"sing no es sin-guh.","why":"El velo ya se entrenó. ng es una marca, no n+g.","minutes":30,"phonemeIds":[],"morphemeIds":[],"steps":[{"id":"s1","name":"Oído","minutes":8,"how":"Oír sing/sin. Parar en el velo."},{"id":"s2","name":"Marca","minutes":8,"how":"ng. La boca no se abre a una g."},{"id":"s3","name":"Leer","minutes":10,"how":"sing, thing, king, ring."},{"id":"s4","name":"Nota del método","minutes":4,"how":"Si suena sing-guh, se anota y se repite."}],"listen":["sing","thing","king","ring"],"methodPrompt":"¿Apareció la g al final?","level":"a0-medio"},
+    {"day":54,"week":8,"phase":"medio-di","title":"Línea de dígrafos","hook":"Cuatro marcas, ninguna palabra nueva de oído.","why":"Solo sh, ch, th, ng más CVC ya leído.","minutes":30,"phonemeIds":[],"morphemeIds":[],"steps":[{"id":"s1","name":"Oído","minutes":8,"how":"Oír la línea. Contar dígrafos, no letras."},{"id":"s2","name":"Marca","minutes":8,"how":"Sin marca nueva."},{"id":"s3","name":"Leer","minutes":10,"how":"The fish is on the ship. The king can sing. This chip is thin."},{"id":"s4","name":"Nota del método","minutes":4,"how":"El dígrafo opaco se reabre antes del morfema."}],"listen":["The fish is on the ship","The king can sing","This chip is thin"],"methodPrompt":"¿Qué dígrafo se tragó?","level":"a0-medio"},
+    {"day":55,"week":8,"phase":"medio-di","title":"El morfema sobre el dígrafo","hook":"ships, chats: la -s ya se sabe.","why":"No es vocabulario. Es la -s de A0-bajo pegada a una base que ahora se lee.","minutes":30,"phonemeIds":["s"],"morphemeIds":["plural-s"],"steps":[{"id":"s1","name":"Oído","minutes":8,"how":"Oír ship y ships. El final es /s/ porque p es sorda."},{"id":"s2","name":"Marca","minutes":8,"how":"La base se lee; luego se destapa -s."},{"id":"s3","name":"Leer","minutes":10,"how":"ships, chats, kings. The ships sing."},{"id":"s4","name":"Nota del método","minutes":4,"how":"Si la -s se come, el problema es el morfema, no sh."}],"listen":["ships","chats","kings","things"],"methodPrompt":"¿ships fue /s/ y no /z/?","level":"a0-medio"},
+    {"day":56,"week":8,"phase":"medio-di","title":"Medir los dígrafos","hook":"8/10 o no hay vocal con marca.","why":"Cierre. Una marca, un sonido. Si se deletrea, no cuenta como leído.","minutes":18,"phonemeIds":[],"morphemeIds":[],"steps":[{"id":"s1","name":"Banco","minutes":12,"how":"Ocho palabras. Criterio: el dígrafo es un solo golpe."},{"id":"s2","name":"Nota del método","minutes":6,"how":"El opaco abre el próximo día, cinco minutos, antes de ee."}],"listen":["ship","chat","thin","king","fish","this"],"methodPrompt":"¿Qué dígrafo sigue opaco?","level":"a0-medio"},
+    {"day":57,"week":9,"phase":"medio-marca","title":"ee y ea, la i que ya es tensa","hook":"see y sea suenan igual.","why":"El sonido /i/ es de sheep. Hoy dos marcas. No se abre el pasado de read.","minutes":30,"phonemeIds":[],"morphemeIds":[],"steps":[{"id":"s1","name":"Oído","minutes":8,"how":"Oír see/sit y sea/see. Igual o distinto."},{"id":"s2","name":"Marca","minutes":8,"how":"ee y ea. «Dos marcas, la i tensa.»"},{"id":"s3","name":"Leer","minutes":10,"how":"see, sea, tea, sheep. I see the sea."},{"id":"s4","name":"Nota del método","minutes":4,"how":"Si ea se lee como e española, se repite."}],"listen":["see","sea","tea","sheep"],"methodPrompt":"¿ee se leyó e-e?","level":"a0-medio"}
+  ]
+};
+
+// Morphophonemic engine rules for L1 Spanish speakers
+const PHONOLOGY = {
+  "schwa": { symbol: "ə", name: "Schwa", desc: "Vocal neutra y reducida. Relaja la mandíbula y la lengua.", target: "about, sofa, the" },
+  "i": { symbol: "i", name: "i Tensa", desc: "Sonrisa tensa, lengua arriba. Equivale a sheep.", target: "sheep, see" },
+  "ɪ": { symbol: "ɪ", name: "i Laxa", desc: "Boca relajada, no fuerces la sonrisa. Equivale a ship.", target: "ship, bit" },
+  "æ": { symbol: "æ", name: "a de Gato", desc: "Mandíbula abajo, comisuras a los lados. Ni A ni E.", target: "cat, map" },
+  "ʌ": { symbol: "ʌ", name: "a Corta Central", desc: "Sonido central rápido desde la garganta.", target: "cut, cup" },
+  "ɑ": { symbol: "ɑ", name: "a Abierta Posterior", desc: "Boca abierta relajada como al médico.", target: "hot, father" },
+  "u": { symbol: "u", name: "u Tensa", desc: "Labios muy redondos y proyectados.", target: "fool, too" },
+  "ʊ": { symbol: "ʊ", name: "u Laxa", desc: "Labios ligeramente relajados.", target: "full, book" },
+  "ɛ": { symbol: "ɛ", name: "e Fija", desc: "E abierta y plana sin deslizar.", target: "bed, wet" },
+  "eɪ": { symbol: "eɪ", name: "eï Deslizante", desc: "Comienza en E y se desliza suave hacia I.", target: "day, wait" },
+  "p": { symbol: "p", name: "P Aspirada", desc: "Oclusión bilabial sorda con soplo de aire inicial.", target: "pen, paper" },
+  "b": { symbol: "b", name: "B Sonora", desc: "Oclusión bilabial con vibración de cuerdas vocales.", target: "bat, cab" },
+  "v": { symbol: "v", name: "V Labiodental", desc: "Dientes superiores sobre el labio inferior con vibración.", target: "van, very" },
+  "θ": { symbol: "θ", name: "TH Sorda", desc: "Lengua entre los dientes con soplo libre.", target: "think, thin" },
+  "ð": { symbol: "ð", name: "TH Sonora", desc: "Lengua entre los dientes con vibración.", target: "this, the" },
+  "s": { symbol: "s", name: "S Sorda", desc: "Silbido limpio sin mover la garganta.", target: "sip, cats" },
+  "z": { symbol: "z", name: "Z Sonora", desc: "Zumbido de abeja con voz activa.", target: "zip, dogs" },
+  "ʃ": { symbol: "ʃ", name: "SH Ancha", desc: "Sonido de mandar a callar con labios afuera.", target: "ship, fish" },
+  "ʒ": { symbol: "ʒ", name: "ZH Suave", desc: "Sonido de SH pero agregando voz.", target: "measure, vision" },
+  "tʃ": { symbol: "tʃ", name: "CH Golpeada", desc: "Cierre brusco de T que se abre en SH.", target: "chat, chair" },
+  "dʒ": { symbol: "dʒ", name: "J Fuerte", desc: "Sonido de CH agregando vibración de voz.", target: "job, jump" },
+  "ŋ": { symbol: "ŋ", name: "NG Velar", desc: "Aire por la nariz bloqueando el fondo de la lengua.", target: "sing, thing" }
+};
+
+const MORPHEMES = {
+  "plural-s": { label: "-s (Plural)", rule: "Sorda → /s/ | Sonora → /z/ | Sibilante → /ɪz/", ex: "cats /s/, dogs /z/, boxes /ɪz/" },
+  "3sg-s": { label: "-s (Tercera persona)", rule: "Aplica idéntica regla fonológica que el plural", ex: "walks /s/, runs /z/, watches /ɪz/" },
+  "past-ed": { label: "-ed (Pasado)", rule: "Base sorda → /t/ | Base sonora → /d/ | Base terminada en T/D → /ɪd/", ex: "jumped /t/, played /d/, wanted /ɪd/" },
+  "ing": { label: "-ing (Continuo)", rule: "Sufijo /ɪŋ/ sin pronunciar la G final", ex: "playing /plæɪ.ɪŋ/" },
+  "un": { label: "un- (Prefijo)", rule: "Inversión o negación /ʌn/", ex: "unhappy, unlock" },
+  "re": { label: "re- (Prefijo)", rule: "Repetición /ɹi/", ex: "replay, reread" },
+  "dis": { label: "dis- (Prefijo)", rule: "Oposición /dɪs/", ex: "dislike, disconnect" }
+};
+
+let currentView = { route: "lessons", id: 1 };
+let completedDays = new Set(JSON.parse(localStorage.getItem("morfofono_prog") || "[]"));
+
+function saveProg() {
+  localStorage.setItem("morfofono_prog", JSON.stringify([...completedDays]));
+  updateProgUI();
+}
+
+function updateProgUI() {
+  const total = DATA.LESSONS.length;
+  const count = completedDays.size;
+  const pct = Math.round((count / total) * 100);
+  const bar = document.getElementById("prog-bar");
+  const num = document.getElementById("prog-num");
+  if (bar) bar.style.width = pct + "%";
+  if (num) num.textContent = `${count} / ${total} días (${pct}%)`;
+}
+
+function speak(text) {
+  if (!('speechSynthesis' in window)) {
+    alert("Tu navegador no soporta síntesis de voz.");
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US';
+  u.rate = 0.85;
+  window.speechSynthesis.speak(u);
+}
+
+function practiceListen(word, btnElement) {
+  speak(word);
+  if(btnElement) {
+    btnElement.classList.add("flash-good");
+    setTimeout(() => btnElement.classList.remove("flash-good"), 600);
+  }
+}
+
+function practiceSpeech(targetWord, statusId) {
+  const statusEl = document.getElementById(statusId);
+  const SpeechClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechClass) {
+    statusEl.innerHTML = "<span style='color:var(--warn)'>Reconocimiento de voz no soportado en este navegador.</span>";
+    return;
+  }
+  const recog = new SpeechClass();
+  recog.lang = 'en-US';
+  recog.interimResults = false;
+  statusEl.innerHTML = "<span style='color:var(--accent)'>Escuchando... habla ahora.</span>";
+  recog.start();
+
+  recog.onresult = (e) => {
+    const heard = e.results[0][0].transcript.toLowerCase().trim();
+    const cleanTarget = targetWord.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+    if (heard.includes(cleanTarget) || cleanTarget.includes(heard)) {
+      statusEl.innerHTML = `<span style='color:var(--good);font-weight:600'>¡Excelente! Oído: "${heard}"</span>`;
+    } else {
+      statusEl.innerHTML = `<span style='color:var(--warn)'>Se oyó: "${heard}". Intenta ajustar el rasgo articulatorio.</span>`;
+    }
+  };
+
+  recog.onerror = () => {
+    statusEl.innerHTML = "<span style='color:var(--warn)'>No se pudo procesar la voz. Inténtalo de nuevo.</span>";
+  };
+}
+
+function renderNav() {
+  const sideNav = document.getElementById("side-nav");
+  const botNav = document.getElementById("bot-nav");
+
+  const items = [
+    { route: "lessons", label: "Lecciones", icon: `<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>` },
+    { route: "phonemes", label: "Fonemas", icon: `<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>` },
+    { route: "morphemes", label: "Morfemas", icon: `<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>` }
+  ];
+
+  sideNav.innerHTML = items.map(item => `
+    <button class="${currentView.route === item.route ? 'on' : ''}" onclick="navigate('${item.route}')">
+      <svg class="i">${item.icon}</svg>
+      <span>${item.label}</span>
+    </button>
+  `).join('');
+
+  botNav.innerHTML = items.map(item => `
+    <a href="#" class="${currentView.route === item.route ? 'on' : ''}" onclick="event.preventDefault(); navigate('${item.route}')">
+      <svg class="i">${item.icon}</svg>
+      <span>${item.label}</span>
+    </a>
+  `).join('');
+}
+
+function navigate(route, id = null) {
+  currentView = { route, id };
+  renderNav();
+  renderApp();
+  window.scrollTo(0, 0);
+}
+
+function renderApp() {
+  const app = document.getElementById("app");
+  if (currentView.route === "lessons") {
+    if (currentView.id) {
+      renderLessonDetail(app, currentView.id);
+    } else {
+      renderLessonList(app);
+    }
+  } else if (currentView.route === "phonemes") {
+    renderPhonemes(app);
+  } else if (currentView.route === "morphemes") {
+    renderMorphemes(app);
+  }
+}
+
+function renderLessonList(container) {
+  let html = `
+    <div style="margin-bottom:1.5rem">
+      <span class="kicker">Ruta de Alfabetización</span>
+      <h2>Plan de Estudio Diario</h2>
+      <p class="muted">Avanza en orden. Oído y morfología antes de ver las letras.</p>
+    </div>
+    <div class="grid">
+  `;
+
+  DATA.LESSONS.forEach(l => {
+    const isDone = completedDays.has(l.day);
+    html += `
+      <button class="lesson-link ${isDone ? 'flash-good' : ''}" onclick="navigate('lessons', ${l.day})">
+        <div class="row" style="justify-content:space-between; width:100%">
+          <span class="badge ${l.level === 'a0-bajo' ? 'acc' : ''}">Día ${l.day} • Semana ${l.week}</span>
+          <span class="faint">${l.minutes} min</span>
+        </div>
+        <div style="font-weight:600;font-size:1.05rem;margin-top:.3rem">${l.title}</div>
+        <div class="faint" style="margin-top:.15rem">${l.hook}</div>
+      </button>
+    `;
+  });
+
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+function renderLessonDetail(container, dayNum) {
+  const lesson = DATA.LESSONS.find(l => l.day === dayNum);
+  if (!lesson) {
+    container.innerHTML = "<p>Lección no encontrada.</p>";
+    return;
+  }
+
+  const isDone = completedDays.has(lesson.day);
+
+  let html = `
+    <button class="btn sec sm" onclick="navigate('lessons')" style="margin-bottom:1rem">
+      ← Volver al plan
+    </button>
+    <div style="margin-bottom:1.5rem">
+      <div class="row">
+        <span class="badge acc">Día ${lesson.day} • Semana ${lesson.week}</span>
+        <span class="badge">${lesson.phase.toUpperCase()}</span>
+      </div>
+      <h1 style="margin-top:.4rem">${lesson.title}</h1>
+      <p class="muted" style="font-size:1.1rem;margin-top:.2rem"><i>"${lesson.hook}"</i></p>
+    </div>
+
+    <div class="card" style="padding:1rem;margin-bottom:1.25rem">
+      <b style="color:var(--accent)">Por qué importa este paso:</b>
+      <p style="margin-top:.3rem;font-size:.95rem">${lesson.why}</p>
+    </div>
+
+    <h3>Pasos de la Lección</h3>
+    <div style="margin-top:.5rem">
+  `;
+
+  lesson.steps.forEach((step, idx) => {
+    html += `
+      <div class="step">
+        <div class="dot">${idx + 1}</div>
+        <div>
+          <b>${step.name}</b> <span class="faint">(${step.minutes} min)</span>
+          <p style="font-size:.9rem;margin-top:.2rem;color:var(--ink)">${step.how}</p>
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+
+  if (lesson.listen && lesson.listen.length > 0) {
+    html += `
+      <h3 style="margin-top:1.5rem">Entrenamiento de Oído y Eco</h3>
+      <div class="chips">
+    `;
+    lesson.listen.forEach((item, i) => {
+      html += `
+        <button class="speak" onclick="practiceListen('${item}', this)">
+          <svg class="i"><path d="M11 5L6 9H2v6h4l5 4V5z"></path></svg>
+          <b>${item}</b>
+        </button>
+      `;
+    });
+    html += `</div>`;
+
+    // Interactive speech drill box
+    html += `
+      <div class="interactive-card">
+        <b style="display:block;margin-bottom:.4rem">Práctica Interactiva de Producción</b>
+        <p class="faint" style="margin-bottom:.8rem">Escucha la palabra y valida tu articulación con micrófono.</p>
+        <div class="row">
+          <select id="drill-target" style="padding:.4rem;border-radius:.4rem;border:1px solid var(--border);font:inherit">
+            ${lesson.listen.map(w => `<option value="${w}">${w}</option>`).join('')}
+          </select>
+          <button class="btn pri sm" onclick="practiceSpeech(document.getElementById('drill-target').value, 'speech-feedback')">
+            <svg class="i"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path></svg> Prácticar con Micrófono
+          </button>
+        </div>
+        <div id="speech-feedback" style="margin-top:.6rem;font-size:.85rem"></div>
+      </div>
+    `;
+  }
+
+  html += `
+    <hr class="sep" />
+    <h3>Bitácora del Método</h3>
+    <p class="faint">${lesson.methodPrompt}</p>
+    <textarea id="lesson-note" placeholder="Escribe aquí las observaciones o resistencias detectadas durante la lección..."></textarea>
+    
+    <div class="row" style="margin-top:1rem;justify-content:space-between">
+      <button class="btn ${isDone ? 'sec' : 'pri'}" onclick="toggleComplete(${lesson.day})">
+        ${isDone ? 'Marcar como incompleto' : 'Completar Día ' + lesson.day}
+      </button>
+      ${lesson.day < 57 ? `<button class="btn ghost" onclick="navigate('lessons', ${lesson.day + 1})">Siguiente día →</button>` : ''}
+    </div>
+  `;
+
+  container.innerHTML = html;
+
+  // Restore saved notes if existing
+  const savedNote = localStorage.getItem(`morfofono_note_${lesson.day}`);
+  if (savedNote) {
+    document.getElementById("lesson-note").value = savedNote;
+  }
+  document.getElementById("lesson-note").addEventListener("input", (e) => {
+    localStorage.setItem(`morfofono_note_${lesson.day}`, e.target.value);
+  });
+}
+
+function toggleComplete(day) {
+  if (completedDays.has(day)) {
+    completedDays.delete(day);
+  } else {
+    completedDays.add(day);
+  }
+  saveProg();
+  renderLessonDetail(document.getElementById("app"), day);
+}
+
+function renderPhonemes(container) {
+  let html = `
+    <div style="margin-bottom:1.5rem">
+      <span class="kicker">Inventario Fonológico</span>
+      <h2>Fonemas Clave para Hispanohablantes</h2>
+      <p class="muted">El oído antes que la grafía. Haz clic en cualquier fonema para escuchar ejemplos y rasgos articulatorios.</p>
+    </div>
+    <div class="grid">
+  `;
+
+  Object.keys(PHONOLOGY).forEach(key => {
+    const p = PHONOLOGY[key];
+    html += `
+      <div class="ph">
+        <div class="row" style="justify-content:space-between">
+          <span class="ipa">/${p.symbol}/</span>
+          <b>${p.name}</b>
+        </div>
+        <p style="font-size:.9rem;margin-top:.3rem;color:var(--ink)">${p.desc}</p>
+        <div style="margin-top:.6rem" class="chips">
+          ${p.target.split(',').map(word => `
+            <button class="speak" onclick="speak('${word.trim()}')">
+              <svg class="i"><path d="M11 5L6 9H2v6h4l5 4V5z"></path></svg>
+              <span>${word.trim()}</span>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+function renderMorphemes(container) {
+  let html = `
+    <div style="margin-bottom:1.5rem">
+      <span class="kicker">Morfofonémica</span>
+      <h2>Morfemas Flexivos y Derivativos</h2>
+      <p class="muted">Descompón palabras en piezas de significado y reglas de sonido.</p>
+    </div>
+    <div class="grid">
+  `;
+
+  Object.keys(MORPHEMES).forEach(key => {
+    const m = MORPHEMES[key];
+    html += `
+      <div class="mh">
+        <b style="font-size:1.1rem;color:var(--accent)">${m.label}</b>
+        <p style="margin-top:.3rem;font-size:.95rem"><b>Regla sonora:</b> ${m.rule}</p>
+        <p class="faint" style="margin-top:.2rem"><b>Ejemplos:</b> ${m.ex}</p>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+// Global initialization
+window.addEventListener("DOMContentLoaded", () => {
+  renderNav();
+  renderApp();
+  updateProgUI();
+});
+</script>
+</body>
+</html>
