@@ -231,6 +231,98 @@ let slowMode = false;
 let searchQuery = "";
 let phaseFilter = "ALL";
 let currentPair = null;
+let currentDay = null;
+let studentName = localStorage.getItem("morfofono_student") || "";
+let sentDays = new Set(JSON.parse(localStorage.getItem("morfofono_days_sent") || "[]"));
+
+function setStudentName(v) {
+  studentName = v.trim();
+  localStorage.setItem("morfofono_student", studentName);
+}
+
+const EXPEDIENTE_URL = "https://valerie.base44.app/functions/logMorfofonoSession";
+
+async function sendExpediente(rec) {
+  try {
+    const r = await fetch(EXPEDIENTE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "api_key": "ABVC-PILOTO-2026" },
+      body: JSON.stringify(rec)
+    });
+    const j = await r.json();
+    return j.ok === true;
+  } catch (e) { return false; }
+}
+
+function setExpStatus(msg) {
+  const el = document.getElementById("exp-status");
+  if (el) el.textContent = msg;
+}
+
+async function logDayComplete(day) {
+  if (sentDays.has(day)) { setExpStatus("✅ Este día ya vive en tu expediente"); return; }
+  const l = DATA.LESSONS.find(x => x.day === day);
+  if (!l) return;
+  const note = localStorage.getItem("morfofono_note_" + day) || "";
+  const rec = {
+    topic: "Morfofono Estudio — Día " + day + ": " + l.title,
+    userId: studentName || "Estudiante 0",
+    passed: true,
+    challengeSentence: l.hook,
+    spokenText: note.slice(0, 400),
+    location: "Estudio",
+    sessionId: "est-d" + day + "-" + Date.now()
+  };
+  setExpStatus("Enviando al expediente de la Maestra...");
+  const ok = await sendExpediente(rec);
+  if (ok) {
+    sentDays.add(day);
+    localStorage.setItem("morfofono_days_sent", JSON.stringify([...sentDays]));
+    setExpStatus("✅ Enviado y guardado en tu expediente");
+  } else {
+    const q = JSON.parse(localStorage.getItem("morfofono_pending") || "[]");
+    q.push(rec);
+    localStorage.setItem("morfofono_pending", JSON.stringify(q));
+    setExpStatus("⚠️ Sin red: se enviará solo la próxima vez");
+  }
+}
+
+async function flushPending() {
+  const q = JSON.parse(localStorage.getItem("morfofono_pending") || "[]");
+  if (!q.length) return;
+  const rest = [];
+  for (const rec of q) {
+    if (await sendExpediente(rec)) { continue; }
+    rest.push(rec);
+  }
+  localStorage.setItem("morfofono_pending", JSON.stringify(rest));
+}
+
+async function logMicPractice(target, heard, ok) {
+  if (!currentDay) return;
+  sendExpediente({
+    topic: "Morfofono Estudio — Día " + currentDay + " — eco: " + target,
+    userId: studentName || "Estudiante 0",
+    passed: ok,
+    spokenText: heard,
+    challengeSentence: target,
+    location: "Estudio",
+    sessionId: "est-eco-" + Date.now()
+  });
+}
+
+async function logPairAttempt(guessedSame, ok) {
+  if (!currentDay || !currentPair) return;
+  sendExpediente({
+    topic: "Morfofono Estudio — Día " + currentDay + " — igual/distinto",
+    userId: studentName || "Estudiante 0",
+    passed: ok,
+    spokenText: guessedSame ? "igual" : "distinto",
+    challengeSentence: currentPair.a + " / " + currentPair.b,
+    location: "Estudio",
+    sessionId: "est-par-" + Date.now()
+  });
+}
 
 function saveProg() {
   localStorage.setItem("morfofono_prog", JSON.stringify([...completedDays]));
@@ -294,11 +386,13 @@ function practiceSpeech(targetWord, statusId) {
   recog.onresult = (e) => {
     const heard = e.results[0][0].transcript.toLowerCase().trim();
     const cleanTarget = targetWord.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
-    if (heard.includes(cleanTarget) || cleanTarget.includes(heard)) {
+    const ok = heard.includes(cleanTarget) || cleanTarget.includes(heard);
+    if (ok) {
       statusEl.innerHTML = `<span style='color:var(--good);font-weight:600'>¡Excelente! Oído: "${heard}"</span>`;
     } else {
       statusEl.innerHTML = `<span style='color:var(--warn)'>Se oyó: "${heard}". Intenta ajustar el rasgo articulatorio.</span>`;
     }
+    logMicPractice(cleanTarget, heard, ok);
   };
 
   recog.onerror = () => {
@@ -330,6 +424,7 @@ function judgePair(guessedSame) {
   const res = document.getElementById("pair-feedback");
   if (!currentPair || !res) return;
   const ok = guessedSame === currentPair.same;
+  logPairAttempt(guessedSame, ok);
   res.innerHTML = ok
     ? `<span style='color:var(--good);font-weight:600'>¡Correcto! Se dijo "${currentPair.a}" y "${currentPair.b}".</span>`
     : `<span style='color:var(--warn);font-weight:600'>Atención: se dijo "${currentPair.a}" y "${currentPair.b}".</span>`;
@@ -405,6 +500,7 @@ function renderLessonList(container) {
       <h2>Plan de Estudio Diario</h2>
       <p class="muted">Avanza en orden. Oído y morfología antes de ver las letras.</p>
       <input class="search-bar" type="search" placeholder="Buscar día, título o concepto..." value="${searchQuery}" oninput="searchQuery=this.value;renderLessonList(document.getElementById('app'))" />
+      <input class="search-bar" type="text" placeholder="Tu nombre para el expediente (así te ve la Maestra)" value="${studentName}" oninput="setStudentName(this.value)" />
       <div class="chips">
         ${phases.map(([code, label]) => `
           <button class="chip ${phaseFilter === code ? 'on' : ''}" onclick="phaseFilter='${code}';renderLessonList(document.getElementById('app'))">${label}</button>
@@ -440,6 +536,7 @@ function renderLessonDetail(container, dayNum) {
   }
 
   const isDone = completedDays.has(lesson.day);
+  currentDay = lesson.day;
   const doneSteps = new Set(completedSteps[String(lesson.day)] || []);
 
   let html = `
@@ -544,6 +641,7 @@ function renderLessonDetail(container, dayNum) {
         ${lesson.day < 57 ? `<button class="btn ghost sm" onclick="navigate('lessons', ${lesson.day + 1})">Día ${lesson.day + 1} →</button>` : ''}
       </div>
     </div>
+    <p class="faint" id="exp-status" style="margin-top:.5rem">${sentDays.has(lesson.day) ? '✅ Este día ya vive en tu expediente' : ''}</p>
   `;
 
   container.innerHTML = html;
@@ -558,12 +656,14 @@ function renderLessonDetail(container, dayNum) {
 }
 
 function toggleComplete(day) {
-  if (completedDays.has(day)) {
+  const wasDone = completedDays.has(day);
+  if (wasDone) {
     completedDays.delete(day);
   } else {
     completedDays.add(day);
   }
   saveProg();
+  if (!wasDone) { logDayComplete(day); }
   renderLessonDetail(document.getElementById("app"), day);
 }
 
@@ -673,6 +773,7 @@ window.addEventListener("DOMContentLoaded", () => {
   renderNav();
   renderApp();
   updateProgUI();
+  flushPending();
 });
 </script>
 </body>
