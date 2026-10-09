@@ -15,6 +15,18 @@
   --accent-soft:#dfe6ec; --border:#ddd4c4; --good:#3d5c45; --warn:#8a5a32;
   --shadow: 0 0 0 1px rgba(28,25,21,.06), 0 1px 2px -1px rgba(28,25,21,.06), 0 2px 4px 0 rgba(28,25,21,.04);
   --shadow-h: 0 0 0 1px rgba(28,25,21,.1), 0 1px 2px -1px rgba(28,25,21,.08), 0 6px 16px -8px rgba(28,25,21,.12);
+  --bar:rgba(250,247,240,.95); --step-on:rgba(223,230,236,.75);
+  color-scheme:light;
+}
+
+html.dark {
+  --bg:#14110d; --surface:#1c1813; --surface-2:#262017; --ink:#ece5d8;
+  --muted:#b0a692; --faint:#8a7f6b; --accent:#a9c7e2; --accent-fg:#10141b;
+  --accent-soft:#28313d; --border:#342c20; --good:#86b892; --warn:#d9a05e;
+  --shadow: 0 0 0 1px rgba(0,0,0,.35), 0 1px 2px -1px rgba(0,0,0,.3), 0 2px 4px 0 rgba(0,0,0,.25);
+  --shadow-h: 0 0 0 1px rgba(0,0,0,.45), 0 1px 2px -1px rgba(0,0,0,.35), 0 6px 16px -8px rgba(0,0,0,.5);
+  --bar:rgba(20,17,13,.95); --step-on:rgba(41,49,61,.8);
+  color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Source Sans 3",system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
@@ -45,12 +57,13 @@ nav.side button:hover, nav.bottom a:hover{background:var(--surface-2);color:var(
   aside{display:none}
   .top{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding:.75rem 1rem;background:var(--surface)}
   .top b{font-family:"Newsreader",serif;font-size:1.15rem}
-  nav.bottom{position:fixed;inset:auto 0 0 0;display:flex;justify-content:space-around;border-top:1px solid var(--border);background:rgba(250,247,240,.95);backdrop-filter:blur(8px);padding:.35rem .4rem calc(.35rem + env(safe-area-inset-bottom));z-index:20}
+  nav.bottom{position:fixed;inset:auto 0 0 0;display:flex;justify-content:space-around;border-top:1px solid var(--border);background:var(--bar);backdrop-filter:blur(8px);padding:.35rem .4rem calc(.35rem + env(safe-area-inset-bottom));z-index:20}
   nav.bottom a{flex-direction:column;gap:.15rem;height:auto;font-size:.68rem;padding:.35rem .2rem;align-items:center}
 }
 @media(min-width:800px){nav.bottom{display:none}}
 .page{max-width:44rem;margin:0 auto}
 .banner-img{display:block;width:100%;max-width:44rem;margin:0 auto;border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.35)}
+.theme-btn{height:2.3rem;min-width:2.3rem;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:1.05rem;box-shadow:var(--shadow)}
 .kicker{font-size:.75rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
 .muted{color:var(--muted)} .faint{color:var(--faint);font-size:.75rem}
 .chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem}
@@ -63,7 +76,7 @@ nav.side button:hover, nav.bottom a:hover{background:var(--surface-2);color:var(
 .badge.acc{background:var(--accent-soft);color:var(--accent);font-weight:600}
 .row{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
 .step{width:100%;display:flex;gap:.75rem;text-align:left;border:0;background:var(--surface);box-shadow:var(--shadow);border-radius:.7rem;padding:.85rem 1rem;margin:.45rem 0;transition:background .15s}
-.step.on{background:rgba(223,230,236,.75);outline:1px solid var(--accent)}
+.step.on{background:var(--step-on);outline:1px solid var(--accent)}
 .dot{width:1.5rem;height:1.5rem;border-radius:99px;flex-shrink:0;display:grid;place-items:center;margin-top:.1rem;color:var(--faint);border:1px solid var(--border);font-size:.8rem;font-weight:600}
 .step.on .dot{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;height:2.65rem;padding:0 1rem;border-radius:.5rem;border:0;font-weight:500;font-size:.9rem;text-decoration:none;color:var(--ink)}
@@ -83,6 +96,11 @@ hr.sep{border:0;border-top:1px solid var(--border);margin:1.5rem 0}
 svg.i{width:1rem;height:1rem;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .interactive-card{background:var(--surface);padding:1.15rem;border-radius:.8rem;box-shadow:var(--shadow);margin:1rem 0;border:1px solid var(--border)}
 </style>
+
+<script>
+(function(){try{var t=localStorage.getItem("morfofono_theme");if(!t){t=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light"}if(t==="dark"){document.documentElement.classList.add("dark")}}catch(e){}})();
+</script>
+
 </head>
 <body>
 <div class="wrap">
@@ -94,17 +112,27 @@ svg.i{width:1rem;height:1rem;stroke:currentColor;fill:none;stroke-width:1.8;stro
       <div class="bar"><i id="prog-bar" style="width:0%"></i></div>
       <p class="faint" id="prog-num">0 / 57 días</p>
     </div>
+    <div style="margin-top:.75rem;text-align:center"><button class="theme-btn" data-theme-toggle onclick="toggleTheme()" aria-label="Cambiar tema">🌙</button></div>
   </aside>
   <div style="flex:1;min-width:0;display:flex;flex-direction:column">
     <img class="banner-img" src="assets/banner-oido.jpg" alt="Banner Morfofono: una oreja de la que salen ondas de sonido hacia las palabras phonetic sounds">
     <div class="top">
       <div><b>Morfofono</b><p class="faint" id="top-sub">De A0-bajo a A1-bajo</p></div>
-      <span class="badge acc" id="top-prog-badge">0 / 57 días</span>
+      <div style="display:flex;align-items:center;gap:.5rem"><button class="theme-btn" data-theme-toggle onclick="toggleTheme()" aria-label="Cambiar tema">🌙</button><span class="badge acc" id="top-prog-badge">0 / 57 días</span></div>
     </div>
     <main class="main"><div class="page" id="app"></div></main>
   </div>
 </div>
 <nav class="bottom" id="bot-nav"></nav>
+<script>
+function applyTheme(t){
+  document.documentElement.classList.toggle("dark", t==="dark");
+  try{localStorage.setItem("morfofono_theme", t)}catch(e){}
+  document.querySelectorAll("[data-theme-toggle]").forEach(function(b){ b.textContent = t==="dark" ? "☀️" : "🌙" });
+}
+function toggleTheme(){ applyTheme(document.documentElement.classList.contains("dark") ? "light" : "dark"); }
+applyTheme(document.documentElement.classList.contains("dark") ? "dark" : "light");
+</script>
 
 <script>
 const DATA = {

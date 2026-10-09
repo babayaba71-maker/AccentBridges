@@ -14,6 +14,14 @@
   --muted:#6b6458; --faint:#8c8376; --accent:#3d5a73; --accent-fg:#faf7f0;
   --accent-soft:#dfe6ec; --border:#ddd4c4; --good:#3d5c45; --warn:#8a5a32; --bad:#8a3a32;
   --shadow:0 0 0 1px rgba(28,25,21,.06),0 1px 2px -1px rgba(28,25,21,.06),0 2px 4px 0 rgba(28,25,21,.04);
+  color-scheme:light;
+}
+html.dark {
+  --bg:#14110d; --surface:#1c1813; --surface-2:#262017; --ink:#ece5d8;
+  --muted:#b0a692; --faint:#8a7f6b; --accent:#a9c7e2; --accent-fg:#10141b;
+  --accent-soft:#28313d; --border:#342c20; --good:#86b892; --warn:#d9a05e; --bad:#c77e6f;
+  --shadow:0 0 0 1px rgba(0,0,0,.35),0 1px 2px -1px rgba(0,0,0,.3),0 2px 4px 0 rgba(0,0,0,.25);
+  color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Source Sans 3",system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
@@ -23,7 +31,8 @@ button{font:inherit;cursor:pointer}
 input[type=text],textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--border);border-radius:.5rem;padding:.5rem .65rem;width:100%}
 select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--border);border-radius:.5rem;padding:.5rem .65rem;width:100%}
 .wrap{max-width:44rem;margin:0 auto;padding:1rem 1rem 6rem}
-header.top{padding:.5rem 0 1.25rem}
+header.top{padding:.5rem 0 1.25rem;position:relative}
+.theme-btn{position:absolute;top:.6rem;right:0;height:2.3rem;min-width:2.3rem;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:1.05rem;box-shadow:var(--shadow)}
 header.top b{font-family:"Newsreader",serif;font-size:1.6rem;font-weight:500;display:block}
 header.top span{font-size:.78rem;color:var(--muted)}
 .doctrine{background:var(--accent-soft);border-radius:.7rem;padding:.7rem .9rem;font-size:.85rem;color:var(--accent);margin:.9rem 0}
@@ -88,12 +97,18 @@ nav.bottom button span{display:block;font-size:1.1rem;font-weight:500}
 .chk b{font-weight:600}
 @media print{nav.bottom{display:none}.view{display:block!important}.card{box-shadow:none;border:1px solid var(--border)}}
 </style>
+
+<script>
+(function(){try{var t=localStorage.getItem("morfofono_theme");if(!t){t=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light"}if(t==="dark"){document.documentElement.classList.add("dark")}}catch(e){}})();
+</script>
+
 </head>
 <body>
 <div class="wrap">
   <header class="top">
     <b>Morfofono Diario</b>
     <span id="today">—</span>
+    <button class="theme-btn" data-theme-toggle onclick="toggleTheme()" aria-label="Cambiar tema">🌙</button>
   </header>
 
   <!-- ============ HOY ============ -->
@@ -792,6 +807,16 @@ if(S.studentName){ bqNameEl.value=S.studentName; }
 bqNameEl.addEventListener("input",function(){ S.studentName=bqNameEl.value.trim(); saveState(); });
 refreshCaps(); renderFichas(); renderBanks(); renderBloques();
 })();
+</script>
+
+<script>
+function applyTheme(t){
+  document.documentElement.classList.toggle("dark", t==="dark");
+  try{localStorage.setItem("morfofono_theme", t)}catch(e){}
+  document.querySelectorAll("[data-theme-toggle]").forEach(function(b){ b.textContent = t==="dark" ? "☀️" : "🌙" });
+}
+function toggleTheme(){ applyTheme(document.documentElement.classList.contains("dark") ? "light" : "dark"); }
+applyTheme(document.documentElement.classList.contains("dark") ? "dark" : "light");
 </script>
 </body>
 </html>
