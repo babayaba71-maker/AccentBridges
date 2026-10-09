@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>K6 Smart Hub — AccentBridges</title>
+<style>
+:root{
+  --bg:#f3efe6; --surface:#faf7f0; --surface-2:#ebe4d6; --ink:#1c1915;
+  --muted:#6b6458; --faint:#8c8376; --accent:#3d5a73; --accent-fg:#faf7f0;
+  --accent-soft:#dfe6ec; --border:#ddd4c4; --good:#3d5c45; --warn:#8a5a32; --bad:#8a3a32;
+  --shadow:0 0 0 1px rgba(28,25,21,.06),0 1px 2px -1px rgba(28,25,21,.06),0 2px 4px 0 rgba(28,25,21,.04);
+  color-scheme:light;
+}
+html.dark {
+  --bg:#14110d; --surface:#1c1813; --surface-2:#262017; --ink:#ece5d8;
+  --muted:#b0a692; --faint:#8a7f6b; --accent:#a9c7e2; --accent-fg:#10141b;
+  --accent-soft:#28313d; --border:#342c20; --good:#86b892; --warn:#d9a05e; --bad:#c77e6f;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.serif{font-family:"Newsreader",Georgia,"Times New Roman",serif}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+
+/* ===== Marco general ===== */
+.wrap{max-width:60rem;margin:0 auto;padding:.9rem 1rem calc(1.5rem + env(safe-area-inset-bottom))}
+header.top{display:flex;align-items:center;justify-content:space-between;padding:.25rem 0 .9rem;position:relative}
+header.top .brand b{font-family:"Newsreader",Georgia,serif;font-size:1.45rem;font-weight:500;display:block;line-height:1.1}
+header.top .brand span{font-size:.72rem;color:var(--muted);letter-spacing:.04em}
+.theme-btn{height:2.3rem;min-width:2.3rem;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:1.05rem;box-shadow:var(--shadow);cursor:pointer}
+
+/* ===== Tarjetas ===== */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:1rem 1.1rem;position:relative}
+.card+.card{margin-top:.8rem}
+.eyebrow{font-size:.66rem;font-weight:800;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-bottom:.35rem}
+
+/* ===== Panel de velocidad (héroe) ===== */
+.speed-hero{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:15.5rem;overflow:hidden}
+.speed-hero::before{content:"";position:absolute;inset:10px;border:1px solid var(--accent-soft);border-radius:12px;opacity:.55;pointer-events:none}
+.corner{position:absolute;width:14px;height:14px;border-color:var(--accent);opacity:.9}
+.corner.tl{top:6px;left:6px;border-top:2px solid;border-left:2px solid;border-top-left-radius:8px}
+.corner.tr{top:6px;right:6px;border-top:2px solid;border-right:2px solid;border-top-right-radius:8px}
+.corner.bl{bottom:6px;left:6px;border-bottom:2px solid;border-left:2px solid;border-bottom-left-radius:8px}
+.corner.br{bottom:6px;right:6px;border-bottom:2px solid;border-right:2px solid;border-bottom-right-radius:8px}
+.speed-num{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:5.6rem;font-weight:700;line-height:1;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.speed-num.warm{color:var(--warn)}
+.speed-num.hot{color:var(--bad)}
+.speed-unit{font-size:.95rem;color:var(--muted);letter-spacing:.28em;margin-top:.15rem;text-transform:uppercase}
+.gps-line{font-size:.78rem;color:var(--faint);margin-top:.7rem;text-align:center;min-height:1.1rem}
+.pulse-dot{display:inline-block;width:8px;height:8px;border-radius:99px;background:var(--faint);margin-right:.4rem;vertical-align:1px}
+.pulse-dot.ok{background:var(--good);animation:pulse 1.6s infinite}
+.pulse-dot.weak{background:var(--warn)}
+.pulse-dot.off{background:var(--bad)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ===== Grid de métricas ===== */
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:.85rem .9rem;text-align:center}
+.metric .v{font-family:ui-monospace,Menlo,monospace;font-size:1.5rem;font-weight:600;font-variant-numeric:tabular-nums}
+.metric .l{font-size:.62rem;font-weight:700;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;margin-top:.2rem}
+
+/* ===== Controles ===== */
+.controls{display:flex;gap:.6rem;flex-wrap:wrap}
+.btn{flex:1;min-height:3.1rem;border:none;border-radius:14px;font:inherit;font-weight:700;font-size:.92rem;letter-spacing:.04em;cursor:pointer;padding:.6rem 1rem}
+.btn.primary{background:var(--accent);color:var(--accent-fg)}
+.btn.ghost{background:var(--surface-2);color:var(--ink);border:1px solid var(--border)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.wakelock{margin-top:.55rem;font-size:.72rem;color:var(--faint);text-align:center;min-height:1rem}
+
+/* ===== Ubicación ===== */
+.coords{font-family:ui-monospace,Menlo,monospace;font-size:.8rem;color:var(--muted);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.coords b{color:var(--ink);font-weight:600}
+.acc-badge{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.08em;border-radius:99px;padding:.18rem .6rem}
+.acc-badge.ok{background:var(--accent-soft);color:var(--accent)}
+.acc-badge.weak{color:var(--warn);border:1px solid var(--warn)}
+.acc-badge.off{color:var(--bad);border:1px solid var(--bad)}
+.map-link{display:inline-block;margin-top:.7rem;font-size:.8rem;font-weight:600;color:var(--accent)}
+
+/* ===== Placeholder Valerie ===== */
+.valerie{display:flex;align-items:center;gap:.9rem}
+.valerie .orb{width:3.2rem;height:3.2rem;border-radius:99px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex:none}
+.valerie p{font-size:.8rem;color:var(--muted)}
+.valerie b{color:var(--ink)}
+
+footer.note{margin-top:1rem;font-size:.7rem;color:var(--faint);text-align:center;line-height:1.5}
+
+/* ===== LANDSCAPE (manillar) ===== */
+@media (orientation:landscape) and (max-width:1100px){
+  .wrap{padding:.6rem .9rem;max-width:none}
+  .grid-land{display:grid;grid-template-columns:1.15fr 1fr;gap:.8rem;align-items:stretch}
+  .grid-land .card+.card{margin-top:0}
+  .speed-hero{min-height:100%}
+  .speed-num{font-size:6.8rem}
+  .stack-land{display:flex;flex-direction:column;gap:.6rem}
+  .stack-land .card{padding:.7rem .9rem}
+  .metrics{gap:.6rem}
+  footer.note{display:none}
+}
+@media (max-width:420px){
+  .speed-num{font-size:4.6rem}
+}
+</style>
+<script>
+(function(){try{var t=localStorage.getItem("morfofono_theme");if(!t){t=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light"}if(t==="dark"){document.documentElement.classList.add("dark")}}catch(e){}})();
+</script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <b>K6 Smart Hub</b>
+      <span>ACCENTBRIDGES · HONEY WHALE K6 PRO</span>
+    </div>
+    <button class="theme-btn" data-theme-toggle onclick="toggleTheme()" aria-label="Cambiar tema">🌙</button>
+  </header>
+
+  <div class="grid-land">
+    <!-- VELOCÍMETRO -->
+    <div class="card speed-hero">
+      <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+      <div class="eyebrow">Velocidad actual</div>
+      <div class="speed-num" id="speed">0.0</div>
+      <div class="speed-unit">km/h</div>
+      <div class="gps-line" id="gps-line"><span class="pulse-dot off" id="gps-dot"></span>Esperando señal GPS…</div>
+    </div>
+
+    <div class="stack-land">
+      <!-- MÉTRICAS -->
+      <div class="metrics">
+        <div class="metric"><div class="v" id="dist">0.00</div><div class="l">km</div></div>
+        <div class="metric"><div class="v" id="max">0.0</div><div class="l">máx km/h</div></div>
+        <div class="metric"><div class="v" id="time">00:00</div><div class="l">tiempo</div></div>
+      </div>
+
+      <!-- CONTROLES -->
+      <div class="card">
+        <div class="eyebrow">Trayecto</div>
+        <div class="controls">
+          <button class="btn primary" id="btn-start">▶ Iniciar</button>
+          <button class="btn ghost" id="btn-pause" disabled>⏸ Pausar</button>
+          <button class="btn ghost" id="btn-reset">↺ Reiniciar</button>
+        </div>
+        <div class="wakelock" id="wakelock"></div>
+      </div>
+
+      <!-- UBICACIÓN -->
+      <div class="card">
+        <div class="eyebrow" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Ubicación</span>
+          <span class="acc-badge off" id="acc-badge">SIN SEÑAL</span>
+        </div>
+        <div class="coords">
+          <span>Lat <b id="lat">—</b></span>
+          <span>Lng <b id="lng">—</b></span>
+          <span>±<b id="acc">—</b> m</span>
+        </div>
+        <a class="map-link" id="map-link" href="#" target="_blank" rel="noopener">Ver en Google Maps ↗</a>
+      </div>
+
+      <!-- VALERIE (placeholder) -->
+      <div class="card valerie">
+        <div class="orb">🦴</div>
+        <div>
+          <b>Alma · Copiloto</b>
+          <p>Próximamente: lecciones mientras pedaleas, comandos de voz y conexión con tu expediente AccentBridges.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="note">
+    V1 · Velocímetro GPS independiente. No sustituye el tablero original de la K6 Pro ni interviene en su sistema.<br>
+    Consulta el teléfono solo cuando estés detenido. Casco puesto, ojos en la calle. 🚴‍♂️
+  </footer>
+</div>
+
+<script>
+/* ===== Tema (compartido con la familia AccentBridges) ===== */
+function applyTheme(t){
+  document.documentElement.classList.toggle("dark", t==="dark");
+  try{localStorage.setItem("morfofono_theme", t)}catch(e){}
+  document.querySelectorAll("[data-theme-toggle]").forEach(function(b){ b.textContent = t==="dark" ? "☀️" : "🌙" });
+}
+function toggleTheme(){ applyTheme(document.documentElement.classList.contains("dark") ? "light" : "dark"); }
+applyTheme(document.documentElement.classList.contains("dark") ? "dark" : "light");
+
+/* ===== Estado del trayecto ===== */
+var state = { running:false, startTs:0, elapsed:0, dist:0, max:0, lastFix:null, watchId:null, wakeLock:null };
+
+var el = function(id){ return document.getElementById(id); };
+function fmtTime(ms){
+  var s = Math.floor(ms/1000), m = Math.floor(s/60); s = s%60;
+  return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+}
+function haversine(a, b){
+  var R = 6371000, r = Math.PI/180;
+  var dLat = (b.lat-a.lat)*r, dLng = (b.lng-a.lng)*r;
+  var x = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return 2*R*Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
+}
+
+function setBtns(){
+  el("btn-start").disabled = state.running;
+  el("btn-start").textContent = (state.elapsed>0 && !state.running) ? "▶ Reanudar" : "▶ Iniciar";
+  el("btn-pause").disabled = !state.running;
+}
+
+function updateAccBadge(acc){
+  var b = el("acc-badge"), d = el("gps-dot");
+  el("acc").textContent = acc != null ? acc.toFixed(0) : "—";
+  if(acc == null){ b.textContent = "SIN SEÑAL"; b.className = "acc-badge off"; d.className = "pulse-dot off"; }
+  else if(acc <= 15){ b.textContent = "BUENA"; b.className = "acc-badge ok"; d.className = "pulse-dot ok"; }
+  else if(acc <= 35){ b.textContent = "REGULAR"; b.className = "acc-badge weak"; d.className = "pulse-dot weak"; }
+  else { b.textContent = "DÉBIL"; b.className = "acc-badge off"; d.className = "pulse-dot off"; }
+}
+
+function onFix(pos){
+  var c = pos.coords;
+  el("lat").textContent = c.latitude.toFixed(5);
+  el("lng").textContent = c.longitude.toFixed(5);
+  el("map-link").href = "https://www.google.com/maps?q=" + c.latitude + "," + c.longitude;
+  updateAccBadge(c.accuracy);
+
+  /* velocidad: nativa si existe, si no, derivada */
+  var kmh = null;
+  if(c.speed != null && c.speed >= 0){ kmh = c.speed * 3.6; }
+
+  var fix = { lat:c.latitude, lng:c.longitude, ts:pos.timestamp };
+  if(state.lastFix && kmh == null){
+    var d = haversine(state.lastFix, fix), dt = (fix.ts - state.lastFix.ts)/1000;
+    if(dt > 0.4 && (c.accuracy || 999) <= 30 && d/dt < 35){ kmh = (d/dt) * 3.6; }
+  }
+  state.lastFix = fix;
+
+  if(kmh != null){
+    el("speed").textContent = Math.max(0, kmh).toFixed(1);
+    el("speed").className = kmh >= 30 ? "speed-num hot" : (kmh >= 20 ? "speed-num warm" : "speed-num");
+    if(state.running){
+      if(kmh > state.max){ state.max = kmh; el("max").textContent = state.max.toFixed(1); }
+    }
+  }
+  el("gps-line").innerHTML = '<span class="pulse-dot ' + (state.running ? "ok" : "ok") + '" id="gps-dot"></span>' +
+    (state.running ? "Trayecto activo" : "Señal GPS recibida");
+
+  /* distancia: solo con el trayecto activo */
+  if(state.running && state.prevFix){
+    var dd = haversine(state.prevFix, fix);
+    var dt2 = (fix.ts - state.prevFix.ts)/1000;
+    if((c.accuracy || 999) <= 30 && dd/dt2 < 35){
+      state.dist += dd;
+      el("dist").textContent = (state.dist/1000).toFixed(2);
+    }
+  }
+  state.prevFix = fix;
+  updateAccBadge(c.accuracy);
+}
+
+function onError(e){
+  var msg = e.code === 1 ? "Permiso de ubicación denegado" :
+            e.code === 2 ? "Señal GPS no disponible" :
+            e.code === 3 ? "Tiempo de espera agotado" : "Error de GPS";
+  el("gps-line").innerHTML = '<span class="pulse-dot off"></span>' + msg + " — revisa la ubicación del navegador";
+}
+
+async function requestWakeLock(){
+  try{
+    if("wakeLock" in navigator && state.running){
+      state.wakeLock = await navigator.wakeLock.request("screen");
+      el("wakelock").textContent = "🟢 Pantalla activa durante el trayecto";
+      state.wakeLock.addEventListener("release", function(){ el("wakelock").textContent = ""; });
+    }
+  }catch(err){ el("wakelock").textContent = ""; }
+}
+
+function startGPS(){
+  if(state.watchId == null){
+    if(navigator.geolocation){
+      state.watchId = navigator.geolocation.watchPosition(onFix, onError, { enableHighAccuracy:true, maximumAge:1000, timeout:15000 });
+    } else { onError({code:2}); }
+  }
+}
+
+/* ===== Botones ===== */
+el("btn-start").addEventListener("click", function(){
+  startGPS();
+  if(!state.running){
+    if(state.elapsed === 0){ state.startTs = Date.now(); } else { state.startTs = Date.now() - state.elapsed; }
+    state.running = true; setBtns(); requestWakeLock();
+    el("gps-line").innerHTML = '<span class="pulse-dot ok"></span>Trayecto activo — ¡buen viaje! 🚴‍♂️';
+  }
+});
+el("btn-pause").addEventListener("click", function(){
+  if(state.running){
+    state.elapsed = Date.now() - state.startTs;
+    state.running = false; setBtns();
+    if(state.wakeLock){ state.wakeLock.release().catch(function(){}); state.wakeLock = null; el("wakelock").textContent = ""; }
+    el("gps-line").innerHTML = '<span class="pulse-dot weak"></span>En pausa';
+  }
+});
+el("btn-reset").addEventListener("click", function(){
+  state.running = false; state.elapsed = 0; state.dist = 0; state.max = 0; state.prevFix = null;
+  el("dist").textContent = "0.00"; el("max").textContent = "0.0"; el("time").textContent = "00:00";
+  el("speed").textContent = "0.0"; el("speed").className = "speed-num";
+  setBtns();
+  if(state.wakeLock){ state.wakeLock.release().catch(function(){}); state.wakeLock = null; el("wakelock").textContent = ""; }
+  el("gps-line").innerHTML = '<span class="pulse-dot off"></span>Trayecto reiniciado';
+});
+
+/* reloj del trayecto */
+setInterval(function(){
+  if(state.running){
+    var ms = Date.now() - state.startTs;
+    el("time").textContent = fmtTime(ms);
+  }
+}, 1000);
+
+setBtns();
+startGPS();
+</script>
+</body>
+</html>
