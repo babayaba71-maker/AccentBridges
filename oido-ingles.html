@@ -58,6 +58,8 @@ document.addEventListener("click",e=>{const s=e.target.closest("[data-say]");if(
 let cur,steps,st,ti,sc,tr,done;
 let NAME="";try{NAME=localStorage.getItem("oi2name")||""}catch(e){}
 let TEACH=false;try{TEACH=localStorage.getItem("oi2teacher")=="1"}catch(e){}
+try{if(new URLSearchParams(location.search).get("t")=="ABVC2026"){localStorage.setItem("oi2teacher","1");TEACH=true}}catch(e){}
+let dicTries=0,dicMode="ar",CHB=[],CHL=[],dicLog=[];
 let pendD=0,heard={},repLog=[],repTries=0,repCounted=false;
 function home(){cur=null;const ls=D.L.filter(l=>l.lv==lv),nx=D.L.find(l=>!(PD[l.d]||S[l.d]>=70));
 $.innerHTML=`<h1>🎧 Oído Inglés</h1><p class="m">Primero escucha. Después lee. Al final, escribe.</p>`+(NAME?`<p class="m">🎓 Estudiante: <b>${esc(NAME)}</b> · <button class="lk" onclick="NAME='';try{localStorage.removeItem('oi2name')}catch(e){};home()">cambiar</button></p>`:`<p class="m">🎓 <button class="lk" onclick="namePage()">Escribe tu nombre para el expediente</button></p>`)+(TTS?"":`<p class="no">Este navegador no tiene voz en inglés. Prueba con Chrome o Safari.</p>`)+
@@ -71,7 +73,7 @@ function start(d){T0=Date.now();cur=D.L.find(l=>l.d==d);pendD=d;
 if(!TTS){$.innerHTML=`<div class="top"><button class="lk" onclick="home()" aria-label="Volver al inicio">←</button><span class="m">Audio necesario</span></div><h1>🎧 Esta app entrena el oído</h1><p>Sin voz no hay lección: no queremos resultados adivinados al azar.</p><p class="m">Abre esta página en <b>Chrome</b> (menú ⋮ → "Abrir en Chrome") y revisa que el teléfono no esté silenciado.</p><button class="go alt" onclick="home()">Volver</button>`;return}
 if(!NAME){namePage();return}
 if(d>1&&!(PD[d-1]||S[d-1]>=70)&&!TEACH){const pd=D.L.find(l=>l.d==d-1);$.innerHTML=`<div class="top"><button class="lk" onclick="home()" aria-label="Volver al inicio">←</button><span class="m">🔒 Día bloqueado</span></div><h1>Primero el día ${d-1}</h1><p>El orden es parte del método: oído, palabra, letra, escritura. Para abrir el día ${d} necesitas pasar el día ${d-1} con ${th(d-1)}% o más.</p><button class="go" onclick="start(${d-1})">Ir al día ${d-1}: ${esc(pd.t)}</button><button class="go alt" onclick="home()">Volver a la lista</button>`;return}
-sc={ok:0,tot:0};repLog=[];steps=[["same","Oído","Escucha dos sonidos. ¿Son iguales o distintos?"],["rep","Repite","Escucha y repite en voz alta tres veces."+(SR?" Si el mic no te reconoce, reintenta o salta — saltar queda como no verificado.":"")]];
+sc={ok:0,tot:0};repLog=[];dicLog=[];steps=[["same","Oído","Escucha dos sonidos. ¿Son iguales o distintos?"],["rep","Repite","Escucha y repite en voz alta tres veces."+(SR?" Si el mic no te reconoce, reintenta o salta — saltar queda como no verificado.":"")]];
 if(d>=40)steps.push(["lee","Lectura","Escucha y elige lo que está escrito."],["dic","Dictado","Escucha y escribe."]);
 $.innerHTML=`<div class="top"><button class="lk" onclick="home()" aria-label="Volver al inicio">←</button><span class="m">Día ${d}</span></div><h1>${esc(cur.t)}</h1><p>${esc(cur.h)}</p>${d<40?`<p class="m">Hoy no hay letras: el método primero entrena el oído.</p>`:""}<button class="go" onclick="st=0;step()">Empezar</button>`}
 function step(){const I=cur.l;ti=0;const k=steps[st][0];
@@ -86,17 +88,28 @@ let b=`<div class="top"><button class="lk" onclick="home()" aria-label="Volver a
 if(k=="same"){heard={a:0,b:0};b+=`<div class="row"><button class="sp" data-say="${esc(T.a)}" data-w="a">🔊<br>A</button><button class="sp" data-say="${esc(T.b)}" data-w="b">🔊<br>B</button></div><p class="m" id="hg">Escucha 🔊 A y 🔊 B antes de responder.</p><div class="row"><button class="ans" data-a="1" disabled>Iguales</button><button class="ans" data-a="0" disabled>Distintos</button></div>`;}
 else if(k=="rep")b+=`<button class="sp big" data-say="${esc(T)}">🔊 Escuchar</button>`+spd(T)+(SR?`<button class="go" id="mic" onclick="mic()">🎤 Decirlo yo</button>`:"")+`<button class="go alt" onclick="repSkip()">${SR?"Saltar (no verificado)":"Ya lo repetí"}</button>`;
 else if(k=="lee"){const o=[T,...sh(I2()).filter(w=>w!=T).slice(0,3)];b+=`<button class="sp big" data-say="${esc(T)}">🔊 Escuchar</button>`+sh(o).map(w=>`<button class="opt" data-a="${esc(w)}">${esc(w)}</button>`).join("")}
-else b+=`<button class="sp big" data-say="${esc(T)}">🔊 Escuchar</button><input id="inp" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Escribe lo que oyes" onkeydown="if(event.key=='Enter')ans()"><button class="go" onclick="ans()">Comprobar</button>`;
+else{dicTries=0;CHB=[];CHL=[];
+if(T.includes(" ")){dicMode="es";b+=`<button class="sp big" data-say="${esc(T)}">🔊 Escuchar</button><input id="inp" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Escribe lo que oyes" onkeydown="if(event.key=='Enter')ans()"><button class="go" onclick="ans()">Comprobar</button>`}
+else{dicMode="ar";b+=`<div id="dz"><button class="sp big" data-say="${esc(T)}">🔊 Escuchar</button><div class="row" style="margin:10px 0">${chips(T).map(c=>`<button class="lk ch" style="flex:1;font-size:20px;padding:12px 0" data-c="${c}" onclick="tapCh(this)">${c}</button>`).join("")}</div><div id="cw" style="font-size:26px;letter-spacing:6px;text-align:center;min-height:36px;font-weight:700"></div><div class="row" style="margin:10px 0"><button class="lk" style="flex:1" onclick="bkCh()">⌫</button><button class="go" style="flex:2" onclick="chkCh()">Comprobar</button></div></div>`}}
 $.innerHTML=b+`<div id="fb"></div>`;done=false;
-if(k=="lee"||k=="dic")setTimeout(()=>say(T),300);if(k=="dic")document.getElementById("inp").focus()}
+if(k=="lee"||k=="dic")setTimeout(()=>say(T),300);if(k=="dic"){const ip=document.getElementById("inp");if(ip)ip.focus()}}
 const I2=()=>cur.l.length>=4?cur.l:[...cur.l,...sh(POOL).slice(0,4)];
 function ans(a){if(done)return;const T=tr[ti],k=steps[st][0];let ok,msg="";
 if(k=="same"){ok=(a==1)==!!T.s;msg=cur.d>=40?`A = ${T.a} · B = ${T.b}`:(T.s?"Eran iguales.":"Eran distintos.")}
 else if(k=="lee"){ok=a==T;msg=`Era: ${T}`}
-else{ok=cl(document.getElementById("inp").value)==cl(T);msg=`Se escribe: ${T}`}
+else{dicAns(T);return}
 done=true;sc.tot++;if(ok)sc.ok++;
 document.getElementById("fb").innerHTML=`<p class="${ok?"ok":"no"}">${ok?"✓ Correcto":"✗ Casi"} <span class="m">${esc(msg)}</span></p><button class="go" onclick="nx()">Seguir</button>`;
 document.querySelectorAll(".ans,.opt").forEach(x=>x.disabled=true)}
+function chips(T){const w=cl(T),base=[...w],dec="aeioubdghlmnprst".split("").filter(c=>!w.includes(c));while(base.length<w.length+2)base.push(dec[Math.floor(Math.random()*dec.length)]);return sh(base)}
+function tapCh(el){if(el.disabled)return;el.disabled=true;CHB.push(el.dataset.c);CHL.push(el);document.getElementById("cw").textContent=CHB.join("")}
+function bkCh(){const el=CHL.pop();if(el){CHB.pop();el.disabled=false}document.getElementById("cw").textContent=CHB.join("")}
+function dicDone(T,ok,m){done=true;sc.tot++;if(ok)sc.ok++;dicLog.push({w:T,ok:ok,m:m,n:dicTries+1});document.getElementById("fb").innerHTML=`<p class="${ok?"ok":"no"}">${ok?(m=="ar"?"✅ ¡Armada!":"✅ Correcto"):"✗ Era: "+esc(T)}</p><button class="go" onclick="nx()">Seguir</button>`;document.querySelectorAll(".ans,.opt,.ch").forEach(x=>x.disabled=true)}
+function chkCh(){const T=tr[ti];if(CHB.join("")==cl(T)){dicDone(T,true,"ar");return}dicTries++;const fb=document.getElementById("fb");
+if(dicTries>=2){dicMode="es";document.getElementById("dz").innerHTML=`<button class="sp big" data-say="${esc(T)}">🔊 Escuchar</button><input id="inp" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Escribe lo que oyes" onkeydown="if(event.key=='Enter')ans()"><button class="go" onclick="ans()">Comprobar</button>`;fb.innerHTML=`<p class="no">✗ Casi</p><p class="m">Ahora escríbela. Pista: empieza con «${esc(cl(T)[0])}». Escucha otra vez.</p>`;document.getElementById("inp").focus();return}
+fb.innerHTML=`<p class="no">✗ Casi</p><p class="m">Escucha otra vez y vuelve a armar. Usa ⌫ para borrar.</p>`}
+function dicAns(T){const inp=document.getElementById("inp");if(cl(inp.value)==cl(T)){dicDone(T,true,"es");return}dicTries++;
+if(dicTries>=4){dicDone(T,false,"es");return}const hint=dicTries>=3?cl(T).slice(0,2):cl(T).slice(0,1);document.getElementById("fb").innerHTML=`<p class="no">✗ Casi</p><p class="m">Pista: empieza con «${esc(hint)}…». Escucha otra vez.</p>`;inp.value="";inp.focus()}
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 function mic(){const T=tr[ti],btn=document.getElementById("mic"),fb=document.getElementById("fb");
 repTries++;const r=new SR();r.lang="en-US";r.maxAlternatives=3;btn.textContent="🔴 Escuchando…";btn.disabled=true;
@@ -113,7 +126,7 @@ function repSkip(){if(!repCounted){repCounted=true;sc.tot++;if(!SR){sc.ok++;repL
 function nx(){ti++;if(ti<tr.length)return show();st++;if(st<steps.length)return step();end()}
 const BQ_EP="https://valerie.base44.app/functions/logMorfofonoSession",BQ_KEY="ABVC-PILOTO-2026";
 function bq(p,pass,T){const sid="oi-"+cur.d+"-"+Date.now();
-const rec={topic:"Oído Inglés — Día "+cur.d+": "+cur.t+" ("+cur.lv+")",location:"Culiacán",accuracy:p,passed:pass,spokenText:"oido-ingles · bloques: "+steps.map(s=>s[1]).join("→")+" · "+sc.ok+"/"+sc.tot+(repLog.length?" · rep:"+repLog.map(r=>r.w+(r.ok?"✓":"✗")+(r.t?"("+r.t+")":"")).join(","):"")+" · int:"+AT[cur.d]+" · th:"+T+" · t:"+Math.round((Date.now()-T0)/1000)+"s · sid:"+sid,challengeSentence:(cur.l||[]).slice(0,4).join(", "),userId:NAME||"Estudiante sin nombre",sessionId:sid,date:new Date().toISOString().slice(0,10)};
+const rec={topic:"Oído Inglés — Día "+cur.d+": "+cur.t+" ("+cur.lv+")",location:"Culiacán",accuracy:p,passed:pass,spokenText:"oido-ingles · bloques: "+steps.map(s=>s[1]).join("→")+" · "+sc.ok+"/"+sc.tot+(repLog.length?" · rep:"+repLog.map(r=>r.w+(r.ok?"✓":"✗")+(r.t?"("+r.t+")":"")).join(","):"")+(dicLog.length?" · dic:"+dicLog.map(d=>d.w+(d.ok?"✓":"✗")+"["+d.m+d.n+"]").join(","):"")+" · int:"+AT[cur.d]+" · th:"+T+" · t:"+Math.round((Date.now()-T0)/1000)+"s · sid:"+sid,challengeSentence:(cur.l||[]).slice(0,4).join(", "),userId:NAME||"Estudiante sin nombre",sessionId:sid,date:new Date().toISOString().slice(0,10)};
 try{fetch(BQ_EP,{method:"POST",headers:{"Content-Type":"application/json","api_key":BQ_KEY},body:JSON.stringify(rec)}).then(r=>r.json()).then(j=>{const s=document.getElementById("bq");if(s)s.innerHTML=(j&&j.ok)?"<b>Expediente:</b> ✅ enviado. La Maestra ya lo puede leer.":"<b>Expediente:</b> ⚠️ el servidor no aceptó — repite la lección más tarde."}).catch(()=>{const s=document.getElementById("bq");if(s)s.innerHTML="<b>Expediente:</b> ⚠️ sin conexión — se reintenta al repetir la lección."})}catch(e){}}
 function end(){const p=sc.tot?Math.round(sc.ok/sc.tot*100):100,T=th(cur.d),pass=p>=T;AT[cur.d]=(AT[cur.d]||0)+1;if(pass)PD[cur.d]=1;S[cur.d]=Math.max(S[cur.d]||0,p);save();bq(p,pass,T);const n=D.L.find(l=>l.d==cur.d+1);
 $.innerHTML=`<h1>¡Lección completa!</h1><div class="stars">${p>=90?"⭐⭐⭐":p>=60?"⭐⭐":"⭐"}</div><p style="text-align:center">Acertaste ${sc.ok} de ${sc.tot} (${p}%) · ${pass?"✅ aprobada, umbral "+T+"%":"te faltó para el umbral de "+T+"%"}</p>${repLog.length?`<p class="m" style="text-align:center">🎤 Repite: ${repLog.map(r=>r.w+(r.ok?"✓":"✗")).join(" · ")}</p>`:""}<p class="m" id="bq" style="text-align:center"><b>Expediente:</b> enviando…</p>`+((n&&pass)?`<button class="go" onclick="start(${n.d})">Siguiente: día ${n.d}</button>`:((n&&!pass)?`<p class="m" style="text-align:center">Para abrir el día ${cur.d+1}: pásala con ${th(cur.d)}%. El umbral baja con cada intento — la constancia también cuenta.</p>`:""))+`<button class="go alt" onclick="start(${cur.d})">Repetir lección</button><button class="go alt" onclick="lv='${cur.lv}';home()">Volver a la lista</button>`}
