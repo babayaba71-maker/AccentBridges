@@ -51,7 +51,7 @@ const POOL=[...new Set(D.L.flatMap(l=>l.l))];
 document.addEventListener("click",e=>{const s=e.target.closest("[data-say]");if(s)say(s.dataset.say);const w=e.target.closest("[data-w]");if(w){heard[w.dataset.w]=1;if(heard.a&&heard.b){document.querySelectorAll(".ans").forEach(x=>x.disabled=false);const h=document.getElementById("hg");if(h)h.textContent="Ya oíste A y B. Ahora responde."}}const a=e.target.closest("[data-a]");if(a)ans(a.dataset.a)});
 let cur,steps,st,ti,sc,tr,done;
 let NAME="";try{NAME=localStorage.getItem("oi2name")||""}catch(e){}
-let pendD=0,heard={};
+let pendD=0,heard={},repLog=[],repTries=0,repCounted=false;
 function home(){cur=null;const ls=D.L.filter(l=>l.lv==lv),nx=D.L.find(l=>S[l.d]==null);
 $.innerHTML=`<h1>🎧 Oído Inglés</h1><p class="m">Primero escucha. Después lee. Al final, escribe.</p>`+(NAME?`<p class="m">🎓 Estudiante: <b>${esc(NAME)}</b> · <button class="lk" onclick="NAME='';try{localStorage.removeItem('oi2name')}catch(e){};home()">cambiar</button></p>`:`<p class="m">🎓 <button class="lk" onclick="namePage()">Escribe tu nombre para el expediente</button></p>`)+(TTS?"":`<p class="no">Este navegador no tiene voz en inglés. Prueba con Chrome o Safari.</p>`)+
 (nx?`<button class="go" onclick="start(${nx.d})">Continuar: día ${nx.d} · ${esc(nx.t)}</button>`:"")+
@@ -62,7 +62,7 @@ function setName(){const v=(document.getElementById("nm").value||"").trim();if(!
 function start(d){cur=D.L.find(l=>l.d==d);pendD=d;
 if(!TTS){$.innerHTML=`<div class="top"><button class="lk" onclick="home()" aria-label="Volver al inicio">←</button><span class="m">Audio necesario</span></div><h1>🎧 Esta app entrena el oído</h1><p>Sin voz no hay lección: no queremos resultados adivinados al azar.</p><p class="m">Abre esta página en <b>Chrome</b> (menú ⋮ → "Abrir en Chrome") y revisa que el teléfono no esté silenciado.</p><button class="go alt" onclick="home()">Volver</button>`;return}
 if(!NAME){namePage();return}
-sc={ok:0,tot:0};steps=[["same","Oído","Escucha dos sonidos. ¿Son iguales o distintos?"],["rep","Repite","Escucha y repite en voz alta tres veces."]];
+sc={ok:0,tot:0};repLog=[];steps=[["same","Oído","Escucha dos sonidos. ¿Son iguales o distintos?"],["rep","Repite","Escucha y repite en voz alta tres veces."+(SR?" Si el mic no te reconoce, reintenta o salta — saltar queda como no verificado.":"")]];
 if(d>=40)steps.push(["lee","Lectura","Escucha y elige lo que está escrito."],["dic","Dictado","Escucha y escribe."]);
 $.innerHTML=`<div class="top"><button class="lk" onclick="home()" aria-label="Volver al inicio">←</button><span class="m">Día ${d}</span></div><h1>${esc(cur.t)}</h1><p>${esc(cur.h)}</p>${d<40?`<p class="m">Hoy no hay letras: el método primero entrena el oído.</p>`:""}<button class="go" onclick="st=0;step()">Empezar</button>`}
 function step(){const I=cur.l;ti=0;const k=steps[st][0];
@@ -72,10 +72,10 @@ else if(k=="rep")tr=I.slice(0,8);
 else if(k=="lee")tr=sh(I).slice(0,6);
 else tr=sh(I).sort((a,b)=>a.length-b.length).slice(0,6);
 show()}
-function show(){const T=tr[ti],h=steps[st],k=h[0];
+function show(){const T=tr[ti],h=steps[st],k=h[0];if(k=="rep"){repTries=0;repCounted=false}
 let b=`<div class="top"><button class="lk" onclick="home()" aria-label="Volver al inicio">←</button><span class="m">${st+1}. ${h[1]} · ${ti+1} de ${tr.length}</span></div><div class="bar"><i style="width:${(st+ti/tr.length)/steps.length*100}%"></i></div><p>${h[2]}</p>`;
 if(k=="same"){heard={a:0,b:0};b+=`<div class="row"><button class="sp" data-say="${esc(T.a)}" data-w="a">🔊<br>A</button><button class="sp" data-say="${esc(T.b)}" data-w="b">🔊<br>B</button></div><p class="m" id="hg">Escucha 🔊 A y 🔊 B antes de responder.</p><div class="row"><button class="ans" data-a="1" disabled>Iguales</button><button class="ans" data-a="0" disabled>Distintos</button></div>`;}
-else if(k=="rep")b+=`<button class="sp big" data-say="${esc(T)}">🔊 Escuchar</button>`+(SR?`<button class="go" id="mic" onclick="mic()">🎤 Decirlo yo</button>`:"")+`<button class="go alt" onclick="nx()">${SR?"Saltar":"Ya lo repetí"}</button>`;
+else if(k=="rep")b+=`<button class="sp big" data-say="${esc(T)}">🔊 Escuchar</button>`+(SR?`<button class="go" id="mic" onclick="mic()">🎤 Decirlo yo</button>`:"")+`<button class="go alt" onclick="repSkip()">${SR?"Saltar (no verificado)":"Ya lo repetí"}</button>`;
 else if(k=="lee"){const o=[T,...sh(I2()).filter(w=>w!=T).slice(0,3)];b+=`<button class="sp big" data-say="${esc(T)}">🔊 Escuchar</button>`+sh(o).map(w=>`<button class="opt" data-a="${esc(w)}">${esc(w)}</button>`).join("")}
 else b+=`<button class="sp big" data-say="${esc(T)}">🔊 Escuchar</button><input id="inp" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Escribe lo que oyes" onkeydown="if(event.key=='Enter')ans()"><button class="go" onclick="ans()">Comprobar</button>`;
 $.innerHTML=b+`<div id="fb"></div>`;done=false;
@@ -90,20 +90,21 @@ document.getElementById("fb").innerHTML=`<p class="${ok?"ok":"no"}">${ok?"✓ Co
 document.querySelectorAll(".ans,.opt").forEach(x=>x.disabled=true)}
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 function mic(){const T=tr[ti],btn=document.getElementById("mic"),fb=document.getElementById("fb");
-const r=new SR();r.lang="en-US";r.maxAlternatives=3;btn.textContent="🔴 Escuchando…";btn.disabled=true;
+repTries++;const r=new SR();r.lang="en-US";r.maxAlternatives=3;btn.textContent="🔴 Escuchando…";btn.disabled=true;
 const fin=t=>{btn.disabled=false;btn.textContent="🎤 Intentar de nuevo";fb.innerHTML=t};
-r.onresult=e=>{const al=[...e.results[0]].map(x=>cl(x.transcript)),ok=al.includes(cl(T));
+r.onresult=e=>{const al=[...e.results[0]].map(x=>cl(x.transcript)),ok=al.includes(cl(T));if(ok&&!repCounted){repCounted=true;sc.tot++;sc.ok++;repLog.push({w:T,ok:1,t:repTries})}
 fb.innerHTML=`<p class="${ok?"ok":"no"}">${ok?"✓ Se entendió bien":"✗ "+(cur.d>=40?"Entendí: "+esc(al[0]):"No se entendió. Escucha y prueba otra vez.")}</p>`+(ok?`<button class="go" onclick="nx()">Seguir</button>`:"");btn.disabled=false;btn.textContent=ok?"🎤 Otra vez":"🎤 Intentar de nuevo"};
 r.onerror=e=>fin(`<p class="no">${e.error=="not-allowed"?"Permite el micrófono en el navegador.":"No se oyó nada. Intenta de nuevo."}</p>`);
 r.onnomatch=()=>fin(`<p class="no">No se entendió. Intenta de nuevo.</p>`);
 r.onend=()=>{if(btn.disabled)fin("")};
 try{r.start()}catch(x){fin("")}}
+function repSkip(){if(!repCounted){repCounted=true;sc.tot++;if(!SR){sc.ok++;repLog.push({w:tr[ti],ok:1,self:1})}else{repLog.push({w:tr[ti],ok:0,t:repTries})}}nx()}
 function nx(){ti++;if(ti<tr.length)return show();st++;if(st<steps.length)return step();end()}
 const BQ_EP="https://valerie.base44.app/functions/logMorfofonoSession",BQ_KEY="ABVC-PILOTO-2026";
 function bq(p){const sid="oi-"+cur.d+"-"+Date.now();
-const rec={topic:"Oído Inglés — Día "+cur.d+": "+cur.t+" ("+cur.lv+")",location:"Culiacán",accuracy:p,passed:p>=70,spokenText:"oido-ingles · bloques: "+steps.map(s=>s[1]).join("→")+" · "+sc.ok+"/"+sc.tot+" · sid:"+sid,challengeSentence:(cur.l||[]).slice(0,4).join(", "),userId:NAME||"Estudiante sin nombre",sessionId:sid,date:new Date().toISOString().slice(0,10)};
+const rec={topic:"Oído Inglés — Día "+cur.d+": "+cur.t+" ("+cur.lv+")",location:"Culiacán",accuracy:p,passed:p>=70,spokenText:"oido-ingles · bloques: "+steps.map(s=>s[1]).join("→")+" · "+sc.ok+"/"+sc.tot+(repLog.length?" · rep:"+repLog.map(r=>r.w+(r.ok?"✓":"✗")+(r.t?"("+r.t+")":"")).join(","):"")+" · sid:"+sid,challengeSentence:(cur.l||[]).slice(0,4).join(", "),userId:NAME||"Estudiante sin nombre",sessionId:sid,date:new Date().toISOString().slice(0,10)};
 try{fetch(BQ_EP,{method:"POST",headers:{"Content-Type":"application/json","api_key":BQ_KEY},body:JSON.stringify(rec)}).then(r=>r.json()).then(j=>{const s=document.getElementById("bq");if(s)s.innerHTML=(j&&j.ok)?"<b>Expediente:</b> ✅ enviado. La Maestra ya lo puede leer.":"<b>Expediente:</b> ⚠️ el servidor no aceptó — repite la lección más tarde."}).catch(()=>{const s=document.getElementById("bq");if(s)s.innerHTML="<b>Expediente:</b> ⚠️ sin conexión — se reintenta al repetir la lección."})}catch(e){}}
 function end(){const p=sc.tot?Math.round(sc.ok/sc.tot*100):100;S[cur.d]=Math.max(S[cur.d]||0,p);save();bq(p);const n=D.L.find(l=>l.d==cur.d+1);
-$.innerHTML=`<h1>¡Lección completa!</h1><div class="stars">${p>=90?"⭐⭐⭐":p>=60?"⭐⭐":"⭐"}</div><p style="text-align:center">Acertaste ${sc.ok} de ${sc.tot} (${p}%).</p><p class="m" id="bq" style="text-align:center"><b>Expediente:</b> enviando…</p>`+(n?`<button class="go" onclick="start(${n.d})">Siguiente: día ${n.d}</button>`:"")+`<button class="go alt" onclick="start(${cur.d})">Repetir lección</button><button class="go alt" onclick="lv='${cur.lv}';home()">Volver a la lista</button>`}
+$.innerHTML=`<h1>¡Lección completa!</h1><div class="stars">${p>=90?"⭐⭐⭐":p>=60?"⭐⭐":"⭐"}</div><p style="text-align:center">Acertaste ${sc.ok} de ${sc.tot} (${p}%).</p>${repLog.length?`<p class="m" style="text-align:center">🎤 Repite: ${repLog.map(r=>r.w+(r.ok?"✓":"✗")).join(" · ")}</p>`:""}<p class="m" id="bq" style="text-align:center"><b>Expediente:</b> enviando…</p>`+(n?`<button class="go" onclick="start(${n.d})">Siguiente: día ${n.d}</button>`:"")+`<button class="go alt" onclick="start(${cur.d})">Repetir lección</button><button class="go alt" onclick="lv='${cur.lv}';home()">Volver a la lista</button>`}
 home();
 </script></body></html>
