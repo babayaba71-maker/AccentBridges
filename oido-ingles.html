@@ -104,11 +104,11 @@ document.querySelectorAll(".ans,.opt").forEach(x=>x.disabled=true)}
 function chips(T){const w=cl(T),base=[...w],dec="aeioubdghlmnprst".split("").filter(c=>!w.includes(c));while(base.length<w.length+2)base.push(dec[Math.floor(Math.random()*dec.length)]);return sh(base)}
 function tapCh(el){if(el.disabled)return;el.disabled=true;CHB.push(el.dataset.c);CHL.push(el);document.getElementById("cw").textContent=CHB.join("")}
 function bkCh(){const el=CHL.pop();if(el){CHB.pop();el.disabled=false}document.getElementById("cw").textContent=CHB.join("")}
-function dicDone(T,ok,m){done=true;sc.tot++;if(ok)sc.ok++;dicLog.push({w:T,ok:ok,m:m,n:dicTries+1});document.getElementById("fb").innerHTML=`<p class="${ok?"ok":"no"}">${ok?(m=="ar"?"✅ ¡Armada!":"✅ Correcto"):"✗ Era: "+esc(T)}</p><button class="go" onclick="nx()">Seguir</button>`;document.querySelectorAll(".ans,.opt,.ch").forEach(x=>x.disabled=true)}
-function chkCh(){const T=tr[ti];if(CHB.join("")==cl(T)){dicDone(T,true,"ar");return}dicTries++;const fb=document.getElementById("fb");
+function dicDone(T,ok,m){done=true;sc.tot++;if(ok)sc.ok++;dicLog.push({w:T,ok:ok,m:m,n:dicTries+1});document.getElementById("fb").innerHTML=`<p class="${ok?"ok":"no"}">${ok?(m=="ar"?"✅ ¡Armada!":"✅ Correcto"):"✗ Era: "+esc(T)}</p><button class="go" onclick="nx()">Seguir</button>`;document.querySelectorAll(".ans,.opt,.ch,#dz button").forEach(x=>x.disabled=true)}
+function chkCh(){if(done)return;const T=tr[ti];if(CHB.join("")==cl(T)){dicDone(T,true,"ar");return}dicTries++;const fb=document.getElementById("fb");
 if(dicTries>=2){dicMode="es";document.getElementById("dz").innerHTML=`<button class="sp big" data-say="${esc(T)}">🔊 Escuchar</button><input id="inp" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Escribe lo que oyes" onkeydown="if(event.key=='Enter')ans()"><button class="go" onclick="ans()">Comprobar</button>`;fb.innerHTML=`<p class="no">✗ Casi</p><p class="m">Ahora escríbela. Pista: empieza con «${esc(cl(T)[0])}». Escucha otra vez.</p>`;document.getElementById("inp").focus();return}
 fb.innerHTML=`<p class="no">✗ Casi</p><p class="m">Escucha otra vez y vuelve a armar. Usa ⌫ para borrar.</p>`}
-function dicAns(T){const inp=document.getElementById("inp");if(cl(inp.value)==cl(T)){dicDone(T,true,"es");return}dicTries++;
+function dicAns(T){if(done)return;const inp=document.getElementById("inp");if(cl(inp.value)==cl(T)){dicDone(T,true,"es");return}dicTries++;
 if(dicTries>=4){dicDone(T,false,"es");return}const hint=dicTries>=3?cl(T).slice(0,2):cl(T).slice(0,1);document.getElementById("fb").innerHTML=`<p class="no">✗ Casi</p><p class="m">Pista: empieza con «${esc(hint)}…». Escucha otra vez.</p>`;inp.value="";inp.focus()}
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 function mic(){const T=tr[ti],btn=document.getElementById("mic"),fb=document.getElementById("fb");
