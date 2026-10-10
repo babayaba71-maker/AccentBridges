@@ -82,7 +82,7 @@ const MAZO_TAG={pronombre:"Mazo 1 · Pronombres",to_be:"Mazo 1 · To be",morfema
 const BQ_TAP="https://valerie.base44.app/functions/logFlashcardTap";
 const BQ_SES="https://valerie.base44.app/functions/logMorfofonoSession";
 const KEY="ABVC-PILOTO-2026";
-let NAME="",cur=null,idx=0,ok=0,tot=0,queue=[],repeats=[],tries=0,T0=0;
+let NAME="",cur=null,idx=0,ok=0,tot=0,queue=[],repeats=[],tries=0,T0=0,logS=[];
 
 function say(txt,rate){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang="en-US";u.rate=rate||0.9;const v=speechSynthesis.getVoices().find(v=>/en[-_]US/i.test(v.lang));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
 document.addEventListener("click",()=>{try{speechSynthesis.getVoices()}catch(e){}},{once:true});
@@ -115,7 +115,7 @@ function reveal(){
   });
 }
 function tap(op,btn){
-  tries++;tot++;
+  tries++;tot++;logS.push(cur.senal+":"+(op===cur.correcta?"✓":"✗")+"("+tries+")");
   const good=(op===cur.correcta);
   const id=cur.id+"|"+tries;
   // expediente: cada tap → QuizResponse (señal legible por el ruteador)
@@ -158,7 +158,7 @@ function finish(){
   // sesión → PracticeSession (resumen para la Maestra)
   const sid="fc-"+Date.now();
   const rec={topic:"Flashcards Sentidos+Ser — Muestra (6 tarjetas)",location:"Culiacán",accuracy:acc,passed:acc>=70,
-    spokenText:"flashcards · "+ok+"/"+queue.length+" · señales: "+MAZO_TAG,
+    spokenText:"flashcards · "+ok+"/"+queue.length+" · señales: "+logS.join(", ")+((repeats.length)?" · repite:"+repeats.join(","):" · sin repetidos"),
     challengeSentence:repeats.join(",")||"—",userId:NAME,sessionId:sid};
   try{fetch(BQ_SES,{method:"POST",headers:{"Content-Type":"application/json","api_key":KEY},body:JSON.stringify(rec)})
     .then(r=>r.json()).then(j=>{document.getElementById("bq").innerHTML=(j&&j.ok)?"<b>Expediente:</b> ✅ enviado. La Maestra ya lo puede leer.":"<b>Expediente:</b> ⚠️ el servidor no aceptó — repite más tarde."})
