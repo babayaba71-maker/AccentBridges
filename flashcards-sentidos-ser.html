@@ -102,10 +102,11 @@ function showCard(){
   document.getElementById("score").textContent="⭐ "+ok+"/"+tot;
   setTimeout(()=>say(cur.audio,0.85),400);
 }
+function mezclar(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function reveal(){
   document.getElementById("rev").classList.add("hidden");
   const o=document.getElementById("opts");o.classList.remove("hidden");o.innerHTML="";
-  cur.opts.forEach(op=>{
+  mezclar(cur.opts).forEach(op=>{
     const b=document.createElement("button");b.className="opt";b.textContent=op;
     b.onclick=()=>tap(op,b);o.appendChild(b);
   });
