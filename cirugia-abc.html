@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<title>Cirugía del Abecedario — AccentBridges</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,sans-serif;background:linear-gradient(160deg,#0d1b2a,#1b263b 60%,#2a9d8f 140%);min-height:100vh;color:#fff;display:flex;flex-direction:column;align-items:center;padding:14px;max-width:560px;margin:0 auto}
+h1{font-size:1.2rem;text-align:center;margin:6px 0 2px}
+.ver{font-size:.6rem;color:rgba(255,255,255,.35);text-align:center}
+.sub{font-size:.8rem;color:#a8dadc;text-align:center;margin-bottom:12px}
+.tabs{display:flex;gap:8px;margin-bottom:12px;width:100%}
+.tabbtn{flex:1;border:0;border-radius:12px;padding:10px 6px;font-size:.85rem;font-weight:700;background:rgba(255,255,255,.12);color:#fff;cursor:pointer}
+.tabbtn.active{background:#e9c46a;color:#1b263b}
+.card{background:#fff;color:#1b263b;border-radius:22px;width:100%;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.35);text-align:center;margin-bottom:14px}
+.paso{font-size:.72rem;color:#6c757d;letter-spacing:.5px;text-transform:uppercase;font-weight:700;margin-bottom:10px}
+button{border:0;border-radius:14px;font-size:1rem;font-weight:700;padding:13px 18px;cursor:pointer;transition:transform .1s}
+button:active{transform:scale(.96)}
+.big{background:#2a9d8f;color:#fff;width:100%;font-size:1.05rem}
+.esc{background:#e9c46a;color:#1b263b;width:100%;margin-top:10px}
+.hidden{display:none}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.letra{background:#f1faee;border:3px solid #2a9d8f;border-radius:14px;padding:10px 4px;cursor:pointer}
+.letra .L{font-size:1.5rem;font-weight:900}
+.letra .nom{font-size:.75rem;color:#6c757d}
+.letra .am{font-size:.8rem;font-weight:800;color:#2a9d8f}
+.duo{display:flex;align-items:center;justify-content:center;gap:10px}
+.flecha{font-size:1.3rem;color:#e76f51;font-weight:900}
+.nota{font-size:.85rem;color:#6c757d;line-height:1.5;margin-top:10px;font-style:italic}
+.insight{background:#f1faee;border-radius:14px;padding:12px;font-size:.9rem;line-height:1.5;margin:10px 0;text-align:left}
+.fb{margin-top:10px;font-size:1.05rem;font-weight:800;min-height:1.3em}
+.fb.ok{color:#2a9d8f}.fb.no{color:#e76f51}
+.score{font-size:.85rem;font-weight:800;color:#e9c46a;margin-bottom:8px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.opt{background:#f1faee;color:#1b263b;border:3px solid #2a9d8f;border-radius:14px;font-size:1.4rem;padding:14px}
+.opt.ok{background:#2a9d8f;color:#fff}
+.opt.no{background:#e76f51;color:#fff;border-color:#e76f51}
+.meta{font-size:.8rem;color:#6c757d;line-height:1.5;margin-top:10px}
+</style>
+</head>
+<body>
+<h1>🔬 Cirugía del Abecedario</h1>
+<div class="ver">v1</div>
+<div class="sub">Hispano primero · luego el puente L1 → L2</div>
+<div class="tabs">
+  <button class="tabbtn active" id="tb-hx" onclick="setFase('hx')">🇲🇽 Hispana</button>
+  <button class="tabbtn" id="tb-tr" onclick="setFase('tr')">🌉 Transición</button>
+  <button class="tabbtn" id="tb-qz" onclick="setFase('qz')">🧠 Quiz</button>
+</div>
+
+<!-- FASE 1: HISPANA -->
+<div id="f-hx">
+  <div class="card">
+    <div class="paso">fase 1 · anatomía del alfabeto hispano</div>
+    <div style="font-size:1.05rem;line-height:1.6">Tu alfabeto de toda la vida <b>ya es un mapa de sonidos</b>. Escucha: cada letra tiene un nombre que es una <b>sílaba</b> — consonante con vocal incrustada: <i>e-fe, e-ne, jo-ta, ha-che</i>. Cinco letras son vocales puras: el nombre <b>ES</b> el sonido (a, e, i, o, u).</div>
+    <div class="insight">💡 El hispano nunca memorizó "símbolos mudos": recitó <b>sonidos</b> toda la vida. El español es ortografía casi perfecta: letra = sonido. Los romanos lo dejaron así.</div>
+    <div class="insight">⚠️ La trampa: en el alfabeto <b>gringo</b> ese contrato se rompe. La letra se llama con un <b>diptongo</b> (ei, bi, si...), y el sonido de la letra es OTRA cosa. Hoy operamos esa herida.</div>
+    <button class="esc" onclick="recitar()">🔊 Escuchar el alfabeto hispano</button>
+    <button class="big" style="margin-top:10px" onclick="setFase('tr')">A la mesa de transición →</button>
+    <div class="nota">Toca cada letra para oír su nombre.</div>
+    <div class="grid" id="gridHx"></div>
+  </div>
+</div>
+
+<!-- FASE 2: TRANSICIÓN -->
+<div id="f-tr" class="hidden">
+  <div class="card">
+    <div class="paso">fase 2 · mesa de transición L1 → L2</div>
+    <div style="font-size:.95rem;line-height:1.5">Mismo símbolo, nombre nuevo. Toca la letra: oyes su nombre <b>hispano</b> y luego su nombre <b>americano</b>.</div>
+    <div class="insight">⭐ La trampa estrella: la letra <b>E</b> gringa se llama <b>"i"</b>. Cuando el gringo dice "i" está nombrando la E. Y la vocal "e" como nombre de letra... <b>no existe</b> en su alfabeto.</div>
+    <button class="big" style="margin-top:8px" onclick="setFase('qz')">🧠 Operación terminada — al quiz</button>
+    <div class="nota">Toca cada letra para oír el antes y el después.</div>
+    <div class="grid" id="gridTr"></div>
+  </div>
+</div>
+
+<!-- FASE 3: QUIZ -->
+<div id="f-qz" class="hidden">
+  <div class="card">
+    <div class="paso">fase 3 · ¿qué letra es?</div>
+    <div style="font-size:.9rem;line-height:1.5">La Maestra nombra la letra <b>en americano</b>. Tú eliges cuál es. Esto es el deletreo en acción.</div>
+    <div class="score" id="score"></div>
+    <button class="esc" onclick="decir()">🔊 Escuchar otra vez</button>
+    <div class="opts" id="opts"></div>
+    <div class="fb" id="fb"></div>
+    <div class="nota" id="ancla"></div>
+    <button class="big hidden" id="next" onclick="pregunta()">Siguiente →</button>
+    <div id="fin" class="hidden" style="margin-top:12px">
+      <div style="font-size:1.4rem;font-weight:900;color:#2a9d8f" id="finTxt"></div>
+      <button class="big" style="margin-top:10px" onclick="n=0;ok=0;pregunta()">Otra ronda 🔁</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ====== CIRUGÍA DEL ABECEDARIO (idea y palomita de Seeley, 11-oct-2026) ======
+// Doctrina: hispano primero (nombres-sílaba), luego puente L1→L2 (nombres-diptongo).
+// Secuencia día 40+: cirugía → fichas → spelling bee. Conecta con Canto en Chunks.
+const HX=[["A","a"],["B","be"],["C","ce"],["D","de"],["E","e"],["F","efe"],["G","ge"],["H","hache"],["I","i"],["J","jota"],["K","ka"],["L","ele"],["M","eme"],["N","ene"],["Ñ","eñe"],["O","o"],["P","pe"],["Q","cu"],["R","ere"],["S","ese"],["T","te"],["U","u"],["V","uve"],["W","doble ve"],["X","equis"],["Y","ye"],["Z","zeta"]];
+const TR=[["A","a","ei"],["B","be","bi"],["C","ce","si"],["D","de","di"],["E","e","i"],["F","efe","ef"],["G","ge","yi"],["H","hache","eich"],["I","i","ai"],["J","jota","yei"],["K","ka","kei"],["L","ele","el"],["M","eme","em"],["N","ene","en"],["O","o","ou"],["P","pe","pi"],["Q","cu","kiu"],["R","ere","ar"],["S","ese","es"],["T","te","ti"],["U","u","iu"],["V","uve","vi"],["W","doble ve","dabliu"],["X","equis","eks"],["Y","ye","uai"],["Z","zeta","zi"]];
+const FAMS=[["B","C","D","E","G","P","T","V","Z"],["A","J","K"],["I","Y"],["F","L","M","N","S","X"],["Q","U","W"],["H","R"],["O"]];
+const BQ_TAP="https://valerie.base44.app/functions/logFlashcardTap";
+const BQ_SES="https://valerie.base44.app/functions/logMorfofonoSession";
+const KEY="ABVC-PILOTO-2026";
+let fase="hx",n=0,ok=0,q=null,qLast=-1,tries=0;
+
+function voz(txt,lang,rate){
+  try{const u=new SpeechSynthesisUtterance(txt);u.lang=lang;u.rate=rate||0.9;
+  const vs=speechSynthesis.getVoices();const v=vs.find(v=>new RegExp(lang.replace("-","[-_]"),"i").test(v.lang));if(v)u.voice=v;
+  return u}catch(e){return null}
+}
+function sayEs(t,r){try{speechSynthesis.cancel();speechSynthesis.speak(voz(t,"es-MX",r))}catch(e){}}
+function sayEn(t,r){try{speechSynthesis.cancel();speechSynthesis.speak(voz(t,"en-US",r))}catch(e){}}
+function sayDuo(hx,am){try{speechSynthesis.cancel();const a=voz(hx,"es-MX",0.85);const b=voz(am,"en-US",0.85);if(a)speechSynthesis.speak(a);if(b)speechSynthesis.speak(b)}catch(e){}}
+document.addEventListener("click",()=>{try{speechSynthesis.getVoices()}catch(e){}},{once:true});
+
+function setFase(f){
+  fase=f;
+  ["hx","tr","qz"].forEach(k=>{document.getElementById("f-"+k).classList.toggle("hidden",k!==f);
+    document.getElementById("tb-"+k).classList.toggle("active",k===f)});
+  try{speechSynthesis.cancel()}catch(e){}
+  if(f==="qz"){n=0;ok=0;document.getElementById("fin").classList.add("hidden");pregunta()}
+}
+
+// fase 1: recitar hispano y grid
+function recitar(){try{speechSynthesis.cancel();let d="";HX.forEach(p=>{d+=p[1]+", "});speechSynthesis.speak(voz(d,"es-MX",0.92))}catch(e){}}
+function gridHx(){
+  document.getElementById("gridHx").innerHTML=HX.map(p=>
+    `<div class="letra" onclick="sayEs('${p[1]}')"><div class="L">${p[0]}</div><div class="nom">${p[1]}</div></div>`).join("");
+}
+function gridTr(){
+  document.getElementById("gridTr").innerHTML=TR.map(p=>
+    `<div class="letra" onclick="sayDuo('${p[1]}','${p[2]}')"><div class="L">${p[0]}</div><div class="nom">${p[1]}</div><div class="am">${p[2]}</div></div>`).join("");
+}
+
+// fase 3: quiz — la Maestra dice el nombre AMERICANO
+function mezclar(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function pregunta(){
+  let r;do{r=Math.floor(Math.random()*TR.length)}while(r===qLast&&TR.length>1);qLast=r;
+  q=TR[r];tries=0;n++;
+  document.getElementById("fin").classList.add("hidden");
+  document.getElementById("score").textContent="⭐ "+ok+" de "+(n-1);
+  document.getElementById("fb").textContent="";document.getElementById("fb").className="fb";
+  document.getElementById("ancla").textContent="";
+  document.getElementById("next").classList.add("hidden");
+  const o=document.getElementById("opts");o.innerHTML="";
+  // señuelos: letras con nombres cercanos (no posición fija: mezclar SIEMPRE)
+  const fam=FAMS.find(f=>f.indexOf(q[0])>=0)||TR.map(x=>x[0]);
+  const pool=mezclar(fam.filter(L=>L!==q[0])).slice(0,3);
+  mezclar(pool.concat([q[0]])).forEach(L=>{
+    const b=document.createElement("button");b.className="opt";b.textContent=L;
+    b.onclick=()=>elegir(b,L);o.appendChild(b);
+  });
+  sayEn(q[0],0.8);
+}
+function decir(){sayEn(q[0],0.7)}
+function elegir(b,L){
+  const bien=L===q[0];
+  try{fetch(BQ_TAP,{method:"POST",headers:{"Content-Type":"application/json","api_key":KEY},body:JSON.stringify({studentName:NAME(),quizType:"cirugia",questionId:"abc_"+q[0]+"|"+(tries+1),choice:L,correct:bien,word:q[0],channel:"cirugia"})}).catch(()=>{})}catch(e){}
+  if(bien){
+    b.classList.add("ok");
+    ok++;
+    document.getElementById("fb").textContent="✓ ¡Es la "+q[0]+"!";document.getElementById("fb").className="fb ok";
+    document.getElementById("ancla").textContent="🇲🇽 "+q[1]+" → 🇺🇸 "+q[2];
+    document.getElementById("score").textContent="⭐ "+ok+" de "+n;
+    [...document.querySelectorAll(".opt")].forEach(x=>x.disabled=true);
+    if(n>=13){document.getElementById("fin").classList.remove("hidden");
+      const acc=Math.round(100*ok/n);
+      document.getElementById("finTxt").textContent=acc>=80?"🏆 "+ok+" de "+n+" — ¡operación exitosa!":ok+" de "+n+" — la herida se cierra con práctica 💪";
+      final(acc);
+    }else{document.getElementById("next").classList.remove("hidden")}
+  }else{
+    tries++;
+    b.classList.add("no");b.disabled=true;
+    document.getElementById("fb").textContent="✗ Esa es la "+L+". Escucha otra vez";document.getElementById("fb").className="fb no";
+    sayEn(q[0],0.7);
+  }
+}
+function NAME(){try{return localStorage.getItem("abvc_name")||"Estudiante"}catch(e){return "Estudiante"}}
+function final(acc){
+  const rec={topic:"Cirugía del Abecedario — Quiz Transición (13 preguntas)",location:"Culiacán",accuracy:acc,passed:acc>=70,
+    spokenText:"cirugia · "+ok+"/"+n+" · transicion L1-L2 · sid:abc-"+Date.now(),challengeSentence:"—",userId:NAME(),sessionId:"abc-"+Date.now()};
+  fetch(BQ_SES,{method:"POST",headers:{"Content-Type":"application/json","api_key":KEY},body:JSON.stringify(rec)}).catch(()=>{});
+}
+gridHx();gridTr();
+</script>
+</body>
+</html>
