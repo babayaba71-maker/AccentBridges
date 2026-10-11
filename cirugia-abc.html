@@ -100,7 +100,10 @@ button:active{transform:scale(.96)}
 // Doctrina: hispano primero (nombres-sílaba), luego puente L1→L2 (nombres-diptongo).
 // Secuencia día 40+: cirugía → fichas → spelling bee. Conecta con Canto en Chunks.
 const HX=[["A","a"],["B","be"],["C","ce"],["D","de"],["E","e"],["F","efe"],["G","ge"],["H","hache"],["I","i"],["J","jota"],["K","ka"],["L","ele"],["M","eme"],["N","ene"],["Ñ","eñe"],["O","o"],["P","pe"],["Q","cu"],["R","ere"],["S","ese"],["T","te"],["U","u"],["V","uve"],["W","doble ve"],["X","equis"],["Y","ye"],["Z","zeta"]];
-const TR=[["A","a","ei"],["B","be","bi"],["C","ce","si"],["D","de","di"],["E","e","i"],["F","efe","ef"],["G","ge","yi"],["H","hache","eich"],["I","i","ai"],["J","jota","yei"],["K","ka","kei"],["L","ele","el"],["M","eme","em"],["N","ene","en"],["O","o","ou"],["P","pe","pi"],["Q","cu","kiu"],["R","ere","ar"],["S","ese","es"],["T","te","ti"],["U","u","iu"],["V","uve","vi"],["W","doble ve","dabliu"],["X","equis","eks"],["Y","ye","uai"],["Z","zeta","zi"]];
+const TR=[["A","a","ei","ay"],["B","be","bi","bee"],["C","ce","si","see"],["D","de","di","dee"],["E","e","i","ee"],["F","efe","ef","ef"],["G","ge","yi","gee"],["H","hache","eich","aitch"],["I","i","ai","eye"],["J","jota","yei","jay"],["K","ka","kei","kay"],["L","ele","el","el"],["M","eme","em","em"],["N","ene","en","en"],["O","o","ou","oh"],["P","pe","pi","pee"],["Q","cu","kiu","cue"],["R","ere","ar","ar"],["S","ese","es","ess"],["T","te","ti","tee"],["U","u","iu","you"],["V","uve","vi","vee"],["W","doble ve","dabliu","double you"],["X","equis","eks","ex"],["Y","ye","uai","why"],["Z","zeta","zi","zee"]];
+// campo 4 = nombre de letra escrito como PALABRA inglesa (bee, see, tee...)
+// doctrina TTS (descubierta por Seeley 11-oct): letra suelta = token ambiguo,
+// la voz cae a su fonologia dominante y destroza los nombres con i. Palabra completa, jamas simbolo.
 const FAMS=[["B","C","D","E","G","P","T","V","Z"],["A","J","K"],["I","Y"],["F","L","M","N","S","X"],["Q","U","W"],["H","R"],["O"]];
 const BQ_TAP="https://valerie.base44.app/functions/logFlashcardTap";
 const BQ_SES="https://valerie.base44.app/functions/logMorfofonoSession";
@@ -133,7 +136,7 @@ function gridHx(){
 }
 function gridTr(){
   document.getElementById("gridTr").innerHTML=TR.map(p=>
-    `<div class="letra" onclick="sayDuo('${p[1]}','${p[2]}')"><div class="L">${p[0]}</div><div class="nom">${p[1]}</div><div class="am">${p[2]}</div></div>`).join("");
+    `<div class="letra" onclick="sayDuo('${p[1]}','${p[3]}')"><div class="L">${p[0]}</div><div class="nom">${p[1]}</div><div class="am">${p[2]}</div></div>`).join("");
 }
 
 // fase 3: quiz — la Maestra dice el nombre AMERICANO
@@ -154,9 +157,9 @@ function pregunta(){
     const b=document.createElement("button");b.className="opt";b.textContent=L;
     b.onclick=()=>elegir(b,L);o.appendChild(b);
   });
-  sayEn(q[0],0.8);
+  sayEn(q[3],0.8);
 }
-function decir(){sayEn(q[0],0.7)}
+function decir(){sayEn(q[3],0.7)}
 function elegir(b,L){
   const bien=L===q[0];
   try{fetch(BQ_TAP,{method:"POST",headers:{"Content-Type":"application/json","api_key":KEY},body:JSON.stringify({studentName:NAME(),quizType:"cirugia",questionId:"abc_"+q[0]+"|"+(tries+1),choice:L,correct:bien,word:q[0],channel:"cirugia"})}).catch(()=>{})}catch(e){}
@@ -175,7 +178,7 @@ function elegir(b,L){
   }else{
     tries++;
     b.classList.add("no");b.disabled=true;
-    sayEn(q[0],0.7);
+    sayEn(q[3],0.7);
     if(tries>=2){ // doctrina: a los 2 fallos se revela
       [...document.querySelectorAll(".opt")].forEach(x=>{x.disabled=true;if(x.textContent===q[0])x.classList.add("ok")});
       document.getElementById("fb").textContent="✗ Era la "+q[0];document.getElementById("fb").className="fb no";
