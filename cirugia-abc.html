@@ -175,8 +175,19 @@ function elegir(b,L){
   }else{
     tries++;
     b.classList.add("no");b.disabled=true;
-    document.getElementById("fb").textContent="✗ Esa es la "+L+". Escucha otra vez";document.getElementById("fb").className="fb no";
     sayEn(q[0],0.7);
+    if(tries>=2){ // doctrina: a los 2 fallos se revela
+      [...document.querySelectorAll(".opt")].forEach(x=>{x.disabled=true;if(x.textContent===q[0])x.classList.add("ok")});
+      document.getElementById("fb").textContent="✗ Era la "+q[0];document.getElementById("fb").className="fb no";
+      document.getElementById("ancla").textContent="🇲🇽 "+q[1]+" → 🇺🇸 "+q[2];
+      if(n>=13){document.getElementById("fin").classList.remove("hidden");
+        const acc=Math.round(100*ok/n);
+        document.getElementById("finTxt").textContent=acc>=80?"🏆 "+ok+" de "+n+" — ¡operación exitosa!":ok+" de "+n+" — la herida se cierra con práctica 💪";
+        final(acc);
+      }else{document.getElementById("next").classList.remove("hidden")}
+    }else{
+      document.getElementById("fb").textContent="✗ Esa es la "+L+". Escucha otra vez";document.getElementById("fb").className="fb no";
+    }
   }
 }
 function NAME(){try{return localStorage.getItem("abvc_name")||"Estudiante"}catch(e){return "Estudiante"}}
