@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Flashcards — Mazo 0 · Colores y Números</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,sans-serif;background:linear-gradient(160deg,#0d1b2a,#1b263b 60%,#2a9d8f 140%);min-height:100vh;color:#fff;display:flex;flex-direction:column;align-items:center;padding:14px;max-width:520px;margin:0 auto}
+h1{font-size:1.25rem;text-align:center;margin:6px 0 2px}
+.sub{font-size:.8rem;color:#a8dadc;text-align:center;margin-bottom:10px}
+.card{background:#fff;color:#1b263b;border-radius:22px;width:100%;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.35);text-align:center}
+#face{width:100%;height:40vh;border-radius:14px;border:4px solid rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;font-size:8rem;font-weight:900;color:#1b263b;pointer-events:none}
+.paso{font-size:.72rem;color:#6c757d;margin:10px 0 6px;letter-spacing:.5px;text-transform:uppercase;font-weight:700}
+button{border:0;border-radius:14px;font-size:1rem;font-weight:700;padding:13px 18px;cursor:pointer;transition:transform .1s}
+button:active{transform:scale(.96)}
+.big{background:#2a9d8f;color:#fff;width:100%;font-size:1.05rem}
+.listen{background:#e9c46a;color:#1b263b}
+.hidden{display:none}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.opt{background:#f1faee;color:#1b263b;border:3px solid #2a9d8f;font-size:1.15rem;padding:15px}
+.opt.ok{background:#2a9d8f;color:#fff}
+.opt.no{background:#e76f51;color:#fff;border-color:#e76f51}
+.veri{font-size:.85rem;color:#6c757d;margin-top:8px;font-style:italic}
+.fb{margin-top:12px;font-size:1.05rem;font-weight:800;min-height:1.4em}
+.fb.ok{color:#2a9d8f}.fb.no{color:#e76f51}
+.next{background:#1b263b;color:#fff;margin-top:12px;width:100%}
+input{width:100%;border:3px solid #2a9d8f;border-radius:14px;padding:13px;font-size:1rem;margin:8px 0}
+.end{font-size:1.6rem;font-weight:900;color:#2a9d8f;margin:14px 0 4px}
+.meta{font-size:.8rem;color:#6c757d;line-height:1.5;margin-top:10px}
+.bq{margin-top:10px;font-size:.8rem;color:#264653}
+.score{position:absolute;top:10px;right:12px;background:rgba(255,255,255,.15);border-radius:10px;padding:4px 10px;font-size:.75rem;font-weight:700}
+.wrap{position:relative;width:100%}
+</style>
+</head>
+<body>
+<div class="wrap"><span class="score" id="score"></span></div>
+<h1>🎴 Mazo 0 · Colores y Números</h1>
+<div class="sub">Alfabetización cero — mira, escucha y elige</div>
+
+<!-- PANTALLA 0: nombre -->
+<div class="card" id="p0">
+  <div class="paso">antes de empezar</div>
+  <h2 style="margin:8px 0">¿Cómo te llamas?</h2>
+  <input id="name" placeholder="Tu nombre" autocomplete="off">
+  <button class="big" onclick="start()">¡Empezar! 🎴</button>
+  <div class="meta">Mira la tarjeta, escucha el inglés y elige.<br>Piensa tu respuesta ANTES de ver las opciones 😉</div>
+</div>
+
+<!-- PANTALLA 1: tarjeta -->
+<div class="card hidden" id="p1">
+  <div class="paso" id="mazoTag"></div>
+  <div id="face"></div>
+  <button class="listen" style="margin-top:10px;width:100%" onclick="say(cur.audio,0.85)">🔊 Escuchar</button>
+  <button class="big hidden" id="rev" style="margin-top:10px" onclick="reveal()">Ya pensé mi respuesta 👇</button>
+  <div class="opts hidden" id="opts"></div>
+  <div class="fb" id="fb"></div>
+  <div class="veri hidden" id="veri"></div>
+  <button class="next hidden" id="next" onclick="nx()">Siguiente tarjeta →</button>
+</div>
+
+<!-- PANTALLA 2: final -->
+<div class="card hidden" id="p2">
+  <div class="end" id="endTitle"></div>
+  <div id="endMsg" style="font-size:.95rem;line-height:1.5"></div>
+  <div class="bq" id="bq"></div>
+  <button class="big" style="margin-top:14px" onclick="location.reload()">Jugar otra vez 🔁</button>
+</div>
+
+<script>
+// ====== MAZO 0 — ALFABETIZACIÓN CERO (idea de Seeley, 10-oct-2026) ======
+// 10 colores + 10 números. Caras 100% en código: $0 de imágenes.
+// Enseña la MECÁNICA de la tarjeta y mide qué trae de casa el alumno.
+const DECK=[
+// colores
+{"id":"c_red","senal":"mazo0","tipo":"color","color":"#d32f2f","audio":"red.","opts":["red","black","brown","green"],"correcta":"red","veri":"rojo"},
+{"id":"c_blue","senal":"mazo0","tipo":"color","color":"#1976d2","audio":"blue.","opts":["blue","black","brown","green"],"correcta":"blue","veri":"azul"},
+{"id":"c_green","senal":"mazo0","tipo":"color","color":"#388e3c","audio":"green.","opts":["green","blue","red","black"],"correcta":"green","veri":"verde"},
+{"id":"c_yellow","senal":"mazo0","tipo":"color","color":"#fbc02d","audio":"yellow.","opts":["yellow","orange","brown","green"],"correcta":"yellow","veri":"amarillo"},
+{"id":"c_orange","senal":"mazo0","tipo":"color","color":"#f57c00","audio":"orange.","opts":["orange","yellow","red","brown"],"correcta":"orange","veri":"naranja"},
+{"id":"c_purple","senal":"mazo0","tipo":"color","color":"#7b1fa2","audio":"purple.","opts":["purple","blue","pink","brown"],"correcta":"purple","veri":"morado"},
+{"id":"c_pink","senal":"mazo0","tipo":"color","color":"#f06292","audio":"pink.","opts":["pink","purple","red","orange"],"correcta":"pink","veri":"rosa"},
+{"id":"c_brown","senal":"mazo0","tipo":"color","color":"#6d4c41","audio":"brown.","opts":["brown","orange","black","red"],"correcta":"brown","veri":"café"},
+{"id":"c_black","senal":"mazo0","tipo":"color","color":"#212121","audio":"black.","opts":["black","blue","brown","purple"],"correcta":"black","veri":"negro"},
+{"id":"c_white","senal":"mazo0","tipo":"color","color":"#ffffff","audio":"white.","opts":["white","yellow","green","pink"],"correcta":"white","veri":"blanco"},
+// números
+{"id":"n_one","senal":"mazo0","tipo":"num","num":1,"audio":"one.","opts":["one","two","ten","five"],"correcta":"one","veri":"uno"},
+{"id":"n_two","senal":"mazo0","tipo":"num","num":2,"audio":"two.","opts":["two","one","ten","twelve"],"correcta":"two","veri":"dos"},
+{"id":"n_three","senal":"mazo0","tipo":"num","num":3,"audio":"three.","opts":["three","tree","two","ten"],"correcta":"three","veri":"tres"},
+{"id":"n_four","senal":"mazo0","tipo":"num","num":4,"audio":"four.","opts":["four","for","five","fourteen"],"correcta":"four","veri":"cuatro"},
+{"id":"n_five","senal":"mazo0","tipo":"num","num":5,"audio":"five.","opts":["five","four","fine","fifty"],"correcta":"five","veri":"cinco"},
+{"id":"n_six","senal":"mazo0","tipo":"num","num":6,"audio":"six.","opts":["six","seven","sixty","sixteen"],"correcta":"six","veri":"seis"},
+{"id":"n_seven","senal":"mazo0","tipo":"num","num":7,"audio":"seven.","opts":["seven","six","eleven","seventy"],"correcta":"seven","veri":"siete"},
+{"id":"n_eight","senal":"mazo0","tipo":"num","num":8,"audio":"eight.","opts":["eight","ate","nine","eighteen"],"correcta":"eight","veri":"ocho"},
+{"id":"n_nine","senal":"mazo0","tipo":"num","num":9,"audio":"nine.","opts":["nine","ninety","ten","night"],"correcta":"nine","veri":"nueve"},
+{"id":"n_ten","senal":"mazo0","tipo":"num","num":10,"audio":"ten.","opts":["ten","nine","twelve","ton"],"correcta":"ten","veri":"diez"}
+];
+const MAZO_TAG={mazo0:"Mazo 0 · Colores y Números"};
+const BQ_TAP="https://valerie.base44.app/functions/logFlashcardTap";
+const BQ_SES="https://valerie.base44.app/functions/logMorfofonoSession";
+const KEY="ABVC-PILOTO-2026";
+let NAME="",queue=[],idx=0,ok=0,tot=0,cur=null,tries=0,T0=0,logS=[],repeats=[];
+const MODO_OIDO=document.location.search.includes("modo=oido");
+if(MODO_OIDO){document.querySelector(".sub").textContent="🎧 Escucha y decifra";}
+
+function say(t,rate){
+  try{speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t);u.lang="en-US";u.rate=rate||0.9;
+  const v=speechSynthesis.getVoices().find(v=>/en[-_]US/i.test(v.lang));if(v)u.voice=v;
+  speechSynthesis.speak(u);}catch(e){}
+}
+document.addEventListener("click",()=>{try{speechSynthesis.getVoices()}catch(e){}},{once:true});
+
+function start(){
+  NAME=(document.getElementById("name").value||"Estudiante").trim().slice(0,40);
+  queue=DECK.slice();idx=0;ok=0;tot=0;T0=Date.now();logS=[];repeats=[];
+  document.getElementById("p0").classList.add("hidden");
+  showCard();
+}
+function showCard(){
+  cur=queue[idx];tries=0;
+  if(MODO_OIDO){document.getElementById("mazoTag").textContent="🎧 · "+(idx+1)+" de "+queue.length;}
+  else{document.getElementById("mazoTag").textContent=MAZO_TAG[cur.senal]+" · "+(idx+1)+" de "+queue.length;}
+  const f=document.getElementById("face");
+  if(cur.tipo==="color"){f.style.background=cur.color;f.textContent="";}
+  else{f.style.background="#fff";f.textContent=cur.num;}
+  document.getElementById("p1").classList.remove("hidden");
+  document.getElementById("rev").classList.remove("hidden");
+  document.getElementById("opts").classList.add("hidden");document.getElementById("opts").innerHTML="";
+  document.getElementById("fb").textContent="";document.getElementById("fb").className="fb";
+  document.getElementById("veri").classList.add("hidden");
+  document.getElementById("next").classList.add("hidden");
+  say(cur.audio,0.85);
+}
+function reveal(){
+  document.getElementById("rev").classList.add("hidden");
+  const o=document.getElementById("opts");o.classList.remove("hidden");o.innerHTML="";
+  cur.opts.forEach(op=>{
+    const b=document.createElement("button");b.className="opt";b.textContent=op;
+    b.onclick=()=>tap(b,op);o.appendChild(b);
+  });
+}
+function tap(b,op){
+  const bien=op===cur.correcta;
+  try{fetch(BQ_TAP,{method:"POST",headers:{"Content-Type":"application/json","api_key":KEY},body:JSON.stringify({studentName:NAME,quizType:"flashcard",questionId:cur.id+"|"+(tries+1),choice:op,correct:bien,word:cur.correcta,channel:"mazo0"})}).catch(()=>{})}catch(e){}
+  if(bien){
+    b.classList.add("ok");
+    document.getElementById("fb").textContent="✓ ¡"+op+"!";document.getElementById("fb").className="fb ok";
+    document.getElementById("veri").classList.remove("hidden");
+    document.getElementById("veri").textContent="("+cur.veri+")";
+    if(tries===0){ok++;tot++;logS.push("mazo0:✓("+cur.id+")")}else{logS.push("mazo0:✓("+cur.id+","+tries+"f)");if(repeats.indexOf(cur.id)<0)repeats.push(cur.id)}
+    cur.opts.forEach(o=>{if(o!==op){const bs=[...document.querySelectorAll(".opt")].find(x=>x.textContent===o);if(bs)bs.disabled=true}});
+    b.disabled=false;
+    document.getElementById("next").classList.remove("hidden");
+    document.getElementById("score").textContent="⭐ "+ok+"/"+tot;
+  }else{
+    tries++;tot++;
+    b.classList.add("no");b.disabled=true;
+    document.getElementById("fb").textContent="✗ Escucha otra vez";document.getElementById("fb").className="fb no";
+    say(cur.audio,0.7);
+    if(tries>=2){
+      logS.push("mazo0:✗("+cur.id+")");
+      if(repeats.indexOf(cur.id)<0)repeats.push(cur.id);
+      [...document.querySelectorAll(".opt")].forEach(x=>{x.disabled=true;if(x.textContent===cur.correcta)x.classList.add("ok")});
+      document.getElementById("fb").textContent="✗ Era: "+cur.correcta;document.getElementById("fb").className="fb no";
+      document.getElementById("veri").classList.remove("hidden");
+      document.getElementById("veri").textContent="("+cur.veri+")";
+      queue.push(cur); // re-encola al final
+      document.getElementById("next").classList.remove("hidden");
+    }
+  }
+}
+function nx(){
+  idx++;
+  if(idx<queue.length){showCard()}
+  else finish();
+}
+function finish(){
+  document.getElementById("p1").classList.add("hidden");
+  const p2=document.getElementById("p2");p2.classList.remove("hidden");
+  const acc=queue.length?Math.round(100*ok/queue.length):0;
+  document.getElementById("endTitle").textContent="⭐ "+ok+" de "+queue.length+" ("+acc+"%)";
+  document.getElementById("endMsg").innerHTML=acc>=80?"¡Los colores y números ya son de casa! 🎉":acc>=50?"¡Bien! Repite para que se vuelvan de casa 💪":"Mira y escucha otra vez — el ojo se afina con cada vuelta 👀";
+  const sid="fc0-"+Date.now();
+  const rec={topic:"Flashcards Mazo 0 — Alfabetización Cero ("+queue.length+" tarjetas)",location:"Culiacán",accuracy:acc,passed:acc>=70,
+    spokenText:"mazo0 · "+ok+"/"+queue.length+" · señales: "+logS.join(", ")+((repeats.length)?" · repite:"+repeats.join(","):" · sin repetidos"),
+    challengeSentence:repeats.join(",")||"—",userId:NAME,sessionId:sid};
+  let intento=0;
+  const enviar=()=>{intento++;
+    fetch(BQ_SES,{method:"POST",headers:{"Content-Type":"application/json","api_key":KEY},body:JSON.stringify(rec)})
+    .then(r=>r.json()).then(j=>{document.getElementById("bq").innerHTML=(j&&j.ok)?"<b>Expediente:</b> ✅ enviado. La Maestra ya lo puede leer.":"<b>Expediente:</b> ⚠️ el servidor no aceptó — repite más tarde."})
+    .catch(()=>{if(intento<4){document.getElementById("bq").innerHTML="<b>Expediente:</b> ⏳ reintentando ("+intento+"/3)...";setTimeout(enviar,2500*intento)}else{document.getElementById("bq").innerHTML="<b>Expediente:</b> ⚠️ sin conexión. Los taps sí se guardaron."}})};
+  enviar();
+}
+</script>
+</body>
+</html>
