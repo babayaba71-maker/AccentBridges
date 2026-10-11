@@ -38,7 +38,7 @@ input{width:100%;border:3px solid #2a9d8f;border-radius:14px;padding:13px;font-s
 <body>
 <div class="wrap"><span class="score" id="score"></span></div>
 <h1>🎴 Mazo 0 · Colores y Números</h1>
-<div style="font-size:.6rem;color:rgba(255,255,255,.35);text-align:center" id="ver">v2-mezcla</div>
+<div style="font-size:.6rem;color:rgba(255,255,255,.35);text-align:center" id="ver">v3-senuelos</div>
 <div class="sub">Alfabetización cero — mira, escucha y elige</div>
 
 <!-- PANTALLA 0: nombre -->
@@ -74,38 +74,22 @@ input{width:100%;border:3px solid #2a9d8f;border-radius:14px;padding:13px;font-s
 // ====== MAZO 0 — ALFABETIZACIÓN CERO (idea de Seeley, 10-oct-2026) ======
 // 10 colores + 10 números. Caras 100% en código: $0 de imágenes.
 // Enseña la MECÁNICA de la tarjeta y mide qué trae de casa el alumno.
-const DECK=[
-// colores
-{"id":"c_red","senal":"mazo0","tipo":"color","color":"#d32f2f","audio":"red.","opts":["red","black","brown","green"],"correcta":"red","veri":"rojo"},
-{"id":"c_blue","senal":"mazo0","tipo":"color","color":"#1976d2","audio":"blue.","opts":["blue","black","brown","green"],"correcta":"blue","veri":"azul"},
-{"id":"c_green","senal":"mazo0","tipo":"color","color":"#388e3c","audio":"green.","opts":["green","blue","red","black"],"correcta":"green","veri":"verde"},
-{"id":"c_yellow","senal":"mazo0","tipo":"color","color":"#fbc02d","audio":"yellow.","opts":["yellow","orange","brown","green"],"correcta":"yellow","veri":"amarillo"},
-{"id":"c_orange","senal":"mazo0","tipo":"color","color":"#f57c00","audio":"orange.","opts":["orange","yellow","red","brown"],"correcta":"orange","veri":"naranja"},
-{"id":"c_purple","senal":"mazo0","tipo":"color","color":"#7b1fa2","audio":"purple.","opts":["purple","blue","pink","brown"],"correcta":"purple","veri":"morado"},
-{"id":"c_pink","senal":"mazo0","tipo":"color","color":"#f06292","audio":"pink.","opts":["pink","purple","red","orange"],"correcta":"pink","veri":"rosa"},
-{"id":"c_brown","senal":"mazo0","tipo":"color","color":"#6d4c41","audio":"brown.","opts":["brown","orange","black","red"],"correcta":"brown","veri":"café"},
-{"id":"c_black","senal":"mazo0","tipo":"color","color":"#212121","audio":"black.","opts":["black","blue","brown","purple"],"correcta":"black","veri":"negro"},
-{"id":"c_white","senal":"mazo0","tipo":"color","color":"#ffffff","audio":"white.","opts":["white","yellow","green","pink"],"correcta":"white","veri":"blanco"},
-// números
-{"id":"n_one","senal":"mazo0","tipo":"num","num":1,"audio":"one.","opts":["one","two","ten","five"],"correcta":"one","veri":"uno"},
-{"id":"n_two","senal":"mazo0","tipo":"num","num":2,"audio":"two.","opts":["two","one","ten","twelve"],"correcta":"two","veri":"dos"},
-{"id":"n_three","senal":"mazo0","tipo":"num","num":3,"audio":"three.","opts":["three","tree","two","ten"],"correcta":"three","veri":"tres"},
-{"id":"n_four","senal":"mazo0","tipo":"num","num":4,"audio":"four.","opts":["four","for","five","fourteen"],"correcta":"four","veri":"cuatro"},
-{"id":"n_five","senal":"mazo0","tipo":"num","num":5,"audio":"five.","opts":["five","four","fine","fifty"],"correcta":"five","veri":"cinco"},
-{"id":"n_six","senal":"mazo0","tipo":"num","num":6,"audio":"six.","opts":["six","seven","sixty","sixteen"],"correcta":"six","veri":"seis"},
-{"id":"n_seven","senal":"mazo0","tipo":"num","num":7,"audio":"seven.","opts":["seven","six","eleven","seventy"],"correcta":"seven","veri":"siete"},
-{"id":"n_eight","senal":"mazo0","tipo":"num","num":8,"audio":"eight.","opts":["eight","ate","nine","eighteen"],"correcta":"eight","veri":"ocho"},
-{"id":"n_nine","senal":"mazo0","tipo":"num","num":9,"audio":"nine.","opts":["nine","ninety","ten","night"],"correcta":"nine","veri":"nueve"},
-{"id":"n_ten","senal":"mazo0","tipo":"num","num":10,"audio":"ten.","opts":["ten","nine","twelve","ton"],"correcta":"ten","veri":"diez"}
-];
+const DECK=[{"id": "c_red", "senal": "mazo0", "tipo": "color", "color": "#d32f2f", "audio": "red.", "opts": ["bed", "rat", "led", "red"], "correcta": "red", "veri": "rojo", "frag": "r·e·d"}, {"id": "c_blue", "senal": "mazo0", "tipo": "color", "color": "#1976d2", "audio": "blue.", "opts": ["true", "glue", "clue", "blue"], "correcta": "blue", "veri": "azul", "frag": "bl·u·e"}, {"id": "c_green", "senal": "mazo0", "tipo": "color", "color": "#388e3c", "audio": "green.", "opts": ["grin", "great", "clean", "green"], "correcta": "green", "veri": "verde", "frag": "gr·ee·n"}, {"id": "c_yellow", "senal": "mazo0", "tipo": "color", "color": "#fbc02d", "audio": "yellow.", "opts": ["hello", "below", "mellow", "yellow"], "correcta": "yellow", "veri": "amarillo", "frag": "ye·ll·ow"}, {"id": "c_orange", "senal": "mazo0", "tipo": "color", "color": "#f57c00", "audio": "orange.", "opts": ["porridge", "message", "garage", "orange"], "correcta": "orange", "veri": "naranja", "frag": "o·r·an·ge"}, {"id": "c_purple", "senal": "mazo0", "tipo": "color", "color": "#7b1fa2", "audio": "purple.", "opts": ["turtle", "people", "circle", "purple"], "correcta": "purple", "veri": "morado", "frag": "pu·r·ple"}, {"id": "c_pink", "senal": "mazo0", "tipo": "color", "color": "#f06292", "audio": "pink.", "opts": ["sink", "think", "pick", "pink"], "correcta": "pink", "veri": "rosa", "frag": "p·i·nk"}, {"id": "c_brown", "senal": "mazo0", "tipo": "color", "color": "#6d4c41", "audio": "brown.", "opts": ["town", "crown", "down", "brown"], "correcta": "brown", "veri": "café", "frag": "br·ow·n"}, {"id": "c_black", "senal": "mazo0", "tipo": "color", "color": "#212121", "audio": "black.", "opts": ["block", "clock", "back", "black"], "correcta": "black", "veri": "negro", "frag": "bl·a·ck"}, {"id": "c_white", "senal": "mazo0", "tipo": "color", "color": "#ffffff", "audio": "white.", "opts": ["light", "night", "right", "white"], "correcta": "white", "veri": "blanco", "frag": "wh·i·te"}, {"id": "n_one", "senal": "mazo0", "tipo": "num", "num": 1, "audio": "one.", "opts": ["want", "went", "own", "one"], "correcta": "one", "veri": "uno", "frag": "w·u·n"}, {"id": "n_two", "senal": "mazo0", "tipo": "num", "num": 2, "audio": "two.", "opts": ["ten", "tow", "twelve", "two"], "correcta": "two", "veri": "dos", "frag": "t·u·(w muda)"}, {"id": "n_three", "senal": "mazo0", "tipo": "num", "num": 3, "audio": "three.", "opts": ["tree", "free", "through", "three"], "correcta": "three", "veri": "tres", "frag": "th·r·ee"}, {"id": "n_four", "senal": "mazo0", "tipo": "num", "num": 4, "audio": "four.", "opts": ["door", "far", "five", "four"], "correcta": "four", "veri": "cuatro", "frag": "f·or"}, {"id": "n_five", "senal": "mazo0", "tipo": "num", "num": 5, "audio": "five.", "opts": ["fine", "dive", "file", "five"], "correcta": "five", "veri": "cinco", "frag": "f·i·ve"}, {"id": "n_six", "senal": "mazo0", "tipo": "num", "num": 6, "audio": "six.", "opts": ["sick", "sit", "sixteen", "six"], "correcta": "six", "veri": "seis", "frag": "s·i·ks"}, {"id": "n_seven", "senal": "mazo0", "tipo": "num", "num": 7, "audio": "seven.", "opts": ["eleven", "seventy", "heaven", "seven"], "correcta": "seven", "veri": "siete", "frag": "se·ven"}, {"id": "n_eight", "senal": "mazo0", "tipo": "num", "num": 8, "audio": "eight.", "opts": ["late", "night", "eighty", "eight"], "correcta": "eight", "veri": "ocho", "frag": "ei·t"}, {"id": "n_nine", "senal": "mazo0", "tipo": "num", "num": 9, "audio": "nine.", "opts": ["night", "line", "ninety", "nine"], "correcta": "nine", "veri": "nueve", "frag": "n·i·ne"}, {"id": "n_ten", "senal": "mazo0", "tipo": "num", "num": 10, "audio": "ten.", "opts": ["tan", "tin", "ton", "ten"], "correcta": "ten", "veri": "diez", "frag": "t·e·n"}];
 const MAZO_TAG={mazo0:"Mazo 0 · Colores y Números"};
 const BQ_TAP="https://valerie.base44.app/functions/logFlashcardTap";
 const BQ_SES="https://valerie.base44.app/functions/logMorfofonoSession";
 const KEY="ABVC-PILOTO-2026";
 let NAME="",queue=[],idx=0,ok=0,tot=0,cur=null,tries=0,T0=0,logS=[],repeats=[];
 const MODO_OIDO=document.location.search.includes("modo=oido");
+const MODO_MAESTRO=document.location.search.includes("t=ABVC2026");
+if(MODO_MAESTRO){/* fichas visibles para la maestra */}
 if(MODO_OIDO){document.querySelector(".sub").textContent="🎧 Escucha y decifra";}
 
+function sayFrag(w){try{speechSynthesis.cancel();
+  const a=new SpeechSynthesisUtterance(w);a.lang="en-US";a.rate=0.45;
+  const b=new SpeechSynthesisUtterance(w);b.lang="en-US";b.rate=0.95;
+  const v=speechSynthesis.getVoices().find(v=>/en[-_]US/i.test(v.lang));if(v){a.voice=v;b.voice=v}
+  speechSynthesis.speak(a);speechSynthesis.speak(b);}catch(e){}}
 function say(t,rate){
   try{speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(t);u.lang="en-US";u.rate=rate||0.9;
@@ -151,7 +135,8 @@ function tap(b,op){
     b.classList.add("ok");
     document.getElementById("fb").textContent="✓ ¡"+op+"!";document.getElementById("fb").className="fb ok";
     document.getElementById("veri").classList.remove("hidden");
-    document.getElementById("veri").textContent="("+cur.veri+")";
+    document.getElementById("veri").textContent=MODO_MAESTRO?cur.frag+" = "+cur.correcta+" ("+cur.veri+")":"("+cur.veri+")";
+    sayFrag(cur.correcta);
     if(tries===0){ok++;tot++;logS.push("mazo0:✓("+cur.id+")")}else{logS.push("mazo0:✓("+cur.id+","+tries+"f)");if(repeats.indexOf(cur.id)<0)repeats.push(cur.id)}
     cur.opts.forEach(o=>{if(o!==op){const bs=[...document.querySelectorAll(".opt")].find(x=>x.textContent===o);if(bs)bs.disabled=true}});
     b.disabled=false;
