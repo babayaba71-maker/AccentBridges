@@ -86,8 +86,11 @@ function start(){
   document.getElementById("p0").classList.add("hidden");
   showCard();
 }
+const MODO_OIDO=document.location.search.includes("modo=oido");
+if(MODO_OIDO){document.querySelector(".sub").textContent="🎧 Escucha y decifra";}
 function showCard(){
   cur=queue[idx];tries=0;
+  if(MODO_OIDO){document.getElementById("mazoTag").textContent="🎧 · "+(idx+1)+" de "+queue.length;}
   document.getElementById("p1").classList.remove("hidden");
   document.getElementById("mazoTag").textContent=MAZO_TAG[cur.senal]+" · "+(idx+1)+" de "+queue.length;
   document.getElementById("img").src=cur.img;
