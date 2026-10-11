@@ -42,7 +42,7 @@ input{width:100%;border:3px solid #2a9d8f;border-radius:14px;padding:13px;font-s
 <body>
 <div class="wrap"><span class="score" id="score"></span></div>
 <h1>🧩 Ensamblando</h1>
-<div style="font-size:.6rem;color:rgba(255,255,255,.35);text-align:center" id="ver">v1</div>
+<div style="font-size:.6rem;color:rgba(255,255,255,.35);text-align:center" id="ver">v1.1</div>
 <div class="sub">Pronombres + To be — Fase 2: arma el chunk de oído</div>
 
 <!-- PANTALLA 0: nombre -->
@@ -94,14 +94,14 @@ const DECK=[
 const BQ_TAP="https://valerie.base44.app/functions/logFlashcardTap";
 const BQ_SES="https://valerie.base44.app/functions/logMorfofonoSession";
 const KEY="ABVC-PILOTO-2026";
-let NAME="",cur=null,idx=0,ok=0,tot=0,queue=[],repeats=[],tries=0,sel=[],logS=[],locked=false;
+let BASE=0,NAME="",cur=null,idx=0,ok=0,tot=0,queue=[],repeats=[],tries=0,sel=[],logS=[],locked=false;
 
 function say(txt,rate){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang="en-US";u.rate=rate||0.9;const v=speechSynthesis.getVoices().find(v=>/en[-_]US/i.test(v.lang));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
 document.addEventListener("click",()=>{try{speechSynthesis.getVoices()}catch(e){}},{once:true});
 
 function start(){
   NAME=(document.getElementById("name").value||"Estudiante").trim().slice(0,40);
-  queue=DECK.slice();idx=0;ok=0;tot=0;sel=[];logS=[];
+  queue=DECK.map(c=>Object.assign({},c));BASE=DECK.length;idx=0;ok=0;tot=0;sel=[];logS=[];repeats=[];
   document.getElementById("p0").classList.add("hidden");
   showCard();
 }
@@ -155,7 +155,7 @@ function check(){
     if(!good&&b.dataset.w===sel[0]||!good&&b.dataset.w===sel[1]){}
   });
   if(good){
-    if(tries===1)ok++;
+    if(tries===1&&!cur.requeued)ok++;
     document.querySelectorAll(".opt").forEach(b=>{b.classList.remove("ok");if(cur.parts.includes(b.dataset.w))b.classList.add("ok")});
     say(cur.audio,0.9);fb.textContent="✅ ¡Sí! "+cur.rev;fb.className="fb ok";
     document.getElementById("veri").textContent="("+cur.veri+")";
@@ -175,7 +175,7 @@ function check(){
       return;
     }
     // 2 fallos → revelación honesta + re-encolar al final (repaso)
-    if(!repeats.includes(cur.id)){cur.requeued=true;queue.push(cur);repeats.push(cur.id)}
+    if(!repeats.includes(cur.id)){queue.push(Object.assign({},cur,{requeued:true}));repeats.push(cur.id)}
     fb.textContent=(isTrap?cur.trampa.msg+" · ":"")+"✗ Era: "+cur.rev;
     fb.className="fb no";
     document.querySelectorAll(".opt").forEach(b=>{b.classList.remove("no");if(cur.parts.includes(b.dataset.w))b.classList.add("ok")});
@@ -194,8 +194,8 @@ function nx(){
 function finish(){
   document.getElementById("p1").classList.add("hidden");
   document.getElementById("p2").classList.remove("hidden");
-  const base=queue.filter(c=>!c.requeued).length;
-  const acc=base?Math.round(100*ok/base):0;
+  const base=BASE;
+  const acc=base?Math.min(100,Math.round(100*ok/base)):0;
   document.getElementById("endTitle").textContent="⭐ "+ok+" de "+base+" ("+acc+"%)";
   document.getElementById("endMsg").innerHTML=acc>=80?"¡El patrón I am / You are ya es de casa! 🎉<br>Escúchalo en tu cabeza: ya suena.":"¡Bien! Vuelve a armarlo para que el patrón se vuelva de casa 💪";
   const sid="ens-"+Date.now();
