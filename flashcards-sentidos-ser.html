@@ -153,12 +153,16 @@ function finish(){
   document.getElementById("endMsg").innerHTML=acc>=80?"¡Los sentidos y el ser ya son de casa! 🎉":acc>=50?"¡Bien! Repite para que se vuelvan de casa 💪":"Mira y escucha otra vez — el ojo se afina con cada vuelta 👀";
   // sesión → PracticeSession (resumen para la Maestra)
   const sid="fc-"+Date.now();
-  const rec={topic:"Flashcards Sentidos+Ser — Muestra (6 tarjetas)",location:"Culiacán",accuracy:acc,passed:acc>=70,
+  const rec={topic:"Flashcards Sentidos+Ser — Mazo 1 ("+queue.length+" tarjetas)",location:"Culiacán",accuracy:acc,passed:acc>=70,
     spokenText:"flashcards · "+ok+"/"+queue.length+" · señales: "+logS.join(", ")+((repeats.length)?" · repite:"+repeats.join(","):" · sin repetidos"),
     challengeSentence:repeats.join(",")||"—",userId:NAME,sessionId:sid};
-  try{fetch(BQ_SES,{method:"POST",headers:{"Content-Type":"application/json","api_key":KEY},body:JSON.stringify(rec)})
+  let intento=0;
+  const enviar=()=>{intento++;
+    fetch(BQ_SES,{method:"POST",headers:{"Content-Type":"application/json","api_key":KEY},body:JSON.stringify(rec)})
     .then(r=>r.json()).then(j=>{document.getElementById("bq").innerHTML=(j&&j.ok)?"<b>Expediente:</b> ✅ enviado. La Maestra ya lo puede leer.":"<b>Expediente:</b> ⚠️ el servidor no aceptó — repite más tarde."})
-    .catch(()=>{document.getElementById("bq").innerHTML="<b>Expediente:</b> ⚠️ sin conexión."})}catch(e){}
+    .catch(()=>{if(intento<4){document.getElementById("bq").innerHTML="<b>Expediente:</b> ⏳ reintentando ("+intento+"/3)...";setTimeout(enviar,2500*intento)}else{document.getElementById("bq").innerHTML="<b>Expediente:</b> ⚠️ sin conexión. Los taps sí se guardaron."}})};
+  enviar();
+  catch(e){}
 }
 </script>
 </body>
