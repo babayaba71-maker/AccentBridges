@@ -162,7 +162,6 @@ function finish(){
     .then(r=>r.json()).then(j=>{document.getElementById("bq").innerHTML=(j&&j.ok)?"<b>Expediente:</b> ✅ enviado. La Maestra ya lo puede leer.":"<b>Expediente:</b> ⚠️ el servidor no aceptó — repite más tarde."})
     .catch(()=>{if(intento<4){document.getElementById("bq").innerHTML="<b>Expediente:</b> ⏳ reintentando ("+intento+"/3)...";setTimeout(enviar,2500*intento)}else{document.getElementById("bq").innerHTML="<b>Expediente:</b> ⚠️ sin conexión. Los taps sí se guardaron."}})};
   enviar();
-  catch(e){}
 }
 </script>
 </body>
