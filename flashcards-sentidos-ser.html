@@ -92,7 +92,7 @@ function showCard(){
   cur=queue[idx];tries=0;
   if(MODO_OIDO){document.getElementById("mazoTag").textContent="🎧 · "+(idx+1)+" de "+queue.length;}
   document.getElementById("p1").classList.remove("hidden");
-  document.getElementById("mazoTag").textContent=MAZO_TAG[cur.senal]+" · "+(idx+1)+" de "+queue.length;
+  if(!MODO_OIDO){document.getElementById("mazoTag").textContent=MAZO_TAG[cur.senal]+" · "+(idx+1)+" de "+queue.length;}
   document.getElementById("img").src=cur.img;
   document.getElementById("rev").classList.remove("hidden");
   document.getElementById("opts").classList.add("hidden");document.getElementById("opts").innerHTML="";
