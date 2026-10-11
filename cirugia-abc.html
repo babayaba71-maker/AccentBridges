@@ -104,7 +104,7 @@ const TR=[["A","a","ei","ay"],["B","be","bi","bee"],["C","ce","si","see"],["D","
 // campo 4 = nombre de letra escrito como PALABRA inglesa (bee, see, tee...)
 // doctrina TTS (descubierta por Seeley 11-oct): letra suelta = token ambiguo,
 // la voz cae a su fonologia dominante y destroza los nombres con i. Palabra completa, jamas simbolo.
-const FAMS=[["B","C","D","E","G","P","T","V","Z"],["A","J","K"],["I","Y"],["F","L","M","N","S","X"],["Q","U","W"],["H","R"],["O"]];
+const FAMS=[["B","C","D","E","G","P","T","V","Z"],["A","J","K","H"],["I","Y","A"],["F","L","M","N","S","X"],["Q","U","W"],["H","R","A"],["O","U","R","W"]];
 const BQ_TAP="https://valerie.base44.app/functions/logFlashcardTap";
 const BQ_SES="https://valerie.base44.app/functions/logMorfofonoSession";
 const KEY="ABVC-PILOTO-2026";
@@ -152,7 +152,8 @@ function pregunta(){
   const o=document.getElementById("opts");o.innerHTML="";
   // señuelos: letras con nombres cercanos (no posición fija: mezclar SIEMPRE)
   const fam=FAMS.find(f=>f.indexOf(q[0])>=0)||TR.map(x=>x[0]);
-  const pool=mezclar(fam.filter(L=>L!==q[0])).slice(0,3);
+  let pool=mezclar(fam.filter(L=>L!==q[0])).slice(0,3);
+  if(pool.length<3){const resto=mezclar(TR.map(x=>x[0]).filter(L=>L!==q[0]&&pool.indexOf(L)<0));while(pool.length<3&&resto.length)pool.push(resto.shift())}
   mezclar(pool.concat([q[0]])).forEach(L=>{
     const b=document.createElement("button");b.className="opt";b.textContent=L;
     b.onclick=()=>elegir(b,L);o.appendChild(b);
