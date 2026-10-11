@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<title>TECLEANDO — El alfabeto trabajando</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,sans-serif;background:linear-gradient(160deg,#0d1b2a,#1b263b 60%,#e9c46a 140%);min-height:100vh;color:#fff;display:flex;flex-direction:column;align-items:center;padding:14px;max-width:520px;margin:0 auto}
+h1{font-size:1.25rem;text-align:center;margin:6px 0 2px}
+.sub{font-size:.8rem;color:#a8dadc;text-align:center;margin-bottom:10px}
+.card{background:#fff;color:#1b263b;border-radius:22px;width:100%;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.35);text-align:center}
+button{border:0;border-radius:14px;font-size:1rem;font-weight:700;padding:13px 18px;cursor:pointer;transition:transform .1s}
+button:active{transform:scale(.96)}
+.big{background:#2a9d8f;color:#fff;width:100%;font-size:1.05rem}
+.listen{background:#e9c46a;color:#1b263b}
+.hidden{display:none}
+.paso{font-size:.72rem;color:#6c757d;margin:10px 0 6px;letter-spacing:.5px;text-transform:uppercase;font-weight:700}
+.cue{width:120px;height:120px;border-radius:24px;margin:10px auto;display:flex;align-items:center;justify-content:center;font-size:4rem;font-weight:900;background:#f1faee;border:4px solid #2a9d8f}
+.cue.txt{font-size:3rem;color:#1b263b;background:#f1faee}
+.cue.pattern{width:auto;min-width:180px;padding:0 18px;font-size:1.8rem;letter-spacing:2px;background:#f1faee}
+.fb{margin-top:12px;font-size:1rem;font-weight:800;min-height:1.4em}
+.fb.ok{color:#2a9d8f}.fb.no{color:#e76f51}
+.veri{font-size:.85rem;color:#6c757d;margin-top:8px;font-style:italic}
+.next{background:#1b263b;color:#fff;margin-top:12px;width:100%}
+.enlace{background:#e76f51;color:#fff;margin-top:10px;width:100%}
+input{width:100%;border:3px solid #2a9d8f;border-radius:14px;padding:13px;font-size:1.2rem;margin:8px 0;text-align:center;letter-spacing:3px;font-weight:700}
+input:focus{outline:none;border-color:#e9c46a}
+.end{font-size:1.6rem;font-weight:900;color:#2a9d8f;margin:14px 0 4px}
+.meta{font-size:.8rem;color:#6c757d;line-height:1.5;margin-top:10px}
+.bq{margin-top:10px;font-size:.8rem;color:#264653}
+.score{position:absolute;top:10px;right:12px;background:rgba(255,255,255,.15);border-radius:10px;padding:4px 10px;font-size:.75rem;font-weight:700}
+.wrap{position:relative;width:100%}
+.instru{font-size:.85rem;color:#457b9d;margin:2px 0 8px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap"><span class="score" id="score"></span></div>
+<h1>⌨️ TECLEANDO</h1>
+<div style="font-size:.6rem;color:rgba(255,255,255,.35);text-align:center" id="ver">v1</div>
+<div class="sub">Números → Colores → Pronombres → To be — el alfabeto trabajando</div>
+
+<!-- PANTALLA 0: nombre -->
+<div class="card" id="p0">
+  <div class="paso">antes de empezar</div>
+  <h2 style="margin:8px 0">¿Cómo te llamas?</h2>
+  <input id="name" placeholder="Tu nombre" autocomplete="off">
+  <button class="big" onclick="start()">¡Teclear! ⌨️</button>
+  <div class="meta">Escuchas la palabra en inglés.<br>La TECLEAS letra por letra: cada tecla dice su nombre gringo.<br>Al acertar: palabra en inglés primero, eco en español después. 🎯</div>
+</div>
+
+<!-- PANTALLA 1: tarjeta -->
+<div class="card hidden" id="p1">
+  <div class="paso" id="mazoTag"></div>
+  <div class="instru" id="instru">🔊 Escucha y teclea la palabra:</div>
+  <button class="listen" style="width:100%" onclick="say(cur.audio,0.75)">🔊 Escuchar otra vez</button>
+  <div class="cue txt" id="cue"></div>
+  <input id="typing" placeholder="escribe aquí" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <button class="big" onclick="submit()">¡Listo! ✅</button>
+  <div class="fb" id="fb"></div>
+  <div class="veri hidden" id="veri"></div>
+  <button class="next hidden" id="next" onclick="nx()">Siguiente →</button>
+</div>
+
+<!-- PANTALLA 2: final -->
+<div class="card hidden" id="p2">
+  <div class="end" id="endTitle"></div>
+  <div id="endMsg" style="font-size:.95rem;line-height:1.5"></div>
+  <div class="bq" id="bq"></div>
+  <button class="enlace" onclick="location.href='flashcards-ensamblador.html'">🧩 Sigue: Ensamblando →</button>
+  <button class="big" style="margin-top:10px" onclick="location.reload()">Teclear otra vez 🔁</button>
+</div>
+
+<script>
+// ====== TECLEANDO (v1, 11-oct-2026, diseño de Seeley "Dale Bones, en ese orden") ======
+// Eslabón entre la Cirugía del Abecedario y el Ensamblador.
+// Doctrina: (1) JAMÁS letra suelta al TTS — cada tecla dice su NOMBRE escrito como palabra
+// (bee, tee, oh...), tal como sellamos en la Cirugía. (2) Palabra completa en inglés primero,
+// eco en español después (el español es verificador, no puente). (3) Orden: números →
+// colores → pronombres → to be → desemboca en el Ensamblador.
+// La I SIEMPRE va mayúscula: en esta tarjeta se exige — es un hecho real del inglés.
+const LN={a:"ay",b:"bee",c:"see",d:"dee",e:"ee",f:"ef",g:"gee",h:"aitch",i:"eye",j:"jay",k:"kay",l:"el",m:"em",n:"en",o:"oh",p:"pee",q:"cue",r:"ar",s:"ess",t:"tee",u:"you",v:"vee",w:"double you",x:"ex",y:"why",z:"zee"};
+
+const DECK=[
+ // ---- NÚMEROS (lo más concreto) ----
+ {id:"tc_01",g:"Números",word:"one",audio:"One.",cue:"1",es:"uno"},
+ {id:"tc_02",g:"Números",word:"two",audio:"Two.",cue:"2",es:"dos"},
+ {id:"tc_03",g:"Números",word:"three",audio:"Three.",cue:"3",es:"tres"},
+ {id:"tc_04",g:"Números",word:"four",audio:"Four.",cue:"4",es:"cuatro"},
+ {id:"tc_05",g:"Números",word:"five",audio:"Five.",cue:"5",es:"cinco"},
+ {id:"tc_06",g:"Números",word:"six",audio:"Six.",cue:"6",es:"seis"},
+ {id:"tc_07",g:"Números",word:"seven",audio:"Seven.",cue:"7",es:"siete"},
+ {id:"tc_08",g:"Números",word:"eight",audio:"Eight.",cue:"8",es:"ocho"},
+ {id:"tc_09",g:"Números",word:"nine",audio:"Nine.",cue:"9",es:"nueve"},
+ {id:"tc_10",g:"Números",word:"ten",audio:"Ten.",cue:"10",es:"diez"},
+ // ---- COLORES (el campo de color ya operaba en Mazo 0) ----
+ {id:"tc_11",g:"Colores",word:"red",audio:"Red.",cue:"",bg:"#e63946",es:"rojo"},
+ {id:"tc_12",g:"Colores",word:"blue",audio:"Blue.",cue:"",bg:"#1d6fd1",es:"azul"},
+ {id:"tc_13",g:"Colores",word:"green",audio:"Green.",cue:"",bg:"#37b24d",es:"verde"},
+ {id:"tc_14",g:"Colores",word:"yellow",audio:"Yellow.",cue:"",bg:"#f5c518",es:"amarillo"},
+ {id:"tc_15",g:"Colores",word:"black",audio:"Black.",cue:"",bg:"#111111",es:"negro"},
+ {id:"tc_16",g:"Colores",word:"white",audio:"White.",cue:"",bg:"#ffffff",es:"blanco"},
+ // ---- PRONOMBRES (referente con icono, sin letras) ----
+ {id:"tc_17",g:"Pronombres",word:"I",audio:"I.",cue:"🙋",es:"yo",capI:true},
+ {id:"tc_18",g:"Pronombres",word:"you",audio:"You.",cue:"👉",es:"tú"},
+ {id:"tc_19",g:"Pronombres",word:"he",audio:"He.",cue:"👦",es:"él"},
+ {id:"tc_20",g:"Pronombres",word:"she",audio:"She.",cue:"👧",es:"ella"},
+ // ---- TO BE (en su hábitat: pegado a su pronombre) ----
+ {id:"tc_21",g:"To be",word:"am",audio:"I am.",pattern:"I ___",es:"yo soy / yo estoy"},
+ {id:"tc_22",g:"To be",word:"is",audio:"He is.",pattern:"he ___",es:"él es / él está"},
+ {id:"tc_23",g:"To be",word:"are",audio:"You are.",pattern:"you ___",es:"tú eres / tú estás"}
+];
+const BQ_TAP="https://valerie.base44.app/functions/logFlashcardTap";
+const BQ_SES="https://valerie.base44.app/functions/logMorfofonoSession";
+const KEY="ABVC-PILOTO-2026";
+let BASE=0,NAME="",cur=null,idx=0,ok=0,tot=0,queue=[],repeats=[],tries=0,logS=[],locked=false;
+
+function say(txt,rate){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang="en-US";u.rate=rate||0.9;const v=speechSynthesis.getVoices().find(v=>/en[-_]US/i.test(v.lang));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
+function sayEs(txt){try{const u=new SpeechSynthesisUtterance(txt);u.lang="es-MX";u.rate=0.95;const v=speechSynthesis.getVoices().find(v=>/es[-_]MX/i.test(v.lang));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
+document.addEventListener("click",()=>{try{speechSynthesis.getVoices()}catch(e){}},{once:true});
+
+function start(){
+  NAME=(document.getElementById("name").value||"Estudiante").trim().slice(0,40);
+  queue=DECK.map(c=>Object.assign({},c));BASE=DECK.length;idx=0;ok=0;tot=0;logS=[];repeats=[];
+  document.getElementById("p0").classList.add("hidden");
+  showCard();
+}
+function showCard(){
+  cur=queue[idx];tries=0;locked=false;
+  document.getElementById("mazoTag").textContent="⌨️ "+cur.g+" · "+(idx+1)+" de "+queue.length+(cur.requeued?" (repaso)":"");
+  document.getElementById("p1").classList.remove("hidden");
+  document.getElementById("fb").textContent="";document.getElementById("fb").className="fb";
+  document.getElementById("veri").classList.add("hidden");
+  document.getElementById("next").classList.add("hidden");
+  document.getElementById("score").textContent="⭐ "+ok+"/"+tot;
+  // cue visual
+  const cue=document.getElementById("cue");
+  if(cur.pattern){cue.className="cue pattern";cue.textContent=cur.pattern;cue.style.background="#f1faee"}
+  else if(cur.bg){cue.className="cue";cue.textContent="";cue.style.background=cur.bg;cue.style.borderColor=(cur.word==="white")?"#adb5bd":"#2a9d8f"}
+  else{cue.className="cue txt";cue.textContent=cur.cue;cue.style.background="#f1faee"}
+  const inp=document.getElementById("typing");inp.value="";inp.readOnly=false;
+  inp.placeholder=cur.g==="To be"?"completa el hueco":"escribe aquí";
+  document.getElementById("instru").textContent=cur.g==="To be"?"🔊 Escucha y teclea lo que falta:":"🔊 Escucha y teclea la palabra:";
+  setTimeout(()=>{say(cur.audio,0.75)},400);
+}
+// CADA TECLA DICE SU NOMBRE GRINGO — palabra completa, jamás símbolo (doctrina sellada)
+document.getElementById("typing").addEventListener("input",e=>{
+  if(locked)return;
+  const t=e.target.value;
+  const ch=t.slice(-1).toLowerCase();
+  if(LN[ch])say(LN[ch],0.95);
+});
+function submit(){
+  if(locked)return;
+  const inp=document.getElementById("typing");
+  const val=inp.value.trim();
+  if(!val)return;
+  tries++;tot++;locked=true;inp.readOnly=true;
+  let good;
+  if(cur.capI){good=(val==="I")}           // la I SIEMPRE mayúscula
+  else{good=(val.toLowerCase()===cur.word)}
+  logS.push(cur.id.replace("tc_","")+":"+(good?"✓":"✗")+"("+tries+")");
+  try{fetch(BQ_TAP,{method:"POST",headers:{"Content-Type":"application/json","api_key":KEY},
+    body:JSON.stringify({studentName:NAME,quizType:"flashcard",questionId:cur.id+"|"+tries,choice:val,correct:good,word:cur.audio,channel:"teclado"})}).catch(()=>{})}catch(e){}
+  const fb=document.getElementById("fb");
+  if(good){
+    if(tries===1&&!cur.requeued)ok++;
+    fb.textContent="✅ ¡Sí! "+cur.word;fb.className="fb ok";
+    say(cur.audio,0.9);                       // inglés primero
+    setTimeout(()=>sayEs(cur.es),1400);        // eco en español después
+    document.getElementById("veri").textContent="("+cur.es+")";
+    document.getElementById("veri").classList.remove("hidden");
+    document.getElementById("next").classList.remove("hidden");
+  }else{
+    const esI=cur.capI&&val.toLowerCase()==="i";
+    if(tries<2){
+      fb.textContent=esI?"✗ Casi… pero la I SIEMPRE va MAYÚSCULA — inténtalo otra vez":"✗ Escucha otra vez y teclea de nuevo";
+      fb.className="fb no";
+      setTimeout(()=>{locked=false;inp.value="";inp.readOnly=false;say(cur.audio,0.7);inp.focus()},1800);
+      return;
+    }
+    // 2 fallos → revelación honesta + re-encolar (copia marcada, no el original)
+    if(!repeats.includes(cur.id)){queue.push(Object.assign({},cur,{requeued:true}));repeats.push(cur.id)}
+    fb.textContent=(esI?"La I SIEMPRE va MAYÚSCULA · ":"")+"✗ Era: "+cur.word;
+    fb.className="fb no";
+    say(cur.audio,0.7);
+    setTimeout(()=>sayEs(cur.es),1600);
+    inp.value=cur.word;
+    document.getElementById("veri").textContent="("+cur.es+")";
+    document.getElementById("veri").classList.remove("hidden");
+    document.getElementById("next").classList.remove("hidden");
+  }
+  document.getElementById("score").textContent="⭐ "+ok+"/"+tot;
+}
+function nx(){
+  idx++;
+  if(idx<queue.length){showCard()}
+  else finish();
+}
+function finish(){
+  document.getElementById("p1").classList.add("hidden");
+  document.getElementById("p2").classList.remove("hidden");
+  const base=BASE;
+  const acc=base?Math.min(100,Math.round(100*ok/base)):0;
+  document.getElementById("endTitle").textContent="⭐ "+ok+" de "+base+" ("+acc+"%)";
+  document.getElementById("endMsg").innerHTML=acc>=80?"¡Ya tecleas lo que oyes! Las palabras clave son de casa. 🎉<br>Ahora arma los chunks: te espera el Ensamblador.":"¡Bien! Vuelve a teclearlas para que se vuelvan de casa 💪";
+  const sid="tec-"+Date.now();
+  const rec={topic:"Flashcards Tecleando — Números+Colores+Pronombres+To be ("+base+" palabras)",location:"Culiacán",accuracy:acc,passed:acc>=70,
+    spokenText:"tecleando · "+ok+"/"+base+" · señales: "+logS.join(", ")+((repeats.length)?" · repite:"+repeats.join(","):" · sin repetidos"),
+    challengeSentence:repeats.join(",")||"—",userId:NAME,sessionId:sid};
+  let intento=0;
+  const enviar=()=>{intento++;
+    fetch(BQ_SES,{method:"POST",headers:{"Content-Type":"application/json","api_key":KEY},body:JSON.stringify(rec)})
+    .then(r=>r.json()).then(j=>{document.getElementById("bq").innerHTML=(j&&j.ok)?"<b>Expediente:</b> ✅ enviado. La Maestra ya lo puede leer.":"<b>Expediente:</b> ⚠️ "+((j&&j.error)||"sin confirmación")})
+    .catch(()=>{if(intento<4){document.getElementById("bq").innerHTML="<b>Expediente:</b> ⏳ reintentando ("+intento+"/3)...";setTimeout(enviar,2500*intento)}else{document.getElementById("bq").innerHTML="<b>Expediente:</b> ❌ sin conexión. Tu avance quedó en pantalla."}})};
+  enviar();
+}
+</script>
+</body>
+</html>
