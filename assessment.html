@@ -203,7 +203,8 @@ function intro(){
   $("app").innerHTML=`<div class="dim-chip">🧠 Antes de empezar</div>
   <div class="q-text">No tienes UN nivel. Tienes un <b>PERFIL</b>: tu oído, tu ojo y tu boca pueden estar en niveles distintos — y cada uno se entrena en SU escalón.</div>
   <div class="explain">👂 <b>Oído</b> — percibes los sonidos<br>👁 <b>Ojo</b> — reconoces anclas y escritura<br>👅 <b>Boca</b> — produces las frases<br><br>⏱ 12 preguntas o menos · 🎧 usa audífonos · 📱 mejor en Chrome · 🎲 cada intento trae preguntas NUEVAS (banco de 36)</div>
-  <button class="btn btn-primary" onclick="startDim(0)">Empezar mi expediente →</button>`;
+  <input id="abName" placeholder="¿Cómo te llamas? (para tu expediente)" style="width:90%;max-width:420px;padding:12px 16px;border-radius:14px;border:1px solid #334155;background:#f8fafc;font-size:15px;margin:6px auto 12px;display:block">
+  <button class="btn btn-primary" onclick="window.abName=(document.getElementById('abName').value||'').trim()||'Anónima/o';startDim(0)">Empezar mi expediente →</button>`;
 }
 /* ============ CALENTAMIENTO DE CANTANTE (doctrina Vocalización — rampa de la Boca) ============ */
 let wuAC=null,wuTimers=[];const wuDone=[false,false,false];
@@ -378,13 +379,14 @@ Dosis recomendada:
 ${["ear","eye","mouth"].map(id=>"· "+es[id]+" ("+results[id].level+"): "+DOSE[id][results[id].level]).join("\n")}
 — Level Assessment · ${new Date().toLocaleDateString("es-MX")}`;
   try{localStorage.setItem("ab_expediente",JSON.stringify({date:new Date().toISOString(),ear:results.ear.level,eye:results.eye.level,mouth:results.mouth.level}))}catch(e){}
+  try{fetch("https://valerie.base44.app/functions/logAssessmentResult",{method:"POST",headers:{"Content-Type":"application/json","api_key":"ABVC-PILOTO-2026"},body:JSON.stringify({studentName:window.abName||"Anónima/o",assessmentType:"level",ear:results.ear.level,eye:results.eye.level,mouth:results.mouth.level,code:code})}).catch(()=>{})}catch(e){}
   $("app").innerHTML=`<div class="dim-chip">📋 Expediente completo</div>
   <div class="q-text">Tu árbol por dimensión 🌳</div>
   <div class="grid3">${dims}</div>
   <div class="q-text" style="font-size:14px">Tu DOSIS (i+1 por dimensión):</div>${doses}
   <div class="explain">Siéntete orgulloso/a: acabas de usar el pasaporte entre las dos orillas del puente. Con este perfil, tu maestra dosifica cada clase a TU escalón.</div>
   <textarea class="share" rows="7" readonly onclick="this.select()">${code}</textarea>
-  <div class="q-anchor">Toca el texto, cópialo y mándaselo a tu maestra por WhatsApp 📲</div>
+  <div class="q-anchor">✅ Tu resultado ya viajó solo a tu maestra — el texto de abajo es tu respaldo por si quieres mandarlo también 📲</div>
   <button class="btn btn-ghost" onclick="location.reload()">🔄 Repetir el assessment</button>`;
 }
 /* demo interno: assessment.html#demo */

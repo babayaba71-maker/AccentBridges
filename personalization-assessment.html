@@ -143,6 +143,7 @@ function renderResults(){
   }
   const code=answers.map(a=>a.tag).join("|");
   try{localStorage.setItem("ab_pers_result",JSON.stringify({date:new Date().toISOString(),canal:canal,pers:pers,modo_hugo:modoHugo,arquetipo:nombre,plataforma:plat,code:code}))}catch(e){}
+  try{fetch("https://valerie.base44.app/functions/logAssessmentResult",{method:"POST",headers:{"Content-Type":"application/json","api_key":"ABVC-PILOTO-2026"},body:JSON.stringify({studentName:window.abName||"Anónima/o",assessmentType:"personality",canal:canal,arquetipo:nombre,modoHugo:modoHugo,plataforma:plat,code:code})}).catch(()=>{})}catch(e){}
   const shareTxt="🎭 MI EXPEDIENTE HUMANO\n"+em+" "+nombre+"\n"+desc+"\n\n"+sumHtml.replace(/<br>/g,"\n").replace(/<\/?b>/g,"")+"\nPuerta de entrada: "+canalTxt+"\nCódigo para tu coach: "+code+"\n— Personality Assessment · Myl AccentBridges";
   app.innerHTML=`
    <div class="emoji-big">${em}</div>
@@ -162,7 +163,8 @@ function intro(){
    <div class="emoji-big">🎭</div>
    <div class="q-text" style="margin-top:8px">Esto <b>no es un examen</b>. Es una plática de 16 preguntas — como te conocería una amiga en el camión.<br><br>Todas las respuestas son legítimas ✅. No hay correctas ni incorrectas: esto no evalúa, <b>ESCUCHA</b>.</div>
    <div class="hl" style="text-align:left">🕐 3 minutos · 🎲 cada vuelta trae preguntas nuevas · 🔒 todo se queda contigo</div>
-   <button class="btn btn-primary" onclick="start()">Vamos, cuéntame de ti 😄</button>`;
+   <input id="abName" placeholder="¿Cómo te llamas? (para tu expediente)" style="width:90%;max-width:420px;padding:12px 16px;border-radius:14px;border:1px solid #334155;background:#f8fafc;font-size:15px;margin:6px auto 12px;display:block">
+   <button class="btn btn-primary" onclick="window.abName=(document.getElementById('abName').value||'').trim()||'Anónima/o';start()">Vamos, cuéntame de ti 😄</button>`;
 }
 intro();
 </script>
