@@ -153,7 +153,20 @@ function stopReader(msg){
   readerOn=false; try{ speechSynthesis.cancel(); }catch(e){}
   const b=document.getElementById("btn-reader"), s=document.getElementById("reader-status");
   if(b){ b.textContent="▶ Escuchar lección"; b.classList.remove("sec"); b.classList.add("pri"); }
+  if(activeBlockBtn){ activeBlockBtn.textContent=activeBlockBtn.dataset.orig||"🔊"; activeBlockBtn=null; }
   if(s) s.textContent=msg||"";
+}
+let activeBlockBtn=null;
+function playBlock(btn,segs){
+  if(activeBlockBtn===btn){ stopReader(); return; }
+  stopReader();
+  if(typeof speechSynthesis==="undefined"){ alert("Tu navegador no soporta síntesis de voz."); return; }
+  loadReaderVoices(); readerQueue=segs.slice(); readerOn=true;
+  const b=document.getElementById("btn-reader");
+  if(b){ b.textContent="⏹ Detener lectura"; b.classList.remove("pri"); b.classList.add("sec"); }
+  if(btn){ activeBlockBtn=btn; btn.dataset.orig=btn.textContent; btn.textContent="⏹"; }
+  try{ speechSynthesis.cancel(); }catch(e){}
+  readerSpeakNext();
 }
 function readerSpeakNext(){
   if(!readerOn||readerQueue.length===0){ stopReader(readerOn?"✅ Lección terminada":""); return; }
@@ -245,7 +258,8 @@ function viewHoy(){
       <span class="faint" id="reader-status" style="flex:1;min-width:10rem">🎧 La Maestra te la lee, sin que tengas que leer</span>
     </section>
     <section class="note">
-      <p class="kicker" style="color:var(--faint)">Por qué hoy, en este orden</p>
+      <p class="kicker" style="color:var(--faint)">Por qué hoy, en este orden
+        <button type="button" class="btn sec" style="margin-left:.6rem;padding:.25rem .7rem;font-size:.8rem" data-blockwhy>🔊 Escuchar</button></p>
       <p style="margin-top:.4rem">${esc(L.why)}</p>
     </section>
     ${(phon.length||morph.length)?`
@@ -258,7 +272,8 @@ function viewHoy(){
     </section>`:""}
     ${L.listen.length?`
     <section style="margin-top:1.4rem">
-      <p class="kicker" style="color:var(--faint)">Banco de oído</p>
+      <p class="kicker" style="color:var(--faint)">Banco de oído
+        <button type="button" class="btn sec" style="margin-left:.6rem;padding:.25rem .7rem;font-size:.8rem" data-blockbank>🔊 Escuchar todas</button></p>
       <div class="chips">
         ${L.listen.map(w=>`<button type="button" class="speak" data-say="${esc(w)}">${esc(w)}</button>`).join("")}
       </div>
@@ -268,11 +283,11 @@ function viewHoy(){
         <h2>Ritual del día</h2>
         <p class="faint">${checked.length}/${L.steps.length}</p>
       </div>
-      ${L.steps.map(s=>{
+      ${L.steps.map((s,si)=>{
         const on = checked.includes(s.id);
         return `<button type="button" class="step ${on?'on':''}" data-toggle="${s.id}">
           <span class="dot">${on?"✓":""}</span>
-          <span><b>${esc(s.name)}</b> <span class="faint">· ${s.minutes} min</span>
+          <span><b>${esc(s.name)}</b> <span class="faint">· ${s.minutes} min</span><span data-stepaudio="${si}" title="Escuchar solo este paso" style="margin-left:.5rem;cursor:pointer">🔊</span>
           <span style="display:block;margin-top:.25rem;color:var(--muted);font-size:.92rem">${esc(s.how)}</span></span>
         </button>`;
       }).join("")}
@@ -481,6 +496,9 @@ function render(){
 
 function bind(root){
   const rd=root.querySelector("[data-reader]"); if(rd) rd.onclick=toggleReader;
+  root.querySelectorAll("[data-blockwhy]").forEach(el=>el.onclick=()=>{ const L=lesson(); playBlock(el,[{t:"Por qué hoy, en este orden. "+sanearIPA(L.why),lang:"es",label:"Por qué"}]); });
+  root.querySelectorAll("[data-blockbank]").forEach(el=>el.onclick=()=>{ const L=lesson(); playBlock(el,[{t:"Escucha y repite.",lang:"es",label:"Escucha y repite"}].concat(L.listen.map(w=>({t:w+".",lang:"en",label:w})))); });
+  root.querySelectorAll("[data-stepaudio]").forEach(el=>el.onclick=(e)=>{ e.stopPropagation(); const si=+el.getAttribute("data-stepaudio"); const L=lesson(); const st=L.steps[si]; if(st) playBlock(el,[{t:"Paso "+(si+1)+": "+st.name+". "+sanearIPA(st.how),lang:"es",label:"Paso "+(si+1)}]); });
   root.querySelectorAll("[data-say]").forEach(el => el.onclick = () => speak(el.getAttribute("data-say")));
   root.querySelectorAll("[data-toggle]").forEach(el => el.onclick = () => {
     const id = el.getAttribute("data-toggle");
