@@ -137,6 +137,53 @@ function speak(text){
     speechSynthesis.speak(u);
   } catch {}
 }
+/* ===== MODO MAESTRA LEE — lector bilingüe (portado del Estudio; feedback Marcos: "no todos aprenden leyendo") ===== */
+let readerQueue=[], readerOn=false, READER_VOICES=[];
+function loadReaderVoices(){ try{ READER_VOICES=speechSynthesis.getVoices()||[]; }catch(e){ READER_VOICES=[]; } }
+if (typeof speechSynthesis!=="undefined"){ loadReaderVoices(); speechSynthesis.onvoiceschanged=loadReaderVoices; }
+function pickReaderVoice(prefix,prefer){
+  const c=READER_VOICES.filter(v=>v.lang&&v.lang.toLowerCase().startsWith(prefix));
+  return c.find(v=>(v.name||"").toLowerCase().includes(prefer))||c[0]||null;
+}
+const IPA_MAP=[["eɪ"," ei deslizante "],["aɪ"," ai "],["aʊ"," au "],["ɔɪ"," oi "],["oʊ"," ou "],["tʃ"," ch "],["dʒ"," y fuerte "],
+  ["ə"," shwa "],["ɪ"," i laxa "],["æ"," a de gato "],["ʌ"," a corta "],["ɑ"," a abierta "],["ʊ"," u laxa "],["ɛ"," e fija "],
+  ["ʃ"," sh "],["ʒ"," zh "],["θ"," th "],["ð"," th sonora "],["ŋ"," ng "],["ɹ"," r americana "],["u"," u "],["i"," i "]];
+function sanearIPA(t){ t=String(t||"").replace(/\//g," "); for(const[s,w]of IPA_MAP){ t=t.split(s).join(w); } return t.replace(/\s+/g," ").trim(); }
+function stopReader(msg){
+  readerOn=false; try{ speechSynthesis.cancel(); }catch(e){}
+  const b=document.getElementById("btn-reader"), s=document.getElementById("reader-status");
+  if(b){ b.textContent="▶ Escuchar lección"; b.classList.remove("sec"); b.classList.add("pri"); }
+  if(s) s.textContent=msg||"";
+}
+function readerSpeakNext(){
+  if(!readerOn||readerQueue.length===0){ stopReader(readerOn?"✅ Lección terminada":""); return; }
+  const seg=readerQueue[0], s=document.getElementById("reader-status"), b=document.getElementById("btn-reader");
+  if(b){ b.textContent="⏹ Detener lectura"; b.classList.remove("pri"); b.classList.add("sec"); }
+  const u=new SpeechSynthesisUtterance(seg.t);
+  if(seg.lang==="en"){ u.lang="en-US"; u.rate=0.7; const v=pickReaderVoice("en","us"); if(v) u.voice=v; if(s) s.textContent="🇺🇸 Escucha y repite: "+seg.label; }
+  else{ u.lang="es-MX"; u.rate=0.98; const v=pickReaderVoice("es","mx")||pickReaderVoice("es",""); if(v) u.voice=v; if(s) s.textContent="📖 "+(seg.label||"Leyendo…"); }
+  u.onend=()=>{ readerQueue.shift(); setTimeout(readerSpeakNext, seg.lang==="en"?650:220); };
+  u.onerror=()=>{ readerQueue.shift(); readerSpeakNext(); };
+  try{ speechSynthesis.speak(u); }catch(e){ readerQueue.shift(); readerSpeakNext(); }
+}
+function toggleReader(){
+  if(readerOn){ stopReader(); return; }
+  if(typeof speechSynthesis==="undefined"){ alert("Tu navegador no soporta síntesis de voz."); return; }
+  const L=lesson(); loadReaderVoices(); readerQueue=[];
+  readerQueue.push({t:"Lección del día "+L.day+". "+sanearIPA(L.title)+". "+sanearIPA(L.hook),lang:"es",label:L.title});
+  readerQueue.push({t:"Por qué importa este paso. "+sanearIPA(L.why),lang:"es",label:"Por qué importa"});
+  if(L.steps&&L.steps.length){
+    readerQueue.push({t:"Los pasos de la lección.",lang:"es",label:"Pasos"});
+    L.steps.forEach((st,i)=>readerQueue.push({t:"Paso "+(i+1)+": "+st.name+". "+sanearIPA(st.how),lang:"es",label:"Paso "+(i+1)+" de "+L.steps.length}));
+  }
+  if(L.listen&&L.listen.length){
+    readerQueue.push({t:"Ahora, escucha y repite cada palabra.",lang:"es",label:"Escucha y repite"});
+    L.listen.forEach(w=>readerQueue.push({t:w+".",lang:"en",label:w}));
+  }
+  readerQueue.push({t:"Fin de la lección. Pregunta para tu bitácora: "+sanearIPA(L.methodPrompt),lang:"es",label:"Bitácora"});
+  readerOn=true; try{ speechSynthesis.cancel(); }catch(e){}
+  readerSpeakNext();
+}
 function lesson(){ return DATA.LESSONS[Math.min(Math.max(state.day,1), DATA.TOTAL_DAYS)-1]; }
 function phase(id){ return DATA.PHASES.find(p=>p.id===id); }
 function ph(id){ return DATA.PHONEMES.find(p=>p.id===id); }
@@ -193,6 +240,10 @@ function viewHoy(){
       <h1 style="font-size:clamp(1.8rem,4vw,2.8rem);margin-top:.4rem">${esc(L.title)}</h1>
       <p class="muted" style="margin-top:.7rem;font-size:1.05rem">${esc(L.hook)}</p>
     </header>
+    <section class="note" style="display:flex;align-items:center;gap:.9rem;flex-wrap:wrap">
+      <button type="button" class="btn pri" id="btn-reader" data-reader>▶ Escuchar lección</button>
+      <span class="faint" id="reader-status" style="flex:1;min-width:10rem">🎧 La Maestra te la lee, sin que tengas que leer</span>
+    </section>
     <section class="note">
       <p class="kicker" style="color:var(--faint)">Por qué hoy, en este orden</p>
       <p style="margin-top:.4rem">${esc(L.why)}</p>
@@ -407,6 +458,7 @@ function viewDiario(){
 }
 
 function render(){
+  if(readerOn) stopReader();
   document.getElementById("side-nav").innerHTML = navHtml();
   document.getElementById("bot-nav").innerHTML = NAV.map(([k,l]) => `<a href="#" class="${state.view===k?'on':''}" data-go="${k}">${l}</a>`).join("");
   progress();
@@ -428,6 +480,7 @@ function render(){
 }
 
 function bind(root){
+  const rd=root.querySelector("[data-reader]"); if(rd) rd.onclick=toggleReader;
   root.querySelectorAll("[data-say]").forEach(el => el.onclick = () => speak(el.getAttribute("data-say")));
   root.querySelectorAll("[data-toggle]").forEach(el => el.onclick = () => {
     const id = el.getAttribute("data-toggle");
