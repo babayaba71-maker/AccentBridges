@@ -592,7 +592,19 @@ let lastNotAllowedAt = 0;
 let quickEndStreak = 0, lastStartAt = 0, lastRecogErr = ""; // v0.6: freno anti clic-clic
 const brainEl = document.getElementById("brain");
 const wakeBtn = document.getElementById("btn-wake");
+setTimeout(() => dbgMic("listo"), 300);
 
+let micDbg = [];
+function dbgMic(s) {
+  micDbg.push(s); if (micDbg.length > 4) micDbg.shift();
+  let el = document.getElementById("micdbg");
+  if (!el) {
+    el = document.createElement("div"); el.id = "micdbg";
+    el.style.cssText = "position:fixed;left:14px;bottom:46px;z-index:50;font:10px ui-monospace,monospace;color:#5eead4;opacity:.7;pointer-events:none";
+    document.body.appendChild(el);
+  }
+  el.textContent = "v0.8 · " + micDbg.join(" ▸ ");
+}
 function setBrain(txt, on) {
   if (!brainEl) return;
   brainEl.textContent = txt;
@@ -629,9 +641,10 @@ function startWakeRecog() {
   try {
     wakeRecog = new SR();
     wakeRecog.lang = "es-MX";
-    wakeRecog.continuous = true;
+    wakeRecog.continuous = false; // v0.8: sesiones cortas, más estables en Android
     wakeRecog.interimResults = true;
-    wakeRecog.onstart = () => { wakeStarting = false; notAllowedStreak = 0; lastStartAt = performance.now(); setBrain("ESCUCHANDO…", true); };
+    wakeRecog.onstart = () => { wakeStarting = false; notAllowedStreak = 0; lastStartAt = performance.now();
+      setTimeout(() => { if (wakeArmed && performance.now() - lastStartAt >= 1100) setBrain("ESCUCHANDO…", true); }, 1200); };
     wakeRecog.onresult = e => {
       notAllowedStreak = 0; quickEndStreak = 0;
       for (let i = e.resultIndex; i < e.results.length; i++) {
@@ -652,6 +665,7 @@ function startWakeRecog() {
     };
     wakeRecog.onerror = ev => {
       wakeStarting = false; lastRecogErr = ev.error || "";
+      try { dbgMic("err:" + lastRecogErr); } catch (e) {}
       if (ev.error === "not-allowed" || ev.error === "service-not-allowed") {
         // El navegador dispara "not-allowed" TAMBIÉN mientras el diálogo de permiso
         // sigue abierto (antes de que el usuario responda) — eso NO es un rechazo real.
@@ -677,7 +691,7 @@ function startWakeRecog() {
       if (quickEndStreak >= 6) {
         // El mic no abre de verdad: dejar de molestar y pedir un toque manual
         wakeArmed = false; quickEndStreak = 0;
-        setBrain("MIC NO ABRE · TOCA DE NUEVO" + (lastRecogErr ? " (" + lastRecogErr + ")" : ""), false);
+        setBrain("MIC NO ABRE · " + (lastRecogErr || "sin-error") + " · v0.8", false);
         setWakeButtonsText('🎙️ ESCUCHAR "EY VALERIE"');
         return;
       }
