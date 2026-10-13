@@ -585,6 +585,7 @@ setTimeout(() => { if (state === S.ACTIVE) setState(S.DEMAT); }, 16000);
    ============================================================ */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 let wakeRecog = null, wakeArmed = false, lastWakeAt = 0;
+let lastCommand = null, cmdWindowUntil = 0, routingBusy = false; // v0.5: comandos de voz
 let wakeStarting = false;       // evita "ya está iniciado" al reintentar muy rápido
 let notAllowedStreak = 0;       // solo desarma tras VARIOS rechazos reales seguidos
 let lastNotAllowedAt = 0;
@@ -614,8 +615,9 @@ function onWakeHeard() {
     morphMode = "ring"; // esfera → halo: "te oí"
     setTimeout(() => { if (state === S.PASSIVE) setState(S.MAT); }, 900);
   } else if (state === S.ACTIVE) {
-    // ya materializada — solo repite el saludo/abre el chat
-    speakWakeGreeting();
+    // ya materializada — si dijo comando, enruta; si no, repite el saludo/abre el chat
+    if (lastCommand) routeCommand(lastCommand);
+    else speakWakeGreeting();
   }
   setTimeout(() => { if (wakeArmed) setBrain("ESCUCHANDO…", true); }, 2500);
 }
@@ -633,7 +635,18 @@ function startWakeRecog() {
       notAllowedStreak = 0;
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const t = e.results[i][0].transcript.toLowerCase();
-        if (/valer/.test(t) || /balery|balrry/.test(t)) { onWakeHeard(); break; }
+        if (/valer\w*|balery|balrry/.test(t)) {
+          // v0.5: lo que sigue DESPUÉS de la palabra de despertar = comando
+          const after = t.replace(/^[\s\S]*?(valer\w*|balery|balrry)/, "").replace(/^[,.\s]+/, "").trim();
+          if (after.length > 2) lastCommand = after; else cmdWindowUntil = Date.now() + 9000;
+          onWakeHeard();
+          break;
+        }
+        // v0.5: ventana de comando — la frase SIGUIENTE al despertar también manda
+        if (cmdWindowUntil && Date.now() < cmdWindowUntil && e.results[i].isFinal) {
+          const t2 = t.trim();
+          if (t2.length > 2) { cmdWindowUntil = 0; lastCommand = t2; if (state === S.ACTIVE || state === S.MAT) routeCommand(lastCommand); }
+        }
       }
     };
     wakeRecog.onerror = ev => {
@@ -702,6 +715,12 @@ if (new URLSearchParams(location.search).has("debugwake")) {
   setTimeout(() => { wakeArmed = true; setBrain("ESCUCHANDO…", true); onWakeHeard(); }, 1200);
 }
 
+/* ---- Arnés de QA: ?debugcmd=<comando> enruta sin voz real ---- */
+if (new URLSearchParams(location.search).has("debugcmd")) {
+  const c = decodeURIComponent(new URLSearchParams(location.search).get("debugcmd") || "");
+  if (c) setTimeout(() => { wakeArmed = true; setBrain("ESCUCHANDO…", true); routeCommand(c); }, 1500);
+}
+
 /* ---- Saludo hablado de Valerie 1 al despertar ---- */
 let voicesCache = [];
 function loadVoices() { voicesCache = speechSynthesis.getVoices(); }
@@ -716,11 +735,31 @@ function speakWakeGreeting() {
     const v = voicesCache.find(v => /^es/i.test(v.lang) && /female|mujer|helena|paulina|mónica|monica/i.test(v.name))
            || voicesCache.find(v => /^es/i.test(v.lang));
     if (v) u.voice = v;
-    u.onend = () => { speaking = false; setTimeout(openValerie1, 350); };
+    u.onend = () => {
+      speaking = false;
+      if (lastCommand) routeCommand(lastCommand); // v0.5: el comando manda
+      else setTimeout(openValerie1, 350);
+    };
     speechSynthesis.cancel();
     speaking = true;
     speechSynthesis.speak(u);
   } catch (e) { openValerie1(); }
+}
+
+/* ---- v0.5: voz de confirmación de enrutado ---- */
+function speakEs(text) {
+  if (!("speechSynthesis" in window)) return;
+  try {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "es-MX"; u.rate = 0.98; u.pitch = 1.05;
+    const v = voicesCache.find(v => /^es/i.test(v.lang) && /female|mujer|helena|paulina|mónica|monica/i.test(v.name))
+           || voicesCache.find(v => /^es/i.test(v.lang));
+    if (v) u.voice = v;
+    u.onend = () => { speaking = false; if (wakeArmed) setBrain("ESCUCHANDO…", true); };
+    speechSynthesis.cancel();
+    speaking = true;
+    speechSynthesis.speak(u);
+  } catch (e) {}
 }
 </script>
 
@@ -926,6 +965,60 @@ function openValerie1(){
 }
 function closeV1Chat(){ var m=document.getElementById("v1chat"); if(m) m.style.display="none"; }
 function openPortal(){const p=document.getElementById("portal");p.classList.add("show");renderPortal()}
+
+/* ============================================================
+   VOICE ROUTER v0.5 (13-oct-2026) — doctrina del Mapa Maestro:
+   Tier 0 DETERMINÍSTICO (local, gratis, instantáneo) para las 12 puertas;
+   Tier 1 = wallBrain (OpenAI→Gemini, valerie.base44.app) SOLO lo borroso.
+   El LLM interpreta el comando, JAMÁS inventa puertas fuera del catálogo.
+   ============================================================ */
+const DOOR_URLS = {trainer:TRAINER, ar:AR, call:CALL, telegram:TG, tiktok:TT, america:AMERICA, palace:PALACE, panel:PANEL, soundmap:SOUNDMAP, youtube:YT};
+const DOOR_NAMES = {portal:"LA MAESTRA", trainer:"TRAINER", ar:"AR LABELER", call:"VOZ EN VIVO", valerie1:"VALERIE 1", telegram:"TELEGRAM", youtube:"YOUTUBE", tiktok:"TIKTOK", america:"AMERICA", palace:"PALACE", panel:"PANEL", soundmap:"SOUNDMAP"};
+const WALLBRAIN = "https://valerie.base44.app/functions/wallBrain";
+
+function executeDoor(door, reply) {
+  lastCommand = null; routingBusy = false;
+  if (!door || door === "none") {
+    speakEs(reply || "No te entendí, dime otra vez.");
+    if (wakeArmed) setBrain("ESCUCHANDO…", true);
+    return;
+  }
+  const nm = DOOR_NAMES[door] || door.toUpperCase();
+  setBrain("→ " + nm, true);
+  speakEs(reply || ("Abriendo " + nm.toLowerCase() + " para ti."));
+  if (door === "portal") { openPortal(); }
+  else if (door === "valerie1") { openValerie1(); }
+  else if (DOOR_URLS[door]) { window.open(DOOR_URLS[door], "_blank"); }
+}
+
+function routeCommand(cmd) {
+  if (routingBusy) return;
+  const raw = String(cmd || "").trim();
+  if (!raw) return;
+  routingBusy = true;
+  // ---- TIER 0: router determinístico — 0 LLM, 0 costo, 0 latencia ----
+  const norm = raw.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  let door = null;
+  if (/maestr|portal|dosis/.test(norm)) door = "portal";
+  else if (/trainer|cartilla|fundac|alfabet/.test(norm)) door = "trainer";
+  else if (/\bar\b|labeler|etiqueta|escane/.test(norm)) door = "ar";
+  else if (/llam|\bcall\b|voz en vivo|telefono/.test(norm)) door = "call";
+  else if (/presentadora|presentador|valerie 1|valerie uno|abuela|recepcion/.test(norm)) door = "valerie1";
+  else if (/telegram|grupo/.test(norm)) door = "telegram";
+  else if (/youtube|video|reel/.test(norm)) door = "youtube";
+  else if (/tiktok/.test(norm)) door = "tiktok";
+  else if (/america|pares minim/.test(norm)) door = "america";
+  else if (/palace|palacio|trabaleng/.test(norm)) door = "palace";
+  else if (/panel|expediente|dashboard/.test(norm)) door = "panel";
+  else if (/soundmap|mapa/.test(norm)) door = "soundmap";
+  if (door) { executeDoor(door, "Abriendo " + DOOR_NAMES[door].toLowerCase() + " para ti."); return; }
+  // ---- TIER 1: wallBrain para lo borroso ----
+  setBrain("PENSANDO…", true);
+  fetch(WALLBRAIN, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ command: raw }) })
+    .then(r => r.json())
+    .then(j => executeDoor(j.door, j.reply_es))
+    .catch(() => executeDoor("none", "Se me cayó el cerebro, dime otra vez."));
+}
 if(location.hash==="#portal"||location.hash==="#maestra"){openPortal()}
 function closePortal(){document.getElementById("portal").classList.remove("show")}
 </script>
