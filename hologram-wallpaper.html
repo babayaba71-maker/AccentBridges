@@ -707,7 +707,7 @@ if (wakeBtn) {
 }
 
 /* ---- FAB siempre visible de wake word ---- */
-function toggleWakeFromFab() {
+async function toggleWakeFromFab() {
   const fab = document.getElementById("wakefab");
   const wbtn = document.getElementById("btn-wake");
   if (!("SpeechRecognition" in window || "webkitSpeechRecognition" in window)) {
@@ -715,12 +715,38 @@ function toggleWakeFromFab() {
     return;
   }
   initAudio();
-  wakeArmed = !wakeArmed;
-  if (wakeArmed) { startWakeRecog(); }
-  else { stopWakeRecog(); }
-  const label = wakeArmed ? "🎙️ ESCUCHANDO…" : "🎙️ EY VALERIE";
-  fab.textContent = label;
-  if (wbtn) wbtn.textContent = wakeArmed ? "🎙️ ESCUCHANDO…" : '🎙️ ESCUCHAR "EY VALERIE"';
+  if (wakeArmed) { // apagar es inmediato
+    wakeArmed = false; stopWakeRecog();
+    fab.textContent = "🎙️ EY VALERIE";
+    if (wbtn) wbtn.textContent = '🎙️ ESCUCHAR "EY VALERIE"';
+    return;
+  }
+  // v0.7: pedir el mic de verdad ANTES de armar. Si Chrome ya lo negó,
+  // getUserMedia falla al instante con el motivo exacto (sin clic-clic eterno).
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    fab.textContent = "🎙️ PIDIENDO MIC…";
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(t => t.stop()); // solo era el permiso
+    } catch (err) {
+      const n = err && err.name || "error";
+      if (n === "NotAllowedError" || n === "SecurityError" || n === "PermissionDeniedError") {
+        fab.textContent = "🎙️ MIC BLOQUEADO — AJUSTES > MIC";
+        setBrain("MIC BLOQUEADO EN CHROME — Ajustes del sitio > Micrófono > Permitir", false);
+      } else if (n === "NotFoundError" || n === "DevicesNotFoundError") {
+        fab.textContent = "🎙️ SIN MICRÓFONO";
+        setBrain("ESTE DISPOSITIVO NO TIENE MICRÓFONO", false);
+      } else {
+        fab.textContent = "🎙️ MIC ERROR: " + n;
+        setBrain("MIC: " + n, false);
+      }
+      return;
+    }
+  }
+  wakeArmed = true;
+  startWakeRecog();
+  fab.textContent = "🎙️ ESCUCHANDO…";
+  if (wbtn) wbtn.textContent = "🎙️ ESCUCHANDO…";
 }
 
 /* ---- Arnés de QA temporal: ?debugwake=1 dispara el wake sin voz real
@@ -1037,7 +1063,7 @@ if(location.hash==="#portal"||location.hash==="#maestra"){openPortal()}
 function closePortal(){document.getElementById("portal").classList.remove("show")}
 </script>
 <div id="v1chat" style="display:none;position:fixed;inset:0;z-index:90;background:rgba(2,6,23,.94)">
-  <div style="position:absolute;top:12px;left:14px;z-index:2;color:#ffd7ee;font:700 12px ui-monospace,monospace;letter-spacing:1px">🗣️ VALERIE 1 — PRESENTADORA <span style="color:#64748b">v0.4</span></div>
+  <div style="position:absolute;top:12px;left:14px;z-index:2;color:#ffd7ee;font:700 12px ui-monospace,monospace;letter-spacing:1px">🗣️ VALERIE 1 — PRESENTADORA <span style="color:#64748b">v0.7</span></div>
   <button onclick="closeV1Chat()" style="position:absolute;top:8px;right:12px;z-index:2;background:rgba(20,10,40,.9);color:#ffd7ee;border:1px solid #ff4fa3;border-radius:999px;padding:8px 14px;font:700 12px ui-monospace,monospace;cursor:pointer">✕ CERRAR</button>
   <iframe id="v1frame" style="width:100%;height:100%;border:0;background:#f8fafc" title="Valerie 1"></iframe>
   <div id="v1spin" style="display:none;position:absolute;inset:0;z-index:1;background:rgba(2,6,23,.9);flex-direction:column;align-items:center;justify-content:center;gap:14px">
