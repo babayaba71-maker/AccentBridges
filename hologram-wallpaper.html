@@ -743,7 +743,8 @@ const AMERICA="https://speak-native-buddy.lovable.app";
 const PALACE="https://pronunciation-palace.lovable.app";
 const PANEL="https://accent-dashboard-buddy.lovable.app";
 const SOUNDMAP="https://myl-sound-path.base44.app";
-const V1CFG="https://files.bpcontent.cloud/2026/03/31/09/20260331093109-OWOFJOLD.json"; // Valerie 1 (Botpress): la primera Valerie, abuela del ecosistema — ahora PRESENTADORA oficial del sistema (JJ 17-sep-2026). Recibe, explica y enruta a las puertas. // Myl SoundMap English (Base44): 40 lecciones, Sound Rules, Practice, Listening, Quiz, 24h Challenge duelos, Phoneme Library, logros, Tabla Global. Datos legibles por Alma (entidades LeaderboardEntry + Challenge). // Dashboard: radar 5 ramas del Motor Linguistico, streak/XP, Learning Path (wana/reduced speech), CEFR A1-C2, AI picks next lesson // PronunLab: trabalenguas con score (evidencia sobrino A-bajo 70-100%), diptongos/trifongos, shadowing, quiz, ranks // PronounceAI (app Lovable JJ): minimal pairs con reconocimiento de voz, entonación, grabación, progreso
+const V1CFG="https://files.bpcontent.cloud/2026/03/31/09/20260331093109-OWOFJOLD.json";
+const V1SHARE="https://cdn.botpress.cloud/webchat/v3.6/shareable.html?configUrl="+encodeURIComponent(V1CFG); // ventana oficial VERIFICADA viva 13-oct-2026 (el embed inject.js jamás renderizaba el iframe) // Valerie 1 (Botpress): la primera Valerie, abuela del ecosistema — ahora PRESENTADORA oficial del sistema (JJ 17-sep-2026). Recibe, explica y enruta a las puertas. // Myl SoundMap English (Base44): 40 lecciones, Sound Rules, Practice, Listening, Quiz, 24h Challenge duelos, Phoneme Library, logros, Tabla Global. Datos legibles por Alma (entidades LeaderboardEntry + Challenge). // Dashboard: radar 5 ramas del Motor Linguistico, streak/XP, Learning Path (wana/reduced speech), CEFR A1-C2, AI picks next lesson // PronunLab: trabalenguas con score (evidencia sobrino A-bajo 70-100%), diptongos/trifongos, shadowing, quiz, ranks // PronounceAI (app Lovable JJ): minimal pairs con reconocimiento de voz, entonación, grabación, progreso
 const YT="https://www.youtube.com/@Jacobmendoza5379";
 const ytSearch=q=>YT+"/search?query="+encodeURIComponent(q);
 const PERS_URL="https://babayaba71-maker.github.io/AccentBridges/personalization-assessment.html";
@@ -905,22 +906,25 @@ function renderPortal(){
 }
 function pNoLevel(){alert("Primero el paso 1: el Expediente Humano. La persona antes que el pronóstico ✨")}
 function openValerie1(){
-  if(!document.getElementById("bp-inject")){
-    var sc=document.createElement("script");
-    sc.id="bp-inject"; sc.src="https://cdn.botpress.cloud/webchat/v3.6/inject.js";
-    sc.onload=function(){
-      try{
-        window.botpress.init({configUrl:V1CFG});
-        setTimeout(function(){try{window.botpress.open&&window.botpress.open()}catch(e){}},800);
-      }catch(e){alert("Valerie 1 no pudo despertar — intenta de nuevo 🤖")}
-    };
-    document.body.appendChild(sc);
-  }else{try{window.botpress.open&&window.botpress.open()}catch(e){}}
+  // v0.3 (13-oct): el embed inject.js NUNCA renderizaba (7 meses). Ahora: la ventana
+  // oficial shareable de Botpress (VERIFICADA viva: saluda y responde) va en un iframe
+  // modal DENTRO del holograma; respaldo = pestaña nueva si el iframe falla.
+  var m=document.getElementById("v1chat");
+  if(!m){ window.open(V1SHARE,"_blank"); return; }
+  var f=document.getElementById("v1frame");
+  if(!f.getAttribute("src")) f.src=V1SHARE;
+  m.style.display="block";
 }
+function closeV1Chat(){ var m=document.getElementById("v1chat"); if(m) m.style.display="none"; }
 function openPortal(){const p=document.getElementById("portal");p.classList.add("show");renderPortal()}
 if(location.hash==="#portal"||location.hash==="#maestra"){openPortal()}
 function closePortal(){document.getElementById("portal").classList.remove("show")}
 </script>
+<div id="v1chat" style="display:none;position:fixed;inset:0;z-index:90;background:rgba(2,6,23,.94)">
+  <div style="position:absolute;top:12px;left:14px;z-index:2;color:#ffd7ee;font:700 12px ui-monospace,monospace;letter-spacing:1px">🗣️ VALERIE 1 — PRESENTADORA</div>
+  <button onclick="closeV1Chat()" style="position:absolute;top:8px;right:12px;z-index:2;background:rgba(20,10,40,.9);color:#ffd7ee;border:1px solid #ff4fa3;border-radius:999px;padding:8px 14px;font:700 12px ui-monospace,monospace;cursor:pointer">✕ CERRAR</button>
+  <iframe id="v1frame" style="width:100%;height:100%;border:0;background:#f8fafc" title="Valerie 1"></iframe>
+</div>
 <button id="wakefab" style="position:fixed;bottom:66px;right:14px;z-index:40;background:rgba(20,10,40,.82);color:#ccfbf1;border:1px solid #2dd4bf;border-radius:999px;padding:10px 16px;font-size:13px;font-weight:700;letter-spacing:.5px;cursor:pointer;backdrop-filter:blur(6px)" onclick="toggleWakeFromFab()">🎙️ EY VALERIE</button>
 <button id="v1fab" style="position:fixed;bottom:14px;right:14px;z-index:40;background:rgba(20,10,40,.82);color:#ffd7ee;border:1px solid #ff4fa3;border-radius:999px;padding:10px 16px;font-size:13px;font-weight:700;letter-spacing:.5px;cursor:pointer;backdrop-filter:blur(6px)" onclick="openValerie1()">🗣️ VALERIE 1</button>
 </body>
