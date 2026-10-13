@@ -98,9 +98,13 @@
 
 <script>
 /* ============================================================
-   VALERIE 3 — HOLOGRAM WALLPAPER v0.1
+   VALERIE 3 — HOLOGRAM WALLPAPER v0.2 — MOTOR MORPH (idea Gemini, ejecución Alma 13-oct)
    Estados: passive → materializing (3s) → active → dematerializing (2.5s) → passive
    Orb respirando + partículas orbitales + silueta de partículas + wordmark
+   MORPH: standby = esfera nebulosa 3D rotando; wake detectado = halo pulsante (te oí,
+   procesando); Valerie hablando = onda viva en la silueta. Proyección 3D casera con
+   perspectiva por profundidad, CERO dependencias (ni Three.js ni GSAP — batería First).
+   Cap 30fps en pasivo + pausa en segundo plano.
    ============================================================ */
 const cv = document.getElementById("cv");
 const ctx = cv.getContext("2d");
@@ -129,6 +133,7 @@ function updateFaceBox() {
   faceEl.style.height = (470 * silScale) + "px";
 }
 window.addEventListener("resize", resize);
+document.addEventListener("visibilitychange", () => { last = performance.now(); rLast = 0; });
 resize();
 
 /* ---- Puntos objetivo: silueta de Valerie — cabello largo lacio con
@@ -183,16 +188,25 @@ for (let i = 0; i < N; i++) {
     size: rnd(.7, 2.4),
     hue: Math.random() < .12 ? 48 : rnd(165, 195),  // 12% doradas, resto turquesa/cyan
     tw: rnd(0.5, 1.6),
-    tgt: SIL[i % SIL.length]
+    tgt: SIL[i % SIL.length],
+    s3: (() => { const th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
+         return [Math.sin(ph) * Math.cos(th), Math.sin(ph) * Math.sin(th), Math.cos(ph)]; })(),
+    sr: rnd(0.62, 1.25),          // radio relativo dentro de la nebulosa
+    rph: Math.random() * Math.PI * 2,  // fase sobre el halo
+    pers: 1
   });
 }
 
 /* ---- Máquina de estados ---- */
 const S = { PASSIVE: 0, MAT: 1, ACTIVE: 2, DEMAT: 3 };
 let state = S.PASSIVE, stateT = 0, matHold = 0;
+let morphMode = "sphere";   // "sphere" (standby) | "ring" (te oí, procesando)
+let speaking = false;       // Valerie hablando por TTS → onda viva
+let rLast = 0;              // cap de frames: batería
 const stateEl = document.getElementById("state-label");
 function setState(s) {
   state = s; stateT = 0;
+  if (s === S.PASSIVE) morphMode = "sphere";
   if (s === S.MAT) matSound();
   if (s === S.DEMAT) { dematSound(); hideFace(); }
   stateEl.textContent = s === S.PASSIVE ? "● PRESENCIA PASIVA"
@@ -216,6 +230,10 @@ function orb() { return { x: W / 2, y: H / 2 }; }
 const easeIO = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 
 function frame(now) {
+  // cap: 30fps en pasivo/desvaneciendo (batería), 60fps materializada
+  const cap = (state === S.PASSIVE || state === S.DEMAT) ? 33 : 16;
+  if (now - rLast < cap) { requestAnimationFrame(frame); return; }
+  rLast = now;
   const dt = Math.min((now - last) / 1000, .05); last = now;
   tGlobal += dt; stateT += dt;
   const o = orb();
@@ -258,11 +276,31 @@ function frame(now) {
   for (const p of P) {
     let tx, ty;
     if (state === S.PASSIVE) {
-      // órbita libre alrededor del orbe
-      p.oph += p.oang * dt;
-      const rr = p.orad * (0.92 + Math.sin(tGlobal * 0.4 + p.oph) * 0.08);
-      tx = o.x + Math.cos(p.oph) * rr;
-      ty = o.y + Math.sin(p.oph) * rr * 0.92;
+      // MOTOR MORPH v0.2 — nube 3D con perspectiva
+      const R0 = Math.min(W, H) * 0.30;
+      let px, py, pz;
+      if (morphMode === "ring") {
+        // HALO PULSANTE: "te oí, procesando"
+        const RR = R0 * 0.85 * (1 + Math.sin(tGlobal * 5.2) * 0.07);
+        const a = p.rph + tGlobal * 0.9;
+        px = Math.cos(a) * RR; pz = Math.sin(a) * RR;
+        py = Math.sin(a * 2 + p.rph) * R0 * 0.10;
+      } else {
+        // ESFERA NEBULOSA rotando lento (standby)
+        const sx = p.s3[0], sy = p.s3[1], sz = p.s3[2];
+        const rr = R0 * p.sr * (0.97 + Math.sin(tGlobal * 0.6 + p.oph) * 0.05);
+        const a = tGlobal * 0.22 + p.oph * 0.05;
+        const cx = sx * Math.cos(a) - sz * Math.sin(a);
+        const cz = sx * Math.sin(a) + sz * Math.cos(a);
+        const tilt = 0.42;
+        const cy = sy * Math.cos(tilt) - cz * Math.sin(tilt);
+        const cz2 = sy * Math.sin(tilt) + cz * Math.cos(tilt);
+        px = cx * rr; py = cy * rr; pz = cz2 * rr;
+      }
+      const fov = R0 * 2.8;
+      p.pers = fov / (fov + pz);
+      tx = o.x + px * p.pers;
+      ty = o.y + py * p.pers * 0.96;
     } else if (state === S.MAT) {
       const k = easeIO(Math.min(stateT / 3, 1));
       const gx = silOffX + p.tgt[0] * silScale + Math.sin(tGlobal * 3 + p.oph) * (1 - k) * 30;
@@ -270,11 +308,13 @@ function frame(now) {
       tx = p.x + (gx - p.x) * (k * 0.9 + 0.04);
       ty = p.y + (gy - p.y) * (k * 0.9 + 0.04);
     } else if (state === S.ACTIVE) {
-      // shimmer alrededor de su punto de silueta
+      // shimmer alrededor de su punto de silueta (ONDA VIVA si Valerie habla)
       const gx = silOffX + p.tgt[0] * silScale;
       const gy = silOffY + p.tgt[1] * silScale;
-      tx = gx + Math.sin(tGlobal * 1.4 + p.oph) * 2.2;
-      ty = gy + Math.cos(tGlobal * 1.1 + p.oph) * 2.2;
+      const amp = speaking ? 5.5 : 2.2;
+      const spd = speaking ? 4.2 : 1.4;
+      tx = gx + Math.sin(tGlobal * spd + p.oph) * amp;
+      ty = gy + Math.cos(tGlobal * spd * 0.8 + p.oph) * amp;
     } else { // DEMAT
       const k = easeIO(Math.min(stateT / 2.5, 1));
       p.oph += p.oang * dt * 4;
@@ -286,10 +326,11 @@ function frame(now) {
     p.y += (ty - p.y) * (state === S.PASSIVE ? 0.05 : 0.18);
 
     const tw = 0.55 + Math.sin(tGlobal * p.tw * 2.5 + p.oph) * 0.45;
-    const alpha = (state === S.ACTIVE ? 0.85 : 0.6) * tw;
+    const dep = state === S.PASSIVE ? (0.35 + 0.65 * Math.min(1, Math.max(0, p.pers))) : 1;
+    const alpha = (state === S.ACTIVE ? 0.85 : 0.6) * tw * dep;
     ctx.fillStyle = p.hue === 48 ? `rgba(255, 215, 0, ${alpha})` : `rgba(103, 232, 249, ${alpha})`;
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size * (state === S.ACTIVE ? 1.15 : 1), 0, Math.PI * 2);
+    ctx.arc(p.x, p.y, p.size * (state === S.ACTIVE ? 1.15 : 1) * dep, 0, Math.PI * 2);
     ctx.fill();
   }
 
@@ -570,7 +611,8 @@ function onWakeHeard() {
   blip();
   if (state === S.PASSIVE) {
     pendingWakeGreeting = true;
-    setState(S.MAT);
+    morphMode = "ring"; // esfera → halo: "te oí"
+    setTimeout(() => { if (state === S.PASSIVE) setState(S.MAT); }, 900);
   } else if (state === S.ACTIVE) {
     // ya materializada — solo repite el saludo/abre el chat
     speakWakeGreeting();
@@ -674,8 +716,9 @@ function speakWakeGreeting() {
     const v = voicesCache.find(v => /^es/i.test(v.lang) && /female|mujer|helena|paulina|mónica|monica/i.test(v.name))
            || voicesCache.find(v => /^es/i.test(v.lang));
     if (v) u.voice = v;
-    u.onend = () => setTimeout(openValerie1, 350);
+    u.onend = () => { speaking = false; setTimeout(openValerie1, 350); };
     speechSynthesis.cancel();
+    speaking = true;
     speechSynthesis.speak(u);
   } catch (e) { openValerie1(); }
 }
