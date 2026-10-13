@@ -603,7 +603,7 @@ function dbgMic(s) {
     el.style.cssText = "position:fixed;left:14px;bottom:46px;z-index:50;font:10px ui-monospace,monospace;color:#5eead4;opacity:.7;pointer-events:none";
     document.body.appendChild(el);
   }
-  el.textContent = "v0.8 · " + micDbg.join(" ▸ ");
+  el.textContent = "v0.9 · " + micDbg.join(" ▸ ");
 }
 function setBrain(txt, on) {
   if (!brainEl) return;
@@ -684,20 +684,9 @@ function startWakeRecog() {
     };
     wakeRecog.onend = () => {
       wakeStarting = false;
-      if (!wakeArmed) return;
-      // v0.6: si la sesión murió en <2.5s (sin oír nada) es el clic-clic de Android.
-      const lived = performance.now() - lastStartAt;
-      quickEndStreak = (lived < 2500) ? quickEndStreak + 1 : 0;
-      if (quickEndStreak >= 6) {
-        // El mic no abre de verdad: dejar de molestar y pedir un toque manual
-        wakeArmed = false; quickEndStreak = 0;
-        setBrain("MIC NO ABRE · " + (lastRecogErr || "sin-error") + " · v0.8", false);
-        setWakeButtonsText('🎙️ ESCUCHAR "EY VALERIE"');
-        return;
-      }
-      // retroceso: 300ms, 600, 1200... hasta 4s (sin spam de clics)
-      const wait = Math.min(300 * Math.pow(2, quickEndStreak), 4000);
-      setTimeout(() => { if (wakeArmed) startWakeRecog(); }, wait);
+      // v0.9: SIN BUCLE — el eterno prende-apaga del mic de Android muere aquí.
+      // Push-to-talk: una sesión por toque. Si no oyó, toca de nuevo.
+      if (wakeArmed) setBrain("TOCA EL MIC Y HABLA", false);
     };
     wakeRecog.start();
   } catch (e) { wakeStarting = false; }
@@ -729,6 +718,8 @@ async function toggleWakeFromFab() {
     return;
   }
   initAudio();
+  if (pttRec && pttRec.state === "recording") { try { pttRec.stop(); } catch (e) {} return; }
+  if (pttBusy) return; // ya está procesando
   if (wakeArmed) { // apagar es inmediato
     wakeArmed = false; stopWakeRecog();
     fab.textContent = "🎙️ EY VALERIE";
@@ -757,10 +748,89 @@ async function toggleWakeFromFab() {
       return;
     }
   }
+  // v0.9: PUSH-TO-TALK. Toca, habla, vuelve a tocar. Cero bucle.
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    startPtt(stream, fab, wbtn);
+  } catch (err) { /* el error ya se pintó arriba si getUserMedia falló */ }
+}
+
+let pttRec = null, pttChunks = [], pttBusy = false;
+const ELSTT = "https://valerie.base44.app/functions/elStt";
+
+function startPtt(stream, fab, wbtn) {
+  pttChunks = [];
+  try { pttRec = new MediaRecorder(stream); } catch (e) {
+    stream.getTracks().forEach(t => t.stop());
+    fab.textContent = "🎙️ ERROR DE GRABACIÓN";
+    return;
+  }
+  pttRec.ondataavailable = e => { if (e.data && e.data.size) pttChunks.push(e.data); };
+  pttRec.onstop = () => {
+    stream.getTracks().forEach(t => t.stop());
+    const blob = new Blob(pttChunks, { type: pttChunks[0]?.type || "audio/webm" });
+    if (blob.size < 800) { setBrain("NO OÍ NADA — OTRA VEZ", false); return; }
+    sendPtt(blob, fab, wbtn);
+  };
+  pttRec.start();
   wakeArmed = true;
-  startWakeRecog();
-  fab.textContent = "🎙️ ESCUCHANDO…";
-  if (wbtn) wbtn.textContent = "🎙️ ESCUCHANDO…";
+  setBrain("HABLA — TOCA PARA ENVIAR", true);
+  setWakeButtonsText("⏹️ ENVIAR");
+  setTimeout(() => { if (pttRec && pttRec.state === "recording") pttRec.stop(); }, 12000);
+}
+
+function blobToB64(b) {
+  return new Promise(res => {
+    const fr = new FileReader();
+    fr.onload = () => res(String(fr.result).split(",")[1] || "");
+    fr.readAsDataURL(b);
+  });
+}
+
+async function sendPtt(blob, fab, wbtn) {
+  if (pttBusy) return;
+  pttBusy = true; wakeArmed = false;
+  setBrain("ESCUCHANDO TU GRABACIÓN…", true);
+  setWakeButtonsText("🧠 PROCESANDO…");
+  try {
+    const b64 = await blobToB64(blob);
+    const r = await fetch(ELSTT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-abvc-key": "ABVC-PILOTO-2026" },
+      body: JSON.stringify({ audio_b64: b64, mime: blob.type || "audio/webm", lang: "es" })
+    });
+    if (!r.ok) throw new Error("stt " + r.status);
+    const j = await r.json();
+    const text = String(j.text || "").trim();
+    dbgMic("stt:" + (text.slice(0, 26) || "vacío"));
+    if (!text) { executeDoor("none", "No oí nada, háblame otra vez."); return; }
+    const low = text.toLowerCase();
+    if (/valer\w*|balery/.test(low)) {
+      const after = low.replace(/^[\s\S]*?(valer\w*|balery)/, "").replace(/^[,.\s]+/, "").trim();
+      if (after.length > 2) { onWakeHeard(); routeCommand(after); }
+      else onWakeHeard();
+    } else {
+      routeCommand(text); // push-to-talk: el toque ES el despertar
+    }
+  } catch (e) {
+    dbgMic("stt-err:" + String(e).slice(0, 40));
+    // Oído ElevenLabs sin llave viva: un intento del navegador, SIN bucle
+    if (SR) {
+      setBrain("OÍDO EL APAGADO — MODO NAVEGADOR", false);
+      setWakeButtonsText('🎙️ ESCUCHAR "EY VALERIE"');
+      wakeArmed = true;
+      startWakeRecog();
+    } else {
+      executeDoor("none", "El oído nuevo se enciende con la llave de ElevenLabs.");
+    }
+    return;
+  } finally {
+    pttBusy = false;
+    if (!wakeArmed) {
+      setWakeButtonsText('🎙️ EY VALERIE');
+      setTimeout(() => { if (!wakeArmed && !speaking) setBrain("STANDBY", false); }, 4000);
+    }
+  }
 }
 
 /* ---- Arnés de QA temporal: ?debugwake=1 dispara el wake sin voz real
@@ -1077,7 +1147,7 @@ if(location.hash==="#portal"||location.hash==="#maestra"){openPortal()}
 function closePortal(){document.getElementById("portal").classList.remove("show")}
 </script>
 <div id="v1chat" style="display:none;position:fixed;inset:0;z-index:90;background:rgba(2,6,23,.94)">
-  <div style="position:absolute;top:12px;left:14px;z-index:2;color:#ffd7ee;font:700 12px ui-monospace,monospace;letter-spacing:1px">🗣️ VALERIE 1 — PRESENTADORA <span style="color:#64748b">v0.7</span></div>
+  <div style="position:absolute;top:12px;left:14px;z-index:2;color:#ffd7ee;font:700 12px ui-monospace,monospace;letter-spacing:1px">🗣️ VALERIE 1 — PRESENTADORA <span style="color:#64748b">v0.9</span></div>
   <button onclick="closeV1Chat()" style="position:absolute;top:8px;right:12px;z-index:2;background:rgba(20,10,40,.9);color:#ffd7ee;border:1px solid #ff4fa3;border-radius:999px;padding:8px 14px;font:700 12px ui-monospace,monospace;cursor:pointer">✕ CERRAR</button>
   <iframe id="v1frame" style="width:100%;height:100%;border:0;background:#f8fafc" title="Valerie 1"></iframe>
   <div id="v1spin" style="display:none;position:absolute;inset:0;z-index:1;background:rgba(2,6,23,.9);flex-direction:column;align-items:center;justify-content:center;gap:14px">
