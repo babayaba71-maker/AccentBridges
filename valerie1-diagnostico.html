@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diagnóstico Valerie 1 — Botpress</title>
+<style>
+body{background:#020617;color:#ccfbf1;font:14px/1.7 ui-monospace,monospace;padding:1.2rem;margin:0}
+#log{white-space:pre-wrap;word-break:break-all}
+.ok{color:#5eead4}.bad{color:#fda4af}.dim{color:#94a3b8}
+</style></head><body>
+<h3>🩺 Diagnóstico Valerie 1 (Botpress)</h3>
+<div id="log">esperando…</div>
+<script>
+const V1CFG="https://files.bpcontent.cloud/2026/03/31/09/20260331093109-OWOFJOLD.json";
+const log=document.getElementById("log");
+function L(m,cls){const d=document.createElement("div");if(cls)d.className=cls;d.textContent="› "+m;log.appendChild(d)}
+window.onerror=function(msg){L("window.onerror: "+msg,"bad")};
+function stamp(){return new Date().toLocaleTimeString()}
+L(stamp()+" — probando config…");
+fetch(V1CFG,{method:"GET"}).then(r=>{L("config HTTP "+r.status+(r.ok?" — VIVO":" — MUERTO"),r.ok?"ok":"bad");return r.json()})
+ .then(j=>{L("botId: "+j.botId);L("clientId: "+(j.clientId?"presente":"AUSENTE"))})
+ .catch(e=>L("config fetch falló: "+e.message,"bad"));
+
+L(stamp()+" — inyectando SDK v3.6…");
+const s=document.createElement("script");
+s.src="https://cdn.botpress.cloud/webchat/v3.6/inject.js";
+s.onerror=()=>L("SDK FALLO AL CARGAR (red/CSP)","bad");
+s.onload=function(){
+  L("SDK cargado ("+Math.round(performance.now())+"ms)","ok");
+  if(!window.botpress){L("window.botpress NO existe tras cargar SDK","bad");return}
+  const fns=["init","open","close","send"].filter(f=>typeof window.botpress[f]==="function");
+  L("API disponible: "+(fns.join(", ")||"NINGUNA"),fns.length?"ok":"bad");
+  let r;
+  try{ r=window.botpress.init({configUrl:V1CFG}) }catch(e){L("init EXCEPCIÓN: "+e.message,"bad");return}
+  L("init llamado — devuelve "+(r&&r.then?"promesa":"otro"));
+  if(r&&r.then){r.then(()=>L("INIT RESUELTO OK","ok")).catch(e=>L("INIT RECHAZADO: "+(e.message||e),"bad"))}
+  setTimeout(function(){
+    try{window.botpress.open();L("open() ejecutado sin excepción","ok")}
+    catch(e){L("open() falló: "+e.message,"bad")}
+  },2500);
+  setTimeout(function(){
+    const fr=document.querySelectorAll("iframe").length;
+    const wc=document.querySelector("bp-webchat,bp-fab,#bp-webchat,[id^='bp']");
+    L("iframes en DOM: "+fr+" — elemento webchat: "+(wc?"SÍ ("+wc.tagName+"#"+wc.id+")":"NO"),wc?"ok":"bad");
+    L("VEREDICTO: "+(fr||wc?"webchat renderizado — el problema era OTRO":"webchat NUNCA renderiza: bot muerto o despublicado en Botpress"),(fr||wc)?"ok":"bad");
+  },9000);
+};
+document.body.appendChild(s);
+</script></body></html>
