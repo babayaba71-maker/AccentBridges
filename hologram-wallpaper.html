@@ -589,6 +589,7 @@ let lastCommand = null, cmdWindowUntil = 0, routingBusy = false; // v0.5: comand
 let wakeStarting = false;       // evita "ya está iniciado" al reintentar muy rápido
 let notAllowedStreak = 0;       // solo desarma tras VARIOS rechazos reales seguidos
 let lastNotAllowedAt = 0;
+let quickEndStreak = 0, lastStartAt = 0, lastRecogErr = ""; // v0.6: freno anti clic-clic
 const brainEl = document.getElementById("brain");
 const wakeBtn = document.getElementById("btn-wake");
 
@@ -630,9 +631,9 @@ function startWakeRecog() {
     wakeRecog.lang = "es-MX";
     wakeRecog.continuous = true;
     wakeRecog.interimResults = true;
-    wakeRecog.onstart = () => { wakeStarting = false; notAllowedStreak = 0; setBrain("ESCUCHANDO…", true); };
+    wakeRecog.onstart = () => { wakeStarting = false; notAllowedStreak = 0; lastStartAt = performance.now(); setBrain("ESCUCHANDO…", true); };
     wakeRecog.onresult = e => {
-      notAllowedStreak = 0;
+      notAllowedStreak = 0; quickEndStreak = 0;
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const t = e.results[i][0].transcript.toLowerCase();
         if (/valer\w*|balery|balrry/.test(t)) {
@@ -650,7 +651,7 @@ function startWakeRecog() {
       }
     };
     wakeRecog.onerror = ev => {
-      wakeStarting = false;
+      wakeStarting = false; lastRecogErr = ev.error || "";
       if (ev.error === "not-allowed" || ev.error === "service-not-allowed") {
         // El navegador dispara "not-allowed" TAMBIÉN mientras el diálogo de permiso
         // sigue abierto (antes de que el usuario responda) — eso NO es un rechazo real.
@@ -669,7 +670,20 @@ function startWakeRecog() {
     };
     wakeRecog.onend = () => {
       wakeStarting = false;
-      if (wakeArmed) setTimeout(() => { if (wakeArmed) startWakeRecog(); }, 300);
+      if (!wakeArmed) return;
+      // v0.6: si la sesión murió en <2.5s (sin oír nada) es el clic-clic de Android.
+      const lived = performance.now() - lastStartAt;
+      quickEndStreak = (lived < 2500) ? quickEndStreak + 1 : 0;
+      if (quickEndStreak >= 6) {
+        // El mic no abre de verdad: dejar de molestar y pedir un toque manual
+        wakeArmed = false; quickEndStreak = 0;
+        setBrain("MIC NO ABRE · TOCA DE NUEVO" + (lastRecogErr ? " (" + lastRecogErr + ")" : ""), false);
+        setWakeButtonsText('🎙️ ESCUCHAR "EY VALERIE"');
+        return;
+      }
+      // retroceso: 300ms, 600, 1200... hasta 4s (sin spam de clics)
+      const wait = Math.min(300 * Math.pow(2, quickEndStreak), 4000);
+      setTimeout(() => { if (wakeArmed) startWakeRecog(); }, wait);
     };
     wakeRecog.start();
   } catch (e) { wakeStarting = false; }
