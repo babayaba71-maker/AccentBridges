@@ -900,6 +900,7 @@ function speakEs(text) {
 const TRAINER="https://babayaba71-maker.github.io/AccentBridges/foundation-trainer.html";
 const AR="https://babayaba71-maker.github.io/AccentBridges/ar-labeler.html";
 const CALL="https://valerie.base44.app/functions/valerieCall";
+const VALHABLA="https://elevenlabs.io/app/talk-to?agent_id=agent_7401kqvpkpmhep5rqcf95j5kz41b&branch_id=agtbrch_9301ks2d5jxtee0bjq0e149kj6tm"; // VALERIE HABLADA (ElevenLabs Conversational AI, 13-oct-2026): voz del día a día. Vapi queda para sesiones largas ~10 min (doctrina de voz).
 const TG="https://t.me/+aWV2H9E252QwYTMx"; // grupo AccentBridges (link de invitación, JJ 17-sep)
 const TT="https://www.tiktok.com/@raul.ybarra0";
 const AMERICA="https://speak-native-buddy.lovable.app";
@@ -1044,7 +1045,7 @@ function renderPortal(){
 
   document.getElementById("pwrap").innerHTML=`
     <div class="p-head">
-      <div><div class="p-title">LA MAESTRA VALERIE-AI</div><div class="p-sub">PORTAL · ACCENTBRIDGES · v3.2.2 WAKE FIX + AURA LIMPIA</div></div>
+      <div><div class="p-title">LA MAESTRA VALERIE-AI</div><div class="p-sub">PORTAL · ACCENTBRIDGES · v3.3.0 PUERTA ELEVENLABS</div></div>
       <button class="p-close" onclick="closePortal()">✕ CERRAR</button>
     </div>
     <div class="p-greet">${greet}</div>
@@ -1055,6 +1056,7 @@ function renderPortal(){
       <a class="p-btn" href="${TRAINER}">🎓 TRAINER</a>
       <a class="p-btn" href="${AR}">🔭 AR LABELER</a>
       <a class="p-btn" href="${CALL}">🎙️ VOZ EN VIVO</a>
+      <a class="p-btn" href="${VALHABLA}" target="_blank" rel="noopener">📞 VALERIE HABLADA — ElevenLabs</a>
       <a class="p-btn" href="${TG}">✈️ TELEGRAM</a>
       <a class="p-btn" href="${YT}">YOUTUBE</a>
       <a class="p-btn" href="${TT}">🎵 TIKTOK</a>
