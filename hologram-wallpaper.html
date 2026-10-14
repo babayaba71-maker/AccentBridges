@@ -843,13 +843,44 @@ if (new URLSearchParams(location.search).has("debugcmd")) {
   if (c) setTimeout(() => { wakeArmed = true; setBrain("ESCUCHANDO…", true); routeCommand(c); }, 1500);
 }
 
+/* ---- v3.5: BOCA ELEVENLABS — la voz real de Valerie ---- */
+const BOCA = "https://valerie.base44.app/functions/bocaValerie";
+const bocaCache = new Map(); // frases repetidas no queman créditos
+async function speakWithBoca(text, onendFn) {
+  try {
+    let url = bocaCache.get(text);
+    if (!url) {
+      const r = await fetch(BOCA, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-abvc-key": "ABVC-PILOTO-2026" },
+        body: JSON.stringify({ text: String(text).slice(0, 500) })
+      });
+      if (!r.ok) throw new Error("boca " + r.status);
+      const blob = await r.blob();
+      if (!blob.size || blob.size < 500) throw new Error("boca vacía");
+      url = URL.createObjectURL(blob);
+      bocaCache.set(text, url);
+    }
+    const a = new Audio(url);
+    try { speechSynthesis.cancel(); } catch (e) {}
+    speaking = true;
+    const fin = () => { speaking = false; onendFn && onendFn(); };
+    a.onended = fin;
+    a.onerror = fin;
+    await a.play();
+    return true;
+  } catch (e) { return false; }
+}
+
 /* ---- Saludo hablado de Valerie 1 al despertar ---- */
 let voicesCache = [];
 function loadVoices() { voicesCache = speechSynthesis.getVoices(); }
 loadVoices();
 if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = loadVoices;
 
-function speakWakeGreeting() {
+async function speakWakeGreeting() {
+  const FIN_GREET = () => { if (lastCommand) routeCommand(lastCommand); else setTimeout(openValerie1, 350); };
+  if (await speakWithBoca('Ey, ¿cómo puedo ayudarte? Soy Valerie 1, y hoy voy a estar asistiéndote.', FIN_GREET)) return;
   if (!("speechSynthesis" in window)) { openValerie1(); return; }
   try {
     const u = new SpeechSynthesisUtterance('Ey, ¿cómo puedo ayudarte? Soy Valerie 1, y hoy voy a estar asistiéndote.');
@@ -869,7 +900,9 @@ function speakWakeGreeting() {
 }
 
 /* ---- v0.5: voz de confirmación de enrutado ---- */
-function speakEs(text) {
+async function speakEs(text) {
+  const FIN_ES = () => { if (wakeArmed) setBrain("ESCUCHANDO…", true); };
+  if (await speakWithBoca(text, FIN_ES)) return;
   if (!("speechSynthesis" in window)) return;
   try {
     const u = new SpeechSynthesisUtterance(text);
@@ -1043,7 +1076,7 @@ function renderPortal(){
 
   document.getElementById("pwrap").innerHTML=`
     <div class="p-head">
-      <div><div class="p-title">LA MAESTRA VALERIE-AI</div><div class="p-sub">PORTAL · ACCENTBRIDGES · v3.4.0 PUSH-TO-TALK EN APK</div></div>
+      <div><div class="p-title">LA MAESTRA VALERIE-AI</div><div class="p-sub">PORTAL · ACCENTBRIDGES · v3.5.0 BOCA ELEVENLABS</div></div>
       <button class="p-close" onclick="closePortal()">✕ CERRAR</button>
     </div>
     <div class="p-greet">${greet}</div>
