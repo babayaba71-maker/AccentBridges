@@ -1076,7 +1076,7 @@ function renderPortal(){
 
   document.getElementById("pwrap").innerHTML=`
     <div class="p-head">
-      <div><div class="p-title">LA MAESTRA VALERIE-AI</div><div class="p-sub">PORTAL · ACCENTBRIDGES · v3.5.0 BOCA ELEVENLABS</div></div>
+      <div><div class="p-title">LA MAESTRA VALERIE-AI</div><div class="p-sub">PORTAL · ACCENTBRIDGES · v3.6.0 CEREBRO ELEVENLABS</div></div>
       <button class="p-close" onclick="closePortal()">✕ CERRAR</button>
     </div>
     <div class="p-greet">${greet}</div>
@@ -1196,5 +1196,24 @@ function closePortal(){document.getElementById("portal").classList.remove("show"
 <style>@keyframes v1spin{to{transform:rotate(360deg)}}</style>
 <button id="wakefab" style="position:fixed;bottom:66px;right:14px;z-index:40;background:rgba(20,10,40,.82);color:#ccfbf1;border:1px solid #2dd4bf;border-radius:999px;padding:10px 16px;font-size:13px;font-weight:700;letter-spacing:.5px;cursor:pointer;backdrop-filter:blur(6px)" onclick="toggleWakeFromFab()">🎙️ EY VALERIE</button>
 <button id="v1fab" style="position:fixed;bottom:14px;right:14px;z-index:40;background:rgba(20,10,40,.82);color:#ffd7ee;border:1px solid #ff4fa3;border-radius:999px;padding:10px 16px;font-size:13px;font-weight:700;letter-spacing:.5px;cursor:pointer;backdrop-filter:blur(6px)" onclick="openValerie1()">🗣️ VALERIE 1</button>
+
+<!-- ============================================================
+     v3.6: CEREBRO CONVERSACIONAL OFICIAL ELEVENLABS (Valerie Hablada)
+     El agente que JJ configuró en ElevenLabs (system prompt = el cerebro).
+     El widget trae oído+cerebro+boca nativos, batalla-probados (el mismo
+     template que funcionó en Lovable). Doctrina: conversación = ElevenLabs;
+     rutas de puertas = Tier 0/wallBrain; Vapi = solo sesiones largas /call.
+     Requiere: agente público (ya lo es) + Allowlist con github.io si activa.
+     ============================================================ -->
+<elevenlabs-convai agent-id="agent_7401kqvpkpmhep5rqcf95j5kz41b"
+  action-text="HABLAR CON VALERIE"
+  start-call-text="Empezar conversación"
+  end-call-text="Colgar"
+  listening-text="Escuchando..."
+  speaking-text="Valerie hablando"
+  expand-text="Abrir conversación"
+  dismissible="true"></elevenlabs-convai>
+<script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+
 </body>
 </html>
