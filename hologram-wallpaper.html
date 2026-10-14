@@ -713,10 +713,8 @@ if (wakeBtn) {
 async function toggleWakeFromFab() {
   const fab = document.getElementById("wakefab");
   const wbtn = document.getElementById("btn-wake");
-  if (!("SpeechRecognition" in window || "webkitSpeechRecognition" in window)) {
-    fab.textContent = "🎙️ NO DISPONIBLE AQUÍ";
-    return;
-  }
+  // v3.4: el WebView de la APK no tiene SpeechRecognition, pero el push-to-talk
+  // (MediaRecorder + oído ElevenLabs) NO lo necesita. Ya no se bloquea aquí.
   initAudio();
   if (pttRec && pttRec.state === "recording") { try { pttRec.stop(); } catch (e) {} return; }
   if (pttBusy) return; // ya está procesando
@@ -1045,7 +1043,7 @@ function renderPortal(){
 
   document.getElementById("pwrap").innerHTML=`
     <div class="p-head">
-      <div><div class="p-title">LA MAESTRA VALERIE-AI</div><div class="p-sub">PORTAL · ACCENTBRIDGES · v3.3.0 PUERTA ELEVENLABS</div></div>
+      <div><div class="p-title">LA MAESTRA VALERIE-AI</div><div class="p-sub">PORTAL · ACCENTBRIDGES · v3.4.0 PUSH-TO-TALK EN APK</div></div>
       <button class="p-close" onclick="closePortal()">✕ CERRAR</button>
     </div>
     <div class="p-greet">${greet}</div>
