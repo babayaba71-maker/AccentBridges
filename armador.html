@@ -57,6 +57,12 @@ function sayEn(t,r){try{speechSynthesis.cancel();speechSynthesis.speak(voz(t,"en
 function sayEs(t,r){try{speechSynthesis.cancel();speechSynthesis.speak(voz(t,"es-MX",r||.95))}catch(e){}}
 document.addEventListener("click",()=>{try{speechSynthesis.getVoices()}catch(e){}},{once:true});
 
+// ===== NOMBRES GRINGOS ESCRITOS COMO PALABRA (regla de oro: jamás símbolo suelto al TTS) =====
+const NOMBRE={a:"ay",b:"bee",c:"see",d:"dee",e:"ee",f:"ef",g:"gee",h:"aitch",i:"eye",j:"jay",k:"kay",l:"el",m:"em",n:"en",o:"oh",p:"pee",q:"cue",r:"are",s:"ess",t:"tee",u:"you",v:"vee",w:"double you",x:"ex",y:"why",z:"zee"};
+const NOMBRE_DUO={sh:"ess aitch",ch:"see aitch",th:"tee aitch",ph:"pee aitch",ng:"en jee",oo:"double oh",ck:"see kay"};
+function nombreDe(g){const w=g.toLowerCase();if(NOMBRE_DUO[w])return NOMBRE_DUO[w];return w.split("").map(l=>NOMBRE[l]||l).join(" ")}
+function sayChain(items){try{speechSynthesis.cancel();let i=0;const next=()=>{if(i>=items.length)return;const it=items[i++];const u=voz(it.t,it.lang,it.rate);u.onend=next;try{speechSynthesis.speak(u)}catch(e){}};next()}catch(e){}}
+
 // ===== EMOJIS DEL BANCO =====
 const EMO={cat:"🐱",bag:"👜",map:"🗺️",hat:"🎩",pan:"🍳",van:"🚐",fan:"🌬️",jam:"🍯",pen:"🖊️",bed:"🛏️",red:"🔴",ten:"🔟",net:"🥅",get:"✋",leg:"🦵",sit:"🪑",big:"🐘",win:"🏆",pin:"📍",zip:"🤐",fit:"🏃",kid:"🧒",box:"📦",hot:"🔥",dog:"🐶",job:"💼",lot:"🧺",pot:"🍲",not:"🚫",bus:"🚌",cup:"☕",run:"🏃",sun:"☀️",fun:"🎉",cut:"✂️",mug:"🍺",ham:"🍖",bat:"🦇",man:"👨",nap:"😴",fish:"🐟",ship:"🚢",shop:"🏪",dish:"🍽️",wish:"🌠",cash:"💵",wash:"🧼",chat:"💬",chip:"🍟",lunch:"🍱",much:"🤗",this:"👉",that:"👈",then:"⏰",thing:"🧩",math:"➗",sing:"🎤",king:"👑",long:"📏",song:"🎶",book:"📖",look:"👀",cook:"👨‍🍳",foot:"🦶",good:"👍",wood:"🪵",took:"⏱️",hood:"🧥",food:"🍽️",moon:"🌙",soon:"⌛",tool:"🔧",room:"🚪",spoon:"🥄",cool:"😎",name:"📛",home:"🏠",hope:"🙏",time:"⌛",five:"5️⃣",note:"📝",late:"🌃",make:"🔧",take:"🎬",cube:"🧊",life:"❤️",wide:"↔️",safe:"🛡️",phone:"📱",plate:"🍽️",cake:"🎂",bike:"🚲",ride:"🐎",game:"🎮",tune:"🎼",rope:"🪢",cute:"🥰",mine:"⛏️",rose:"🌹",wave:"🌊"};
 
@@ -87,9 +93,11 @@ function escuchar(){
   $("stage").innerHTML=`
     <div>🔊</div>
     <button class="bigbtn" id="play">🔊</button>
-    <small class="hint">Escucha bien. Las letras todavía no llegan.</small>
+    <button class="pill" id="slow">🐢 lenta</button>
+    <small class="hint">Escucha bien. 🐢 si la quieres lenta. Las letras todavía no llegan.</small>
     <button class="pill" id="ya">Ya la oí — ¡armarla! →</button>`;
   $("play").onclick=()=>sayEn(p.palabra,.75);
+  $("slow").onclick=()=>sayEn(p.palabra,.45);
   $("ya").onclick=()=>armar(p);
   setTimeout(()=>sayEn(p.palabra,.75),350);
 }
@@ -109,14 +117,21 @@ function armar(p){
   let n=0, fallos=0;
   $("stage").innerHTML=`
     <button class="pill" id="replay">🔊 otra vez</button>
+    <button class="pill" id="slow">🐢 lenta</button>
     <div class="slots" id="slots">${g.map(()=>`<div class="slot"></div>`).join("")}</div>
     <div class="cards">${cartas.map((c,n2)=>`<button class="card" data-n="${n2}">${c.g==="e"&&c.tipo==="muda"?"E 👑":c.g.toUpperCase()}</button>`).join("")}</div>`;
   $("replay").onclick=()=>sayEn(p.palabra,.75);
+  $("slow").onclick=()=>sayEn(p.palabra,.45);
   document.querySelectorAll(".card").forEach(b=>b.onclick=()=>{
     const c=cartas[+b.dataset.n];
+    // SIEMPRE se oye el NOMBRE gringo de lo que aplastaste (entrenamiento de oído, también al fallar)
     if(!c.ok){fallos++;b.classList.add("bad");setTimeout(()=>b.classList.remove("bad"),450);
-      toast("Ese no es el siguiente sonido… escucha otra vez 🔊");sayEn(p.palabra,.75);return}
-    if(c.g!==g[n].g){fallos++;b.classList.add("bad");setTimeout(()=>b.classList.remove("bad"),450);toast("Aún no le toca a esa…");return}
+      toast("Oíste «"+nombreDe(c.g)+"»… ese no es el siguiente sonido 🔊");
+      sayChain([{t:nombreDe(c.g),lang:"en-US",rate:.85},{t:p.palabra,lang:"en-US",rate:.75}]);return}
+    if(c.g!==g[n].g){fallos++;b.classList.add("bad");setTimeout(()=>b.classList.remove("bad"),450);
+      toast("Oíste «"+nombreDe(c.g)+"»… aún no le toca a esa");
+      sayChain([{t:nombreDe(c.g),lang:"en-US",rate:.85}]);return}
+    sayChain([{t:nombreDe(c.g),lang:"en-US",rate:.85},{t:c.conf,lang:"es-MX",rate:1.02}]);
     b.classList.add("gone");
     document.querySelectorAll(".slot")[n].classList.add("fill");
     document.querySelectorAll(".slot")[n].textContent=c.g.toUpperCase();
