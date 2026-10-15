@@ -75,8 +75,8 @@ const SEÑ_LETRAS="bdfghjlmnprsvwz".split("");
 const SEÑ_DIG=["sh","ch","th","ng","oo"];
 let banco=[], fila=[], i=0, prog=JSON.parse(localStorage.getItem("armadorV1")||"{}");
 const BQ_ARM="https://valerie.base44.app/functions/logArmadorResult";
-function actualizarWho(){$("who").textContent="👤 "+(localStorage.getItem("armadorName")||"¿tu nombre?")}
-$("who").onclick=()=>{const n=prompt("¿Cómo te llamas? (para tu expediente de aprendizaje)");if(n){localStorage.setItem("armadorName",n);actualizarWho()}};
+function actualizarWho(){document.getElementById("who").textContent="👤 "+(localStorage.getItem("armadorName")||"¿tu nombre?")}
+document.getElementById("who").onclick=()=>{const n=prompt("¿Cómo te llamas? (para tu expediente de aprendizaje)");if(n){localStorage.setItem("armadorName",n);actualizarWho()}};
 actualizarWho();
 
 // ===== RENDER BÁSICO =====
