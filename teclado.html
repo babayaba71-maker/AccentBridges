@@ -51,7 +51,7 @@ footer a{color:#a8dadc}
 </head>
 <body>
 <h1>🎹 Teclado del Abecedario</h1>
-<div class="ver">v1</div>
+<div class="ver">v1.1 · telemetría al expediente</div>
 <div class="sub">Alfabetización visual con la voz de Valerie · oído ↔ ojo</div>
 
 <div class="tabs">
@@ -74,6 +74,7 @@ footer a{color:#a8dadc}
   <div class="card">
     <div class="paso">valerie dice un nombre · aplasta la letra que se llama así</div>
     <div class="score" id="gscore">⭐ 0 · racha 0</div>
+    <button class="pill" id="who" style="width:100%;margin-bottom:8px">👤</button>
     <div class="fb" id="gfb"></div>
     <button class="esc" id="gplay" onclick="nuevaRonda()">🔊 Escuchar el nombre</button>
     <div class="keys" id="keysG"></div>
@@ -115,6 +116,34 @@ const HISTORIA=["c","h","j","r","w","x","q","y"];
 
 let CONF={}; // confesiones cargadas del banco
 const audioCache={};
+
+// ===== TELEMETRÍA v1.1: las DOS VÍAS al expediente (canal ojo_oido vs oido_ojo) =====
+const BQ_TAP="https://valerie.base44.app/functions/logFlashcardTap";
+const BQ_SES="https://valerie.base44.app/functions/logMorfofonoSession";
+const KEY="ABVC-PILOTO-2026";
+const T0=Date.now();
+function studentName(){return localStorage.getItem("armadorName")||"Estudiante 0"}
+function logTap(qid,choice,correct,word,channel){
+  try{fetch(BQ_TAP,{method:"POST",headers:{"Content-Type":"application/json","api_key":KEY},
+    body:JSON.stringify({studentName:studentName(),quizType:"teclado",questionId:qid,choice:choice,correct:correct,word:word,channel:channel})}).catch(()=>{})}catch(e){}
+}
+function logSesion(rondas,aciertos,fallosPorLetra,segProm){
+  try{
+    const trampas=Object.keys(fallosPorLetra).map(k=>k+"✗"+fallosPorLetra[k]).join(", ")||"ninguna";
+    const rec={
+      topic:"Teclado Oído→Ojo — práctica del abecedario",
+      location:"Teclado",
+      accuracy:Math.round(100*aciertos/Math.max(1,rondas)),
+      passed:aciertos>=10,
+      spokenText:"rondas "+rondas+" · aciertos "+aciertos+" · tiempo "+Math.round((Date.now()-T0)/1000)+"s · seg/ronda ~"+segProm+" · trampas: "+trampas,
+      challengeSentence:"vías: oido_ojo (juego) + ojo_oido (explora) · trampas: "+trampas,
+      userId:studentName(),
+      sessionId:"tk-"+Date.now(),
+      date:new Date().toISOString().slice(0,10)
+    };
+    fetch(BQ_SES,{method:"POST",headers:{"Content-Type":"application/json","api_key":KEY},body:JSON.stringify(rec)}).catch(()=>{});
+  }catch(e){}
+}
 
 // ===== TTS respaldo =====
 function voz(t,lang,r){const u=new SpeechSynthesisUtterance(t);u.lang=lang;u.rate=r||.9;return u}
@@ -196,6 +225,7 @@ function pintaKeys(id,handler){
 // ===== MODO EXPLORA =====
 function exploraTap(w,btn){
   btn.classList.add("pop");setTimeout(()=>btn.classList.remove("pop"),350);
+  logTap("exp_"+w.toUpperCase(),"tap",true,ANCLA[w]||w,"ojo_oido");
   const esDuo=DUOS.includes(w);
   const f=esDuo?fichaDuo(w):fichaTexto(w);
   const ficha=document.getElementById("ficha");
@@ -214,27 +244,49 @@ function exploraTap(w,btn){
 function tocaKey(w){playName(w)}
 
 // ===== MODO JUEGO OÍDO→OJO =====
-let gAns=null,gHits=0,gStreak=0,gBusy=false;
+let gAns=null,gHits=0,gStreak=0,gBusy=false,gRondas=0,gFallos={},gT0=Date.now(),gSegs=[],gDominadoMostrado=false;
 const S=JSON.parse(localStorage.getItem("tecladoV1")||'{"best":0}');
 function nuevaRonda(){
   if(gBusy)return;gBusy=true;
+  gT0=Date.now();
   gAns=ROWS.flat()[Math.floor(Math.random()*26)];
   document.getElementById("gfb").textContent="";
   document.getElementById("gfb").className="fb";
   playName(gAns,()=>{gBusy=false});
 }
+function puertaProduccion(){
+  if(gDominadoMostrado)return;gDominadoMostrado=true;
+  const el=document.createElement("div");
+  el.style.cssText="margin-top:12px;background:#fde8c9;border-radius:14px;padding:12px;font-size:.88rem;line-height:1.5";
+  el.innerHTML=`<b>🚀 SIGUIENTE ETAPA: PRODUCCIÓN</b><br>Ya oyes los nombres — ahora a <b>conjugar palabras básicas</b>:
+  <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+  <a href="flashcards-sentidos-ser.html" style="flex:1;text-decoration:none"><button class="big" style="margin-top:0">🗣️ Conjugación: I am, he touches</button></a>
+  <a href="armador.html" style="flex:1;text-decoration:none"><button class="esc" style="margin-top:0">🧩 Armar palabras</button></a>
+  </div>
+  <div style="margin-top:6px;font-size:.78rem;color:#6c757d">Tu Maestra afina las palabras que a TI te sirven más (tu personality manda) → <a href="hologram-wallpaper.html#portal" style="color:#2a9d8f">pídele tu dosis</a></div>`;
+  document.getElementById("m-g").querySelector(".card").appendChild(el);
+}
 function juegoTap(w,btn){
   if(!gAns){nuevaRonda();return}
   const fb=document.getElementById("gfb");
   if(w===gAns){
-    gHits++;gStreak++;S.best=Math.max(S.best,gHits);localStorage.setItem("tecladoV1",JSON.stringify(S));
+    gHits++;gStreak++;gRondas++;S.best=Math.max(S.best,gHits);localStorage.setItem("tecladoV1",JSON.stringify(S));
+    gSegs.push(Math.round((Date.now()-gT0)/1000));
+    logTap("juego_"+gAns.toUpperCase()+"|r"+gRondas,w.toUpperCase(),true,ANCLA[gAns],"oido_ojo");
     fb.className="fb ok";
     fb.textContent=gHits>=10?`¡DOMINADO! ⭐⭐⭐ ${gAns.toUpperCase()} se llama «${ANCLA[gAns]}»`:`⭐ ¡Eso es! ${gAns.toUpperCase()} se llama «${ANCLA[gAns]}»`;
     document.getElementById("gscore").textContent=`⭐ ${gHits} · racha ${gStreak} · récord ${S.best}`;
     btn.classList.add("pop");setTimeout(()=>btn.classList.remove("pop"),350);
+    if(gRondas%10===0){
+      const segProm=Math.round(gSegs.reduce((a,b)=>a+b,0)/gSegs.length);
+      logSesion(gRondas,gHits,gFallos,segProm);
+    }
+    if(gHits>=10)puertaProduccion();
     gAns=null;setTimeout(nuevaRonda,1200);
   }else{
-    gStreak=0;fb.className="fb no";
+    gStreak=0;gFallos[gAns]=(gFallos[gAns]||0)+1;
+    logTap("juego_"+gAns.toUpperCase()+"|r"+(gRondas+1),w.toUpperCase(),false,ANCLA[gAns],"oido_ojo");
+    fb.className="fb no";
     fb.textContent=`Esa es la ${w.toUpperCase()} («${ANCLA[w]}»). Escucha otra vez…`;
     document.getElementById("gscore").textContent=`⭐ ${gHits} · racha 0 · récord ${S.best}`;
     btn.classList.add("shake");setTimeout(()=>btn.classList.remove("shake"),300);
@@ -254,6 +306,9 @@ fetch("banks/confesiones-abc.json?v="+Date.now()).then(r=>r.json()).then(j=>{CON
 pintaKeys("keysX",exploraTap);
 pintaKeys("keysG",juegoTap);
 document.getElementById("gscore").textContent=`⭐ 0 · racha 0 · récord ${S.best}`;
+function actualizarWho(){const b=document.getElementById("who");if(b)b.textContent="👤 "+(localStorage.getItem("armadorName")||"¿tu nombre?")}
+const wb=document.getElementById("who");if(wb)wb.onclick=()=>{const n=prompt("¿Cómo te llamas? (para tu expediente de aprendizaje)");if(n){localStorage.setItem("armadorName",n);actualizarWho()}};
+actualizarWho();
 document.addEventListener("click",()=>{try{speechSynthesis.getVoices()}catch(e){}},{once:true});
 </script>
 </body>
