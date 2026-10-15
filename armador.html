@@ -128,7 +128,7 @@ function armar(p){
 function confesar(c,ultimo,cb){
   const d=document.createElement("div");d.className="conf";
   d.innerHTML=`<div class="confbox"><span class="g">${c.g==="e"&&c.tipo==="muda"?"E 👑":c.g.toUpperCase()}</span>
-    <p>${c.confesion}</p>
+    <p>${c.conf}</p>
     <button class="pill" id="va">¡Va! 🔥</button></div>`;
   document.body.appendChild(d);
   const cerrar=()=>{d.remove();cb()};
