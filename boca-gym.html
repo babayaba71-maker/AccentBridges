@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🎤 Mouth Gym — Shadowing por nivel — AccentBridges</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,sans-serif;background:#1c1c26;min-height:100vh;color:#f5f0e8;padding-bottom:24px}
+.wrap{max-width:520px;margin:0 auto;padding:14px}
+h1{font-size:1.35rem;text-align:center;margin:8px 0 2px}
+.sub{text-align:center;font-size:.82rem;color:#b9b3a6;margin-bottom:12px}
+.ver{text-align:center;font-size:.68rem;color:#7d7768;margin-bottom:10px}
+.card{background:#262633;border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 4px 18px rgba(0,0,0,.25)}
+.pill{background:#3a3a4c;border:none;color:#f5f0e8;border-radius:999px;padding:10px 14px;font-size:.9rem;margin:4px;cursor:pointer;font-family:inherit}
+.pill.on{background:#e9c46a;color:#1c1c26;font-weight:700}
+.big{display:block;width:100%;background:#2a9d8f;color:#fff;border:none;border-radius:14px;padding:16px;font-size:1.05rem;font-weight:700;margin-top:10px;cursor:pointer;font-family:inherit}
+.esc{display:block;width:100%;background:#3a3a4c;color:#f5f0e8;border:none;border-radius:14px;padding:14px;font-size:.95rem;margin-top:8px;cursor:pointer;font-family:inherit}
+input[type=text]{width:100%;background:#3a3a4c;border:none;border-radius:12px;color:#f5f0e8;padding:12px;font-size:1rem;font-family:inherit}
+.item-en{font-size:1.9rem;font-weight:800;text-align:center;line-height:1.25;color:#e9c46a;margin:6px 0}
+.ancla{background:#33334a;border-radius:12px;padding:12px;font-size:.86rem;line-height:1.5;color:#d8d2c4;margin:10px 0}
+.ancla b{color:#e9c46a}
+.score{text-align:center;font-size:.95rem;color:#b9b3a6;margin-bottom:6px}
+.selfrow{display:flex;gap:8px;margin-top:10px}
+.selfrow .pill{flex:1;margin:0;font-size:1.15rem;padding:14px 0;text-align:center}
+.pill.oksel{background:#2a9d8f;color:#fff}
+.pill.casisel{background:#e9c46a;color:#1c1c26}
+.pill.nosel{background:#c95d5d;color:#fff}
+.done{text-align:center;color:#b9b3a6;font-size:.85rem}
+a{color:#2a9d8f}
+.foot{text-align:center;font-size:.72rem;color:#7d7768;margin-top:14px;line-height:1.6}
+.tiny{font-size:.75rem;color:#b9b3a6;text-align:center;margin-top:6px}
+.hidden{display:none}
+.fb{text-align:center;font-size:1rem;min-height:26px;margin-top:8px;font-weight:600}
+.fb.ok{color:#6fd3c3}.fb.no{color:#e88a8a}
+.blink{animation:bl 1s infinite}@keyframes bl{50%{opacity:.4}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🎤 MOUTH GYM</h1>
+<div class="sub">Shadowing por nivel · escucha → repite EN VOZ ALTA → auto-evalúate</div>
+<div class="ver">v1 · cero micrófono requerido (Modo Hugo friendly) · telemetría al expediente</div>
+
+<!-- PASO 0: identidad + nivel -->
+<div class="card" id="p0">
+  <div class="score">¿Quién entrena hoy?</div>
+  <input type="text" id="name" placeholder="Tu nombre (del expediente)">
+  <button class="big" id="fetchBtn">🎯 Traer mi nivel del expediente</button>
+  <div class="tiny" id="fetchMsg">Si ya hiciste el Level Assessment, la Maestra te sirve tu dosis exacta.</div>
+  <div class="score" style="margin-top:14px">…o elige tu nivel a mano:</div>
+  <div id="lvls"></div>
+  <button class="esc" id="startBtn">💪 EMPEZAR EL GYM</button>
+</div>
+
+<!-- PASO 1: el gym -->
+<div class="card hidden" id="p1">
+  <div class="score" id="score">1 / 10 · nivel A0-medio</div>
+  <div class="item-en" id="itemEn">—</div>
+  <div class="ancla" id="ancla">—</div>
+  <div class="score" style="font-size:.78rem">1️⃣ Escucha · 2️⃣ Repite en voz alta · 3️⃣ Sé honesto contigo</div>
+  <button class="big" id="playN">🔊 Normal</button>
+  <button class="esc" id="playS">🐢 Lenta (0.6x)</button>
+  <div class="fb" id="fb"></div>
+  <div class="selfrow">
+    <button class="pill" id="sOk">😎 ¡nail!</button>
+    <button class="pill" id="sMid">🤏 casi</button>
+    <button class="pill" id="sNo">😅 todavía no</button>
+  </div>
+  <div class="done" id="done"></div>
+</div>
+
+<!-- RESUMEN -->
+<div class="card hidden" id="p2">
+  <div class="item-en" id="resTitle">—</div>
+  <div class="ancla" id="resBody">—</div>
+  <button class="big" id="againBtn">🔁 Repetir mis debilidades</button>
+  <button class="esc" id="backBtn">🏠 Cambiar nivel</button>
+  <div class="foot">Practica en vivo con Valerie: usa <b>/call</b> en Telegram 🔴<br>La Maestra ya leyó tu sesión 📊</div>
+</div>
+
+<div class="foot">
+  <a href="hologram-wallpaper.html">🏠 Portal de la Maestra</a> · <a href="foundation-trainer.html">🎓 Trainer</a> · <a href="teclado.html">🎹 Teclado</a><br>
+  La boca es el ÚLTIMO canal — solo entrena la que ya oyes y ves 🎧👀<br>
+  MYL ACCENTBRIDGES 🔥
+</div>
+</div>
+
+<script>
+// ============================================================
+// MOUTH GYM — Shadowing por nivel (JJ, 15-oct-2026)
+// Doctrina: boca = output, llega DESPUÉS de oído+ojo. Cero regaños
+// (score formativo), Currículo Invisible (anclas culichis, jamás
+// términos técnicos), TTS palabras completas (regla de oro),
+// Modo Hugo friendly: sin micrófono, auto-eval honesta.
+// Nivel desde el expediente (getStudentLevel) o a mano.
+// ============================================================
+const BQ_TAP="https://valerie.base44.app/functions/logFlashcardTap";
+const BQ_SES="https://valerie.base44.app/functions/logMorfofonoSession";
+const BQ_LVL="https://valerie.base44.app/functions/getStudentLevel";
+const KEY="ABVC-PILOTO-2026";
+const T0=Date.now();
+const $=id=>document.getElementById(id);
+function studentName(){return localStorage.getItem("armadorName")||""}
+function say(txt,rate){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang="en-US";u.rate=rate||0.85;const v=speechSynthesis.getVoices().find(v=>/en[-_]US/i.test(v.lang));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
+document.addEventListener("click",()=>{try{speechSynthesis.getVoices()}catch(e){}},{once:true});
+function logTap(qid,choice,correct,word){
+  try{fetch(BQ_TAP,{method:"POST",headers:{"Content-Type":"application/json","api_key":KEY},
+    body:JSON.stringify({studentName:(studentName()||$("name").value.trim()||"Estudiante 0"),quizType:"mouthgym",questionId:qid,choice:choice,correct:correct,word:word,channel:"boca"})}).catch(()=>{})}catch(e){}
+}
+function logSesion(nivel,hechas,ok,mid,no,trampas,segProm){
+  try{
+    const rec={
+      topic:"Mouth Gym — Shadowing "+nivel,
+      location:"Mouth Gym",
+      accuracy:Math.round(100*ok/Math.max(1,hechas)),
+      passed:ok>=8,
+      spokenText:"items "+hechas+" · 😎 "+ok+" · 🤏 "+mid+" · 😅 "+no+" · tiempo "+Math.round((Date.now()-T0)/1000)+"s · seg/item ~"+segProm+" · debilidades: "+(trampas||"ninguna"),
+      challengeSentence:"canal: boca (shadowing) · nivel: "+nivel+" · debilidades: "+(trampas||"ninguna"),
+      userId:(studentName()||$("name").value.trim()||"Estudiante 0"),
+      sessionId:"mg-"+Date.now(),
+      date:new Date().toISOString().slice(0,10)
+    };
+    fetch(BQ_SES,{method:"POST",headers:{"Content-Type":"application/json","api_key":KEY},body:JSON.stringify(rec)}).catch(()=>{});
+  }catch(e){}
+}
+
+// ===== BANCO DE SHADOWING POR NIVEL (doctrina ABVC) =====
+const BANK={
+"a0b":[
+ {en:"I",ancla:"Se dice <b>«ái»</b>, con la boca BIEN abierta — no «i». Es la palabra más egoísta del inglés: toda para ti."},
+ {en:"me",ancla:"«miiii» — la I se estira larga, como en «mí» de español pero más musical."},
+ {en:"you",ancla:"«iú» — termina con labios redonditos, como soplando un beso."},
+ {en:"my",ancla:"«mái» — ¡dos vocales en una! a-i pegadas, un diptongo."},
+ {en:"no",ancla:"Ojo: la O gringa es «ou» — <b>«nóu»</b>, la boca se redondea al final."},
+ {en:"yes",ancla:"«iés» — la S SIENES al final, no «yex». Viento, no golpe."},
+ {en:"Hi!",ancla:"«jáii» — la H es un SOPLO, como le das aire a un espejo. Jamás «ji» española."},
+ {en:"mmm",ancla:"Labios cerrados, zumba como mosca: el sonido de pensar rico. 🤤"},
+ {en:"mama",ancla:"La primera palabra del planeta — igual en inglés. La boca ya lo sabe."},
+ {en:"I am",ancla:"«áiam» — se PEGAN: dos palabras, un solo bulto. Así nace el linking."}],
+"a0m":[
+ {en:"cat",ancla:"C dura como en español («casa») + la T final ESTALLA seca, no «caté»."},
+ {en:"sit",ancla:"«sit» — i cortita y rápida, no «siiit». Corta como pinchazo."},
+ {en:"top",ancla:"«tóup» — la O viaja: empieza redonda y termina en «u». Diptongo gratis."},
+ {en:"good morning",ancla:"«gud mónin» — la D final de good casi no se oye. Los gringos se tragan finales."},
+ {en:"thank you",ancla:"TH: la punta de la lengua SALE entre los dientes y sopla. «tankiu» con lengua afuera."},
+ {en:"water",ancla:"La T entre vocales se vuelve D suave: «uóder» — es la R de «pero» ¡ya la tienes!"},
+ {en:"you are",ancla:"«iúar» — se pegan otra vez. El inglés no habla en pedacitos."},
+ {en:"he is",ancla:"«jíis» — la H sopla y la S final zumba."},
+ {en:"my name is",ancla:"«mái néim is» — dos diptongos seguidos. La A y la I dicen su NOMBRE gringo."},
+ {en:"I am ready",ancla:"«áiam rédi» — listo para el gym. La boca se calienta con esto."}],
+"a0a":[
+ {en:"ship",ancla:"SH: chichi callada — «ship», jamás «sip». Aprieta los labios como puchero."},
+ {en:"chat",ancla:"«chat» — la CH española ya existe en tu boca. ¡Transferencia gratis!"},
+ {en:"this",ancla:"TH zumbado: lengua ENTRE los dientes pero ahora CON voz de garganta. «dhis» sin d."},
+ {en:"sing",ancla:"«sin» — la G final es FANTASMA, no se dice. Ng = nariz, no garganta."},
+ {en:"late",ancla:"Magic E: la E del final es muda pero MUEVE la A: «léit». La magia no se oye, se ve."},
+ {en:"home",ancla:"«jóum» — otra vez Magic E: la O dice su nombre. La H sopla."},
+ {en:"was",ancla:"«uós» — trampa de oído: no se parece a lo que se escribe. Los ojos mienten, el oído manda."},
+ {en:"said",ancla:"«sed» — trampa histórica. Memorízala con la oreja, no con el ojo."},
+ {en:"The cat sat on the mat.",ancla:"Tu PRIMERA oración completa. La TH sopla, las T estallan: «ze cat sat on de mat»."},
+ {en:"I like my cat",ancla:"«áiláik mái cat» — la K de like ESTALLA. Río de diptongos."}],
+"a1":[
+ {en:"My name is Jacob.",ancla:"Nace tu párrafo de identidad. «mái néim is yéikob» — la J es «yi», no «ya»."},
+ {en:"I live in Culiacán.",ancla:"La V: dientes ARRIBA del labio, «liv» — no «biv». Ni B ni V española: un viento entre diente y labio."},
+ {en:"I wanna go",ancla:"want to se suelda: «uána» — el inglés real se come las piezas."},
+ {en:"I don't know",ancla:"«áidoznóu» — tres palabras, UN bulto. La T de don't es puerta que se cierra."},
+ {en:"Good morning, how are you?",ancla:"La pregunta final SUBE ↗ — la melodía pregunta por ti."},
+ {en:"Nice to meet you",ancla:"«náis tu míchiu» — la T de meet se vuelve casi CH. Suave, social."},
+ {en:"I'm going home",ancla:"«áim góin jóum» — la G final de going CAE. El inglés real la bota."},
+ {en:"See you later",ancla:"«síiu léider» — la T de later es flap suave: la R de «pero»."},
+ {en:"What do you mean?",ancla:"«uádaya mín» — whaddaya: tres palabras aplastadas en dos golpes."},
+ {en:"I live in Culiacán, because my parents lived here all their lives.",ancla:"El párrafo de identidad completo — tu pasaporte verbal. TH zumbado en «their»: lengua afuera."}],
+"a2":[
+ {en:"Robert ran around the red car four times.",ancla:"La R americana: lengua ATRÁS flotando, NUNCA truena. Labios redondos en red, car, four."},
+ {en:"The thoughtful mother took a bath in the north.",ancla:"Cinco TH: lengua entre dientes CADA vez. Sopla en thoughtful/bath/north, zumba en the/mother."},
+ {en:"Betty bought a bit of better butter.",ancla:"Todo flap T: «beddy báda bida bedder budder» — la R de «pero» en cada una. Tu gimnasio insignia."},
+ {en:"I'm going to the sofa to eat a banana.",ancla:"Las seis schwas: la vocal secreta «uh». Toda sílaba sin acento se vuelve floja: «buh-nan-uh»."},
+ {en:"think ... sink",ancla:"Par mínimo: lengua AFUERA = think, lengua ADENTRO = sink. La posición lo es TODO."},
+ {en:"ship ... sheep",ancla:"i cortita vs i larga: ship rápida, sheep se estira. El barco y la oveja no viven juntos."},
+ {en:"Robert",ancla:"El acento cae ADELANTE: «RÓbert» — RO fuerte, bert rapidito. El inglés es front-loaded."},
+ {en:"I wanna geddit",ancla:"Linking total: want to get it → «uána gédit». El inglés REAL que no está en los libros."},
+ {en:"Can I have an apple?",ancla:"«canái ávanápl» — las N se funden con las vocales. Un solo río."},
+ {en:"Robert ran around the red car four times.",ancla:"Otra vuelta — ahora con R perfecta. La repetición ES el método."}],
+"b1":[
+ {en:"You're coming to the party, aren't you? ↘",ancla:"Melodía que BAJA = «claro que vienes». Seguro de ti. La afirmación viste de pregunta."},
+ {en:"You're coming to the party, aren't you? ↗",ancla:"MISMA frase, melodía que SUBE = «de verdad dime que sí». Las palabras no cambian, la MÚSICA sí."},
+ {en:"I DIDN'T say she stole the money.",ancla:"Acento en DIDN'T = «yo nunca lo dije». Mueves el golpe, cambias el mensaje."},
+ {en:"I didn't say SHE stole the money.",ancla:"Acento en SHE = «fue OTRA persona». Siete significados en una frase — el acento es el jefe."},
+ {en:"PREsent ... preSENT",ancla:"El regalo (PREsent) y la acción (preSENT): el acento MUDA de casa cuando la palabra cambia de oficio."},
+ {en:"This is the thoughtful mother I told you about.",ancla:"TH en cadena: this, the, thoughtful, mother. La lengua trabaja doble turno — suave y constante."},
+ {en:"Thirty-three thirsty thieves",ancla:"th + r + flap en serie: «zirti-zree zirsty zievz». El twister de graduación."},
+ {en:"How much wood would a woodchuck chuck?",ancla:"W + ritmo: boca redonda TODO el tiempo. Sonrisa con labios tubo."},
+ {en:"I wanna pick it up and hold on a minute.",ancla:"Maratón de linking: «áina pih-kit-tup an jól-don uh mínit». Seis conexiones, un solo bulto."},
+ {en:"I didn't say she stole the money.",ancla:"La frase de las 7 caras. Elige UNA intención y que tu acento la pinte. Ese es el control total."}]
+};
+const LVL_LABEL={"a0b":"A0-bajo","a0m":"A0-medio","a0a":"A0-alto","a1":"A1","a2":"A2","b1":"B1"};
+
+// ===== ESTADO =====
+let lvl=null,queue=[],idx=0,ok=0,mid=0,no=0,debiles=[],itemT0=Date.now(),segs=[],ronda=1;
+$("lvls").innerHTML=Object.keys(BANK).map(k=>`<button class="pill lvl" data-l="${k}">${LVL_LABEL[k]}</button>`).join("");
+document.querySelectorAll(".lvl").forEach(b=>b.onclick=()=>{document.querySelectorAll(".lvl").forEach(x=>x.classList.remove("on"));b.classList.add("on");lvl=b.dataset.l});
+if(studentName())$("name").value=studentName();
+$("name").addEventListener("change",()=>{const v=$("name").value.trim();if(v)localStorage.setItem("armadorName",v)});
+
+$("fetchBtn").onclick=async()=>{
+  const n=$("name").value.trim();
+  if(!n){$("fetchMsg").textContent="Pon tu nombre primero — el expediente te conoce por él.";return}
+  localStorage.setItem("armadorName",n);
+  $("fetchMsg").textContent="consultando el expediente…";$("fetchMsg").classList.add("blink");
+  try{
+    const r=await fetch(BQ_LVL,{method:"POST",headers:{"Content-Type":"application/json","api_key":KEY},body:JSON.stringify({name:n})});
+    const j=await r.json();
+    $("fetchMsg").classList.remove("blink");
+    if(j.ok&&j.found){
+      // el gym entrena la BOCA: esa dimensión manda
+      const map={"A0-bajo":"a0b","A0-medio":"a0m","A0-alto":"a0a","A1":"a1","A2":"a2","B1":"b1","B2":"b1"};
+      lvl=map[j.mouth]||map[j.ear]||"a0m";
+      document.querySelectorAll(".lvl").forEach(x=>x.classList.toggle("on",x.dataset.l===lvl));
+      $("fetchMsg").innerHTML="✅ Expediente: oído "+j.ear+" · ojo "+j.eye+" · <b>boca "+j.mouth+"</b> → dosis "+LVL_LABEL[lvl]+" lista. 💪";
+    }else{
+      $("fetchMsg").innerHTML="Aún sin Level Assessment en el expediente — elige tu nivel a mano (y hazlo pronto 📊).";
+    }
+  }catch(e){$("fetchMsg").classList.remove("blink");$("fetchMsg").textContent="Sin conexión con el expediente — elige tu nivel a mano."}
+};
+
+$("startBtn").onclick=()=>{
+  if(!lvl){$("fetchMsg").textContent="Elige tu nivel primero 👆";return}
+  $("p0").classList.add("hidden");$("p2").classList.add("hidden");$("p1").classList.remove("hidden");
+  queue=BANK[lvl].slice();ronda=1;empezarRonda();
+};
+function empezarRonda(){
+  idx=0;ok=0;mid=0;no=0;debiles=[];segs=[];itemT0=Date.now();
+  mostrar();
+}
+function mostrar(){
+  const it=queue[idx];if(!it){resumen();return}
+  $("score").textContent=(idx+1)+" / "+queue.length+" · "+LVL_LABEL[lvl]+(ronda>1?" · ronda "+ronda:"");
+  $("itemEn").textContent=it.en;$("ancla").innerHTML="💡 "+it.ancla;
+  $("fb").textContent="";$("fb").className="fb";
+  itemT0=Date.now();
+  setTimeout(()=>say(it.en,0.85),300);
+}
+$("playN").onclick=()=>say(queue[idx].en,0.85);
+$("playS").onclick=()=>say(queue[idx].en,0.6);
+function evaluar(choice,correct,btnClass){
+  const it=queue[idx];if(!it)return;
+  logTap("mg_"+lvl+"_"+(idx+1)+"|"+it.en.slice(0,20),choice,correct,it.en);
+  segs.push(Math.round((Date.now()-itemT0)/1000));
+  if(choice==="😎"){ok++;$("fb").className="fb ok";$("fb").textContent="🔥 ¡Eso es! La boca aprendió."}
+  else if(choice==="🤏"){mid++;$("fb").className="fb";$("fb").textContent="🤏 Casi — otra vez lento, la boca necesita repeticiones."}
+  else{no++;debiles.push(it);$("fb").className="fb no";$("fb").textContent="😅 Sin pena — el músculo se entrena, no se regaña. Vuelve al final."}
+  $("done").textContent="😎 "+ok+" · 🤏 "+mid+" · 😅 "+no;
+  idx++;setTimeout(mostrar,900);
+}
+$("sOk").onclick=()=>evaluar("😎",true);
+$("sMid").onclick=()=>evaluar("🤏",false);
+$("sNo").onclick=()=>evaluar("😅",false);
+function resumen(){
+  const segProm=segs.length?Math.round(segs.reduce((a,b)=>a+b,0)/segs.length):0;
+  const trapTxt=debiles.map(d=>d.en.slice(0,24)).join(", ")||"ninguna";
+  logSesion(LVL_LABEL[lvl],queue.length,ok,mid,no,trapTxt,segProm);
+  $("resTitle").textContent="🏁 "+(ok>=8?"¡RONDA DOMINADA!":"Ronda completa");
+  let msg="😎 "+ok+" · 🤏 "+mid+" · 😅 "+no+" — "+segProm+"s por item.<br><br>";
+  msg+=(ok>=8?"Tu boca ya huele a gringo. 🇺🇸":"El músculo se construye con repeticiones — otra ronda y verás.");
+  if(debiles.length)msg+="<br><br><b>Tus debilidades vuelven:</b> "+trapTxt;
+  $("resBody").innerHTML=msg;
+  $("againBtn").style.display=debiles.length?"block":"none";
+  $("p1").classList.add("hidden");$("p2").classList.remove("hidden");
+}
+$("againBtn").onclick=()=>{queue=debiles.slice();ronda++;$("p2").classList.add("hidden");$("p1").classList.remove("hidden");empezarRonda()};
+$("backBtn").onclick=()=>{$("p2").classList.add("hidden");$("p0").classList.remove("hidden")};
+</script>
+</body>
+</html>
