@@ -31,6 +31,8 @@ h1{font-size:1.35rem;text-align:center;margin:6px 0 2px}
 .confbox .g{font-size:2.6rem;font-weight:900;color:#e76f51;display:block;margin-bottom:6px}
 .confbox p{font-size:1rem;line-height:1.45;margin-bottom:14px}
 .emoji{font-size:5rem;line-height:1}
+.foto{max-height:110px;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+.who{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:14px;padding:4px 12px;font-size:.75rem;cursor:pointer;margin-bottom:8px}
 .lesson{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:12px;font-size:.92rem;line-height:1.4;max-width:340px}
 .word{font-size:2.6rem;font-weight:900;letter-spacing:2px;color:#f4a261}
 .ipa{font-size:.9rem;opacity:.7}
@@ -44,6 +46,7 @@ small.hint{opacity:.7;font-size:.78rem}
 <body>
 <h1>🧩 ARMADOR DE SONIDOS</h1>
 <div class="sub">Primero el oído. Después, las letras confiesan.</div>
+<button class="who" id="who">👤</button>
 <div class="tabs" id="tabs"></div>
 <div class="meta" id="meta"></div>
 <div class="stage" id="stage"></div>
@@ -71,6 +74,10 @@ const BANDAS=[{k:"cerrada",n:"CVC"},{k:"digrafo",n:"Dúos 🔒"},{k:"oo_corta",n
 const SEÑ_LETRAS="bdfghjlmnprsvwz".split("");
 const SEÑ_DIG=["sh","ch","th","ng","oo"];
 let banco=[], fila=[], i=0, prog=JSON.parse(localStorage.getItem("armadorV1")||"{}");
+const BQ_ARM="https://valerie.base44.app/functions/logArmadorResult";
+function actualizarWho(){$("who").textContent="👤 "+(localStorage.getItem("armadorName")||"¿tu nombre?")}
+$("who").onclick=()=>{const n=prompt("¿Cómo te llamas? (para tu expediente de aprendizaje)");if(n){localStorage.setItem("armadorName",n);actualizarWho()}};
+actualizarWho();
 
 // ===== RENDER BÁSICO =====
 const $=id=>document.getElementById(id);
@@ -156,8 +163,11 @@ function celebrar(p,fallos){
   const clean=fallos===0, stars=clean?3:(fallos<=1?2:1);
   const prev=prog[p.id]||0; if(stars>prev)prog[p.id]=stars;
   localStorage.setItem("armadorV1",JSON.stringify(prog));
+  const emo=EMO[p.palabra]||"🔤";
+  fetch(BQ_ARM,{method:"POST",headers:{"Content-Type":"application/json","api_key":"ABVC-PILOTO-2026"},
+    body:JSON.stringify({name:localStorage.getItem("armadorName")||"Estudiante 0",palabra:p.palabra,banda:p.tipo_silaba,estrellas:stars,fallos})}).catch(()=>{});
   $("stage").innerHTML=`
-    <div class="emoji">${EMO[p.palabra]||"🔤"}</div>
+    <img class="foto" src="assets/armador/${p.palabra}.jpg" onerror="this.outerHTML='<div class=emoji>${emo}</div>'" alt="${p.palabra}">
     <div class="word">${p.palabra.toUpperCase()}</div>
     <div class="ipa">${p.ipa} · ${p.traduccion_es}</div>
     <div class="stars">${"⭐".repeat(stars)}</div>
