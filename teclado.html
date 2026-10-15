@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🎹 Teclado del Abecedario — AccentBridges</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,sans-serif;background:linear-gradient(160deg,#0d1b2a,#1b263b 60%,#2a9d8f 140%);min-height:100vh;color:#fff;display:flex;flex-direction:column;align-items:center;padding:14px;max-width:560px;margin:0 auto}
+h1{font-size:1.15rem;text-align:center;margin:6px 0 2px}
+.ver{font-size:.6rem;color:rgba(255,255,255,.35);text-align:center}
+.sub{font-size:.8rem;color:#a8dadc;text-align:center;margin-bottom:12px}
+.tabs{display:flex;gap:8px;margin-bottom:12px;width:100%}
+.tabbtn{flex:1;border:0;border-radius:12px;padding:10px 6px;font-size:.85rem;font-weight:700;background:rgba(255,255,255,.12);color:#fff;cursor:pointer}
+.tabbtn.active{background:#e9c46a;color:#1b263b}
+.card{background:#fff;color:#1b263b;border-radius:22px;width:100%;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.35);margin-bottom:14px}
+.paso{font-size:.72rem;color:#6c757d;letter-spacing:.5px;text-transform:uppercase;font-weight:700;margin-bottom:10px}
+button{border:0;border-radius:14px;font-size:1rem;font-weight:700;padding:13px 18px;cursor:pointer;transition:transform .1s}
+button:active{transform:scale(.96)}
+.hidden{display:none}
+kbd{display:inline-block;background:#f1faee;border:3px solid #2a9d8f;border-radius:14px;color:#1b263b;font-weight:900;cursor:pointer;text-align:center;transition:transform .08s}
+kbd:active{transform:scale(.92)}
+.kbdrow{display:flex;gap:7px;margin-bottom:7px}
+kbd.k{flex:1;padding:13px 0;font-size:1.35rem;background:#f1faee;border-color:#2a9d8f}
+kbd.k.vocal{background:#fde8c9;border-color:#e9c46a}
+kbd.k.trampa{background:#f8d7da;border-color:#e76f51}
+kbd.k.historia{background:#e0f2f1;border-color:#457b9d}
+kbd.d{flex:1;padding:10px 0;font-size:.95rem;background:#e8eaf6;border-color:#5c6bc0}
+.keys{margin-top:8px}
+.duotit{font-size:.72rem;color:#6c757d;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin:10px 0 6px}
+.ficha{margin-top:12px;background:#f1faee;border-radius:16px;padding:14px;text-align:center}
+.fletra{font-size:3.2rem;font-weight:900;color:#1b263b;line-height:1}
+.fancla{font-size:.95rem;color:#e76f51;font-weight:800;margin-top:2px}
+.fconf{font-size:.92rem;line-height:1.55;margin-top:10px;text-align:left}
+.fextra{font-size:.85rem;line-height:1.45;margin-top:8px;text-align:left;color:#495057;border-top:1px dashed #adb5bd;padding-top:8px}
+.ej{display:flex;gap:8px;margin-top:10px;justify-content:center;flex-wrap:wrap}
+.ej button{background:#2a9d8f;color:#fff;font-size:.9rem;padding:8px 14px}
+.big{background:#2a9d8f;color:#fff;width:100%;font-size:1.05rem;margin-top:10px}
+.esc{background:#e9c46a;color:#1b263b;width:100%;margin-top:10px}
+.nota{font-size:.85rem;color:#6c757d;line-height:1.5;margin-top:10px;font-style:italic}
+.fb{margin-top:10px;font-size:1.05rem;font-weight:800;min-height:1.3em}
+.fb.ok{color:#2a9d8f}.fb.no{color:#e76f51}
+.score{font-size:.85rem;font-weight:800;color:#e9c46a;margin-bottom:8px}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.shake{animation:shake .25s}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+.pop{animation:pop .3s}
+footer{font-size:.72rem;color:rgba(255,255,255,.55);text-align:center;line-height:1.7;margin-bottom:64px}
+footer a{color:#a8dadc}
+</style>
+</head>
+<body>
+<h1>🎹 Teclado del Abecedario</h1>
+<div class="ver">v1</div>
+<div class="sub">Alfabetización visual con la voz de Valerie · oído ↔ ojo</div>
+
+<div class="tabs">
+  <button class="tabbtn active" id="tb-x" onclick="setModo('x')">👀 Explora</button>
+  <button class="tabbtn" id="tb-g" onclick="setModo('g')">🎧 Oído→Ojo</button>
+</div>
+
+<!-- MODO EXPLORA -->
+<div id="m-x">
+  <div class="card">
+    <div class="paso">toca la letra · la misma voz te dice su nombre y su secreto</div>
+    <div class="nota">🟡 vocales · 🔴 trampa estrella · 🔵 letras con historia</div>
+    <div class="keys" id="keysX"></div>
+    <div class="ficha hidden" id="ficha"></div>
+  </div>
+</div>
+
+<!-- MODO JUEGO OÍDO→OJO -->
+<div id="m-g" class="hidden">
+  <div class="card">
+    <div class="paso">valerie dice un nombre · aplasta la letra que se llama así</div>
+    <div class="score" id="gscore">⭐ 0 · racha 0</div>
+    <div class="fb" id="gfb"></div>
+    <button class="esc" id="gplay" onclick="nuevaRonda()">🔊 Escuchar el nombre</button>
+    <div class="keys" id="keysG"></div>
+    <div class="nota">Conecta lo que OYES con lo que VES. 10 aciertos = dominado.</div>
+  </div>
+</div>
+
+<footer>
+  <a href="cirugia-abc.html">🔬 Cirugía del Abecedario</a> ·
+  <a href="armador.html">🧩 Armador de Sonidos</a> ·
+  <a href="foundation-trainer.html">🏠 Trainer</a>
+  <br>Compuerta día 40+ · A0-medio · Banco de Alfabetización
+  <br>Practica en vivo: toca la burbujita abajo y habla con Valerie Alphabet 🗣️
+</footer>
+
+<elevenlabs-convai agent-id="agent_0201m50rs1zdehktn49d3wdqakyb"
+  action-text="VALERIE ALPHABET"
+  start-call-text="Empezar conversación"
+  end-call-text="Colgar"
+  listening-text="Escuchando..."
+  speaking-text="Valerie hablando"
+  expand-text="Abrir conversación"
+  dismissible="true"></elevenlabs-convai>
+<script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+
+<script>
+// ===== NOMBRES: MP3 oficial de Valerie (verificados por oído) =====
+const AUDIO_BASE="assets/armador/audio/";
+const NOMBRE_FILE={a:"let-a",b:"let-b",c:"let-c",d:"let-d",e:"let-e",f:"let-f",g:"let-g",h:"let-h",i:"let-i",j:"let-j",k:"let-k",l:"let-l",m:"let-m",n:"let-n",o:"let-o",p:"let-p",q:"let-q",r:"let-r",s:"let-s",t:"let-t",u:"let-u",v:"let-v",w:"let-w",x:"let-x",y:"let-y",z:"let-z"};
+const DUO_FILE={sh:"duo-sh",ch:"duo-ch",th:"duo-th",ph:"duo-ph",ng:"duo-ng",oo:"duo-oo",ck:"duo-ck"};
+// respaldo TTS (regla de oro: jamás símbolo suelto)
+const NOMBRE={a:"ey",b:"bee",c:"see",d:"dee",e:"ee",f:"ef",g:"gee",h:"aitch",i:"eye",j:"jay",k:"kay",l:"el",m:"em",n:"en",o:"oh",p:"pee",q:"cue",r:"are",s:"ess",t:"tee",u:"you",v:"vee",w:"double you",x:"ex",y:"why",z:"zee"};
+const NOMBRE_DUO={sh:"ess aitch",ch:"see aitch",th:"tee aitch",ph:"pee aitch",ng:"en jee",oo:"double oh",ck:"see kay"};
+// anclas kulichi (transición L1→L2)
+const ANCLA={a:"ei",b:"bi",c:"si",d:"di",e:"i (¡trampa estrella!)",f:"ef",g:"yi",h:"eich",i:"ai",j:"yei",k:"kei",l:"el",m:"em",n:"en",o:"ou",p:"pi",q:"kiu",r:"ar",s:"es",t:"ti",u:"iu",v:"vi",w:"doble-iu",x:"eks",y:"uai",z:"zi"};
+const EJEMPLOS={a:["cat","cake"],b:["book","bed"],c:["cat","city"],d:["dog","door"],e:["bed","eat"],f:["fish","fun"],g:["go","gym"],h:["hello","home"],i:["sit","bike"],j:["jump","juice"],k:["key","king"],l:["love","school"],m:["mom","moon"],n:["no","name"],o:["dog","home"],p:["pen","party"],q:["queen","quick"],r:["red","car"],s:["sun","yes"],t:["top","water"],u:["cup","music"],v:["very","love"],w:["water","we"],x:["box","six"],y:["yes","my"],z:["zoo","zero"]};
+const VOCALES=["a","e","i","o","u"];
+const HISTORIA=["c","h","j","r","w","x","q","y"];
+
+let CONF={}; // confesiones cargadas del banco
+const audioCache={};
+
+// ===== TTS respaldo =====
+function voz(t,lang,r){const u=new SpeechSynthesisUtterance(t);u.lang=lang;u.rate=r||.9;return u}
+function sayEn(t,r){try{speechSynthesis.cancel();speechSynthesis.speak(voz(t,"en-US",r||.75))}catch(e){}}
+
+// ===== BOCA ELEVENLABS (confesiones con la voz de Valerie) =====
+const BOCA="https://valerie.base44.app/functions/bocaValerie";
+const bocaCache=new Map();
+async function speakBoca(text){
+  try{
+    let url=bocaCache.get(text);
+    if(!url){
+      const r=await fetch(BOCA,{method:"POST",headers:{"Content-Type":"application/json","x-abvc-key":"ABVC-PILOTO-2026"},body:JSON.stringify({text:String(text).slice(0,500)})});
+      if(!r.ok)throw 0;
+      const blob=await r.blob();
+      if(!blob.size||blob.size<500)throw 0;
+      url=URL.createObjectURL(blob);bocaCache.set(text,url);
+    }
+    const a=new Audio(url);
+    try{speechSynthesis.cancel()}catch(e){}
+    a.onended=()=>{if(gEsperandoTapa)gRoundMp3Termino()};
+    a.play().catch(()=>{});
+    return true;
+  }catch(e){return false}
+}
+function speakEs(text){try{speechSynthesis.cancel();speechSynthesis.speak(voz(text,"es-MX",.95))}catch(e){}}
+
+// ===== nombre de letra: MP3 oficial, respaldo TTS =====
+let gEsperandoTapa=false, gRoundMp3Termino=null;
+function playName(key,cb){
+  const w=key.toLowerCase();
+  const f=DUO_FILE[w]||NOMBRE_FILE[w];
+  if(f){
+    const src=AUDIO_BASE+f+".mp3";
+    let a=audioCache[src]||(audioCache[src]=new Audio(src));
+    a.onended=cb||null; a.onerror=()=>{sayEn(NOMBRE[w]||NOMBRE_DUO[w]||w);cb&&cb()};
+    try{a.currentTime=0;a.play().catch(()=>{sayEn(NOMBRE[w]||NOMBRE_DUO[w]||w);cb&&cb()})}catch(e){cb&&cb()}
+  }else{sayEn(NOMBRE[w]||NOMBRE_DUO[w]||w);cb&&cb()}
+}
+
+// ===== ficha de la letra (confesión del banco) =====
+function fichaTexto(key){
+  const w=key.toLowerCase();
+  const H=CONF.consonantes_historia||{},L=CONF.consonantes_leales||{},VN=CONF.vocales_nombre||{},VC=CONF.vocales_cortitas||{},D=CONF.digrafos||{};
+  if(VOCALES.includes(w))return{main:VN[w],extra:"Y en mi forma cortita: "+VC[w]};
+  if(H[w]){
+    if(w==="c")return{main:H.c.replace("{vocal}","a, o, u"),extra:"Y mi empleo dos: ante e-i-y sueno suave como s: city, cell, cycle."};
+    if(w==="t")return{main:H.t_inicial,extra:H.t_final+" "+H.t_flap};
+    return{main:H[w],extra:""};
+  }
+  if(L[w])return{main:L[w],extra:""};
+  return{main:"",extra:""};
+}
+function fichaDuo(key){
+  const D=CONF.digrafos||{};
+  if(key==="th")return{main:D.th_sorda,extra:D.th_zumbada};
+  if(key==="oo")return{main:D.oo_corta,extra:D.oo_larga};
+  return{main:D[key]||"",extra:""};
+}
+function nombreTexto(g){const w=g.toLowerCase();return NOMBRE_DUO[w]||w.split("").map(l=>NOMBRE[l]||l).join(" ")}
+
+// ===== teclados =====
+const ROWS=[["a","b","c","d","e","f","g"],["h","i","j","k","l","m","n"],["o","p","q","r","s","t","u"],["v","w","x","y","z"]];
+const DUOS=["sh","ch","th","ph","ng","oo","ck"];
+function keyClass(w){if(VOCALES.includes(w))return w==="e"?"k vocal trampa":"k vocal";if(HISTORIA.includes(w))return"k historia";return"k"}
+function pintaKeys(id,handler){
+  const el=document.getElementById(id);el.innerHTML="";
+  ROWS.forEach(row=>{
+    const r=document.createElement("div");r.className="kbdrow";
+    row.forEach(w=>{const b=document.createElement("kbd");b.className=keyClass(w);b.textContent=w.toUpperCase();b.onclick=()=>handler(w,b);r.appendChild(b)});
+    el.appendChild(r);
+  });
+  const t=document.createElement("div");t.className="duotit";t.textContent="dígrafos · dos letras, un solo sonido";el.appendChild(t);
+  const dr=document.createElement("div");dr.className="kbdrow";
+  DUOS.forEach(d=>{const b=document.createElement("kbd");b.className="d";b.textContent=d.toUpperCase();b.onclick=()=>handler(d,b);dr.appendChild(b)});
+  el.appendChild(dr);
+}
+
+// ===== MODO EXPLORA =====
+function exploraTap(w,btn){
+  btn.classList.add("pop");setTimeout(()=>btn.classList.remove("pop"),350);
+  const esDuo=DUOS.includes(w);
+  const f=esDuo?fichaDuo(w):fichaTexto(w);
+  const ficha=document.getElementById("ficha");
+  ficha.classList.remove("hidden");
+  ficha.innerHTML=`
+    <div class="fletra">${w.toUpperCase()}</div>
+    <div class="fancla">se llama «${esDuo?ANCLA[w]||w:ANCLA[w]}»</div>
+    <div class="fconf">${f.main||""}</div>
+    ${f.extra?`<div class="fextra">${f.extra}</div>`:""}
+    ${!esDuo&&EJEMPLOS[w]?`<div class="ej">${EJEMPLOS[w].map(x=>`<button onclick="sayEn('${x}')">🔊 ${x}</button>`).join("")}</div>`:""}
+    <button class="big" onclick="tocaKey('${w}')">🔊 Otra vez el nombre</button>`;
+  tocaKey(w);
+  // confesión con la boca de Valerie (respaldo navegador)
+  if(f.main){setTimeout(()=>{if(!speakBoca(f.main))speakEs(f.main)},50)}
+}
+function tocaKey(w){playName(w)}
+
+// ===== MODO JUEGO OÍDO→OJO =====
+let gAns=null,gHits=0,gStreak=0,gBusy=false;
+const S=JSON.parse(localStorage.getItem("tecladoV1")||'{"best":0}');
+function nuevaRonda(){
+  if(gBusy)return;gBusy=true;
+  gAns=ROWS.flat()[Math.floor(Math.random()*26)];
+  document.getElementById("gfb").textContent="";
+  document.getElementById("gfb").className="fb";
+  playName(gAns,()=>{gBusy=false});
+}
+function juegoTap(w,btn){
+  if(!gAns){nuevaRonda();return}
+  const fb=document.getElementById("gfb");
+  if(w===gAns){
+    gHits++;gStreak++;S.best=Math.max(S.best,gHits);localStorage.setItem("tecladoV1",JSON.stringify(S));
+    fb.className="fb ok";
+    fb.textContent=gHits>=10?`¡DOMINADO! ⭐⭐⭐ ${gAns.toUpperCase()} se llama «${ANCLA[gAns]}»`:`⭐ ¡Eso es! ${gAns.toUpperCase()} se llama «${ANCLA[gAns]}»`;
+    document.getElementById("gscore").textContent=`⭐ ${gHits} · racha ${gStreak} · récord ${S.best}`;
+    btn.classList.add("pop");setTimeout(()=>btn.classList.remove("pop"),350);
+    gAns=null;setTimeout(nuevaRonda,1200);
+  }else{
+    gStreak=0;fb.className="fb no";
+    fb.textContent=`Esa es la ${w.toUpperCase()} («${ANCLA[w]}»). Escucha otra vez…`;
+    document.getElementById("gscore").textContent=`⭐ ${gHits} · racha 0 · récord ${S.best}`;
+    btn.classList.add("shake");setTimeout(()=>btn.classList.remove("shake"),300);
+    playName(gAns);
+  }
+}
+function setModo(m){
+  document.getElementById("m-x").classList.toggle("hidden",m!=="x");
+  document.getElementById("m-g").classList.toggle("hidden",m!=="g");
+  document.getElementById("tb-x").classList.toggle("active",m==="x");
+  document.getElementById("tb-g").classList.toggle("active",m==="g");
+  if(m==="g"&&!gAns)nuevaRonda();
+}
+
+// ===== arranque =====
+fetch("banks/confesiones-abc.json?v="+Date.now()).then(r=>r.json()).then(j=>{CONF=j}).catch(()=>{});
+pintaKeys("keysX",exploraTap);
+pintaKeys("keysG",juegoTap);
+document.getElementById("gscore").textContent=`⭐ 0 · racha 0 · récord ${S.best}`;
+document.addEventListener("click",()=>{try{speechSynthesis.getVoices()}catch(e){}},{once:true});
+</script>
+</body>
+</html>

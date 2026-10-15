@@ -1011,6 +1011,12 @@ function renderCard(){
         <div class="say-tip">💡 ${lang==="es"?"Hispanohablantes: ":"Spanish speakers: "}${c.phoneticEs}</div>
       </div>`;
   }
+  if(tab==="alphabet"){
+    html=`<div style="display:flex;gap:8px;margin-bottom:10px">
+      <a href="teclado.html" style="flex:1;text-decoration:none"><button class="btn" style="width:100%">🎹 Teclado del Abecedario</button></a>
+      <a href="cirugia-abc.html" style="flex:1;text-decoration:none"><button class="btn btn-secondary" style="width:100%">🔬 Cirugía</button></a>
+    </div>`+html;
+  }
   $("mainCard").innerHTML=html;
 }
 
