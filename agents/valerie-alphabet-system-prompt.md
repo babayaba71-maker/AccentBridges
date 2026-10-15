@@ -37,5 +37,8 @@ REGLAS FINALES
 - Si el alumno se pierde, baja la velocidad y simplifica.
 - El objetivo no es memorizar: es que el oído posea cada sonido antes que la letra.
 
----
+------
 *Cómo activar este agente:* (a) crear el agente "Valerie Alphabet" en el dashboard de ElevenLabs → Conversational AI y pegar el prompt de arriba, o (b) darle permiso convai_write a una API key de ElevenLabs y Alma lo crea y configura todo vía API. Voz: l4Coq6695JDX9xtLqXDE (la misma de Valerie).
+
+---
+*ESTADO: CREADA (15-oct-2026, vía API por Alma con la key de JJ).* agent_id: `agent_0201m50rs1zdehktn49d3wdqakyb` · LLM: gpt-6-astra · temp: 0.6 (iguales que la Valerie original) · voz: l4Coq6695JDX9xtLqXDE · auth pública desactivada (embeddable). Prueba de dueño: https://elevenlabs.io/app/talk-to?agent_id=agent_0201m50rs1zdehktn49d3wdqakyb
