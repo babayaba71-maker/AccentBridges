@@ -195,6 +195,17 @@ const BANK={
  {en:"I didn't say she stole the money.",ancla:"La frase de las 7 caras. Elige UNA intención y que tu acento la pinte. Ese es el control total."}]
 };
 const LVL_LABEL={"a0b":"A0-bajo","a0m":"A0-medio","a0a":"A0-alto","a1":"A1","a2":"A2","b1":"B1"};
+// normaliza niveles con sub-nivel del expediente: "A2-bajo"→a2, "A0-alto"→a0a, "B2"→b1
+function normLvl(s){
+  const v=String(s||"").toLowerCase().trim();if(!v)return null;
+  if(v[0]==="b")return "b1"; // B1/B2 y sub-niveles: techo actual del gym
+  const m=v.match(/^a(\d)/);if(!m)return null;
+  const n=+m[1];
+  if(n===0){if(v.includes("medio"))return "a0m";if(v.includes("alto"))return "a0a";return "a0b";}
+  if(n===1)return "a1";
+  if(n===2)return "a2";
+  return "b1";
+}
 
 // ===== ESTADO =====
 let lvl=null,queue=[],idx=0,ok=0,mid=0,no=0,debiles=[],itemT0=Date.now(),segs=[],ronda=1;
@@ -213,11 +224,13 @@ $("fetchBtn").onclick=async()=>{
     const j=await r.json();
     $("fetchMsg").classList.remove("blink");
     if(j.ok&&j.found){
-      // el gym entrena la BOCA: esa dimensión manda
-      const map={"A0-bajo":"a0b","A0-medio":"a0m","A0-alto":"a0a","A1":"a1","A2":"a2","B1":"b1","B2":"b1"};
-      lvl=map[j.mouth]||map[j.ear]||"a0m";
+      // DOCTRINA DE DOSIS (15-oct, JJ): la BOCA manda (el músculo entrena donde está),
+      // sin boca medida el OÍDO respalda (shadowing = repetir lo que el oído ya posee),
+      // el OJO JAMÁS gatea el gym (aquí no se lee: se escucha y se repite).
+      lvl=normLvl(j.mouth)||normLvl(j.ear)||"a0m";
       document.querySelectorAll(".lvl").forEach(x=>x.classList.toggle("on",x.dataset.l===lvl));
-      $("fetchMsg").innerHTML="✅ Expediente: oído "+j.ear+" · ojo "+j.eye+" · <b>boca "+j.mouth+"</b> → dosis "+LVL_LABEL[lvl]+" lista. 💪";
+      const bocaTxt=j.mouth?("boca "+j.mouth):("boca sin medir → dosis por oído");
+      $("fetchMsg").innerHTML="✅ Expediente: oído "+(j.ear||"?")+" · ojo "+(j.eye||"?")+" · <b>"+bocaTxt+"</b> → dosis "+LVL_LABEL[lvl]+" lista. 💪";
     }else{
       $("fetchMsg").innerHTML="Aún sin Level Assessment en el expediente — elige tu nivel a mano (y hazlo pronto 📊).";
     }
