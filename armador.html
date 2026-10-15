@@ -61,10 +61,26 @@ function sayEs(t,r){try{speechSynthesis.cancel();speechSynthesis.speak(voz(t,"es
 document.addEventListener("click",()=>{try{speechSynthesis.getVoices()}catch(e){}},{once:true});
 
 // ===== NOMBRES GRINGOS ESCRITOS COMO PALABRA (regla de oro: jamás símbolo suelto al TTS) =====
-const NOMBRE={a:"ay",b:"bee",c:"see",d:"dee",e:"ee",f:"ef",g:"gee",h:"aitch",i:"eye",j:"jay",k:"kay",l:"el",m:"em",n:"en",o:"oh",p:"pee",q:"cue",r:"are",s:"ess",t:"tee",u:"you",v:"vee",w:"double you",x:"ex",y:"why",z:"zee"};
+const NOMBRE={a:"ey",b:"bee",c:"see",d:"dee",e:"ee",f:"ef",g:"gee",h:"aitch",i:"eye",j:"jay",k:"kay",l:"el",m:"em",n:"en",o:"oh",p:"pee",q:"cue",r:"are",s:"ess",t:"tee",u:"you",v:"vee",w:"double you",x:"ex",y:"why",z:"zee"};
 const NOMBRE_DUO={sh:"ess aitch",ch:"see aitch",th:"tee aitch",ph:"pee aitch",ng:"en jee",oo:"double oh",ck:"see kay"};
 function nombreDe(g){const w=g.toLowerCase();if(NOMBRE_DUO[w])return NOMBRE_DUO[w];return w.split("").map(l=>NOMBRE[l]||l).join(" ")}
-function sayChain(items){try{speechSynthesis.cancel();let i=0;const next=()=>{if(i>=items.length)return;const it=items[i++];const u=voz(it.t,it.lang,it.rate);u.onend=next;try{speechSynthesis.speak(u)}catch(e){}};next()}catch(e){}}
+// ===== VOZ OFICIAL: MP3s de Valerie (ElevenLabs, verificados por oído) con respaldo del navegador =====
+const AUDIO_BASE="assets/armador/audio/";
+const NOMBRE_FILE={a:"let-a",b:"let-b",c:"let-c",d:"let-d",e:"let-e",f:"let-f",g:"let-g",h:"let-h",i:"let-i",j:"let-j",k:"let-k",l:"let-l",m:"let-m",n:"let-n",o:"let-o",p:"let-p",q:"let-q",r:"let-r",s:"let-s",t:"let-t",u:"let-u",v:"let-v",w:"let-w",x:"let-x",y:"let-y",z:"let-z"};
+const DUO_FILE={sh:"duo-sh",ch:"duo-ch",th:"duo-th",ph:"duo-ph",ng:"duo-ng",oo:"duo-oo",ck:"duo-ck"};
+const audioCache={};
+function speakText(it,cb){const u=voz(it.t,it.lang,it.rate);u.onend=cb;u.onerror=cb;try{speechSynthesis.speak(u)}catch(e){cb()}}
+function sayChain(items){try{speechSynthesis.cancel()}catch(e){}
+  let i=0;
+  const next=()=>{if(i>=items.length)return;const it=items[i++];
+    if(it.file){const src=AUDIO_BASE+it.file+".mp3";
+      let a=audioCache[src]||(audioCache[src]=new Audio(src));
+      a.onended=()=>{a.onended=null;next()};
+      a.onerror=()=>{if(it.t)speakText(it,next);else next()};
+      try{a.currentTime=0;a.play().catch(()=>{if(it.t)speakText(it,next);else next()})}catch(e){next()}}
+    else speakText(it,next)};
+  next()}
+function nombreItem(g){const w=g.toLowerCase();const t=nombreDe(g);if(DUO_FILE[w])return{file:DUO_FILE[w],t:t,lang:"en-US",rate:.85};if(w.length===1&&NOMBRE_FILE[w])return{file:NOMBRE_FILE[w],t:t,lang:"en-US",rate:.85};return{t:t,lang:"en-US",rate:.85}}
 
 // ===== EMOJIS DEL BANCO =====
 const EMO={cat:"🐱",bag:"👜",map:"🗺️",hat:"🎩",pan:"🍳",van:"🚐",fan:"🌬️",jam:"🍯",pen:"🖊️",bed:"🛏️",red:"🔴",ten:"🔟",net:"🥅",get:"✋",leg:"🦵",sit:"🪑",big:"🐘",win:"🏆",pin:"📍",zip:"🤐",fit:"🏃",kid:"🧒",box:"📦",hot:"🔥",dog:"🐶",job:"💼",lot:"🧺",pot:"🍲",not:"🚫",bus:"🚌",cup:"☕",run:"🏃",sun:"☀️",fun:"🎉",cut:"✂️",mug:"🍺",ham:"🍖",bat:"🦇",man:"👨",nap:"😴",fish:"🐟",ship:"🚢",shop:"🏪",dish:"🍽️",wish:"🌠",cash:"💵",wash:"🧼",chat:"💬",chip:"🍟",lunch:"🍱",much:"🤗",this:"👉",that:"👈",then:"⏰",thing:"🧩",math:"➗",sing:"🎤",king:"👑",long:"📏",song:"🎶",book:"📖",look:"👀",cook:"👨‍🍳",foot:"🦶",good:"👍",wood:"🪵",took:"⏱️",hood:"🧥",food:"🍽️",moon:"🌙",soon:"⌛",tool:"🔧",room:"🚪",spoon:"🥄",cool:"😎",name:"📛",home:"🏠",hope:"🙏",time:"⌛",five:"5️⃣",note:"📝",late:"🌃",make:"🔧",take:"🎬",cube:"🧊",life:"❤️",wide:"↔️",safe:"🛡️",phone:"📱",plate:"🍽️",cake:"🎂",bike:"🚲",ride:"🐎",game:"🎮",tune:"🎼",rope:"🪢",cute:"🥰",mine:"⛏️",rose:"🌹",wave:"🌊"};
@@ -134,11 +150,11 @@ function armar(p){
     // SIEMPRE se oye el NOMBRE gringo de lo que aplastaste (entrenamiento de oído, también al fallar)
     if(!c.ok){fallos++;b.classList.add("bad");setTimeout(()=>b.classList.remove("bad"),450);
       toast("Oíste «"+nombreDe(c.g)+"»… ese no es el siguiente sonido 🔊");
-      sayChain([{t:nombreDe(c.g),lang:"en-US",rate:.85},{t:p.palabra,lang:"en-US",rate:.75}]);return}
+      sayChain([nombreItem(c.g),{t:p.palabra,lang:"en-US",rate:.75}]);return}
     if(c.g!==g[n].g){fallos++;b.classList.add("bad");setTimeout(()=>b.classList.remove("bad"),450);
       toast("Oíste «"+nombreDe(c.g)+"»… aún no le toca a esa");
-      sayChain([{t:nombreDe(c.g),lang:"en-US",rate:.85}]);return}
-    sayChain([{t:nombreDe(c.g),lang:"en-US",rate:.85},{t:c.conf,lang:"es-MX",rate:1.02}]);
+      sayChain([nombreItem(c.g)]);return}
+    sayChain([nombreItem(c.g),{t:c.conf,lang:"es-MX",rate:1.02}]);
     b.classList.add("gone");
     document.querySelectorAll(".slot")[n].classList.add("fill");
     document.querySelectorAll(".slot")[n].textContent=c.g.toUpperCase();
@@ -155,7 +171,6 @@ function confesar(c,ultimo,cb){
   document.body.appendChild(d);
   const cerrar=()=>{d.remove();cb()};
   d.querySelector("#va").onclick=cerrar;
-  sayEs(c.confesion,1.02);
 }
 
 // ===== PASO 3: CELEBRACIÓN + LECCIÓN FINAL =====
