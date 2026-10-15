@@ -1,0 +1,59 @@
+{
+ "vocales_cortitas": {
+  "a": "Soy la A en mi sonido cortito: la a de gato con sazón americana, más ancha que la española.",
+  "e": "Soy la E cortita de bed. ¡Cuidado! Mi NOMBRE gringo es «i», pero aquí no lo digo: digo mi e cortita.",
+  "i": "Soy la I cortita de sit: parecida a la i española, pero relajada, casi sin esfuerzo.",
+  "o": "Soy la O cortita: en la boca americana me estiro y me vuelvo una a grande. hot suena «jat».",
+  "u": "Soy la U floja: sueno como una a relajada. cup suena casi «cap»."
+ },
+ "vocales_nombre": {
+  "a": "La e muda me hace decir mi NOMBRE gringo: «ei». cake suena «keik».",
+  "e": "La e muda me hace decir mi nombre largo «ii».",
+  "i": "La e muda me hace decir mi NOMBRE gringo: «ai». bike suena «baik».",
+  "o": "La e muda me hace decir mi NOMBRE gringo: «ou». home suena «joum».",
+  "u": "La e muda me hace decir mi NOMBRE gringo: «iu». cube suena «kiub»."
+ },
+ "magic_e": "Soy la e MUDA: no se me oye. Mi chamba no es hablar: es MANDAR. Hago que la vocal de en medio diga su nombre gringo.",
+ "consonantes_leales": {
+  "b": "Soy la B: sueno igual que en español. Una leal.",
+  "d": "Soy la D: sueno igual que en español, con la lengua en los dientes. Leal.",
+  "f": "Soy la F: sueno igual que en español. Leal.",
+  "g": "Soy la G de gato: suena igual que en español. Leal y fuerte.",
+  "k": "Soy la K: siempre sueno como la k española. Ojo: la C me copia el sonido.",
+  "l": "Soy la L: al inicio sueno igual que en español. Al final me acuesto: la lengua se queda planita en el techo.",
+  "m": "Soy la M de mamá: sueno igual que en español. Lealtad total.",
+  "n": "Soy la N: sueno igual que en español. Leal.",
+  "p": "Soy la P: sueno igual que en español, con su aire. Leal.",
+  "v": "Soy la V: parecida a la española, pero los dientes muerden el labio SIN sonar como B. ¡No me cambies por la B!",
+  "z": "Soy la Z de zapato: sueno como la s sonora española de «rasgo». En inglés siempre sueno así."
+ },
+ "consonantes_historia": {
+  "c": "Me llamo C pero ante la {vocal} sueno como la K. Es mi empleo número uno: casi nunca sueno como C española.",
+  "h": "Soy la H: en español soy muda, pero en inglés ¡RESPIRO! Sueno como la J española suave. hot suena «jot».",
+  "j": "Soy la J: mi nombre gringo es «yei» y sueno como una D pegada a una Y rápida. job suena «dyob».",
+  "w": "Soy la doble-u: sueno como una u española rápida. wish suena «uish».",
+  "r": "Soy la R gringa: la lengua se jala hacia atrás y NO vibra. Nada que ver con la RR mexicana.",
+  "s": "Soy la S de serpiente: al inicio sueno igual que en español. Silbido leal.",
+  "x": "Soy la X: valgo por dos sonidos pegados, K y S. box suena «boks».",
+  "t_inicial": "Soy la T en mi empleo número uno: al inicio sueno completa, con aire, como la t española.",
+  "t_final": "Soy la T congelada: al final de la palabra no suelto el aire. Me oyes llegar, no salir.",
+  "t_flap": "Soy la T caída: entre vocales sin acento me caigo y sueno como la R suave de «pero». water suena «wader»."
+ },
+ "digrafos": {
+  "sh": "Somos la SH: dos letras, UN solo sonido. El del silencio: «shhh». En español puro no existimos.",
+  "ch": "Somos la CH de chicharrón: idéntica a la española. Chocolate los dos lados del puente.",
+  "th_sorda": "Somos la TH: la lengua asoma entre los dientes y sale airecito, sin garganta.",
+  "th_zumbada": "Somos la TH zumbada: lengua entre los dientes PERO con garganta encendida. this suena casi «dis».",
+  "ph": "Somos la PH: la prima griega de la F. Suenamos exactamente igual: phone suena «foun».",
+  "ng": "Somos la NG: la g se medio traga. sing no acaba en «g» golpeada: es la n americana acostada, el oro del final.",
+  "oo_corta": "Somos la OO en su casa CORTA: suenamos como «u» cortita. book suena «buk».",
+  "oo_larga": "Somos la OO en su casa LARGA: suenamos como «uu» estirada. food suena «fuud»."
+ },
+ "leccion_final": {
+  "cerrada": "UNA sílaba, sílaba CERRADA: la vocal quedó encerrada entre consonantes y por eso dice su sonido cortito.",
+  "digrafo": "UNA sílaba con un dúo secreto: dos letras que hacen UN solo sonido. Eso es un dígrafo (palabra de maestro, no tuya todavía).",
+  "oo_corta": "La OO tiene DOS casas. En esta palabra vive en la casa CORTA: book, look, good.",
+  "oo_larga": "La OO tiene DOS casas. En esta palabra vive en la casa LARGA: food, moon, soon.",
+  "magic_e": "UNA sílaba con e muda: la e no se oye, pero es la jefa: hace que la vocal diga su NOMBRE gringo. Esa es la Magia E."
+ }
+}
