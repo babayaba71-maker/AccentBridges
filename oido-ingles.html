@@ -50,7 +50,7 @@ const TTS='speechSynthesis' in window;let voice;
 function pick(){const v=speechSynthesis.getVoices();voice=v.find(x=>/en[-_]US/.test(x.lang))||v.find(x=>x.lang.startsWith("en"))}
 if(TTS){pick();speechSynthesis.onvoiceschanged=pick}
 let U;function warn(t){let m=document.getElementById("w");if(!m){m=document.createElement("p");m.id="w";m.className="no";m.style.cssText="position:sticky;top:0;background:var(--bg);margin:0;padding:8px 16px";document.body.prepend(m)}m.textContent=t}
-function say(w){if(!TTS)return warn("Este navegador no tiene voz. Prueba con Chrome o Safari.");try{if(speechSynthesis.speaking||speechSynthesis.pending)speechSynthesis.cancel();speechSynthesis.resume()}catch(e){}if(!voice)pick();U=new SpeechSynthesisUtterance(w);U.lang="en-US";if(voice)U.voice=voice;U.rate=(steps&&steps[st]&&steps[st][0]=="rep")?SPR[SP]:.75;U.onerror=e=>{if(e.error!="canceled"&&e.error!="interrupted")warn("No se pudo reproducir la voz ("+e.error+"). Sube el volumen y revisa que el teléfono no esté en silencio.")};speechSynthesis.speak(U)}
+function say(w){if(!TTS)return warn("Este navegador no tiene voz. Prueba con Chrome o Safari.");try{if(speechSynthesis.speaking||speechSynthesis.pending)speechSynthesis.cancel();speechSynthesis.resume()}catch(e){}if(!voice)pick();U=new SpeechSynthesisUtterance(w);U.lang="en-US";if(voice)U.voice=voice;U.rate=(steps&&steps[st]&&steps[st][0]=="rep")?SPR[SP]:.75;U.onerror=e=>{if(e.error!="canceled"&&e.error!="interrupted")warn("No se pudo reproducir la voz ("+e.error+"). Sube el volumen y revisa que el teléfono no esté en silencio.")};try{speechSynthesis.speak(U)}catch(err){warn("La voz del teléfono no respondió. Reinicia el teléfono para revivirla — puedes seguir contestando.")}}
 const $=document.getElementById("app");
 const sh=a=>a.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
 const esc=s=>s.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
@@ -101,8 +101,8 @@ $.innerHTML=b+`<div id="fb"></div>`;done=false;
 if(k=="lee"||k=="dic")setTimeout(()=>say(T),300);if(k=="dic"){const ip=document.getElementById("inp");if(ip)ip.focus()}}
 const I2=()=>cur.l.length>=4?cur.l:[...cur.l,...sh(POOL).slice(0,4)];
 function ans(a){if(done)return;const T=tr[ti],k=steps[st][0];let ok,msg="";
-if(k=="same"){ok=(a==1)==!!T.s;const preL=GF;msg=cur.d>=40?`A = ${T.a} · B = ${T.b}`:(ok?(T.s?"Eran iguales.":"Eran distintos."):"");}
-if(k=="same"&&!ok){GF++;const L=aidLv();let rv=cur.d>=40?"":"Se dijo: "+esc(T.a)+" y "+esc(T.b);if(L>=2&&cur.d<40)rv+=(ANCLA[T.a]?" · ancla "+esc(ANCLA[T.a]):"")+(EMO[T.a]?" ":"")+" / "+esc(T.b)+(ANCLA[T.b]?" · ancla "+esc(ANCLA[T.b]):"");if(L>=3&&cur.d<40)rv+=" "+(EMO[T.a]||"")+" "+(EMO[T.b]||"");const rev=cur.d>=40?"":rv;msg=rev+(L>preL?(L==1?" — \ud83d\udc41\ufe0f ZAS: los ojos entran a ayudar.":L==2?" — \ud83e\udded ZAS: el ancla culichi entra a ayudar.":" — \ud83d\udc41\ufe0f ZAS: la figura entra. Si es un barco, sale un barco. \u2693"):"")+" · pistas nivel "+L}
+if(k=="same"){ok=(a==1)==!!T.s;msg=cur.d>=40?`A = ${T.a} · B = ${T.b}`:(ok?(T.s?"Eran iguales.":"Eran distintos."):"");}
+if(k=="same"&&!ok){const preL=GF;GF++;const L=aidLv();if(cur.d>=40){msg=`A = ${T.a} · B = ${T.b}`}else{let rv="Se dijo: "+esc(T.a)+" y "+esc(T.b);if(L>=2)rv+=" · ancla: "+esc(ANCLA[T.a]||T.a)+" / "+esc(ANCLA[T.b]||T.b);if(L>=3)rv+=" · "+(EMO[T.a]||"\ud83d\udd0a")+(EMO[T.b]||"\ud83d\udd0a");msg=rv+(L>preL?(L==1?" — \ud83d\udc41\ufe0f ZAS: los ojos entran a ayudar.":L==2?" — \ud83e\udded ZAS: el ancla culichi entra a ayudar.":" — \ud83d\udc41\ufe0f ZAS: la figura entra. Si es un barco, sale un barco. \u2693"):"")+" · pistas nivel "+L}}
 else if(k=="lee"){ok=a==T;msg=`Era: ${T}`}
 else{dicAns(T);return}
 done=true;sc.tot++;if(ok)sc.ok++;
