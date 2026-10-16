@@ -1018,9 +1018,9 @@ function maestraDose(pers,lvl){
   acciones.push({label:"🎙️ Practica conmigo en voz (/call)",url:CALL});
   const vObj=videoOfTab(objetivo.tab);
   if(vObj)acciones.push(vObj);
-  // América: el gimnasio de pares mínimos con micrófono — posicionamiento A2-medio a B1-alto (JJ 17-sep)
+  // América: EL PUENTE FUERA DEL KINDERGARTEN — re-posicionada A0-alto→A1-bajo (JJ 15-oct; antes era A2m-B1a)
   const best=Math.max(...["ear","eye","mouth"].map(d=>ORDEN[lvl[d]]!==undefined?ORDEN[lvl[d]]:0));
-  if(best>=2)acciones.push({label:"🇺🇸 Ya meritas AMERICA — pares con microfono (A2m a B1a)",url:AMERICA});
+  if(best>=1)acciones.push({label:"🇺🇸 AMERICA — tu puente fuera del kindergarten (A0a a A1b): pares con micrófono",url:AMERICA});
   // Palace: laboratorio B1a a B2b (grade target JJ) — trabalenguas con score, gimnasio lengua+cerebro que funciona desde A-bajo (evidencia sobrino 70-100%)
   if(best>=3)acciones.push({label:"👑 PALACE te espera — el laboratorio (B1a a B2b)",url:PALACE});
   if(weak==="mouth")acciones.push({label:"👅 Trabalenguas con score — lengua Y cerebro",url:PALACE});

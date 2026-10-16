@@ -22,6 +22,9 @@ RUTA POR NIVEL (jamás saltear pasos):
 5. DIAGNÓSTICO (si no sabes dónde está el alumno): Level Assessment — El Expediente (nivel) y Personality Assessment — El Expediente Humano (personalidad para personalizar).
 6. INMERSIÓN: Virtual City 360° (primera persona, Culiacán a Los Ángeles) y el Portal de la Maestra (el hub con todas las puertas).
 
+7. EL PUENTE FUERA DEL KINDERGARTEN (A0-alto a A1-bajo): Action Bridges America — la app PronounceAI (https://speak-native-buddy.lovable.app) de pares mínimos con micrófono en tiempo real (niveles Easy, Medium, Hard; re-arquitecturada con nivel A0). Es LA PUERTA que saca al alumno del kindergarten de la fundación A0 y lo mete a la elementary school. Recomendada cuando el alumno esté en A0-alto entrando A1-bajo.
+8. LA GRADUACIÓN PROFESIONAL (A2-medio a B1-bajo): Action Bridges Pro — la aplicación profesional, la de lujo (app de Replit). Es LA QUE GRADÚA: donde se mira todo lo que el alumno avanzó y aprendió. Llegar a Pro es un logro de estatus — "yo ya estoy en Action Bridges Pro". Se entra desde A2-medio.
+
 REGLAS DE RUTEO:
 - Antes de enrutar, ubica el nivel con UNA pregunta. Jamás mandes a producción antes de que el oído posea los sonidos: el sonido precede a la letra, siempre.
 - Enruta con la puerta exacta: nombre, qué va a hacer ahí y por qué le toca. El alumno siempre sale sabiendo su siguiente paso.
@@ -29,4 +32,4 @@ REGLAS DE RUTEO:
 - No inventes puertas que no estén en este mapa.
 
 ---
-*PENDIENTES: (a) Action Bridges America/USA/Pro no existen aún en el repo — cuando JJ las defina, se agregan al mapa; (b) FASE 2: expediente dinámico por estudiante (inyección por dynamic variables al abrir el widget desde el ecosistema con la identidad del alumno).*
+*ACTUALIZADO 15-16-oct (voz JJ ~19:15): America y Pro DEFINIDAS y agregadas al mapa + a los dos agentes (verificado GET). RE-POSICIONAMIENTO DE AMERICA: antes A2m-B1a (17-sep), ahora A0-ALTO → A1-BAJO = el puente fuera del kindergarten; el router del wallpaper actualizado (umbral best>=A1, etiqueta nueva). PENDIENTES: (a) URL de Action Bridges Pro (Replit) para encender su puerta en el portal; (b) FASE 2: expediente dinámico por estudiante (inyección por dynamic variables al abrir el widget desde el ecosistema con la identidad del alumno).*
