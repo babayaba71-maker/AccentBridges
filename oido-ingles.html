@@ -102,9 +102,9 @@ if(k=="lee"||k=="dic")setTimeout(()=>say(T),300);if(k=="dic"){const ip=document.
 const I2=()=>cur.l.length>=4?cur.l:[...cur.l,...sh(POOL).slice(0,4)];
 function ans(a){if(done)return;const T=tr[ti],k=steps[st][0];let ok,msg="";
 if(k=="same"){ok=(a==1)==!!T.s;msg=cur.d>=40?`A = ${T.a} · B = ${T.b}`:(ok?(T.s?"Eran iguales.":"Eran distintos."):"");}
-if(k=="same"&&!ok){const preL=GF;GF++;const L=aidLv();if(cur.d>=40){msg=`A = ${T.a} · B = ${T.b}`}else{let rv="Se dijo: "+esc(T.a)+" y "+esc(T.b);if(L>=2)rv+=" · ancla: "+esc(ANCLA[T.a]||T.a)+" / "+esc(ANCLA[T.b]||T.b);if(L>=3)rv+=" · "+(EMO[T.a]||"\ud83d\udd0a")+(EMO[T.b]||"\ud83d\udd0a");msg=rv+(L>preL?(L==1?" — \ud83d\udc41\ufe0f ZAS: los ojos entran a ayudar.":L==2?" — \ud83e\udded ZAS: el ancla culichi entra a ayudar.":" — \ud83d\udc41\ufe0f ZAS: la figura entra. Si es un barco, sale un barco. \u2693"):"")+" · pistas nivel "+L}}
 else if(k=="lee"){ok=a==T;msg=`Era: ${T}`}
 else{dicAns(T);return}
+if(k=="same"&&!ok&&cur.d<40){const preL=GF;GF++;const L=aidLv();let rv="Se dijo: "+esc(T.a)+" y "+esc(T.b);if(L>=2)rv+=" · ancla: "+esc(ANCLA[T.a]||T.a)+" / "+esc(ANCLA[T.b]||T.b);if(L>=3)rv+=" · "+(EMO[T.a]||"\ud83d\udd0a")+(EMO[T.b]||"\ud83d\udd0a");msg=rv+(L>preL?(L==1?" — \ud83d\udc41\ufe0f ZAS: los ojos entran a ayudar.":L==2?" — \ud83e\udded ZAS: el ancla culichi entra a ayudar.":" — \ud83d\udc41\ufe0f ZAS: la figura entra. Si es un barco, sale un barco. \u2693"):"")+" · pistas nivel "+L}
 done=true;sc.tot++;if(ok)sc.ok++;
 document.getElementById("fb").innerHTML=`<p class="${ok?"ok":"no"}">${ok?"✓ Correcto":"✗ Casi"} <span class="m">${esc(msg)}</span></p><button class="go" onclick="nx()">Seguir</button>`;
 document.querySelectorAll(".ans,.opt").forEach(x=>x.disabled=true)}
