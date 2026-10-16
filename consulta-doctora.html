@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🩺 Consulta con la Doctora Valerie — AccentBridges</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:linear-gradient(160deg,#0f172a 0%,#1e293b 55%,#0f172a 100%);min-height:100vh;color:#f8fafc;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:32px 18px 140px}
+  .card{max-width:520px;width:100%;text-align:center}
+  .badge{display:inline-block;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.4);color:#fbbf24;border-radius:999px;padding:6px 18px;font-size:13px;font-weight:600;letter-spacing:.5px;margin-bottom:18px}
+  h1{font-size:26px;font-weight:800;margin-bottom:10px}
+  h1 .doc{font-size:38px;vertical-align:-4px}
+  .sub{color:#94a3b8;font-size:15px;line-height:1.55;margin-bottom:22px}
+  .steps{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:18px;margin-bottom:18px;text-align:left}
+  .steps div{display:flex;gap:12px;align-items:flex-start;padding:9px 0;font-size:14.5px;color:#e2e8f0;line-height:1.45}
+  .steps .n{flex:0 0 26px;height:26px;border-radius:50%;background:#f59e0b;color:#1e293b;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:13px}
+  .mic{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.35);color:#6ee7b7;border-radius:12px;padding:11px 15px;font-size:13.5px;line-height:1.5;margin-bottom:6px}
+  .foot{color:#64748b;font-size:12px;margin-top:14px;line-height:1.5}
+  .foot b{color:#94a3b8}
+  elevenlabs-convai{position:fixed;bottom:20px;right:20px;z-index:50}
+  @media (max-width:480px){h1{font-size:22px}.sub{font-size:14px}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="badge">CONSULTA EXPRESS · 5 MINUTOS</div>
+  <h1><span class="doc">🩺</span> Doctora Valerie</h1>
+  <p class="sub">La doctora del oído de AccentBridges te escucha, prueba tu oído del día y te deja tu receta. Todo hablado, aquí nadie reprueba.</p>
+  <div class="steps">
+    <div><span class="n">1</span><span>Aprieta el botón <b>🩺 Empezar consulta</b> (abajo a la derecha) y dile tu nombre.</span></div>
+    <div><span class="n">2</span><span>Te pregunta qué día estudiaste y te hace la prueba de oído: ¿suena igual o distinto?</span></div>
+    <div><span class="n">3</span><span>Te da tu diagnóstico y tu receta de 5 minutos para mañana. Queda anotado en tu expediente.</span></div>
+  </div>
+  <div class="mic">🎤 Cuando tu navegador pida el micrófono, dale <b>Permitir</b>. Sin micrófono no hay consulta.</div>
+  <p class="foot"><b>Consulta de lunes a viernes</b> · Martes y viernes toca consulta con la Doctora · Todo queda en tu expediente AccentBridges</p>
+</div>
+
+<elevenlabs-convai
+  agent-id="agent_2401m5311s2vfdbv70bkk2pvar1h"
+  action-text="🩺 Tu consulta"
+  start-call-text="Empezar consulta"
+  end-call-text="Cerrar consulta"
+  listening-text="Te escucho..."
+  speaking-text="La Doctora habla..."
+  expand-text="Abrir chat"
+  dismissible="true"
+  avatar-orb-color-1="#f59e0b"
+  avatar-orb-color-2="#10b981"
+></elevenlabs-convai>
+<script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+</body>
+</html>
