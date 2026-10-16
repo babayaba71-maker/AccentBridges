@@ -177,12 +177,26 @@ function setFase(f){
 }
 
 // fase 1: recitar hispano y grid
-function recitar(){ // el abecedario completo cantado: MP3 oficial verificado por oído
+let recitalToken=0;
+function recitar(){ // abecedario completo: CADENA de los 27 MP3s verificados UNO POR UNO por oído
   try{speechSynthesis.cancel()}catch(e){}
-  const src=CG_BASE+"hx-recital.mp3";
-  let a=audioCache[src]||(audioCache[src]=new Audio(src));
-  a.onerror=()=>{let d="";HX.forEach(p=>{d+=p[1]+", "});speakBoca(d,null,()=>{try{speechSynthesis.speak(voz(d,"es-MX",0.92))}catch(e){}})};
-  try{a.currentTime=0;a.play().catch(()=>a.onerror())}catch(e){a.onerror()}
+  const token=++recitalToken;
+  try{Object.values(audioCache).forEach(a=>{try{a.pause()}catch(e){}})}catch(e){}
+  const secuencia=["a","b","c","d","e","f","g","h","i","j","k","l","m","n","nn","o","p","q","r","s","t","u","v","w","x","y","z"];
+  let fallas=0;
+  (function paso(i){
+    if(token!==recitalToken||i>=secuencia.length)return;
+    const k=secuencia[i];
+    const src=CG_BASE+"hx-"+k+".mp3";
+    let a=audioCache[src]||(audioCache[src]=new Audio(src));
+    const siguiente=()=>setTimeout(()=>paso(i+1),350); // pausa cantada entre nombres
+    a.onended=siguiente;
+    a.onerror=()=>{ // respaldo: si el MP3 no carga, la boca de Valerie con la cadena larga
+      if(++fallas===1&&i===0){let d="";HX.forEach(p=>{d+=p[1]+", "});speakBoca(d,null,null)}
+      siguiente();
+    };
+    try{a.currentTime=0;a.play().catch(a.onerror)}catch(e){a.onerror()}
+  })(0);
 }
 function tapaHx(k,w){playHx(k,null,w)}
 function gridHx(){
