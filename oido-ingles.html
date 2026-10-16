@@ -39,6 +39,12 @@ const LV={};D.V.forEach(v=>LV[v.id]=v);
 let S={},lv=D.V[0].id;try{S=JSON.parse(localStorage.getItem("oi2")||"{}")}catch(e){}
 let AT={},PD={},T0=0;try{AT=JSON.parse(localStorage.getItem("oi2a")||"{}")}catch(e){}try{PD=JSON.parse(localStorage.getItem("oi2p")||"{}")}catch(e){}for(const k in S)if(S[k]>=70)PD[k]=1;
 function th(d){return Math.max(50,70-5*Math.min(4,AT[d]||0))}
+/* ESCALERA DE PISTAS DEL BISTURÍ (orden del Maestro JJ, 15-oct): si el oído no capta,
+   zas: 1 fallo → PALABRA en inglés (los ojos entran); 3 fallos → +ANCLA culichi;
+   5 fallos → +FIGURA. El umbral 70→50 ya respira con th(d). El estudiante se evalúa
+   solo con la práctica — 10-15 repeticiones también es medición. GF se resetea al Empezar. */
+let GF=0;const aidLv=()=>GF>=5?3:GF>=3?2:GF>=1?1:0;
+function aidHTML(T){const L=aidLv();if(!L||cur.d>=40)return"";let s="<b>A = "+esc(T.a)+"</b>";if(ANCLA[T.a])s+=" · "+esc(ANCLA[T.a]);s+=" &nbsp;·&nbsp; <b>B = "+esc(T.b)+"</b>";if(ANCLA[T.b])s+=" · "+esc(ANCLA[T.b]);let pre=L>=3?"FIGURA \ud83d\udc41\ufe0f (si es un barco, sale un barco): ":L>=2?"ANCLA \ud83e\udded (as\u00ed suena en culichi): ":"OJOS \ud83d\udc41\ufe0f (la palabra en ingl\u00e9s): ";let e=(EMO[T.a]||"")+" "+(EMO[T.b]||"");return "<p class=\"m\" id=\"aid\" style=\"border-left:3px solid var(--ac);padding:6px 10px;margin:8px 0\">"+pre+s+(L>=3?" &nbsp;"+e:"")+"</p>"}
 const save=()=>{try{localStorage.setItem("oi2",JSON.stringify(S));localStorage.setItem("oi2a",JSON.stringify(AT));localStorage.setItem("oi2p",JSON.stringify(PD))}catch(e){}};
 const TTS='speechSynthesis' in window;let voice;
 function pick(){const v=speechSynthesis.getVoices();voice=v.find(x=>/en[-_]US/.test(x.lang))||v.find(x=>x.lang.startsWith("en"))}
@@ -75,7 +81,7 @@ if(!NAME){namePage();return}
 if(d>1&&!(PD[d-1]||S[d-1]>=70)&&!TEACH){const pd=D.L.find(l=>l.d==d-1);$.innerHTML=`<div class="top"><button class="lk" onclick="home()" aria-label="Volver al inicio">←</button><span class="m">🔒 Día bloqueado</span></div><h1>Primero el día ${d-1}</h1><p>El orden es parte del método: oído, palabra, letra, escritura. Para abrir el día ${d} necesitas pasar el día ${d-1} con ${th(d-1)}% o más.</p><button class="go" onclick="start(${d-1})">Ir al día ${d-1}: ${esc(pd.t)}</button><button class="go alt" onclick="home()">Volver a la lista</button>`;return}
 sc={ok:0,tot:0};repLog=[];dicLog=[];steps=[["same","Oído","Escucha dos sonidos. ¿Son iguales o distintos?"],["rep","Repite","Escucha y repite en voz alta tres veces."+(SR?" Si el mic no te reconoce, reintenta o salta — saltar queda como no verificado.":"")]];
 if(d>=40)steps.push(["lee","Lectura","Escucha y elige lo que está escrito."],["dic","Dictado","Escucha y escribe."]);
-$.innerHTML=`<div class="top"><button class="lk" onclick="home()" aria-label="Volver al inicio">←</button><span class="m">Día ${d}</span></div><h1>${esc(cur.t)}</h1><p>${esc(cur.h)}</p>${d<40?`<p class="m">Hoy no hay letras: el método primero entrena el oído.</p>`:""}<button class="go" onclick="st=0;step()">Empezar</button>`}
+$.innerHTML=`<div class="top"><button class="lk" onclick="home()" aria-label="Volver al inicio">←</button><span class="m">Día ${d}</span></div><h1>${esc(cur.t)}</h1><p>${esc(cur.h)}</p>${d<40?`<p class="m">Hoy no hay letras: el método primero entrena el oído.</p>`:""}<button class="go" onclick="GF=0;st=0;step()">Empezar</button>`}
 function step(){const I=cur.l;ti=0;const k=steps[st][0];
 if(k=="same"){const dp=cur.p.length?cur.p:sh(I.flatMap((a,i)=>I.slice(i+1).map(b=>[a,b]))).slice(0,3);
 tr=sh([...sh(dp).slice(0,3).map(p=>({a:p[0],b:p[1],s:0})),...sh(I).slice(0,3).map(w=>({a:w,b:w,s:1}))]).map(t=>Math.random()<.5?{a:t.b,b:t.a,s:t.s}:t)}
@@ -85,7 +91,7 @@ else tr=sh(I).sort((a,b)=>a.length-b.length).slice(0,6);
 show()}
 function show(){const T=tr[ti],h=steps[st],k=h[0];if(k=="rep"){repTries=0;repCounted=false}
 let b=`<div class="top"><button class="lk" onclick="home()" aria-label="Volver al inicio">←</button><span class="m">${st+1}. ${h[1]} · ${ti+1} de ${tr.length}</span></div><div class="bar"><i style="width:${(st+ti/tr.length)/steps.length*100}%"></i></div><p>${h[2]}</p>`;
-if(k=="same"){heard={a:0,b:0};b+=`<div class="row"><button class="sp" data-say="${esc(T.a)}" data-w="a">🔊<br>A</button><button class="sp" data-say="${esc(T.b)}" data-w="b">🔊<br>B</button></div><p class="m" id="hg">Escucha 🔊 A y 🔊 B antes de responder.</p><div class="row"><button class="ans" data-a="1" disabled>Iguales</button><button class="ans" data-a="0" disabled>Distintos</button></div>`;}
+if(k=="same"){heard={a:0,b:0};b+=`<div class="row"><button class="sp" data-say="${esc(T.a)}" data-w="a">🔊<br>A</button><button class="sp" data-say="${esc(T.b)}" data-w="b">🔊<br>B</button></div><p class="m" id="hg">Escucha 🔊 A y 🔊 B antes de responder.</p>${aidHTML(T)}<div class="row"><button class="ans" data-a="1" disabled>Iguales</button><button class="ans" data-a="0" disabled>Distintos</button></div>`;}
 else if(k=="rep")b+=`<button class="sp big" data-say="${esc(T)}">🔊 Escuchar</button>`+spd(T)+(SR?`<button class="go" id="mic" onclick="mic()">🎤 Decirlo yo</button>`:"")+`<button class="go alt" onclick="repSkip()">${SR?"Saltar (no verificado)":"Ya lo repetí"}</button>`;
 else if(k=="lee"){const o=[T,...sh(I2()).filter(w=>w!=T).slice(0,3)];b+=`<button class="sp big" data-say="${esc(T)}">🔊 Escuchar</button>`+sh(o).map(w=>`<button class="opt" data-a="${esc(w)}">${esc(w)}</button>`).join("")}
 else{dicTries=0;CHB=[];CHL=[];
@@ -95,7 +101,8 @@ $.innerHTML=b+`<div id="fb"></div>`;done=false;
 if(k=="lee"||k=="dic")setTimeout(()=>say(T),300);if(k=="dic"){const ip=document.getElementById("inp");if(ip)ip.focus()}}
 const I2=()=>cur.l.length>=4?cur.l:[...cur.l,...sh(POOL).slice(0,4)];
 function ans(a){if(done)return;const T=tr[ti],k=steps[st][0];let ok,msg="";
-if(k=="same"){ok=(a==1)==!!T.s;msg=cur.d>=40?`A = ${T.a} · B = ${T.b}`:(T.s?"Eran iguales.":"Eran distintos.")}
+if(k=="same"){ok=(a==1)==!!T.s;const preL=GF;msg=cur.d>=40?`A = ${T.a} · B = ${T.b}`:(ok?(T.s?"Eran iguales.":"Eran distintos."):"");}
+if(k=="same"&&!ok){GF++;const L=aidLv();const rev=cur.d>=40?"":`Se dijo: ${esc(T.a)}${ANCLA[T.a]?" · ancla "+esc(ANCLA[T.a]):""}${EMO[T.a]?" "+EMO[T.a]:""} y ${esc(T.b)}${ANCLA[T.b]?" · ancla "+esc(ANCLA[T.b]):""}${EMO[T.b]?" "+EMO[T.b]:""}`;msg=rev+(L>preL?(L==1?" — \ud83d\udc41\ufe0f ZAS: los ojos entran a ayudar.":L==2?" — \ud83e\udded ZAS: el ancla culichi entra a ayudar.":" — \ud83d\udc41\ufe0f ZAS: la figura entra. Si es un barco, sale un barco. \u2693"):"")+" · pistas nivel "+L}
 else if(k=="lee"){ok=a==T;msg=`Era: ${T}`}
 else{dicAns(T);return}
 done=true;sc.tot++;if(ok)sc.ok++;
@@ -126,7 +133,7 @@ function repSkip(){if(!repCounted){repCounted=true;sc.tot++;if(!SR){sc.ok++;repL
 function nx(){ti++;if(ti<tr.length)return show();st++;if(st<steps.length)return step();end()}
 const BQ_EP="https://valerie.base44.app/functions/logMorfofonoSession",BQ_KEY="ABVC-PILOTO-2026";
 function bq(p,pass,T){const sid="oi-"+cur.d+"-"+Date.now();
-const rec={topic:"Oído Inglés — Día "+cur.d+": "+cur.t+" ("+cur.lv+")",location:"Culiacán",accuracy:p,passed:pass,spokenText:"oido-ingles · bloques: "+steps.map(s=>s[1]).join("→")+" · "+sc.ok+"/"+sc.tot+(repLog.length?" · rep:"+repLog.map(r=>r.w+(r.ok?"✓":"✗")+(r.t?"("+r.t+")":"")).join(","):"")+(dicLog.length?" · dic:"+dicLog.map(d=>d.w+(d.ok?"✓":"✗")+"["+d.m+d.n+"]").join(","):"")+" · int:"+AT[cur.d]+" · th:"+T+" · t:"+Math.round((Date.now()-T0)/1000)+"s · sid:"+sid,challengeSentence:(cur.l||[]).slice(0,4).join(", "),userId:NAME||"Estudiante sin nombre",sessionId:sid,date:new Date().toISOString().slice(0,10)};
+const rec={topic:"Oído Inglés — Día "+cur.d+": "+cur.t+" ("+cur.lv+")",location:"Culiacán",accuracy:p,passed:pass,spokenText:"oido-ingles · bloques: "+steps.map(s=>s[1]).join("→")+" · "+sc.ok+"/"+sc.tot+(repLog.length?" · rep:"+repLog.map(r=>r.w+(r.ok?"✓":"✗")+(r.t?"("+r.t+")":"")).join(","):"")+(dicLog.length?" · dic:"+dicLog.map(d=>d.w+(d.ok?"✓":"✗")+"["+d.m+d.n+"]").join(","):"")+" · int:"+AT[cur.d]+" · aid:"+GF+" · th:"+T+" · t:"+Math.round((Date.now()-T0)/1000)+"s · sid:"+sid,challengeSentence:(cur.l||[]).slice(0,4).join(", "),userId:NAME||"Estudiante sin nombre",sessionId:sid,date:new Date().toISOString().slice(0,10)};
 try{fetch(BQ_EP,{method:"POST",headers:{"Content-Type":"application/json","api_key":BQ_KEY},body:JSON.stringify(rec)}).then(r=>r.json()).then(j=>{const s=document.getElementById("bq");if(s)s.innerHTML=(j&&j.ok)?"<b>Expediente:</b> ✅ enviado. La Maestra ya lo puede leer.":"<b>Expediente:</b> ⚠️ el servidor no aceptó — repite la lección más tarde."}).catch(()=>{const s=document.getElementById("bq");if(s)s.innerHTML="<b>Expediente:</b> ⚠️ sin conexión — se reintenta al repetir la lección."})}catch(e){}}
 function end(){const p=sc.tot?Math.round(sc.ok/sc.tot*100):100,T=th(cur.d),pass=p>=T;AT[cur.d]=(AT[cur.d]||0)+1;if(pass)PD[cur.d]=1;S[cur.d]=Math.max(S[cur.d]||0,p);save();bq(p,pass,T);const n=D.L.find(l=>l.d==cur.d+1);
 $.innerHTML=`<h1>¡Lección completa!</h1><div class="stars">${p>=90?"⭐⭐⭐":p>=60?"⭐⭐":"⭐"}</div><p style="text-align:center">Acertaste ${sc.ok} de ${sc.tot} (${p}%) · ${pass?"✅ aprobada, umbral "+T+"%":"te faltó para el umbral de "+T+"%"}</p>${repLog.length?`<p class="m" style="text-align:center">🎤 Repite: ${repLog.map(r=>r.w+(r.ok?"✓":"✗")).join(" · ")}</p>`:""}<p class="m" id="bq" style="text-align:center"><b>Expediente:</b> enviando…</p>`+((n&&pass)?`<button class="go" onclick="start(${n.d})">Siguiente: día ${n.d}</button>`:((n&&!pass)?`<p class="m" style="text-align:center">Para abrir el día ${cur.d+1}: pásala con ${th(cur.d)}%. El umbral baja con cada intento — la constancia también cuenta.</p>`:""))+`<button class="go alt" onclick="start(${cur.d})">Repetir lección</button><button class="go alt" onclick="lv='${cur.lv}';home()">Volver a la lista</button>`}
