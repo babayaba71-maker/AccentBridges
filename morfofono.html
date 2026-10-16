@@ -253,6 +253,17 @@ function playBlock(btn,segs){
   try{ speechSynthesis.cancel(); }catch(e){}
   readerSpeakNext();
 }
+function mediaSession(label, album){
+  // MANOS LIBRES (pedido JJ 16-oct): sin MediaSession, Android mata el audio al bloquear la pantalla.
+  // Con ella, la lectura sigue sonando con pantalla apagada y aparecen controles en el lock screen.
+  if(!("mediaSession" in navigator) || typeof MediaMetadata==="undefined") return;
+  try{
+    navigator.mediaSession.metadata = new MediaMetadata({ title: label||"Maestra Lee", artist: "Valerie · AccentBridges", album: album||"Morfofónico" });
+    navigator.mediaSession.setActionHandler("play", ()=>{ if(BOCAS.cur) BOCAS.cur.play(); });
+    navigator.mediaSession.setActionHandler("pause", ()=>{ if(BOCAS.cur) BOCAS.cur.pause(); });
+    navigator.mediaSession.setActionHandler("stop", ()=>{ stopReader(); });
+  }catch(e){}
+}
 function trocear(t, max){ // bocaValerie máx 500 chars: partir por oraciones
   if (t.length <= max) return [t];
   const partes = [];
@@ -280,6 +291,7 @@ function readerSpeakNext(){
   const seg=readerQueue[0], s=document.getElementById("reader-status"), b=document.getElementById("btn-reader");
   if(b){ b.textContent="⏹ Detener lectura"; b.classList.remove("pri"); b.classList.add("sec"); }
   if(s) s.textContent=(seg.lang==="en" ? "🇺🇸 Escucha y repite: "+seg.label : "📖 "+(seg.label||"Leyendo…"));
+  mediaSession(seg.label, "Morfofónico 2 · Maestra Lee");
   bocaSpeak(seg.t, () => readerAvanzar(seg), () => readerNavegador(seg));
 }
 function toggleReader(){
