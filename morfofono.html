@@ -125,17 +125,52 @@ const state = Object.assign({
   atlas:"sonidos", drill:"pares"
 }, load());
 
+/* ===== BOCA ELEVENLABS (voz oficial Valerie) — navegador queda de RESPALDO ===== */
+const BOCAS = {
+  url: "https://valerie.base44.app/functions/bocaValerie",
+  key: "ABVC-PILOTO-2026",
+  cache: new Map(),   // texto -> Audio (las repeticiones no queman créditos)
+  cur: null
+};
+function bocaFetch(text){
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 9000);
+  return fetch(BOCAS.url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-abvc-key": BOCAS.key },
+    body: JSON.stringify({ text: text }),
+    signal: ctrl.signal
+  }).then(r => { clearTimeout(t); if (!r.ok) throw new Error("boca " + r.status); return r.blob(); })
+    .then(b => URL.createObjectURL(b));
+}
+function bocaSpeak(text, onend, onfail){
+  const play = (a) => {
+    BOCAS.cur = a;
+    a.onended = onend || null;
+    a.onerror = onfail || null;
+    try { a.currentTime = 0; a.play().catch(onfail || null); } catch(e){ if (onfail) onfail(); }
+  };
+  const cached = BOCAS.cache.get(text);
+  if (cached){ play(cached); return; }
+  bocaFetch(text).then(url => {
+    const a = new Audio(url);
+    BOCAS.cache.set(text, a);
+    play(a);
+  }).catch(onfail || null);
+}
 function speak(text){
-  try {
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = "en-US"; u.rate = 0.78;
-    const vs = speechSynthesis.getVoices();
-    const v = vs.find(x => /en[-_]US/i.test(x.lang) && /natural|google|samantha|aria/i.test(x.name))
-      || vs.find(x => /en[-_]US/i.test(x.lang)) || vs.find(x => /^en/i.test(x.lang));
-    if (v) u.voice = v;
-    speechSynthesis.speak(u);
-  } catch {}
+  bocaSpeak(text, null, () => {
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "en-US"; u.rate = 0.78;
+      const vs = speechSynthesis.getVoices();
+      const v = vs.find(x => /en[-_]US/i.test(x.lang) && /natural|google|samantha|aria/i.test(x.name))
+        || vs.find(x => /en[-_]US/i.test(x.lang)) || vs.find(x => /^en/i.test(x.lang));
+      if (v) u.voice = v;
+      speechSynthesis.speak(u);
+    } catch {}
+  });
 }
 /* ===== MODO MAESTRA LEE — lector bilingüe (portado del Estudio; feedback Marcos: "no todos aprenden leyendo") ===== */
 let readerQueue=[], readerOn=false, READER_VOICES=[];
@@ -145,12 +180,39 @@ function pickReaderVoice(prefix,prefer){
   const c=READER_VOICES.filter(v=>v.lang&&v.lang.toLowerCase().startsWith(prefix));
   return c.find(v=>(v.name||"").toLowerCase().includes(prefer))||c[0]||null;
 }
-const IPA_MAP=[["eɪ"," ei deslizante "],["aɪ"," ai "],["aʊ"," au "],["ɔɪ"," oi "],["oʊ"," ou "],["tʃ"," ch "],["dʒ"," y fuerte "],
-  ["ə"," shwa "],["ɪ"," i laxa "],["æ"," a de gato "],["ʌ"," a corta "],["ɑ"," a abierta "],["ʊ"," u laxa "],["ɛ"," e fija "],
-  ["ʃ"," sh "],["ʒ"," zh "],["θ"," th "],["ð"," th sonora "],["ŋ"," ng "],["ɹ"," r americana "],["u"," u "],["i"," i "]];
-function sanearIPA(t){ t=String(t||"").replace(/\//g," "); for(const[s,w]of IPA_MAP){ t=t.split(s).join(w); } return t.replace(/\s+/g," ").trim(); }
+/* sanearIPA v2 (fix 15-oct: "spelling, no lee corrido") — REGLA DE ORO: a la boca jamás van
+   fragmentos pelados. Bug asesino del mapa viejo: ["u"," u "],["i"," i "] PARTÍA toda palabra
+   española con u/i (lengua→"leng u a"). Hechizos verificados por oído de máquina (boca→Scribe). */
+const IPA_MAP = [
+  ["eɪ"," ei deslizante "],["aɪ"," ai "],["aʊ"," au "],["ɔɪ"," oi "],["oʊ"," ou "],["tʃ"," che "],["dʒ"," ye fuerte "],
+  ["ə"," shua "],["ɪ"," i laxa "],["æ"," a de gato "],["ʌ"," a corta "],["ɑ"," a abierta "],["ʊ"," u laxa "],["ɛ"," e fija "],
+  ["ʃ"," shhh "],["ʒ"," zhhh "],["θ"," zeta inglesa "],["ð"," zeta zumbada "],["ŋ"," ene con ge "],["ɹ"," r americana "]
+];
+const LETRA_MAP = {p:"pe",t:"te",k:"ka",b:"be",d:"de",g:"ge",v:"uve",f:"efe",s:"ese",z:"zeta",h:"hache",j:"jota",c:"ce",m:"eme",n:"ene",l:"ele",r:"ere",w:"doble u",x:"ekis",q:"ku",y:"ye"};
+function sanearIPA(text){
+  let t = String(text);
+  t = t.replace(/→/g," se convierte en ").replace(/≈/g," casi ").replace(/≠/g," no es igual a ")
+       .replace(/\+/g," más ").replace(/=/g," es ").replace(/β/g," beta ")
+       .replace(/(\d)\s*–\s*(\d)/g,"$1 a $2").replace(/(\d)%/g,"$1 por ciento");
+  t = t.replace(/\bsss\b/g,"ssss").replace(/\bbbb\b/g,"beee").replace(/\bppp\b/g,"peee")
+       .replace(/\bvvv\b/g,"veee").replace(/\bfff\b/g,"efeee");
+  t = t.replace(/(^|[\s(])-(s|ed|er|ing)\b/g,(m,pre,suf)=> pre+" "+(suf==="s"?"ese":suf)+" ");
+  for (const [sym, word] of IPA_MAP){ t = t.split(sym).join(word); }
+    // guardar la conjunción española "y" del mapa de letras (lee "y", jamás "ye")
+  const YCONJ = "\u27E6y\u27E7";
+  t = t.replace(/(^|[\s\/([:"«])y(?=[\s\/.,:;)"»]|$)/g, "$1"+YCONJ);
+  t = t.replace(/(^|[\s\/([:"«])([a-z])(?=[\s\/.,:;)"»]|$)/g, (m,pre,L)=> (LETRA_MAP[L] ? pre+LETRA_MAP[L] : m));
+  t = t.replace(/(^|[\s\/([:"«])(sh|th|ch|zh|ng|str|spl|thr)(?=[\s\/.,:;)"»]|$)/g, (m,pre,L)=>{
+    const CL={sh:" shhh ",th:" zeta inglesa ",ch:" che ",zh:" zhhh ",ng:" ene con ge ",str:"ese, te, ere, ",spl:"ese, pe, ele, ",thr:"te, hache, ere, "};
+    return pre+CL[L];
+  });
+    t = t.split(YCONJ).join("y");
+  t = t.replace(/\bvs\b/gi," contra ").replace(/\//g," ");
+  return t.replace(/\s+/g," ").trim();
+}
 function stopReader(msg){
   readerOn=false; try{ speechSynthesis.cancel(); }catch(e){}
+  if(BOCAS.cur){ try{ BOCAS.cur.pause(); }catch(e){} BOCAS.cur=null; }
   const b=document.getElementById("btn-reader"), s=document.getElementById("reader-status");
   if(b){ b.textContent="▶ Escuchar lección"; b.classList.remove("sec"); b.classList.add("pri"); }
   if(activeBlockBtn){ activeBlockBtn.textContent=activeBlockBtn.dataset.orig||"🔊"; activeBlockBtn=null; }
@@ -161,39 +223,57 @@ function playBlock(btn,segs){
   if(activeBlockBtn===btn){ stopReader(); return; }
   stopReader();
   if(typeof speechSynthesis==="undefined"){ alert("Tu navegador no soporta síntesis de voz."); return; }
-  loadReaderVoices(); readerQueue=segs.slice(); readerOn=true;
+  loadReaderVoices(); readerQueue=[]; segs.forEach(sg=>encolar(sg)); readerOn=true;
   const b=document.getElementById("btn-reader");
   if(b){ b.textContent="⏹ Detener lectura"; b.classList.remove("pri"); b.classList.add("sec"); }
   if(btn){ activeBlockBtn=btn; btn.dataset.orig=btn.textContent; btn.textContent="⏹"; }
   try{ speechSynthesis.cancel(); }catch(e){}
   readerSpeakNext();
 }
+function trocear(t, max){ // bocaValerie máx 500 chars: partir por oraciones
+  if (t.length <= max) return [t];
+  const partes = [];
+  const oraciones = t.split(/(?<=[.!?])\s+/);
+  let cur = "";
+  oraciones.forEach(o => {
+    if ((cur + " " + o).trim().length > max && cur){ partes.push(cur.trim()); cur = o; }
+    else cur = (cur + " " + o).trim();
+  });
+  if (cur) partes.push(cur.trim());
+  return partes;
+}
+function encolar(seg){ trocear(seg.t, 450).forEach(p => readerQueue.push({ t: p, lang: seg.lang, label: seg.label })); }
+function readerAvanzar(seg){ readerQueue.shift(); setTimeout(readerSpeakNext, seg.lang==="en"?650:220); }
+function readerNavegador(seg){ // RESPALDO: voz del navegador si la boca falla
+  const avanzar = () => readerAvanzar(seg);
+  const u = new SpeechSynthesisUtterance(seg.t);
+  if (seg.lang === "en") { u.lang="en-US"; u.rate=0.7; const v=pickReaderVoice("en","us"); if(v) u.voice=v; }
+  else { u.lang="es-MX"; u.rate=0.98; const v=pickReaderVoice("es","mx")||pickReaderVoice("es",""); if(v) u.voice=v; }
+  u.onend = avanzar; u.onerror = avanzar;
+  try{ speechSynthesis.speak(u); }catch(e){ avanzar(); }
+}
 function readerSpeakNext(){
   if(!readerOn||readerQueue.length===0){ stopReader(readerOn?"✅ Lección terminada":""); return; }
   const seg=readerQueue[0], s=document.getElementById("reader-status"), b=document.getElementById("btn-reader");
   if(b){ b.textContent="⏹ Detener lectura"; b.classList.remove("pri"); b.classList.add("sec"); }
-  const u=new SpeechSynthesisUtterance(seg.t);
-  if(seg.lang==="en"){ u.lang="en-US"; u.rate=0.7; const v=pickReaderVoice("en","us"); if(v) u.voice=v; if(s) s.textContent="🇺🇸 Escucha y repite: "+seg.label; }
-  else{ u.lang="es-MX"; u.rate=0.98; const v=pickReaderVoice("es","mx")||pickReaderVoice("es",""); if(v) u.voice=v; if(s) s.textContent="📖 "+(seg.label||"Leyendo…"); }
-  u.onend=()=>{ readerQueue.shift(); setTimeout(readerSpeakNext, seg.lang==="en"?650:220); };
-  u.onerror=()=>{ readerQueue.shift(); readerSpeakNext(); };
-  try{ speechSynthesis.speak(u); }catch(e){ readerQueue.shift(); readerSpeakNext(); }
+  if(s) s.textContent=(seg.lang==="en" ? "🇺🇸 Escucha y repite: "+seg.label : "📖 "+(seg.label||"Leyendo…"));
+  bocaSpeak(seg.t, () => readerAvanzar(seg), () => readerNavegador(seg));
 }
 function toggleReader(){
   if(readerOn){ stopReader(); return; }
   if(typeof speechSynthesis==="undefined"){ alert("Tu navegador no soporta síntesis de voz."); return; }
   const L=lesson(); loadReaderVoices(); readerQueue=[];
-  readerQueue.push({t:"Lección del día "+L.day+". "+sanearIPA(L.title)+". "+sanearIPA(L.hook),lang:"es",label:L.title});
-  readerQueue.push({t:"Por qué importa este paso. "+sanearIPA(L.why),lang:"es",label:"Por qué importa"});
+  encolar({t:"Lección del día "+L.day+". "+sanearIPA(L.title)+". "+sanearIPA(L.hook),lang:"es",label:L.title});
+  encolar({t:"Por qué importa este paso. "+sanearIPA(L.why),lang:"es",label:"Por qué importa"});
   if(L.steps&&L.steps.length){
-    readerQueue.push({t:"Los pasos de la lección.",lang:"es",label:"Pasos"});
-    L.steps.forEach((st,i)=>readerQueue.push({t:"Paso "+(i+1)+": "+st.name+". "+sanearIPA(st.how),lang:"es",label:"Paso "+(i+1)+" de "+L.steps.length}));
+    encolar({t:"Los pasos de la lección.",lang:"es",label:"Pasos"});
+    L.steps.forEach((st,i)=>encolar({t:sanearIPA("Paso "+(i+1)+": "+st.name+". "+st.how),lang:"es",label:"Paso "+(i+1)+" de "+L.steps.length}));
   }
   if(L.listen&&L.listen.length){
-    readerQueue.push({t:"Ahora, escucha y repite cada palabra.",lang:"es",label:"Escucha y repite"});
-    L.listen.forEach(w=>readerQueue.push({t:w+".",lang:"en",label:w}));
+    encolar({t:"Ahora, escucha y repite cada palabra.",lang:"es",label:"Escucha y repite"});
+    L.listen.forEach(w=>encolar({t:w+".",lang:"en",label:w}));
   }
-  readerQueue.push({t:"Fin de la lección. Pregunta para tu bitácora: "+sanearIPA(L.methodPrompt),lang:"es",label:"Bitácora"});
+  encolar({t:"Fin de la lección. Pregunta para tu bitácora: "+sanearIPA(L.methodPrompt),lang:"es",label:"Bitácora"});
   readerOn=true; try{ speechSynthesis.cancel(); }catch(e){}
   readerSpeakNext();
 }
@@ -255,7 +335,7 @@ function viewHoy(){
     </header>
     <section class="note" style="display:flex;align-items:center;gap:.9rem;flex-wrap:wrap">
       <button type="button" class="btn pri" id="btn-reader" data-reader>▶ Escuchar lección</button>
-      <span class="faint" id="reader-status" style="flex:1;min-width:10rem">🎧 La Maestra te la lee, sin que tengas que leer</span>
+      <span class="faint" id="reader-status" style="flex:1;min-width:10rem">🎧 La Maestra te la lee · VOZ OFICIAL v2</span>
     </section>
     <section class="note">
       <p class="kicker" style="color:var(--faint)">Por qué hoy, en este orden

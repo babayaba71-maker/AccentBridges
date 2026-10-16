@@ -477,12 +477,16 @@ function sanearIPA(text){
   // IPA compuestos primero (nunca letras: no puede partir palabras)
   for (const [sym, word] of IPA_MAP){ t = t.split(sym).join(word); }
   // letras peladas SOLO cuando están solas (jamás dentro de palabras)
+    // guardar la conjunción española "y" del mapa de letras (lee "y", jamás "ye")
+  const YCONJ = "\u27E6y\u27E7";
+  t = t.replace(/(^|[\s\/([:"«])y(?=[\s\/.,:;)"»]|$)/g, "$1"+YCONJ);
   t = t.replace(/(^|[\s\/([:"«])([a-z])(?=[\s\/.,:;)"»]|$)/g, (m,pre,L)=> (LETRA_MAP[L] ? pre+LETRA_MAP[L] : m));
   // clusters y dúos pelados (sh/th/ng literales, grupos del día 24): nombres cantados, jamás deletreados
   t = t.replace(/(^|[\s\/([:"«])(sh|th|ch|zh|ng|str|spl|thr)(?=[\s\/.,:;)"»]|$)/g, (m,pre,L)=>{
     const CL={sh:" shhh ",th:" zeta inglesa ",ch:" che ",zh:" zhhh ",ng:" ene con ge ",str:"ese, te, ere, ",spl:"ese, pe, ele, ",thr:"te, hache, ere, "};
     return pre+CL[L];
   });
+    t = t.split(YCONJ).join("y");
   t = t.replace(/\bvs\b/gi," contra ").replace(/\//g," ");
   return t.replace(/\s+/g," ").trim();
 }
