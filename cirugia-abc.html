@@ -39,11 +39,16 @@ button:active{transform:scale(.96)}
 .opt.ok{background:#2a9d8f;color:#fff}
 .opt.no{background:#e76f51;color:#fff;border-color:#e76f51}
 .meta{font-size:.8rem;color:#6c757d;line-height:1.5;margin-top:10px}
+.who{background:rgba(255,255,255,.12);color:#a8dadc;font-size:.75rem;padding:6px 12px;border-radius:999px;margin:2px auto 10px}
+.foot{font-size:.75rem;color:#a8dadc;text-align:center;line-height:1.7;margin-top:4px}
+.foot a{color:#e9c46a;text-decoration:none}
+button.who{display:block}
 </style>
 </head>
 <body>
 <h1>🔬 Cirugía del Abecedario</h1>
-<div class="ver">v1</div>
+<div class="ver">v2 · voz oficial ElevenLabs</div>
+<button id="who" class="who">👤 ¿tu nombre?</button>
 <div class="sub">Hispano primero · luego el puente L1 → L2</div>
 <div class="tabs">
   <button class="tabbtn active" id="tb-hx" onclick="setFase('hx')">🇲🇽 Hispana</button>
@@ -95,6 +100,8 @@ button:active{transform:scale(.96)}
   </div>
 </div>
 
+<div class="foot">🎹 <a href="teclado.html">Teclado del Abecedario</a> · 🧩 <a href="armador.html">Armador de Sonidos</a> · 🏠 <a href="hologram-wallpaper.html#portal">Portal de la Maestra</a><br>Practica en vivo con Valerie: usa <b>/call</b> en Telegram 🔴 · La Maestra ya leyó tu sesión 📊</div>
+
 <script>
 // ====== CIRUGÍA DEL ABECEDARIO (idea y palomita de Seeley, 11-oct-2026) ======
 // Doctrina: hispano primero (nombres-sílaba), luego puente L1→L2 (nombres-diptongo).
@@ -120,6 +127,36 @@ function sayEn(t,r){try{speechSynthesis.cancel();speechSynthesis.speak(voz(t,"en
 function sayDuo(hx,am){try{speechSynthesis.cancel();const a=voz(hx,"es-MX",0.85);const b=voz(am,"en-US",0.85);if(a)speechSynthesis.speak(a);if(b)speechSynthesis.speak(b)}catch(e){}}
 document.addEventListener("click",()=>{try{speechSynthesis.getVoices()}catch(e){}},{once:true});
 
+// ===== BOCA ELEVENLABS (nombres hispanos con la voz de Valerie) =====
+const BOCA="https://valerie.base44.app/functions/bocaValerie";
+const bocaCache=new Map();const audioCache={};
+const AUDIO_BASE="assets/armador/audio/";
+async function speakBoca(text,cb,fb){
+  try{
+    let url=bocaCache.get(text);
+    if(!url){
+      const r=await fetch(BOCA,{method:"POST",headers:{"Content-Type":"application/json","x-abvc-key":KEY},body:JSON.stringify({text:String(text).slice(0,500)})});
+      if(!r.ok)throw 0;
+      const blob=await r.blob();
+      if(!blob.size||blob.size<500)throw 0;
+      url=URL.createObjectURL(blob);bocaCache.set(text,url);
+    }
+    const a=new Audio(url);
+    try{speechSynthesis.cancel()}catch(e){}
+    a.onended=cb||null;
+    a.play().catch(()=>{fb&&fb()});
+    return true;
+  }catch(e){fb&&fb();return false}
+}
+// nombre de letra AMERICANO: MP3 oficial ElevenLabs, respaldo TTS palabra
+function playLetra(key,cb,fb){
+  const src=AUDIO_BASE+"let-"+key.toLowerCase()+".mp3";
+  let a=audioCache[src]||(audioCache[src]=new Audio(src));
+  a.onended=cb||null;
+  a.onerror=()=>{sayEn(fb||key);cb&&cb()};
+  try{a.currentTime=0;a.play().catch(()=>{sayEn(fb||key);cb&&cb()})}catch(e){cb&&cb()}
+}
+
 function setFase(f){
   fase=f;
   ["hx","tr","qz"].forEach(k=>{document.getElementById("f-"+k).classList.toggle("hidden",k!==f);
@@ -129,14 +166,20 @@ function setFase(f){
 }
 
 // fase 1: recitar hispano y grid
-function recitar(){try{speechSynthesis.cancel();let d="";HX.forEach(p=>{d+=p[1]+", "});speechSynthesis.speak(voz(d,"es-MX",0.92))}catch(e){}}
+function recitar(){try{speechSynthesis.cancel();let d="";HX.forEach(p=>{d+=p[1]+", "});speakBoca(d,null,()=>{try{speechSynthesis.speak(voz(d,"es-MX",0.92))}catch(e){}})}catch(e){}}
+function tapaHx(t){speakBoca(t,null,()=>sayEs(t))}
 function gridHx(){
   document.getElementById("gridHx").innerHTML=HX.map(p=>
-    `<div class="letra" onclick="sayEs('${p[1]}')"><div class="L">${p[0]}</div><div class="nom">${p[1]}</div></div>`).join("");
+    `<div class="letra" onclick="tapaHx('${p[1]}')"><div class="L">${p[0]}</div><div class="nom">${p[1]}</div></div>`).join("");
+}
+function duo(p){ // transición: nombre hispano (Valerie es) → luego el gringo oficial (MP3)
+  speakBoca(p[1],()=>playLetra(p[0],null,p[3]),()=>{ // respaldo navegador: ambos en la cola
+    try{speechSynthesis.cancel();const a=voz(p[1],"es-MX",.85);const b=voz(p[3],"en-US",.85);if(a)speechSynthesis.speak(a);if(b)speechSynthesis.speak(b)}catch(e){}
+  });
 }
 function gridTr(){
   document.getElementById("gridTr").innerHTML=TR.map(p=>
-    `<div class="letra" onclick="sayDuo('${p[1]}','${p[3]}')"><div class="L">${p[0]}</div><div class="nom">${p[1]}</div><div class="am">${p[2]}</div></div>`).join("");
+    `<div class="letra" onclick='duo(${JSON.stringify(p)})'><div class="L">${p[0]}</div><div class="nom">${p[1]}</div><div class="am">${p[2]}</div></div>`).join("");
 }
 
 // fase 3: quiz — la Maestra dice el nombre AMERICANO
@@ -158,9 +201,9 @@ function pregunta(){
     const b=document.createElement("button");b.className="opt";b.textContent=L;
     b.onclick=()=>elegir(b,L);o.appendChild(b);
   });
-  sayEn(q[3],0.8);
+  playLetra(q[0],null,q[3]);
 }
-function decir(){sayEn(q[3],0.7)}
+function decir(){playLetra(q[0],null,q[3])}
 function elegir(b,L){
   const bien=L===q[0];
   try{fetch(BQ_TAP,{method:"POST",headers:{"Content-Type":"application/json","api_key":KEY},body:JSON.stringify({studentName:NAME(),quizType:"cirugia",questionId:"abc_"+q[0]+"|"+(tries+1),choice:L,correct:bien,word:q[0],channel:"cirugia"})}).catch(()=>{})}catch(e){}
@@ -179,7 +222,7 @@ function elegir(b,L){
   }else{
     tries++;
     b.classList.add("no");b.disabled=true;
-    sayEn(q[3],0.7);
+    playLetra(q[0],null,q[3]);
     if(tries>=2){ // doctrina: a los 2 fallos se revela
       [...document.querySelectorAll(".opt")].forEach(x=>{x.disabled=true;if(x.textContent===q[0])x.classList.add("ok")});
       document.getElementById("fb").textContent="✗ Era la "+q[0];document.getElementById("fb").className="fb no";
@@ -194,7 +237,10 @@ function elegir(b,L){
     }
   }
 }
-function NAME(){try{return localStorage.getItem("abvc_name")||"Estudiante"}catch(e){return "Estudiante"}}
+function NAME(){try{return localStorage.getItem("armadorName")||"Estudiante"}catch(e){return "Estudiante"}}
+function actualizarWho(){const b=document.getElementById("who");if(b)b.textContent="👤 "+(localStorage.getItem("armadorName")||"¿tu nombre?")}
+const wb=document.getElementById("who");if(wb)wb.onclick=()=>{const n=prompt("¿Cómo te llamas? (para tu expediente de aprendizaje)");if(n){localStorage.setItem("armadorName",n);actualizarWho()}};
+actualizarWho();
 function final(acc){
   const rec={topic:"Cirugía del Abecedario — Quiz Transición (13 preguntas)",location:"Culiacán",accuracy:acc,passed:acc>=70,
     spokenText:"cirugia · "+ok+"/"+n+" · transicion L1-L2 · sid:abc-"+Date.now(),challengeSentence:"—",userId:NAME(),sessionId:"abc-"+Date.now()};
