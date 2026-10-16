@@ -395,7 +395,7 @@ const BOCAS = {
 };
 function bocaFetch(text){
   const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 9000);
+  const t = setTimeout(() => ctrl.abort(), 15000);
   return fetch(BOCAS.url, {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-abvc-key": BOCAS.key },
@@ -404,21 +404,37 @@ function bocaFetch(text){
   }).then(r => { clearTimeout(t); if (!r.ok) throw new Error("boca " + r.status); return r.blob(); })
     .then(b => URL.createObjectURL(b));
 }
+/* MANOS LIBRES v2 (QA JJ 16-oct ~11:37): la cadena moría al bloquear la pantalla porque cada
+   segmento estrenaba un Audio NUEVO y Android niega el play() sin gesto en background. FIX:
+   UN SOLO <audio> persistente (arrancado por el gesto del botón) que solo CAMBIA de src.
+   Doctrina intacta: palabra/frase completa al TTS, jamás símbolo suelto. */
 function bocaSpeak(text, onend, onfail){
-  // doctrina: palabra/frase completa al TTS, jamás símbolo suelto
-  const play = (a) => {
+  if (!BOCAS.el){
+    BOCAS.el = document.createElement("audio");
+    BOCAS.el.preload = "auto";
+    try{ document.body.appendChild(BOCAS.el); }catch(e){}
+  }
+  const a = BOCAS.el;
+  const play = () => {
     BOCAS.cur = a;
     a.onended = onend || null;
     a.onerror = onfail || null;
-    try { a.currentTime = 0; a.play().catch(onfail || null); } catch(e){ if (onfail) onfail(); }
+    try{ a.currentTime = 0; const p = a.play(); if (p && p.catch) p.catch(() => { if (onfail) onfail(); }); }
+    catch(e){ if (onfail) onfail(); }
+    try{ if (navigator.mediaSession) navigator.mediaSession.playbackState = "playing"; }catch(e){}
   };
   const cached = BOCAS.cache.get(text);
-  if (cached){ play(cached); return; }
+  if (cached){ a.src = cached; play(); return; }
   bocaFetch(text).then(url => {
-    const a = new Audio(url);
-    BOCAS.cache.set(text, a);
-    play(a);
+    BOCAS.cache.set(text, url);
+    a.src = url;
+    play();
   }).catch(onfail || null);
+}
+/* PREFETCH: mientras suena el bloque N, se descarga el N+1 → transición sin hueco */
+function bocaPrefetch(text){
+  if (!text || BOCAS.cache.get(text)) return;
+  bocaFetch(text).then(url => BOCAS.cache.set(text, url)).catch(() => {});
 }
 function speak(text) {
   if (readerOn) stopReader(); // no empalmar la lectura
@@ -494,6 +510,7 @@ function stopReader(msg){
   readerOn = false;
   try{ window.speechSynthesis.cancel(); }catch(e){}
   if (BOCAS.cur){ try{ BOCAS.cur.pause(); }catch(e){} BOCAS.cur = null; }
+  try{ if(navigator.mediaSession) navigator.mediaSession.playbackState="paused"; }catch(e){}
   const b = document.getElementById("btn-reader");
   const s = document.getElementById("reader-status");
   if (b) { b.textContent = "▶ Escuchar lección"; b.classList.remove("sec"); b.classList.add("pri"); }
@@ -525,6 +542,7 @@ function readerSpeakNext(){
   if (s) s.textContent = (seg.lang === "en" ? "🇺🇸 Escucha y repite: " + seg.label : "📖 " + (seg.label || "Leyendo…"));
   mediaSession(seg.label, "Morfofónico 1 · Estudio");
   bocaSpeak(seg.t, () => readerAvanzar(seg), () => readerNavegador(seg));
+  if (readerQueue[1]) bocaPrefetch(readerQueue[1].t);
 }
 function mediaSession(label, album){
   // MANOS LIBRES (pedido JJ 16-oct): sin MediaSession, Android mata el audio al bloquear la pantalla.
