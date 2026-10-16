@@ -107,7 +107,7 @@ button.who{display:block}
 // Doctrina: hispano primero (nombres-sílaba), luego puente L1→L2 (nombres-diptongo).
 // Secuencia día 40+: cirugía → fichas → spelling bee. Conecta con Canto en Chunks.
 const HX=[["A","a"],["B","be"],["C","ce"],["D","de"],["E","e"],["F","efe"],["G","ge"],["H","hache"],["I","i"],["J","jota"],["K","ka"],["L","ele"],["M","eme"],["N","ene"],["Ñ","eñe"],["O","o"],["P","pe"],["Q","cu"],["R","ere"],["S","ese"],["T","te"],["U","u"],["V","uve"],["W","doble ve"],["X","equis"],["Y","ye"],["Z","zeta"]];
-const TR=[["A","a","ei","ay"],["B","be","bi","bee"],["C","ce","si","see"],["D","de","di","dee"],["E","e","i","ee"],["F","efe","ef","ef"],["G","ge","yi","gee"],["H","hache","eich","aitch"],["I","i","ai","eye"],["J","jota","yei","jay"],["K","ka","kei","kay"],["L","ele","el","el"],["M","eme","em","em"],["N","ene","en","en"],["O","o","ou","oh"],["P","pe","pi","pee"],["Q","cu","kiu","cue"],["R","ere","ar","ar"],["S","ese","es","ess"],["T","te","ti","tee"],["U","u","iu","you"],["V","uve","vi","vee"],["W","doble ve","dabliu","double you"],["X","equis","eks","ex"],["Y","ye","uai","why"],["Z","zeta","zi","zee"]];
+const TR=[["A","a","ei","ey"],["B","be","bi","bee"],["C","ce","si","see"],["D","de","di","dee"],["E","e","i","ee"],["F","efe","ef","ef"],["G","ge","yi","gee"],["H","hache","eich","aitch"],["I","i","ai","eye"],["J","jota","yei","jay"],["K","ka","kei","kay"],["L","ele","el","el"],["M","eme","em","em"],["N","ene","en","en"],["O","o","ou","oh"],["P","pe","pi","pee"],["Q","cu","kiu","cue"],["R","ere","ar","are"],["S","ese","es","ess"],["T","te","ti","tee"],["U","u","iu","you"],["V","uve","vi","vee"],["W","doble ve","dabliu","double you"],["X","equis","eks","ex"],["Y","ye","uai","why"],["Z","zeta","zi","zee"]];
 // campo 4 = nombre de letra escrito como PALABRA inglesa (bee, see, tee...)
 // doctrina TTS (descubierta por Seeley 11-oct): letra suelta = token ambiguo,
 // la voz cae a su fonologia dominante y destroza los nombres con i. Palabra completa, jamas simbolo.
@@ -148,6 +148,17 @@ async function speakBoca(text,cb,fb){
     return true;
   }catch(e){fb&&fb();return false}
 }
+// nombre de letra HISPANO: MP3 oficial horneado y verificado por oído (assets/cirugia/)
+// respaldo 1: bocaValerie ElevenLabs · respaldo 2: TTS es-MX navegador
+const CG_BASE="assets/cirugia/";
+function playHx(key,cb,fb){
+  const src=CG_BASE+"hx-"+String(key).toLowerCase()+".mp3";
+  let a=audioCache[src]||(audioCache[src]=new Audio(src));
+  const respaldo=()=>{speakBoca(fb||key,cb,()=>{sayEs(fb||key);cb&&cb()})};
+  a.onended=cb||null;
+  a.onerror=respaldo;
+  try{a.currentTime=0;a.play().catch(respaldo)}catch(e){cb&&cb()}
+}
 // nombre de letra AMERICANO: MP3 oficial ElevenLabs, respaldo TTS palabra
 function playLetra(key,cb,fb){
   const src=AUDIO_BASE+"let-"+key.toLowerCase()+".mp3";
@@ -166,16 +177,20 @@ function setFase(f){
 }
 
 // fase 1: recitar hispano y grid
-function recitar(){try{speechSynthesis.cancel();let d="";HX.forEach(p=>{d+=p[1]+", "});speakBoca(d,null,()=>{try{speechSynthesis.speak(voz(d,"es-MX",0.92))}catch(e){}})}catch(e){}}
-function tapaHx(t){speakBoca(t,null,()=>sayEs(t))}
+function recitar(){ // el abecedario completo cantado: MP3 oficial verificado por oído
+  try{speechSynthesis.cancel()}catch(e){}
+  const src=CG_BASE+"hx-recital.mp3";
+  let a=audioCache[src]||(audioCache[src]=new Audio(src));
+  a.onerror=()=>{let d="";HX.forEach(p=>{d+=p[1]+", "});speakBoca(d,null,()=>{try{speechSynthesis.speak(voz(d,"es-MX",0.92))}catch(e){}})};
+  try{a.currentTime=0;a.play().catch(()=>a.onerror())}catch(e){a.onerror()}
+}
+function tapaHx(k,w){playHx(k,null,w)}
 function gridHx(){
   document.getElementById("gridHx").innerHTML=HX.map(p=>
-    `<div class="letra" onclick="tapaHx('${p[1]}')"><div class="L">${p[0]}</div><div class="nom">${p[1]}</div></div>`).join("");
+    `<div class="letra" onclick="tapaHx('${p[0]==="Ñ"?"nn":p[0]}','${p[1]}')"><div class="L">${p[0]}</div><div class="nom">${p[1]}</div></div>`).join("");
 }
-function duo(p){ // transición: nombre hispano (Valerie es) → luego el gringo oficial (MP3)
-  speakBoca(p[1],()=>playLetra(p[0],null,p[3]),()=>{ // respaldo navegador: ambos en la cola
-    try{speechSynthesis.cancel();const a=voz(p[1],"es-MX",.85);const b=voz(p[3],"en-US",.85);if(a)speechSynthesis.speak(a);if(b)speechSynthesis.speak(b)}catch(e){}
-  });
+function duo(p){ // transición: nombre hispano (MP3 verificado) → luego el gringo (MP3 oficial)
+  playHx(p[0].toLowerCase(),()=>playLetra(p[0],null,p[3]),p[1]);
 }
 function gridTr(){
   document.getElementById("gridTr").innerHTML=TR.map(p=>
