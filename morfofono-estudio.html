@@ -640,7 +640,9 @@ function judgePair(guessedSame) {
   if (!ok) {
     pairGF++;
     const L = pairAidLv();
-    const rev = ` 👁️ <b>${currentPair.a}</b>${ANCLA_E[currentPair.a] ? " · 🧭 " + ANCLA_E[currentPair.a] : ""}${EMO_E[currentPair.a] ? " " + EMO_E[currentPair.a] : ""} / <b>${currentPair.b}</b>${ANCLA_E[currentPair.b] ? " · 🧭 " + ANCLA_E[currentPair.b] : ""}${EMO_E[currentPair.b] ? " " + EMO_E[currentPair.b] : ""}`;
+    let rev = ` 👁️ <b>${currentPair.a}</b> / <b>${currentPair.b}</b>`;
+    if (L >= 2) rev += ` · 🧭 ${ANCLA_E[currentPair.a] || currentPair.a} / ${ANCLA_E[currentPair.b] || currentPair.b}`;
+    if (L >= 3) rev += ` · ${EMO_E[currentPair.a] || "🔊"} ${EMO_E[currentPair.b] || "🔊"}`;
     html += `<div class='faint' style='margin-top:.4rem;border-left:3px solid var(--warn);padding:6px 10px'>${rev}` +
       (L > preL ? (L === 1 ? " — 👁️ ZAS: la palabra sale en inglés, los ojos entran a ayudar." : L === 2 ? " — 🧭 ZAS: el ancla culichi entra." : " — ⚓ ZAS: la figura entra. Si es un barco, sale un barco.") : "") +
       ` · pistas nivel ${L}</div>`;

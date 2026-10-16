@@ -102,7 +102,7 @@ if(k=="lee"||k=="dic")setTimeout(()=>say(T),300);if(k=="dic"){const ip=document.
 const I2=()=>cur.l.length>=4?cur.l:[...cur.l,...sh(POOL).slice(0,4)];
 function ans(a){if(done)return;const T=tr[ti],k=steps[st][0];let ok,msg="";
 if(k=="same"){ok=(a==1)==!!T.s;const preL=GF;msg=cur.d>=40?`A = ${T.a} · B = ${T.b}`:(ok?(T.s?"Eran iguales.":"Eran distintos."):"");}
-if(k=="same"&&!ok){GF++;const L=aidLv();const rev=cur.d>=40?"":`Se dijo: ${esc(T.a)}${ANCLA[T.a]?" · ancla "+esc(ANCLA[T.a]):""}${EMO[T.a]?" "+EMO[T.a]:""} y ${esc(T.b)}${ANCLA[T.b]?" · ancla "+esc(ANCLA[T.b]):""}${EMO[T.b]?" "+EMO[T.b]:""}`;msg=rev+(L>preL?(L==1?" — \ud83d\udc41\ufe0f ZAS: los ojos entran a ayudar.":L==2?" — \ud83e\udded ZAS: el ancla culichi entra a ayudar.":" — \ud83d\udc41\ufe0f ZAS: la figura entra. Si es un barco, sale un barco. \u2693"):"")+" · pistas nivel "+L}
+if(k=="same"&&!ok){GF++;const L=aidLv();let rv=cur.d>=40?"":"Se dijo: "+esc(T.a)+" y "+esc(T.b);if(L>=2&&cur.d<40)rv+=(ANCLA[T.a]?" · ancla "+esc(ANCLA[T.a]):"")+(EMO[T.a]?" ":"")+" / "+esc(T.b)+(ANCLA[T.b]?" · ancla "+esc(ANCLA[T.b]):"");if(L>=3&&cur.d<40)rv+=" "+(EMO[T.a]||"")+" "+(EMO[T.b]||"");const rev=cur.d>=40?"":rv;msg=rev+(L>preL?(L==1?" — \ud83d\udc41\ufe0f ZAS: los ojos entran a ayudar.":L==2?" — \ud83e\udded ZAS: el ancla culichi entra a ayudar.":" — \ud83d\udc41\ufe0f ZAS: la figura entra. Si es un barco, sale un barco. \u2693"):"")+" · pistas nivel "+L}
 else if(k=="lee"){ok=a==T;msg=`Era: ${T}`}
 else{dicAns(T);return}
 done=true;sc.tot++;if(ok)sc.ok++;
