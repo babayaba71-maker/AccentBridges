@@ -386,16 +386,53 @@ function updateProgUI() {
   if (topBadge) topBadge.textContent = `${count} / ${total} días`;
 }
 
+/* ===== BOCA ELEVENLABS (voz oficial Valerie) — navegador queda de RESPALDO ===== */
+const BOCAS = {
+  url: "https://valerie.base44.app/functions/bocaValerie",
+  key: "ABVC-PILOTO-2026",
+  cache: new Map(),   // texto -> Audio (las repeticiones no queman créditos)
+  cur: null
+};
+function bocaFetch(text){
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 9000);
+  return fetch(BOCAS.url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-abvc-key": BOCAS.key },
+    body: JSON.stringify({ text: text }),
+    signal: ctrl.signal
+  }).then(r => { clearTimeout(t); if (!r.ok) throw new Error("boca " + r.status); return r.blob(); })
+    .then(b => URL.createObjectURL(b));
+}
+function bocaSpeak(text, onend, onfail){
+  // doctrina: palabra/frase completa al TTS, jamás símbolo suelto
+  const play = (a) => {
+    BOCAS.cur = a;
+    a.onended = onend || null;
+    a.onerror = onfail || null;
+    try { a.currentTime = 0; a.play().catch(onfail || null); } catch(e){ if (onfail) onfail(); }
+  };
+  const cached = BOCAS.cache.get(text);
+  if (cached){ play(cached); return; }
+  bocaFetch(text).then(url => {
+    const a = new Audio(url);
+    BOCAS.cache.set(text, a);
+    play(a);
+  }).catch(onfail || null);
+}
 function speak(text) {
-  if (!('speechSynthesis' in window)) {
-    alert("Tu navegador no soporta síntesis de voz.");
-    return;
-  }
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'en-US';
-  u.rate = slowMode ? 0.60 : 0.85;
-  window.speechSynthesis.speak(u);
+  if (readerOn) stopReader(); // no empalmar la lectura
+  bocaSpeak(text, null, () => {
+    if (!('speechSynthesis' in window)) {
+      alert("Tu navegador no soporta síntesis de voz.");
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US';
+    u.rate = slowMode ? 0.60 : 0.85;
+    window.speechSynthesis.speak(u);
+  });
 }
 
 function practiceListen(word, btnElement) {
@@ -429,11 +466,27 @@ function sanearIPA(text){
 function stopReader(msg){
   readerOn = false;
   try{ window.speechSynthesis.cancel(); }catch(e){}
+  if (BOCAS.cur){ try{ BOCAS.cur.pause(); }catch(e){} BOCAS.cur = null; }
   const b = document.getElementById("btn-reader");
   const s = document.getElementById("reader-status");
   if (b) { b.textContent = "▶ Escuchar lección"; b.classList.remove("sec"); b.classList.add("pri"); }
   const card = document.querySelector(".reader-card"); if (card) card.classList.remove("on");
   if (s) s.textContent = msg || "";
+}
+function readerAvanzar(seg){ readerQueue.shift(); setTimeout(readerSpeakNext, seg.lang === "en" ? 650 : 220); }
+function readerNavegador(seg){ // RESPALDO: voz del navegador si la boca falla
+  const avanzar = () => readerAvanzar(seg);
+  const u = new SpeechSynthesisUtterance(seg.t);
+  if (seg.lang === "en") {
+    u.lang = "en-US"; u.rate = slowMode ? 0.60 : 0.80;
+    const v = pickReaderVoice("en", "us"); if (v) u.voice = v;
+  } else {
+    u.lang = "es-MX"; u.rate = 0.98;
+    const v = pickReaderVoice("es", "mx") || pickReaderVoice("es", ""); if (v) u.voice = v;
+  }
+  u.onend = avanzar;
+  u.onerror = avanzar;
+  try{ window.speechSynthesis.speak(u); }catch(e){ avanzar(); }
 }
 function readerSpeakNext(){
   if (!readerOn || readerQueue.length === 0){ stopReader(readerOn ? "" : ""); if(readerOn===false){} return; }
@@ -442,37 +495,40 @@ function readerSpeakNext(){
   const b = document.getElementById("btn-reader");
   if (b) { b.textContent = "⏹ Detener lectura"; b.classList.remove("pri"); b.classList.add("sec"); }
   const card = document.querySelector(".reader-card"); if (card) card.classList.add("on");
-  const u = new SpeechSynthesisUtterance(seg.t);
-  if (seg.lang === "en") {
-    u.lang = "en-US"; u.rate = slowMode ? 0.60 : 0.80;
-    const v = pickReaderVoice("en", "us"); if (v) u.voice = v;
-    if (s) s.textContent = "🇺🇸 Escucha y repite: " + seg.label;
-  } else {
-    u.lang = "es-MX"; u.rate = 0.98;
-    const v = pickReaderVoice("es", "mx") || pickReaderVoice("es", ""); if (v) u.voice = v;
-    if (s) s.textContent = "📖 " + (seg.label || "Leyendo…");
-  }
-  u.onend = () => { readerQueue.shift(); setTimeout(readerSpeakNext, seg.lang === "en" ? 650 : 220); };
-  u.onerror = () => { readerQueue.shift(); readerSpeakNext(); };
-  try{ window.speechSynthesis.speak(u); }catch(e){ readerQueue.shift(); readerSpeakNext(); }
+  if (s) s.textContent = (seg.lang === "en" ? "🇺🇸 Escucha y repite: " + seg.label : "📖 " + (seg.label || "Leyendo…"));
+  bocaSpeak(seg.t, () => readerAvanzar(seg), () => readerNavegador(seg));
 }
+function trocear(t, max){ // bocaValerie máx 500 chars: partir por oraciones
+  if (t.length <= max) return [t];
+  const partes = [];
+  const oraciones = t.split(/(?<=[.!?])\s+/);
+  let cur = "";
+  oraciones.forEach(o => {
+    if ((cur + " " + o).trim().length > max && cur){ partes.push(cur.trim()); cur = o; }
+    else cur = (cur + " " + o).trim();
+  });
+  if (cur) partes.push(cur.trim());
+  return partes;
+}
+function encolar(seg){ trocear(seg.t, 450).forEach(p => readerQueue.push({ t: p, lang: seg.lang, label: seg.label })); }
 function toggleReader(dayNum){
   if (readerOn){ stopReader(); return; }
   const lesson = DATA.LESSONS.find(l => l.day === dayNum);
-  if (!lesson || !('speechSynthesis' in window)) { alert("Tu navegador no soporta síntesis de voz."); return; }
+  if (!lesson) { alert("Lección no encontrada."); return; }
+  if (!('speechSynthesis' in window) && !window.fetch) { alert("Tu navegador no soporta síntesis de voz."); return; }
   loadReaderVoices();
   readerQueue = [];
-  readerQueue.push({ t: "Lección del día " + lesson.day + ". " + sanearIPA(lesson.title) + ". " + sanearIPA(lesson.hook), lang: "es", label: lesson.title });
-  readerQueue.push({ t: "Por qué importa este paso. " + sanearIPA(lesson.why), lang: "es", label: "Por qué importa" });
-  readerQueue.push({ t: "Los pasos de la lección.", lang: "es", label: "Pasos" });
+  encolar({ t: "Lección del día " + lesson.day + ". " + sanearIPA(lesson.title) + ". " + sanearIPA(lesson.hook), lang: "es", label: lesson.title });
+  encolar({ t: "Por qué importa este paso. " + sanearIPA(lesson.why), lang: "es", label: "Por qué importa" });
+  encolar({ t: "Los pasos de la lección.", lang: "es", label: "Pasos" });
   (lesson.steps || []).forEach((st, i) => {
-    readerQueue.push({ t: "Paso " + (i+1) + ": " + st.name + ". " + sanearIPA(st.how), lang: "es", label: "Paso " + (i+1) + " de " + lesson.steps.length });
+    encolar({ t: "Paso " + (i+1) + ": " + st.name + ". " + sanearIPA(st.how), lang: "es", label: "Paso " + (i+1) + " de " + lesson.steps.length });
   });
   if (lesson.listen && lesson.listen.length){
-    readerQueue.push({ t: "Ahora, escucha y repite cada palabra.", lang: "es", label: "Escucha y repite" });
-    lesson.listen.forEach(w => readerQueue.push({ t: w + ".", lang: "en", label: w }));
+    encolar({ t: "Ahora, escucha y repite cada palabra.", lang: "es", label: "Escucha y repite" });
+    lesson.listen.forEach(w => encolar({ t: w + ".", lang: "en", label: w }));
   }
-  readerQueue.push({ t: "Fin de la lección. Pregunta para tu bitácora: " + sanearIPA(lesson.methodPrompt), lang: "es", label: "Bitácora" });
+  encolar({ t: "Fin de la lección. Pregunta para tu bitácora: " + sanearIPA(lesson.methodPrompt), lang: "es", label: "Bitácora" });
   readerOn = true;
   try{ window.speechSynthesis.cancel(); }catch(e){}
   readerSpeakNext();
@@ -668,7 +724,7 @@ function renderLessonDetail(container, dayNum) {
     </div>
 
     <div class="interactive-card reader-card">
-      <b>🎧 Modo Maestra Lee</b> <span class="faint">(feedback de Marcos, alumno 2)</span>
+      <b>🎧 Modo Maestra Lee</b> <span class="faint">(feedback de Marcos, alumno 2) · voz oficial ElevenLabs</span>
       <p class="faint" style="margin:.25rem 0 .6rem">Escucha la lección completa narrada en español, y el vocabulario inglés pronunciado exacto con voz americana. Para aprender sin leer.</p>
       <div class="row">
         <button class="btn pri sm" id="btn-reader" onclick="toggleReader(${lesson.day})">▶ Escuchar lección</button>
