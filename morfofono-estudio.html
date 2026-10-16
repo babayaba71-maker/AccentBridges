@@ -453,15 +453,38 @@ function pickReaderVoice(prefix, prefer){
   const cand = READER_VOICES.filter(v => v.lang && v.lang.toLowerCase().startsWith(prefix));
   return cand.find(v => (v.name||'').toLowerCase().includes(prefer)) || cand[0] || null;
 }
+/* sanearIPA v2 (fix JJ 15-oct: "spelling, no lee corrido") — REGLA DE ORO: a la boca jamás van
+   fragmentos pelados. Bug asesino: el mapa viejo tenía ["u"," u "],["i"," i "] y PARTÍA toda
+   palabra española con u/i (lengua→"leng u a", aire→"a i re"). Hechizos verificados por
+   oído de máquina (boca→Scribe): zeta inglesa/pe/te/ka/ene con ge/shhh/ssss leen corrido. */
 const IPA_MAP = [
-  ["eɪ"," ei deslizante "],["aɪ"," ai "],["aʊ"," au "],["ɔɪ"," oi "],["oʊ"," ou "],["tʃ"," ch "],["dʒ"," y fuerte "],
-  ["ə"," shwa "],["ɪ"," i laxa "],["æ"," a de gato "],["ʌ"," a corta "],["ɑ"," a abierta "],["ʊ"," u laxa "],["ɛ"," e fija "],
-  ["ʃ"," sh "],["ʒ"," zh "],["θ"," th "],["ð"," th sonora "],["ŋ"," ng "],["ɹ"," r americana "],["u"," u "],["i"," i "]
+  ["eɪ"," ei deslizante "],["aɪ"," ai "],["aʊ"," au "],["ɔɪ"," oi "],["oʊ"," ou "],["tʃ"," che "],["dʒ"," ye fuerte "],
+  ["ə"," shua "],["ɪ"," i laxa "],["æ"," a de gato "],["ʌ"," a corta "],["ɑ"," a abierta "],["ʊ"," u laxa "],["ɛ"," e fija "],
+  ["ʃ"," shhh "],["ʒ"," zhhh "],["θ"," zeta inglesa "],["ð"," zeta zumbada "],["ŋ"," ene con ge "],["ɹ"," r americana "]
 ];
+const LETRA_MAP = {p:"pe",t:"te",k:"ka",b:"be",d:"de",g:"ge",v:"uve",f:"efe",s:"ese",z:"zeta",h:"hache",j:"jota",c:"ce",m:"eme",n:"ene",l:"ele",r:"ere",w:"doble u",x:"ekis",q:"ku",y:"ye"};
 function sanearIPA(text){
-  let t = text.replace(/\//g, " ");
+  let t = String(text);
+  // símbolos de texto que el TTS no lee
+  t = t.replace(/→/g," se convierte en ").replace(/≈/g," casi ").replace(/≠/g," no es igual a ")
+       .replace(/\+/g," más ").replace(/=/g," es ").replace(/β/g," beta ")
+       .replace(/(\d)\s*–\s*(\d)/g,"$1 a $2").replace(/(\d)%/g,"$1 por ciento");
+  // sonidos alargados del día 2: leídos corridos, jamás deletreados (verificado por oído)
+  t = t.replace(/\bsss\b/g,"ssss").replace(/\bbbb\b/g,"beee").replace(/\bppp\b/g,"peee")
+       .replace(/\bvvv\b/g,"veee").replace(/\bfff\b/g,"efeee");
+  // sufijos pelados: -s → ese (verificado "plural ese"), -ed → ed
+  t = t.replace(/(^|[\s(])-(s|ed|er|ing)\b/g,(m,pre,suf)=> pre+" "+(suf==="s"?"ese":suf)+" ");
+  // IPA compuestos primero (nunca letras: no puede partir palabras)
   for (const [sym, word] of IPA_MAP){ t = t.split(sym).join(word); }
-  return t.replace(/\s+/g, " ").trim();
+  // letras peladas SOLO cuando están solas (jamás dentro de palabras)
+  t = t.replace(/(^|[\s\/([:"«])([a-z])(?=[\s\/.,:;)"»]|$)/g, (m,pre,L)=> (LETRA_MAP[L] ? pre+LETRA_MAP[L] : m));
+  // clusters y dúos pelados (sh/th/ng literales, grupos del día 24): nombres cantados, jamás deletreados
+  t = t.replace(/(^|[\s\/([:"«])(sh|th|ch|zh|ng|str|spl|thr)(?=[\s\/.,:;)"»]|$)/g, (m,pre,L)=>{
+    const CL={sh:" shhh ",th:" zeta inglesa ",ch:" che ",zh:" zhhh ",ng:" ene con ge ",str:"ese, te, ere, ",spl:"ese, pe, ele, ",thr:"te, hache, ere, "};
+    return pre+CL[L];
+  });
+  t = t.replace(/\bvs\b/gi," contra ").replace(/\//g," ");
+  return t.replace(/\s+/g," ").trim();
 }
 function stopReader(msg){
   readerOn = false;
@@ -522,7 +545,7 @@ function toggleReader(dayNum){
   encolar({ t: "Por qué importa este paso. " + sanearIPA(lesson.why), lang: "es", label: "Por qué importa" });
   encolar({ t: "Los pasos de la lección.", lang: "es", label: "Pasos" });
   (lesson.steps || []).forEach((st, i) => {
-    encolar({ t: "Paso " + (i+1) + ": " + st.name + ". " + sanearIPA(st.how), lang: "es", label: "Paso " + (i+1) + " de " + lesson.steps.length });
+    encolar({ t: sanearIPA("Paso " + (i+1) + ": " + st.name + ". " + st.how), lang: "es", label: "Paso " + (i+1) + " de " + lesson.steps.length });
   });
   if (lesson.listen && lesson.listen.length){
     encolar({ t: "Ahora, escucha y repite cada palabra.", lang: "es", label: "Escucha y repite" });
