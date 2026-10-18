@@ -76,7 +76,10 @@ header.hero .sub{color:var(--muted);font-size:.95rem;margin:.4rem 0 1rem;max-wid
 .escucha-todos{border:1px solid var(--border);background:var(--surface);border-radius:.5rem;padding:.25rem .7rem;font-size:.8rem;margin:.2rem 0 .4rem}
 footer.cta{background:var(--surface);border:1px solid var(--border);border-radius:.9rem;padding:1.2rem;margin-top:2rem}
 footer.cta a.btn{display:inline-block;margin-top:.6rem;background:var(--accent);color:var(--accent-fg);border-radius:.6rem;padding:.6rem 1.1rem;text-decoration:none;font-weight:700}
-.pie{color:var(--faint);font-size:.78rem;margin-top:2rem;text-align:center}
+ .pie{color:var(--faint);font-size:.78rem;margin-top:2rem;text-align:center}
+.doc-btn{border:1px solid var(--border);background:var(--surface);border-radius:.6rem;padding:.45rem .9rem;font-size:.9rem;margin:0 0 1rem}
+.doc-btn.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+#docStatus{position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-h);border-radius:99px;padding:.5rem 1rem;font-size:.85rem;display:none;z-index:50;align-items:center;gap:.7rem;max-width:92vw}
 .top{display:none}
 @media(max-width:799px){
   aside{display:none}
@@ -117,10 +120,12 @@ footer.cta a.btn{display:inline-block;margin-top:.6rem;background:var(--accent);
 
   <div class="tools">
     <button id="lentoBtn" onclick="toggleLento()">🐢 Lento</button>
+    <button id="docTodoBtn" onclick="docTodo()">🩺 Doctora narra la guía</button>
     <button onclick="window.scrollTo({top:0,behavior:'smooth'})">↑ Inicio</button>
   </div>
 
   <div id="contenido"></div>
+  <div id="docStatus"><span id="docTxt">🩺 La Doctora está hablando…</span><button onclick="docStop()" style="border:1px solid var(--border);background:var(--surface-2);border-radius:99px;padding:.25rem .8rem;font-size:.8rem">⏹</button></div>
 
   <footer class="cta">
     <b style="font-family:Newsreader,serif;font-size:1.2rem">Practícalas con Valerie, en vivo 🎙️</b>
@@ -137,7 +142,8 @@ footer.cta a.btn{display:inline-block;margin-top:.6rem;background:var(--accent);
 // ===================== DATOS =====================
 const FAM = [
 {
- id:"t", icon:"T", nombre:"La Familia de la T", sub:"La más trabajadora del americano: cambia de empleo según dónde se pare y quién tenga al lado.",
+ id:"t",
+ trans:"Bienvenido a la Guía de Vecindad. Soy la Doctora Valerie, y este es el mapa completo del vecindario del americano. Aquí el sonido cambia según su posición y según sus vecinos. Empezamos con la más trabajadora de todas: la familia de la T. Siete empleos, un solo trabajador. Pon el oído.", icon:"T", nombre:"La Familia de la T", sub:"La más trabajadora del americano: cambia de empleo según dónde se pare y quién tenga al lado.",
  reto:{t:"RETO DE LA FAMILIA T", f:"Betty bought a bit of better butter.", pista:"Beddy boughda bidda bedder budder — pura flap, la lengua toca una vez."},
  cards:[
   {t:"T de arranque con soplo", pat:"Al principio de palabra, la T llega con una bocanada de aire — como si encendieras una velita.",
@@ -171,7 +177,8 @@ const FAM = [
  ]
 },
 {
- id:"d", icon:"D", nombre:"La Familia de la D", sub:"Hermana de la T: entre vocales también se cae, al final se congela, y con la y se funde.",
+ id:"d",
+ trans:"¿Sentiste la flap de la T? Ahora conoce a su hermana: la D. Nació con los mismos vicios. Entre vocales también se cae, al final se congela igual que su hermana, y con la y se funde. Escucha el parentesco.", icon:"D", nombre:"La Familia de la D", sub:"Hermana de la T: entre vocales también se cae, al final se congela, y con la y se funde.",
  reto:{t:"RETO DE LA FAMILIA D", f:"Did you get the order of the ladder?", pista:"didja ge-tha or-der... todo fundido, la D final tapada en good."},
  cards:[
   {t:"D flap — la D que se cae", pat:"Entre vocales, la D también se convierte en golpe suave — igual que su hermana la T. Ladder y latter suenan igual.",
@@ -189,7 +196,8 @@ const FAM = [
  ]
 },
 {
- id:"l", icon:"L", nombre:"La Familia de la L", sub:"La trágica del culichi: en español es clara siempre. En americano tiene dos vestidos.",
+ id:"l",
+ trans:"La T y la D son travesuras de vecinos. La L es otra cosa: es la trágica del culichi, porque en español la L es clara siempre. Y el americano le pide dos vestidos: clara al principio, oscura y gruesa al final.", icon:"L", nombre:"La Familia de la L", sub:"La trágica del culichi: en español es clara siempre. En americano tiene dos vestidos.",
  reto:{t:"RETO DE LA FAMILIA L", f:"Look at the light ball and feel the cold.", pista:"Look y light con L clara; ball, feel, cold con L gruesa final."},
  cards:[
   {t:"L clara al principio", pat:"Al inicio de palabra la L es clara, ligera, con la punta en los dientes — igual que la española.",
@@ -203,7 +211,8 @@ const FAM = [
  ]
 },
 {
- id:"r", icon:"R", nombre:"La Familia de la R", sub:"La más peliaguda para un sinaloense: ni vibrar ni golpear — flota, y se come las vocales.",
+ id:"r",
+ trans:"Si la L es la trágica, la ere es la pesadilla del sinaloense. Ni vibrar como perro, ni golpear como pero. En el americano la R flota, lengua atrás sin tocar nada. Y además se come las vocales.", icon:"R", nombre:"La Familia de la R", sub:"La más peliaguda para un sinaloense: ni vibrar ni golpear — flota, y se come las vocales.",
  reto:{t:"RETO DE LA FAMILIA R", f:"Robert ran around the red car four times.", pista:"Ninguna ere de pero, ningún doble erre de perro: lengua flotando atrás, y la R final completa."},
  cards:[
   {t:"La R americana — la que flota", pat:"La lengua se echa hacia atrás y arriba SIN tocar nada, los labios se redondean un poco. Ni vibración ni golpe: flota.",
@@ -217,7 +226,8 @@ const FAM = [
  ]
 },
 {
- id:"s", icon:"S", nombre:"La Familia de la S", sub:"El morfema plural con fonología escondida: la misma S suena distinto según su vecino.",
+ id:"s",
+ trans:"De los sonidos sueltos a la morfología cantada. El plural. La misma S con tres voces distintas según quién sea su vecino: sorda, zumbada, o con vocalcita. El vecindario decide.", icon:"S", nombre:"La Familia de la S", sub:"El morfema plural con fonología escondida: la misma S suena distinto según su vecino.",
  reto:{t:"RETO DE LA FAMILIA S", f:"The cats, the dogs and the boxes are on the buses.", pista:"cats /s/ · dogs /z/ · boxes /iz/ · buses /iz/ — una S, tres voces."},
  cards:[
   {t:"Plural -S: una letra, tres sonidos", pat:"El morfema del plural suena según su vecino: tras voz sorda es /s/ (cats), tras voz sonora es /z/ (dogs), tras sibilante mete vocal /iz/ (boxes). La misma regla corre en las palabritas: is, was, his — la S zumba /z/.",
@@ -231,7 +241,8 @@ const FAM = [
  ]
 },
 {
- id:"ed", icon:"ED", nombre:"La Familia del Pasado -ED", sub:"Tres vestidos del mismo morfema: el vecino decide.",
+ id:"ed",
+ trans:"¿Ya agarraste el truco? El vecino decide el vestido. El pasado con E-D es exactamente el mismo cuento, con otros tres trajes: te, de, o id.", icon:"ED", nombre:"La Familia del Pasado -ED", sub:"Tres vestidos del mismo morfema: el vecino decide.",
  reto:{t:"RETO DEL PASADO", f:"I walked, played and wanted to talk.", pista:"walked /t/ · played /d/ · wanted /id/ — el pasado tiene tres voces."},
  cards:[
   {t:"-ED: tres sonidos", pat:"Tras voz sorda suena /t/ (walked), tras voz sonora suena /d/ (played), tras t o d mete vocal /id/ (wanted).",
@@ -241,7 +252,8 @@ const FAM = [
  ]
 },
 {
- id:"ing", icon:"ING", nombre:"La Familia del -ING", sub:"Doctrina del Puente -ANDO: la G nunca se suelta, la n se hace atrás.",
+ id:"ing",
+ trans:"Y aquí viene el que más se sufre en Culiacán: la terminación I-N-G. La G jamás se suelta. Ancla con tu A-N-D-O de siempre: playing es como diciendo jugando. La n se hace atrás, en el velo.", icon:"ING", nombre:"La Familia del -ING", sub:"Doctrina del Puente -ANDO: la G nunca se suelta, la n se hace atrás.",
  reto:{t:"RETO DEL -ING", f:"I'm playing and singing all morning.", pista:"Ancla con -ANDO: plei-ing, sin-ing — la n de atrás, la G se medio traga."},
  cards:[
   {t:"-ING y el velo", pat:"La terminación suena con la n pegada atrás, en el velo del paladar — nunca una g explosiva ni una n de nariz española. La misma n de atrás aparece en think, bank, thank: antes de k la n se hace atrás.",
@@ -251,7 +263,8 @@ const FAM = [
  ]
 },
 {
- id:"the", icon:"THE", nombre:"Los Dos Vestidos de THE", sub:"El artículo cambia según lo que viene detrás — regla de vecindad pura.",
+ id:"the",
+ trans:"De los morfemas a la palabra más famosa del inglés: THE. También obedece al vecino. Antes de consonante viste da, antes de vocal viste di. Y en los dos, la lengua sale zumbando.", icon:"THE", nombre:"Los Dos Vestidos de THE", sub:"El artículo cambia según lo que viene detrás — regla de vecindad pura.",
  reto:{t:"RETO DEL THE", f:"I'm gonna go to the house and the airport.", pista:"da house (consonante) · di airport (vocal) — y en los dos, lengua zumbando, jamás una d española."},
  cards:[
   {t:"THE: da y di", pat:"Antes de consonante suena /da/ (the house → da house); antes de vocal suena /di/ (the airport → di airport) y se enlaza con la vocal siguiente.",
@@ -261,7 +274,8 @@ const FAM = [
  ]
 },
 {
- id:"th", icon:"TH", nombre:"La TH — Sorda y Zumbada", sub:"Dos sonidos con la misma pose: lengua asomada entre los dientes.",
+ id:"th",
+ trans:"Ahora sí, la pose estrella: la TH. Lengua asomada entre los dientes, se ve afuera. Sorda si solo pasa aire, zumbada si la garganta trabaja. Mano en la garganta para sentirla.", icon:"TH", nombre:"La TH — Sorda y Zumbada", sub:"Dos sonidos con la misma pose: lengua asomada entre los dientes.",
  reto:{t:"RETO DE LA TH", f:"This thoughtful mother thinks about both.", pista:"think sorda sin voz · this/mother zumbada con voz — la lengua se ve afuera en todas."},
  cards:[
   {t:"TH sorda vs TH zumbada", pat:"think: lengua entre dientes, soplo sin voz. this: misma pose pero con la garganta zumbando.",
@@ -271,7 +285,8 @@ const FAM = [
  ]
 },
 {
- id:"w", icon:"W", nombre:"La Familia de la W", sub:"El famoso güeison del noroeste: la W no es gü — es una u rápida con beso.",
+ id:"w",
+ trans:"Vamos con el güeison. Perdón: con la W, que NO es gü. Es una u rápida que arranca con un beso de labios. Would, water, one. Adiós al güi para siempre.", icon:"W", nombre:"La Familia de la W", sub:"El famoso güeison del noroeste: la W no es gü — es una u rápida con beso.",
  reto:{t:"RETO DE LA W", f:"We would walk one way with water.", pista:"Todas empiezan con u rápida de labios redondos — ni rastro de gü."},
  cards:[
   {t:"W — u rápida, jamás gü", pat:"La W es una u que arranca con los labios redondeados y se desliza a la vocal siguiente. Es un viento de labios, no una consonante dura.",
@@ -281,7 +296,8 @@ const FAM = [
  ]
 },
 {
- id:"bv", icon:"B/V", nombre:"El Par B y V", sub:"En español son la misma letra. En inglés viven en casas distintas.",
+ id:"bv",
+ trans:"Otra pareja que en español es la misma letra: B y V. Pero en inglés viven en casas distintas. La B cierra los dos labios; la V muerde el labio de abajo con los dientes de arriba. Very, jamás bery.", icon:"B/V", nombre:"El Par B y V", sub:"En español son la misma letra. En inglés viven en casas distintas.",
  reto:{t:"RETO DEL PAR B/V", f:"I believe seven very good videos.", pista:"believe y seven con labios juntos; very y videos con labio en el diente."},
  cards:[
   {t:"B de labios, V de diente", pat:"La B se dice con los dos labios juntos. La V muerde: el labio de abajo toca los dientes de arriba y zumba.",
@@ -291,7 +307,8 @@ const FAM = [
  ]
 },
 {
- id:"h", icon:"H", nombre:"La Familia de la H", sub:"Ni jota raspada ni silencio: la H inglesa sopla suave.",
+ id:"h",
+ trans:"La H inglesa ni raspa ni grita. Sopla suave, como si empañaras un vidrio. Y a veces ni sopla: en hour y honest se calla completa. La más discreta del vecindario.", icon:"H", nombre:"La Familia de la H", sub:"Ni jota raspada ni silencio: la H inglesa sopla suave.",
  reto:{t:"RETO DE LA H", f:"Hello, my house has an hour and I'm honest.", pista:"hello/house soplando suave; hour y honest sin nada — la H muda de esas dos."},
  cards:[
   {t:"H suave — y a veces muda", pat:"La H inglesa es un soplo suave de garganta, más delicado que la jota española. Y en hour, honest, heir ni suena: se calla completa.",
@@ -301,7 +318,8 @@ const FAM = [
  ]
 },
 {
- id:"mansas", icon:"🤫", nombre:"Las Letras Mansas", sub:"Consonantes que existen en el papel pero no en el oído.",
+ id:"mansas",
+ trans:"Hay letras que existen en el papel pero no en el oído: las mansas. La K de know, la W de write, la B final de climb. Se escriben para dar miedo, y el oído solo recibe a la que manda.", icon:"🤫", nombre:"Las Letras Mansas", sub:"Consonantes que existen en el papel pero no en el oído.",
  reto:{t:"RETO DE LAS MANSAS", f:"I know the knife can write and climb.", pista:"know = no · knife = nai-f · write = rait · climb = clai-m — las mansas ni suenan."},
  cards:[
   {t:"KN, WR y MB — las que se callan", pat:"Antes de la i o la n del final, la k de kn se calla (know → no); la w de wr se calla (write → rait); la b final tras m se calla (climb → clai-m).",
@@ -311,7 +329,8 @@ const FAM = [
  ]
 },
 {
- id:"schwa", icon:"ə", nombre:"La Vocal Fantasma — Schwa", sub:"La vocal más común del americano y la más invisible: todas las átonas se apagan.",
+ id:"schwa",
+ trans:"Llegamos a la vocal fantasma: la schwa. La más común del americano y la más invisible. Todas las sílabas sin acento se apagan en un uh relajado. Es la razón por la que el inglés suena rápido: montaña rusa.", icon:"ə", nombre:"La Vocal Fantasma — Schwa", sub:"La vocal más común del americano y la más invisible: todas las átonas se apagan.",
  reto:{t:"RETO DE LA SCHWA", f:"I'm going to the sofa to eat a banana.", pista:"Six schwas en una frase: going→gonna, to→tuh, the→thuh, sofa→so-fuh, a→uh, banana→buh-nan-uh."},
  cards:[
   {t:"Schwa — el uh universal", pat:"Toda sílaba sin acento se apaga en un uh relajado: about, sofa, banana. Es la razón por la que el inglés suena rápido.",
@@ -321,7 +340,8 @@ const FAM = [
  ]
 },
 {
- id:"link", icon:"🔗", nombre:"Las Conexiones — Linking", sub:"Las palabras no viven solas: se roban el aire del vecino.",
+ id:"link",
+ trans:"Y si las átonas se apagan, las palabras se cosen entre sí: linking. La consonante roba la vocal siguiente, y vocal con vocal invita un puente invisible. Pick it se oye piquit, una sola palabra.", icon:"🔗", nombre:"Las Conexiones — Linking", sub:"Las palabras no viven solas: se roban el aire del vecino.",
  reto:{t:"RETO DEL LINKING", f:"I want to pick it up and hold on a minute.", pista:"pih-kit-tup · hol-don — seis conexiones en una frase."},
  cards:[
   {t:"Consonante roba vocal (C+V)", pat:"Cuando una palabra termina en consonante y la siguiente empieza en vocal, se cosen: pick it se oye pih-kit.",
@@ -335,7 +355,8 @@ const FAM = [
  ]
 },
 {
- id:"recortes", icon:"✂️", nombre:"Los Recortes del Speaking", sub:"El inglés corrido se ahorra movidas: nobody says going to en la calle.",
+ id:"recortes",
+ trans:"Con todo eso montado, el americano recorta sin pena. Going to se vuelve gonna, want to se vuelve wanna, got to se vuelve gotta. Economía de boca pura. Así se oye la calle.", icon:"✂️", nombre:"Los Recortes del Speaking", sub:"El inglés corrido se ahorra movidas: nobody says going to en la calle.",
  reto:{t:"RETO DE LOS RECORTES", f:"I'm gonna wanna getta know what you mean.", pista:"gonna · wanna · gotta · whaddaya — el speaking real recorta y enlaza."},
  cards:[
   {t:"Gonna, wanna, gotta y compañía", pat:"going to → gonna, want to → wanna, got to → gotta, let me → lemme, what do you → whaddaya.",
@@ -345,7 +366,8 @@ const FAM = [
  ]
 },
 {
- id:"musica", icon:"🎵", nombre:"La Música — Stress y Melodía", sub:"No es qué dices: es qué aprietas y hacia dónde va la voz.",
+ id:"musica",
+ trans:"Y al final, la corona del vecindario: la música. Porque no es qué dices: es qué aprietas y hacia dónde va la voz. El acento cambia el significado, la melodía lo sella. Ya tienes el mapa completo. A pulirlo con la boca.", icon:"🎵", nombre:"La Música — Stress y Melodía", sub:"No es qué dices: es qué aprietas y hacia dónde va la voz.",
  reto:{t:"RETO DE LA MÚSICA", f:"You're coming to the party, aren't you?", pista:"Voz que BAJA = ya sé que sí · voz que SUBE = de verdad pregunto. Y aprieta la sílaba que importa."},
  cards:[
   {t:"El acento cambia el significado", pat:"La misma palabra cambia de empleo según la sílaba que se apriete: PREsent (regalo) vs preSENT (presentar). REcord (disco) vs reCORD (grabar).",
@@ -371,6 +393,7 @@ function cargavoz(){
 if('speechSynthesis' in window){speechSynthesis.onvoiceschanged=cargavoz;cargavoz();}
 function esc(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
 function di(texto){
+  if(DOC.on) docStop();
   if(!('speechSynthesis' in window))return;
   speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(texto);
@@ -389,6 +412,117 @@ function diTodos(arr){
   });
 }
 
+
+// ===================== DOCTORA ELEVENLABS (boca oficial, navegador de respaldo) =====================
+const BOCAS = {
+  url: "https://valerie.base44.app/functions/bocaValerie",
+  key: "ABVC-PILOTO-2026",
+  cache: new Map(),
+  el: null
+};
+function bocaFetch(text){
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 15000);
+  return fetch(BOCAS.url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-abvc-key": BOCAS.key },
+    body: JSON.stringify({ text: text }),
+    signal: ctrl.signal
+  }).then(r => { clearTimeout(t); if (!r.ok) throw new Error("boca " + r.status); return r.blob(); })
+    .then(b => URL.createObjectURL(b));
+}
+function trocear(texto){
+  const partes = texto.replace(/\s+/g,' ').trim().split(/(?<=[.!?…])\s+/);
+  const segs = []; let actual = '';
+  for (const p of partes){
+    if ((actual + ' ' + p).trim().length > 450){ if (actual) segs.push(actual.trim()); actual = p; }
+    else actual = (actual + ' ' + p).trim();
+  }
+  if (actual) segs.push(actual.trim());
+  return segs;
+}
+const DOC = { on:false, segs:[], i:0, famAct:-1 };
+function docStatus(show, txt){
+  const el=document.getElementById('docStatus');
+  el.style.display = show?'flex':'none';
+  if (txt) document.getElementById('docTxt').textContent = txt;
+}
+function docBtnPinta(fi, on){
+  const b=document.getElementById('docBtn-'+fi);
+  if (b){ b.textContent = on ? '⏹ Detener a la Doctora' : '🩺 La Doctora explica esta familia'; b.classList.toggle('on',on); }
+}
+function docPlaySeg(seg){
+  if (!BOCAS.el){
+    BOCAS.el = document.createElement("audio");
+    BOCAS.el.preload = "auto";
+    try{ document.body.appendChild(BOCAS.el); }catch(e){}
+  }
+  const a = BOCAS.el;
+  const next = () => docNext();
+  const fail = () => {
+    if (!('speechSynthesis' in window)){ docNext(); return; }
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(seg);
+    u.lang='es-MX'; u.rate=0.95; u.onend=next; u.onerror=next;
+    speechSynthesis.speak(u);
+  };
+  const play = () => {
+    a.onended = next; a.onerror = fail;
+    try{ a.currentTime = 0; const p=a.play(); if (p&&p.catch) p.catch(fail); }catch(e){ fail(); }
+  };
+  const cached = BOCAS.cache.get(seg);
+  if (cached){ a.src = cached; play(); }
+  else bocaFetch(seg).then(url => { BOCAS.cache.set(seg, url); a.src = url; play(); }).catch(fail);
+  if (DOC.i + 1 < DOC.segs.length) {
+    const nxt = DOC.segs[DOC.i + 1];
+    if (!BOCAS.cache.get(nxt)) bocaFetch(nxt).then(u => BOCAS.cache.set(nxt, u)).catch(()=>{});
+  }
+}
+function docNext(){
+  DOC.i++;
+  if (DOC.i < DOC.segs.length && DOC.on) docPlaySeg(DOC.segs[DOC.i]);
+  else docFin();
+}
+function docFin(){
+  DOC.on = false; DOC.segs = []; DOC.i = 0;
+  if (DOC.famAct >= 0){ docBtnPinta(DOC.famAct, false); DOC.famAct = -1; }
+  const todo = document.getElementById('docTodoBtn');
+  if (todo){ todo.textContent = '🩺 Doctora narra la guía'; todo.classList.remove('on'); }
+  docStatus(false);
+}
+function docStop(){
+  DOC.on = false; DOC.segs = []; DOC.i = 0;
+  if (BOCAS.el){ try{ BOCAS.el.pause(); BOCAS.el.onended=null; }catch(e){} }
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  docFin();
+}
+function docStart(segs, fi){
+  docStop();
+  DOC.segs = segs; DOC.i = 0; DOC.on = true; DOC.famAct = fi;
+  if (fi >= 0) docBtnPinta(fi, true);
+  const fam = FAM[fi >= 0 ? fi : 0];
+  docStatus(true, `🩺 La Doctora explica: ${fam.nombre}…`);
+  docPlaySeg(DOC.segs[0]);
+}
+function narraFamilia(fi){
+  if (DOC.on && DOC.famAct === fi){ docStop(); return; }
+  const f = FAM[fi];
+  const texto = f.trans + ' Reto de la familia: ' + f.reto.f + '. ' + f.reto.pista + '. Tócala lento, siente el movimiento, y cuando estés listo pásala con Valerie en vivo.';
+  docStart(trocear(texto), fi);
+}
+function docTodo(){
+  if (DOC.on){ docStop(); return; }
+  const todo = document.getElementById('docTodoBtn');
+  todo.textContent = '⏹ Detener la narración'; todo.classList.add('on');
+  let segs = [];
+  FAM.forEach(f => {
+    segs = segs.concat(trocear(f.trans + ' Reto: ' + f.reto.f + '. ' + f.reto.pista + '.'));
+  });
+  DOC.famAct = -1;
+  docStart(segs, -1);
+  docStatus(true, '🩺 La Doctora narra la guía completa…');
+}
+
 // ===================== ESTADO =====================
 const KEY='variacionesV1';
 let st={}; try{st=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
@@ -404,7 +538,8 @@ FAM.forEach((f,fi)=>{
   navh+=`<button data-fam="${fi}" onclick="irA(${fi})">${f.icon} ${f.nombre}</button>`;
   selh+=`<option value="${fi}">${f.icon} ${f.nombre}</option>`;
   html+=`<div class="fam-head" id="fam-${fi}"><span class="fi">${f.icon}</span><h2>${f.nombre}</h2></div>
-  <p class="fam-sub">${f.sub}</p>`;
+  <p class="fam-sub">${f.sub}</p>
+  <button class="doc-btn" id="docBtn-${fi}" onclick="narraFamilia(${fi})">🩺 La Doctora explica esta familia</button>`;
   f.cards.forEach((c,ci)=>{
     const id=`${fi}-${ci}`; const done=st[id]==='ok';
     const ejemplos=c.ej.map(e=>`<span class="ej"><button onclick="di('${esc(e.w)}')" aria-label="escuchar ${esc(e.w)}">🔊</button><span class="w">${e.w}</span><span class="s">${e.s||''}</span></span>`).join('');
