@@ -84,6 +84,19 @@ footer.cta a.btn{display:inline-block;margin-top:.6rem;background:var(--accent);
 .reto-mini .mini-oir{border:0;background:var(--accent);color:var(--accent-fg);border-radius:50%;width:1.6rem;height:1.6rem;margin-left:.3rem;font-size:.7rem;vertical-align:middle}
 .reto-mini.pulse{outline:2px solid var(--accent);animation:pulse .9s ease-in-out 4}
 @keyframes pulse{50%{outline-color:transparent}}
+#escenario{position:fixed;inset:0;background:var(--bg);z-index:100;display:none;flex-direction:column;padding:1.1rem 1.2rem 2.5rem;overflow-y:auto}
+.esc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem}
+.esc-top .salir{border:1px solid var(--border);background:var(--surface);border-radius:.6rem;padding:.45rem 1rem;font-size:.9rem}
+.esc-stage{font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.3rem}
+#escTitulo{font-size:1.7rem;margin:.2rem 0 .9rem}
+#escTexto{font-family:"Newsreader",serif;font-size:1.3rem;line-height:1.5}
+#escTexto.grande{font-size:1.9rem;text-align:center;margin:1.4rem 0}
+#escPalabras{display:flex;flex-wrap:wrap;gap:.7rem;margin:1.3rem 0}
+.esc-pal{background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow);border-radius:.8rem;padding:.55rem 1rem;font-weight:700;font-size:1.3rem;display:flex;flex-direction:column;align-items:center}
+.esc-pal i{font-size:.85rem;color:var(--warn);font-style:italic;font-weight:400}
+#escEval{display:none;gap:.7rem;flex-wrap:wrap;margin:1.2rem 0}
+#escEval button{border:1px solid var(--border);background:var(--surface);border-radius:.8rem;padding:.75rem 1.4rem;font-size:1.15rem}
+#escEval button.pick{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
 #docStatus{position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-h);border-radius:99px;padding:.5rem 1rem;font-size:.85rem;display:none;z-index:50;align-items:center;gap:.7rem;max-width:92vw}
 .top{display:none}
 @media(max-width:799px){
@@ -130,7 +143,19 @@ footer.cta a.btn{display:inline-block;margin-top:.6rem;background:var(--accent);
   </div>
 
   <div id="contenido"></div>
-  <div id="docStatus"><span id="docTxt">🩺 La Doctora está hablando…</span><button onclick="docStop()" style="border:1px solid var(--border);background:var(--surface-2);border-radius:99px;padding:.25rem .8rem;font-size:.8rem">⏹</button></div>
+  <div id="escenario">
+    <div class="esc-top"><span style="font-size:.82rem;color:var(--muted)">🗺️ Guía de Vecindad · Modo Clase</span><button class="salir" onclick="gStop()">✕ Salir</button></div>
+    <div class="esc-stage" id="escEtapa">🩺</div>
+    <h2 id="escTitulo"></h2>
+    <p id="escTexto"></p>
+    <div id="escPalabras"></div>
+    <div id="escEval">
+      <button data-val="ok" onclick="evaluarFam(Number(this.parentNode.dataset.fam),this.dataset.val,this)">😎 La dominé</button>
+      <button data-val="casi" onclick="evaluarFam(Number(this.parentNode.dataset.fam),this.dataset.val,this)">🤏 Casi</button>
+      <button data-val="otra" onclick="evaluarFam(Number(this.parentNode.dataset.fam),this.dataset.val,this)">😅 Otra ronda</button>
+    </div>
+  </div>
+  <div id="docStatus"><span id="docTxt">🩺 La Doctora está hablando…</span><button onclick="gStop()" style="border:1px solid var(--border);background:var(--surface-2);border-radius:99px;padding:.25rem .8rem;font-size:.8rem">⏹</button></div>
 
   <footer class="cta">
     <b style="font-family:Newsreader,serif;font-size:1.2rem">Practícalas con Valerie, en vivo 🎙️</b>
@@ -446,6 +471,8 @@ const UNIVERSAL = {
 };
 const GUIDA = { on:false, steps:[], i:0, fam:-1, timer:null };
 function stShow(txt){
+  const esc=document.getElementById('escenario');
+  if (esc && esc.style.display==='flex'){ document.getElementById('docStatus').style.display='none'; return; }
   const el=document.getElementById('docStatus');
   el.style.display='flex';
   document.getElementById('docTxt').textContent = txt || '🩺 La Doctora está hablando…';
@@ -509,8 +536,10 @@ function gRun(){
   if (!GUIDA.on){ return; }
   if (GUIDA.i >= GUIDA.steps.length){ gFin(); return; }
   const st = GUIDA.steps[GUIDA.i];
+  if (st.vista) escPinta(st);
   if (st.wait){ stShow('🗣️ Pausa de práctica — repite en voz alta'); GUIDA.timer = setTimeout(gNext, st.wait); return; }
   if (st.card) gScroll(st.card);
+  if (st.items){ stShow(st.label || '🇺🇸'); gItems(st.items); return; }
   if (st.reto !== undefined){
     const el = document.getElementById('reto-'+st.reto);
     if (el){ try{ el.scrollIntoView({behavior:'smooth',block:'center'}); el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }catch(e){} }
@@ -522,12 +551,56 @@ function gRun(){
   const nxt = GUIDA.steps[GUIDA.i+1];
   if (nxt && nxt.say && !BOCAS.cache.get(nxt.say)) bocaFetch(nxt.say).then(u => BOCAS.cache.set(nxt.say, u)).catch(()=>{});
 }
+function escPinta(st){
+  const esc=document.getElementById('escenario');
+  if (!esc) return;
+  if (esc.style.display!=='flex'){ esc.style.display='flex'; try{ document.body.style.overflow='hidden'; }catch(e){} }
+  document.getElementById('escEtapa').textContent = st.label || '🩺';
+  const v = st.vista || {};
+  document.getElementById('escTitulo').textContent = v.titulo || '';
+  const tx=document.getElementById('escTexto');
+  tx.textContent = v.texto || '';
+  tx.classList.toggle('grande', !!v.grande);
+  document.getElementById('escPalabras').innerHTML = (v.palabras||[]).map(p=>`<span class="esc-pal">${p.w}${p.s?'<i>'+p.s+'</i>':''}</span>`).join('');
+  const ev=document.getElementById('escEval');
+  if (v.evalFam !== undefined){
+    ev.style.display='flex';
+    ev.dataset.fam = v.evalFam;
+    [...ev.children].forEach(b=>b.classList.remove('pick'));
+  } else ev.style.display='none';
+}
+function gItems(arr){
+  if (!('speechSynthesis' in window)){ gNext(); return; }
+  let i = 0;
+  const step = () => {
+    if (!GUIDA.on) return;
+    if (i >= arr.length){ gNext(); return; }
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(arr[i]); i++;
+    u.lang='en-US'; if (vozUS) u.voice=vozUS; u.rate=0.7;
+    u.onend = () => { GUIDA.timer = setTimeout(step, 750); };
+    u.onerror = u.onend;
+    speechSynthesis.speak(u);
+  };
+  step();
+}
+function evaluarFam(fi, val, btn){
+  st['fam-'+fi]=val; salva();
+  [...btn.parentNode.children].forEach(b=>b.classList.remove('pick'));
+  btn.classList.add('pick');
+  const tx=document.getElementById('escTexto');
+  if (tx) tx.textContent = val==='ok' ? '✓ ¡Familia dominada! Registrado en tu progreso. 🔥' : (val==='casi' ? '✓ Registrado. ¡Casi! Una ronda más y cae.' : '✓ Registrado. Sin pena: aquí los errores son bienvenidos — otra ronda cuando quieras.');
+  pintaProg();
+}
 function gFin(){
   GUIDA.on=false; GUIDA.steps=[]; GUIDA.i=0;
   if (GUIDA.fam>=0){ gBtnPinta(GUIDA.fam,false); GUIDA.fam=-1; }
   const todo=document.getElementById('docTodoBtn');
   if (todo){ todo.textContent='🩺 Tour guiado (17 familias)'; todo.classList.remove('on'); }
   document.getElementById('docStatus').style.display='none';
+  const esc=document.getElementById('escenario');
+  if (esc){ esc.style.display='none'; }
+  document.body.style.overflow='';
 }
 function gStop(){
   GUIDA.on=false; clearTimeout(GUIDA.timer);
@@ -537,24 +610,29 @@ function gStop(){
 }
 function pasosFamilia(fi){
   const f = FAM[fi]; const steps = [];
-  steps.push({say:f.trans, label:'🚪 Puerta — '+f.nombre});
+  steps.push({say:f.trans, label:'🚪 Puerta', fam:fi, vista:{titulo:f.icon+' '+f.nombre, texto:f.trans}});
   f.cards.forEach((c,ci)=>{
-    steps.push({say:c.nar, label:'📖 Explica: '+c.t, card:'c-'+fi+'-'+ci});
-    steps.push({say:UNIVERSAL.turno, label:'🗣️ Tu turno — repite'});
+    const narSolo = (c.nar.split('Escucha:')[0] || c.nar).trim();
+    const chips = c.ej.map(e=>({w:e.w, s:e.s}));
+    steps.push({say:narSolo+'.', label:'📖 Explica', fam:fi, card:'c-'+fi+'-'+ci, vista:{titulo:c.t, texto:narSolo+'.'}});
+    steps.push({items:c.ej.map(e=>e.w), label:'🇺🇸 Escucha', fam:fi, vista:{titulo:c.t, texto:'🇺🇸 Escucha la voz americana:', palabras:chips}});
+    steps.push({say:UNIVERSAL.turno, label:'🗣️ Tu turno', fam:fi, vista:{titulo:'🗣️ Tu turno', texto:'Repite cada palabra en voz alta, despacito, sintiendo el movimiento:', palabras:chips}});
     steps.push({wait:3200});
   });
-  steps.push({say:UNIVERSAL.retoIntro, label:'🏆 El reto — míralo en pantalla', reto:fi});
-  steps.push({en:f.reto.f, rate:0.6, label:'🇺🇸 Modelo lento'});
+  const tw = f.reto.f.split(/\s+/).filter(Boolean);
+  steps.push({say:UNIVERSAL.retoIntro, label:'🏆 El reto', fam:fi, vista:{titulo:'🏆 Reto de la familia', texto:f.reto.f, grande:true}});
+  steps.push({en:f.reto.f, rate:0.6, label:'🇺🇸 Lento', fam:fi});
   steps.push({wait:900});
-  steps.push({chunks:f.reto.f, label:'🇺🇸 Palabra por palabra'});
-  steps.push({say:f.reto.pista, label:'🏆 La pista'});
-  steps.push({say:UNIVERSAL.turnoReto, label:'🗣️ Tu turno con el reto'});
+  steps.push({chunks:f.reto.f, label:'🇺🇸 Palabra por palabra', fam:fi, vista:{titulo:'Palabra por palabra', texto:'🇺🇸 Cada palabra es un paso:', palabras:tw.map(w=>({w:w}))}});
+  steps.push({say:f.reto.pista, label:'🏆 La pista', fam:fi, vista:{titulo:'La pista', texto:f.reto.pista}});
+  steps.push({say:UNIVERSAL.turnoReto, label:'🗣️ Tu turno', fam:fi, vista:{titulo:'🗣️ Tu turno con el reto', texto:'Tómala lento primero, y luego acelera. La pantalla se queda contigo:'}});
   steps.push({wait:4500});
-  steps.push({say:UNIVERSAL.full, label:'🏆 Completo con ritmo'});
-  steps.push({en:f.reto.f, rate:0.95, label:'🇺🇸 Modelo completo'});
-  steps.push({say:UNIVERSAL.autoeval, label:'🤍 Tu veredicto'});
+  steps.push({say:UNIVERSAL.full, label:'🏆 Completo', fam:fi, vista:{titulo:'🏆 Completo, con ritmo', texto:f.reto.f, grande:true}});
+  steps.push({en:f.reto.f, rate:0.95, label:'🇺🇸 Modelo completo', fam:fi});
+  steps.push({say:UNIVERSAL.autoeval, label:'🤍 Tu veredicto', fam:fi, vista:{titulo:'🤍 Tu veredicto', texto:'¿Cómo te quedó esta familia? Sé honesto: aquí nadie te regaña.', evalFam:fi}});
   const nx = FAM[fi+1];
-  steps.push({say: nx ? ('Cuando la domines, te espero en la siguiente familia: '+nx.nombre+'.') : UNIVERSAL.salidaFin, label:'🚪 Salida'});
+  const salidaTxt = nx ? ('Cuando la domines, te espero en la siguiente familia: '+nx.nombre+'.') : UNIVERSAL.salidaFin;
+  steps.push({say:salidaTxt, label:'🚪 Salida', fam:fi, vista:{titulo:'🚪 Salida', texto:salidaTxt}});
   return steps;
 }
 function leccionGuiada(fi){
@@ -632,10 +710,11 @@ function evaluar(id,val,btn){
 }
 function pintaProg(){
   const tot=totalCards();
-  const ok=Object.values(st).filter(v=>v==='ok').length;
+  const ok=Object.entries(st).filter(([k,v])=>/^\d+-\d+$/.test(k)&&v==='ok').length;
+  const famOk=Object.entries(st).filter(([k,v])=>/^fam-\d+$/.test(k)&&v==='ok').length;
   const pct=Math.round(ok/tot*100);
   document.getElementById('bar').style.width=pct+'%';
-  document.getElementById('progTxt').textContent=`${ok} de ${tot} variaciones dominadas`;
+  document.getElementById('progTxt').textContent=`${ok} de ${tot} variaciones dominadas`+(famOk?` · ${famOk} familias ✓`:'');
 }
 pintaProg();
 </script>
