@@ -129,7 +129,7 @@ footer.cta a.btn{display:inline-block;margin-top:.6rem;background:var(--accent);
   <header class="hero">
     <span class="badge">Estudio de Variaciones</span>
     <h1>La Guía de Vecindad 🗺️</h1>
-    <p class="sub">El sonido cambia según su posición y según sus vecinos. Aquí viven <b>todas las variaciones importantes del americano para un mexicano del noroeste</b>: 14 familias, cada una con su ancla culichi, su ejemplo hablado y el error que hay que cazar.</p>
+    <p class="sub">El sonido cambia según su posición y según sus vecinos. Aquí viven <b>todas las variaciones importantes del americano para un mexicano del noroeste</b>: 19 familias, cada una con su ancla culichi, su ejemplo hablado y el error que hay que cazar.</p>
   </header>
 
   <div class="nota-caja">
@@ -138,7 +138,7 @@ footer.cta a.btn{display:inline-block;margin-top:.6rem;background:var(--accent);
 
   <div class="tools">
     <button id="lentoBtn" onclick="toggleLento()">🐢 Lento</button>
-    <button id="docTodoBtn" onclick="tourGuiado()">🩺 Tour guiado (17 familias)</button>
+    <button id="docTodoBtn" onclick="tourGuiado()">🩺 Tour guiado (19 familias)</button>
     <button onclick="window.scrollTo({top:0,behavior:'smooth'})">↑ Inicio</button>
   </div>
 
@@ -290,6 +290,28 @@ const FAM = [
    ancla:"PUENTE -ANDO: playing ↔ «estoy jugANDO». La misma n de cantar. Jamás «plein-gu».",
    err:"Soltar la G como en «gato»: pleiN-GU. La g se medio traga.",
    ej:[{w:"playing",s:"plei-ing"},{w:"singing",s:"sin-ing"},{w:"morning",s:"mor-ning"},{w:"think",s:"n atrás"}]}
+ ]
+},
+{
+ id:"flexion", icon:"📐", nombre:"La Flexión — piezas que doblan", sub:"Los morfemas que doblan la palabra sin cambiarle el sentido: posesivo, verbo, comparativo. Y todos suenan según su vecino.",
+ trans:"Ya oíste la S del plural, la del pasado y la G del I-N-G. Esas tres son piezas de flexión: doblan la palabra sin cambiarle el sentido. Aquí van sus parientes cercanos: el posesivo, la tercera persona y el comparativo.",
+ reto:{t:"RETO DE LA FLEXIÓN", f:"The dog's tail is longer than the cat's.", pista:"dog's con /z/, cat's con /s/, longer con la schwa del -er. El vecino decide la voz, y el comparativo lleva la vocal fantasma."},
+ cards:[
+  {t:"El posesivo con apóstrofo", nar:"Primera pieza: el posesivo. La misma S con las mismas tres voces del plural, pegada al nombre. Escucha: the cat's toy, the dog's bone, the boss's office.", pat:"La piecita del posesivo suena pegada al nombre con la regla de las tres voces: sorda /s/ (cat's), sonora /z/ (dog's), sibilante /ɪz/ (boss's).", ancla:"Mismo truco del plural que ya dominas: el vecino decide la voz. cat's suena como cats, pero con dueño.", err:"Decir «de dog» o leer el apóstrofo como pausa — el posesivo es un sonidito pegado al nombre.", ej:[{w:"the cat's toy",s:"/s/"},{w:"the dog's bone",s:"/z/"},{w:"the boss's office",s:"/ɪz/"}]},
+  {t:"El -s del verbo (tercera persona)", nar:"Segunda: la tercera persona del verbo. He works, she runs: la S del verbo comparte ropero con el plural y el posesivo. Escucha: he works, she runs, he watches.", pat:"El verbo con él y ella lleva la misma S morfema: works /s/ tras sorda, runs /z/ tras sonora, watches /ɪz/ tras sibilante.", ancla:"La S de los morfemas tiene un solo vestuario: plural, posesivo y verbo comparten ropero. Un truco, tres empleos.", err:"Olvidarla — «he work» — o comerla: la S del verbo se canta pegada al final.", ej:[{w:"he works",s:"/s/"},{w:"she runs",s:"/z/"},{w:"he watches",s:"/ɪz/"}]},
+  {t:"-er y -est: el comparativo", nar:"Y el comparativo: el -er lleva la vocal fantasma adentro, la schwa. Taller suena tuh-ler. Escucha: taller, bigger, the biggest, faster.", pat:"El comparativo -er trae schwa: la e se apaga como en about. El superlativo -est cierra la competencia.", ancla:"más alto = tol-ler: la e del -er es la misma schwa de about — la sílaba chica se apaga.", err:"Decir tall-ÉR con e fuerte, o more taller: doble marca jamás.", ej:[{w:"taller",s:"tuh-ler"},{w:"bigger",s:"bi-ger"},{w:"the biggest",s:"big-gest"},{w:"faster",s:"fas-ter"}]}
+ ]
+},
+{
+ id:"derivacion", icon:"🧱", nombre:"La Derivación — piezas que construyen", sub:"Los morfemas que construyen palabras nuevas: prefijos que voltean el sentido y sufijos que cambian el oficio. Morfología cantada, sin nombre técnico.",
+ trans:"Y si la flexión dobla la palabra, la derivación la construye: piezas que se pegan delante y detrás para crear palabras nuevas. Un- le voltea el sentido, -ness la vuelve nombre, -er la vuelve persona. Morfología cantada, sin nombre técnico.",
+ reto:{t:"RETO DE LA DERIVACIÓN", f:"My teacher is really unhappy with this beautiful notebook.", pista:"teacher es el que enseña. Really, la y vestida de i. Unhappy, el sentido volteado. Notebook, dos palabras con un solo acento."},
+ cards:[
+  {t:"un-, re-, dis-: el principio voltea el sentido", nar:"La derivación construye palabras nuevas. La pieza un- voltea el sentido, re- repite, dis- pelea. Escucha: unhappy, redo, disagree.", pat:"Una pieza delante y la palabra cambia de sentido sin cambiar de sonido: unhappy, redo, disagree.", ancla:"un- voltea (happy a unhappy), re- repite (do a redo), dis- pelea (agree a disagree). El sonido queda intacto.", err:"Aplastar la pieza como sílaba aparte: «uhn-happy» — se canta pegada a la palabra.", ej:[{w:"unhappy",s:"un-happy"},{w:"redo",s:"re-do"},{w:"disagree",s:"dis-agree"}]},
+  {t:"-ly: el convertidor", nar:"El convertidor -ly: cambia adjetivo en adverbio, y la y se viste de i. Escucha: quickly, happily, really, slowly.", pat:"-ly convierte adjetivo en adverbio: quick a quickly. Y si la palabra termina en y, la y se viste de i: happily.", ancla:"LA Y SE VISTE DE I: happy a happily (hapi-li). Nunca happyy-ly.", err:"Conservar la y: «happy-ly» — la i gana el puesto.", ej:[{w:"quickly",s:"quick-li"},{w:"happily",s:"ha-pi-li"},{w:"really",s:"rea-li"},{w:"slowly",s:"slow-li"}]},
+  {t:"-ful y -less: lleno y vacío", nar:"El que llena y el que vacía: -ful es lleno de, -less es sin nada. Escucha: helpful, beautiful, careless, hopeless.", pat:"-ful llena la palabra de sentido (helpful, beautiful); -less la vacía (careless, hopeless).", ancla:"-ful esconde un full adentro: HELP-ful, lleno de ayuda. -less es el «sin»: careless, sin cuidado.", err:"Decir -ful con u fuerte de burro: suena ful cortito con schwa.", ej:[{w:"helpful",s:"help-ful"},{w:"beautiful",s:"beau-ti-ful"},{w:"careless",s:"care-less"},{w:"hopeless",s:"hope-less"}]},
+  {t:"-ness y -er: el nombre y el que hace", nar:"Y los fabricantes: -ness vuelve nombre a la palabra, -er vuelve persona que hace. Escucha: happiness, teacher, worker, singer.", pat:"-ness fabrica nombres (happiness); -er fabrica a la persona que hace (teacher, worker, singer).", ancla:"-er de worker es el «el que» — igual que trabajador. Y en happiness la y se viste de i otra vez.", err:"HappyNESS con e fuerte: el -ness también lleva schwa.", ej:[{w:"happiness",s:"ha-pi-ness"},{w:"teacher",s:"tea-cher"},{w:"worker",s:"wor-ker"},{w:"singer",s:"sin-ger"}]},
+  {t:"Compuestos: palabras que se casan", nar:"Y las palabras que se casan: dos en una, con el acento en la primera. Escucha: basketball, notebook, weekend.", pat:"Dos palabras, un significado, un solo acento en la primera: BASKETball, WEEKend, NOTEbook.", ancla:"basket más ball es basketball: la primera palabra es la jefa del acento.", err:"Acentuar la segunda: basketBALL — la primera manda.", ej:[{w:"basketball",s:"BAS-ket-ball"},{w:"notebook",s:"NOTE-book"},{w:"weekend",s:"WEEK-end"}]}
  ]
 },
 {
@@ -596,7 +618,7 @@ function gFin(){
   GUIDA.on=false; GUIDA.steps=[]; GUIDA.i=0;
   if (GUIDA.fam>=0){ gBtnPinta(GUIDA.fam,false); GUIDA.fam=-1; }
   const todo=document.getElementById('docTodoBtn');
-  if (todo){ todo.textContent='🩺 Tour guiado (17 familias)'; todo.classList.remove('on'); }
+  if (todo){ todo.textContent='🩺 Tour guiado (19 familias)'; todo.classList.remove('on'); }
   document.getElementById('docStatus').style.display='none';
   const esc=document.getElementById('escenario');
   if (esc){ esc.style.display='none'; }
