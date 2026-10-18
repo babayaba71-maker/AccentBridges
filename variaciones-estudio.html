@@ -79,6 +79,11 @@ footer.cta a.btn{display:inline-block;margin-top:.6rem;background:var(--accent);
  .pie{color:var(--faint);font-size:.78rem;margin-top:2rem;text-align:center}
 .doc-btn{border:1px solid var(--border);background:var(--surface);border-radius:.6rem;padding:.45rem .9rem;font-size:.9rem;margin:0 0 1rem}
 .doc-btn.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.reto-mini{background:var(--accent-soft);border-radius:.6rem;padding:.6rem .9rem;margin:0 0 1.1rem;font-size:1rem;font-family:"Newsreader",serif}
+.reto-mini b{color:var(--accent)}
+.reto-mini .mini-oir{border:0;background:var(--accent);color:var(--accent-fg);border-radius:50%;width:1.6rem;height:1.6rem;margin-left:.3rem;font-size:.7rem;vertical-align:middle}
+.reto-mini.pulse{outline:2px solid var(--accent);animation:pulse .9s ease-in-out 4}
+@keyframes pulse{50%{outline-color:transparent}}
 #docStatus{position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-h);border-radius:99px;padding:.5rem 1rem;font-size:.85rem;display:none;z-index:50;align-items:center;gap:.7rem;max-width:92vw}
 .top{display:none}
 @media(max-width:799px){
@@ -435,7 +440,9 @@ const UNIVERSAL = {
   turno:"Tu turno: repítelas despacito, sintiendo el movimiento.",
   turnoReto:"Tu turno con el reto: tómala lento primero, y luego acelera.",
   autoeval:"¿Cómo te quedó? Califícate abajo con el corazón. Aquí nadie te regaña: tú eres el dueño de tu progreso.",
-  salidaFin:"Ese era el último bloque. Ya tienes el mapa completo del vecindario. A pulirlo con la boca, y cuando quieras pásalo con Valerie en vivo."
+  salidaFin:"Ese era el último bloque. Ya tienes el mapa completo del vecindario. A pulirlo con la boca, y cuando quieras pásalo con Valerie en vivo.",
+  retoIntro:"Este es el reto de la familia. Lo tienes escrito en pantalla: lée-lo mientras lo escuchas despacito, palabra por palabra.",
+  full:"Y así suena completo, con ritmo americano. Escúchala una última vez y repítela con ella."
 };
 const GUIDA = { on:false, steps:[], i:0, fam:-1, timer:null };
 function stShow(txt){
@@ -474,13 +481,43 @@ function gSpeak(step){
   else bocaFetch(step.say).then(url => { BOCAS.cache.set(step.say, url); a.src = url; play(); }).catch(fail);
 }
 function gNext(){ GUIDA.i++; gRun(); }
+function gSpeakEn(text, rate){
+  if (!('speechSynthesis' in window)){ gNext(); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang='en-US'; if (vozUS) u.voice=vozUS; u.rate=rate;
+  u.onend = () => gNext(); u.onerror = () => gNext();
+  speechSynthesis.speak(u);
+}
+function gChunks(text){
+  if (!('speechSynthesis' in window)){ gNext(); return; }
+  const words = text.split(/\s+/).filter(Boolean);
+  let i = 0;
+  const step = () => {
+    if (!GUIDA.on) return;
+    if (i >= words.length){ gNext(); return; }
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(words[i]); i++;
+    u.lang='en-US'; if (vozUS) u.voice=vozUS; u.rate=0.6;
+    u.onend = () => { GUIDA.timer = setTimeout(step, 650); };
+    u.onerror = u.onend;
+    speechSynthesis.speak(u);
+  };
+  step();
+}
 function gRun(){
   if (!GUIDA.on){ return; }
   if (GUIDA.i >= GUIDA.steps.length){ gFin(); return; }
   const st = GUIDA.steps[GUIDA.i];
   if (st.wait){ stShow('🗣️ Pausa de práctica — repite en voz alta'); GUIDA.timer = setTimeout(gNext, st.wait); return; }
   if (st.card) gScroll(st.card);
+  if (st.reto !== undefined){
+    const el = document.getElementById('reto-'+st.reto);
+    if (el){ try{ el.scrollIntoView({behavior:'smooth',block:'center'}); el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }catch(e){} }
+  }
   stShow(st.label || '🩺');
+  if (st.en){ gSpeakEn(st.en, st.rate||0.6); return; }
+  if (st.chunks){ gChunks(st.chunks); return; }
   gSpeak(st);
   const nxt = GUIDA.steps[GUIDA.i+1];
   if (nxt && nxt.say && !BOCAS.cache.get(nxt.say)) bocaFetch(nxt.say).then(u => BOCAS.cache.set(nxt.say, u)).catch(()=>{});
@@ -506,11 +543,15 @@ function pasosFamilia(fi){
     steps.push({say:UNIVERSAL.turno, label:'🗣️ Tu turno — repite'});
     steps.push({wait:3200});
   });
-  steps.push({say:'Reto de la familia: '+f.reto.f, label:'🏆 El reto'});
-  steps.push({wait:2200});
+  steps.push({say:UNIVERSAL.retoIntro, label:'🏆 El reto — míralo en pantalla', reto:fi});
+  steps.push({en:f.reto.f, rate:0.6, label:'🇺🇸 Modelo lento'});
+  steps.push({wait:900});
+  steps.push({chunks:f.reto.f, label:'🇺🇸 Palabra por palabra'});
   steps.push({say:f.reto.pista, label:'🏆 La pista'});
   steps.push({say:UNIVERSAL.turnoReto, label:'🗣️ Tu turno con el reto'});
   steps.push({wait:4500});
+  steps.push({say:UNIVERSAL.full, label:'🏆 Completo con ritmo'});
+  steps.push({en:f.reto.f, rate:0.95, label:'🇺🇸 Modelo completo'});
   steps.push({say:UNIVERSAL.autoeval, label:'🤍 Tu veredicto'});
   const nx = FAM[fi+1];
   steps.push({say: nx ? ('Cuando la domines, te espero en la siguiente familia: '+nx.nombre+'.') : UNIVERSAL.salidaFin, label:'🚪 Salida'});
@@ -550,7 +591,8 @@ FAM.forEach((f,fi)=>{
   selh+=`<option value="${fi}">${f.icon} ${f.nombre}</option>`;
   html+=`<div class="fam-head" id="fam-${fi}"><span class="fi">${f.icon}</span><h2>${f.nombre}</h2></div>
   <p class="fam-sub">${f.sub}</p>
-  <button class="doc-btn" id="docBtn-${fi}" onclick="leccionGuiada(${fi})">🩺 Lección guiada de esta familia</button>`;
+  <button class="doc-btn" id="docBtn-${fi}" onclick="leccionGuiada(${fi})">🩺 Lección guiada de esta familia</button>
+  <div class="reto-mini" id="reto-${fi}">🏆 <b>RETO:</b> “${f.reto.f}” <button class="mini-oir" onclick="di('${esc(f.reto.f)}')" aria-label="escuchar el reto">🔊</button></div>`;
   f.cards.forEach((c,ci)=>{
     const id=`${fi}-${ci}`; const done=st[id]==='ok';
     const ejemplos=c.ej.map(e=>`<span class="ej"><button onclick="di('${esc(e.w)}')" aria-label="escuchar ${esc(e.w)}">🔊</button><span class="w">${e.w}</span><span class="s">${e.s||''}</span></span>`).join('');
