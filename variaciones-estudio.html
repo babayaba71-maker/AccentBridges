@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La Guía de Vecindad — Estudio de Variaciones · AccentBridges</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;1,400&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f3efe6; --surface:#faf7f0; --surface-2:#ebe4d6; --ink:#1c1915;
+  --muted:#6b6458; --faint:#8c8376; --accent:#3d5a73; --accent-fg:#faf7f0;
+  --accent-soft:#dfe6ec; --border:#ddd4c4; --good:#3d5c45; --warn:#8a5a32;
+  --shadow: 0 0 0 1px rgba(28,25,21,.06), 0 1px 2px -1px rgba(28,25,21,.06), 0 2px 4px 0 rgba(28,25,21,.04);
+  color-scheme:light;
+}
+html.dark {
+  --bg:#14110d; --surface:#1c1813; --surface-2:#262017; --ink:#ece5d8;
+  --muted:#b0a692; --faint:#8a7f6b; --accent:#a9c7e2; --accent-fg:#10141b;
+  --accent-soft:#28313d; --border:#342c20; --good:#86b892; --warn:#d9a05e;
+  --shadow: 0 0 0 1px rgba(0,0,0,.35), 0 1px 2px -1px rgba(0,0,0,.3), 0 2px 4px 0 rgba(0,0,0,.25);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Source Sans 3",system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:"Newsreader",Palatino,serif;letter-spacing:-.03em;line-height:1.15;font-weight:500;margin:0}
+p{margin:0;text-wrap:pretty}
+button{cursor:pointer;font:inherit}
+.wrap{max-width:72rem;margin:0 auto;min-height:100dvh;display:flex}
+aside{width:14.5rem;flex-shrink:0;border-right:1px solid var(--border);padding:1.5rem 1rem;position:sticky;top:0;height:100dvh;display:flex;flex-direction:column}
+.brand{padding:0 .5rem 1.5rem}
+.brand b{font-family:"Newsreader",serif;font-size:1.35rem;font-weight:500;display:block}
+.brand span{font-size:.75rem;color:var(--muted)}
+nav.side{display:flex;flex-direction:column;gap:.15rem;flex:1;overflow-y:auto}
+nav.side button{display:flex;align-items:center;gap:.6rem;padding:.45rem .65rem;border:0;border-radius:.5rem;background:transparent;color:var(--muted);font-weight:500;font-size:.85rem;text-align:left;width:100%}
+nav.side button.on{background:var(--accent-soft);color:var(--accent)}
+nav.side button:hover{background:var(--surface-2);color:var(--ink)}
+.prog{background:var(--surface);padding:.75rem;border-radius:.7rem;box-shadow:var(--shadow);margin-top:auto}
+.prog .bar{height:.4rem;background:var(--surface-2);border-radius:99px;overflow:hidden;margin:.5rem 0}
+.prog .bar>i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
+.main{flex:1;min-width:0;padding:1.25rem 1rem 5rem}
+@media(min-width:800px){.main{padding:2rem 2rem 2.5rem}}
+header.hero h1{font-size:2.1rem}
+header.hero .sub{color:var(--muted);font-size:.95rem;margin:.4rem 0 1rem;max-width:44rem}
+.badge{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--accent-soft);color:var(--accent);border-radius:99px;padding:.2rem .7rem;margin-bottom:.6rem}
+.nota-caja{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--warn);border-radius:.7rem;padding:.8rem 1rem;margin:1rem 0;font-size:.9rem;color:var(--muted)}
+.fam-head{display:flex;align-items:baseline;gap:.8rem;margin:2.2rem 0 .6rem}
+.fam-head h2{font-size:1.6rem}
+.fam-head .fi{font-size:1.3rem}
+.fam-sub{color:var(--muted);font-size:.92rem;margin-bottom:1rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:.9rem;padding:1.1rem 1.15rem;margin-bottom:1rem;box-shadow:var(--shadow)}
+.card.done{border-color:var(--good)}
+.card h3{font-size:1.18rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.card h3 .n{font-size:.72rem;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:99px;padding:.15rem .55rem;letter-spacing:.04em}
+.patron{color:var(--ink);margin:.5rem 0 .7rem;font-size:.95rem}
+.ejemplos{display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0}
+.ej{display:inline-flex;align-items:center;gap:.45rem;background:var(--surface-2);border:1px solid var(--border);border-radius:99px;padding:.3rem .5rem .3rem .3rem}
+.ej button{border:0;background:var(--accent);color:var(--accent-fg);border-radius:50%;width:1.7rem;height:1.7rem;font-size:.75rem;flex-shrink:0}
+.ej .w{font-weight:700;font-size:.9rem}
+.ej .s{font-size:.78rem;color:var(--warn);font-style:italic}
+.caja{border-radius:.6rem;padding:.6rem .8rem;font-size:.88rem;margin:.55rem 0}
+.caja b{display:block;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.15rem}
+.caja.ancla{background:rgba(61,92,69,.08)}
+.caja.ancla b{color:var(--good)}
+.caja.error{background:rgba(138,90,50,.08)}
+.caja.error b{color:var(--warn)}
+.reto{background:var(--accent-soft);border-radius:.8rem;padding:1rem 1.1rem;margin:1.2rem 0}
+.reto b{font-family:"Newsreader",serif;font-size:1.1rem;display:block;margin-bottom:.3rem}
+.reto .frase{font-family:"Newsreader",serif;font-size:1.25rem;margin:.4rem 0}
+.autoeval{display:flex;gap:.5rem;margin-top:.8rem;flex-wrap:wrap}
+.autoeval button{border:1px solid var(--border);background:var(--surface);border-radius:99px;padding:.4rem .9rem;font-size:.95rem}
+.autoeval button.pick{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.tools{display:flex;gap:.6rem;align-items:center;margin:1rem 0;flex-wrap:wrap}
+.tools button{border:1px solid var(--border);background:var(--surface);border-radius:.6rem;padding:.5rem .9rem;font-size:.9rem}
+.tools .on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.escucha-todos{border:1px solid var(--border);background:var(--surface);border-radius:.5rem;padding:.25rem .7rem;font-size:.8rem;margin:.2rem 0 .4rem}
+footer.cta{background:var(--surface);border:1px solid var(--border);border-radius:.9rem;padding:1.2rem;margin-top:2rem}
+footer.cta a.btn{display:inline-block;margin-top:.6rem;background:var(--accent);color:var(--accent-fg);border-radius:.6rem;padding:.6rem 1.1rem;text-decoration:none;font-weight:700}
+.pie{color:var(--faint);font-size:.78rem;margin-top:2rem;text-align:center}
+.top{display:none}
+@media(max-width:799px){
+  aside{display:none}
+  .top{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding:.7rem 1rem;background:var(--surface);position:sticky;top:0;z-index:20}
+  .top b{font-family:"Newsreader",serif;font-size:1.05rem}
+  .top select{border:1px solid var(--border);background:var(--surface-2);border-radius:.5rem;padding:.3rem .4rem;font-size:.8rem;max-width:11rem}
+}
+</style>
+</head>
+<body>
+<div class="top">
+  <b>🗺️ Guía de Vecindad</b>
+  <select id="famSel" onchange="irA(this.value)"></select>
+</div>
+<div class="wrap">
+<aside>
+  <div class="brand">
+    <b>Guía de Vecindad</b>
+    <span>Estudio de Variaciones · AccentBridges</span>
+  </div>
+  <nav class="side" id="nav"></nav>
+  <div class="prog">
+    <b style="font-size:.75rem;color:var(--muted)">Tu progreso</b>
+    <div class="bar"><i id="bar" style="width:0%"></i></div>
+    <span id="progTxt" style="font-size:.75rem;color:var(--muted)"></span>
+  </div>
+</aside>
+<main class="main">
+  <header class="hero">
+    <span class="badge">Estudio de Variaciones</span>
+    <h1>La Guía de Vecindad 🗺️</h1>
+    <p class="sub">El sonido cambia según su posición y según sus vecinos. Aquí viven <b>todas las variaciones importantes del americano para un mexicano del noroeste</b>: 14 familias, cada una con su ancla culichi, su ejemplo hablado y el error que hay que cazar.</p>
+  </header>
+
+  <div class="nota-caja">
+    📐 <b>Nota de capas:</b> los SONIDOS de esta guía se entrenan <b>al oído desde cualquier nivel</b>. Los nombres de letra solo son <b>etiquetas de búsqueda</b> para maestras y comunidad avanzada — en el A0 puro nadie nombra letras. Instrucción en español, ejemplos en inglés: Bilingual Bridge.
+  </div>
+
+  <div class="tools">
+    <button id="lentoBtn" onclick="toggleLento()">🐢 Lento</button>
+    <button onclick="window.scrollTo({top:0,behavior:'smooth'})">↑ Inicio</button>
+  </div>
+
+  <div id="contenido"></div>
+
+  <footer class="cta">
+    <b style="font-family:Newsreader,serif;font-size:1.2rem">Practícalas con Valerie, en vivo 🎙️</b>
+    <p style="color:var(--muted);font-size:.9rem">Cada reto se pule con la boca en una sesión de voz. Menciona la variación por su nombre y Valerie te acompaña.</p>
+    <a class="btn" href="https://valerie.base44.app/functions/valerieCall">🎤 Hablar con Valerie (/call)</a>
+  </footer>
+
+  <p class="pie">AccentBridges — técnica, identidad y libertad.<br>
+  La Guía de Vecindad · Metodología Valerie · Culiacán, Sinaloa → el mundo</p>
+</main>
+</div>
+
+<script>
+// ===================== DATOS =====================
+const FAM = [
+{
+ id:"t", icon:"T", nombre:"La Familia de la T", sub:"La más trabajadora del americano: cambia de empleo según dónde se pare y quién tenga al lado.",
+ reto:{t:"RETO DE LA FAMILIA T", f:"Betty bought a bit of better butter.", pista:"Beddy boughda bidda bedder budder — pura flap, la lengua toca una vez."},
+ cards:[
+  {t:"T de arranque con soplo", pat:"Al principio de palabra, la T llega con una bocanada de aire — como si encendieras una velita.",
+   ancla:"Pon la mano frente a la boca y di top: debes sentir el aire golpear. La T española es seca; la gringa sopla.",
+   err:"El culichi dice la T dental seca, sin aire — suena dura y sudada.",
+   ej:[{w:"top",s:"con soplo"},{w:"table",s:"tei-bol"},{w:"ten",s:"con aire"}]},
+  {t:"Flap T — la que se cae", pat:"Entre vocales y sin acento, la T se convierte en un golpe suave de lengua — suena como una D relajada.",
+   ancla:"ORO data/dara: es LA MISMA ere de «pero». Si puedes decir pero, ya sabes decir water. La lengua toca una vez y ya.",
+   err:"Decir «guater» con T limpia. En el americano el oído escucha una ere: wah-der.",
+   ej:[{w:"water",s:"wah-der"},{w:"better",s:"be-der"},{w:"city",s:"si-di"},{w:"party",s:"par-di"}]},
+  {t:"T final congelada", pat:"Al final de palabra la T no explota: se congela. El aire se queda adentro y la lengua selle la puerta.",
+   ancla:"Di cat y quédate congelado en la T — sin soltar el aire. Es un tapón, no un cohete.",
+   err:"Explotar la T final como en español — o peor, soltarle una e de apoyo: «cate».",
+   ej:[{w:"cat",s:"congelada"},{w:"sit",s:"tapón"},{w:"what",s:"qué-t"}]},
+  {t:"T glotal — la que se atraganta", pat:"Antes de una N, la T ni se mueve: se atraganta en la garganta. El americano dice impor-ant, sin la T.",
+   ancla:"Siente un micro-clic en la garganta entre impor y ant. La T se la traga la laringe.",
+   err:"Pronunciar la T completa: «imporTant» con T limpia suena a locutor de novela.",
+   ej:[{w:"important",s:"impor-ant"},{w:"mountain",s:"moun-ain"},{w:"button",s:"buh-in"},{w:"winter",s:"win-er"}]},
+  {t:"T + R = la que se ablanda (palatal)", pat:"Cuando la T va pegada a una ere, se ablanda y se acerca a la ch. Trump suena Chrum.",
+   ancla:"El insight del Maestro: Trump → «Chrum». truck → chruck, train → chrain. La T se hace chicle con la ere.",
+   err:"Decir trei-n con T dura: la T+R gringa es una sola masa suave.",
+   ej:[{w:"truck",s:"chruck"},{w:"train",s:"chrain"},{w:"trip",s:"chrip"},{w:"Trump",s:"Chrum"}]},
+  {t:"T + Y = gotcha", pat:"Cuando la T se junta con una y, se funden en ch. got you no existe en la calle: existe gotcha.",
+   ancla:"What you want → wha-cha-want. La T+Y se abrazan y nacen como ch.",
+   err:"Separar las palabras: «got you» con T limpia y y fuerte.",
+   ej:[{w:"got you",s:"gotcha"},{w:"what you",s:"whatcha"},{w:"aren't you",s:"aren-cha"}]},
+  {t:"T + I = la elegante que se vuelve sh", pat:"En la terminación -tion y en picture, la T pegada a la i se ablanda hacia sh: nation suena nei-shan.",
+   ancla:"La T besa la i y nace sh — la vecindad más elegante del americano. education → e-dju-KEI-shan.",
+   err:"Decir na-TION con T limpia: «nei-tion» — suena a robot de laboratorio.",
+   ej:[{w:"nation",s:"nei-shan"},{w:"station",s:"stei-shan"},{w:"education",s:"e-ju-kei-shan"},{w:"picture",s:"pic-shur"}]}
+ ]
+},
+{
+ id:"d", icon:"D", nombre:"La Familia de la D", sub:"Hermana de la T: entre vocales también se cae, al final se congela, y con la y se funde.",
+ reto:{t:"RETO DE LA FAMILIA D", f:"Did you get the order of the ladder?", pista:"didja ge-tha or-der... todo fundido, la D final tapada en good."},
+ cards:[
+  {t:"D flap — la D que se cae", pat:"Entre vocales, la D también se convierte en golpe suave — igual que su hermana la T. Ladder y latter suenan igual.",
+   ancla:"Misma ere de «pero»: ladder suena la-der. El americano ni las distingue.",
+   err:"Decir la D fuerte de «deck» en medio de palabra: «or-DER» muy martillada.",
+   ej:[{w:"ladder",s:"la-der"},{w:"order",s:"or-der"},{w:"leader",s:"li-der"}]},
+  {t:"D + Y = didja", pat:"La D con la y se funden hacia una j suave: did you se oye didja.",
+   ancla:"Did you eat? → di-ja eat. La D+Y nace como j.",
+   err:"«Did you» bien separado — nadie lo dice así hablando corrido.",
+   ej:[{w:"did you",s:"didja"},{w:"would you",s:"wouldja"},{w:"could you",s:"couldja"}]},
+  {t:"D final tapón", pat:"La D final no explota: se congela igual que la T. good queda con el aire atrapado adentro.",
+   ancla:"good → gu(d): cierra la boca en la d y guarda el aire. Sin e de apoyo.",
+   err:"Soltar «gui-DÉ» con e fuerte, o explotarla — delata de lector.",
+   ej:[{w:"good",s:"tapón"},{w:"bad",s:"tapón"},{w:"world",s:"wor-l(d)"}]}
+ ]
+},
+{
+ id:"l", icon:"L", nombre:"La Familia de la L", sub:"La trágica del culichi: en español es clara siempre. En americano tiene dos vestidos.",
+ reto:{t:"RETO DE LA FAMILIA L", f:"Look at the light ball and feel the cold.", pista:"Look y light con L clara; ball, feel, cold con L gruesa final."},
+ cards:[
+  {t:"L clara al principio", pat:"Al inicio de palabra la L es clara, ligera, con la punta en los dientes — igual que la española.",
+   ancla:"Esta sí la tienes: light, love, lip. L de siempre.",
+   err:"Ninguno aquí — es tu terreno seguro. Solo no la arrastres con la e española: «ele».",
+   ej:[{w:"light",s:"clarita"},{w:"love",s:"clarita"},{w:"listen",s:"li-sen"}]},
+  {t:"L oscura al final (dark L)", pat:"Al final de palabra o antes de consonante, el dorso de la lengua sube y la L se pone gruesa, oscura, casi con eco de u.",
+   ancla:"feel → fi-l con la lengua gruesa atrás, como si la L llevara chocolate derretido. La L final pesa.",
+   err:"El error #1 del noroeste: usar la L clara española al final — fiL limpio. El americano dice fill con la L de gordo.",
+   ej:[{w:"feel",s:"L gruesa"},{w:"ball",s:"bo-l"},{w:"cold",s:"cou-l"},{w:"milk",s:"miok"}]}
+ ]
+},
+{
+ id:"r", icon:"R", nombre:"La Familia de la R", sub:"La más peliaguda para un sinaloense: ni vibrar ni golpear — flota, y se come las vocales.",
+ reto:{t:"RETO DE LA FAMILIA R", f:"Robert ran around the red car four times.", pista:"Ninguna ere de pero, ningún doble erre de perro: lengua flotando atrás, y la R final completa."},
+ cards:[
+  {t:"La R americana — la que flota", pat:"La lengua se echa hacia atrás y arriba SIN tocar nada, los labios se redondean un poco. Ni vibración ni golpe: flota.",
+   ancla:"Es el murmullo de agua en la boca. En red la lengua flota; jamás toca el techo.",
+   err:"El culichi mete la ere de pero en red (rred con golpe) o la ere fuerte española.",
+   ej:[{w:"red",s:"flotante"},{w:"brother",s:"bro-der"},{w:"right",s:"rai-t"}]},
+  {t:"La R se come la vocal (tras vocal)", pat:"Después de una vocal, la R se traga la vocal y la enfría: car, four, bird. El conjunto ER de teacher, worker.",
+   ancla:"bird → be-rd con la lengua gruesa atrás, casi sin vocal. Y la R final es FUERTE: four-rr, car-rr — jamás a la británica.",
+   err:"Cortar la R final (four → fo) o decir bird con ere golpeada española.",
+   ej:[{w:"car",s:"R completa"},{w:"four",s:"four-r"},{w:"bird",s:"be-rd"},{w:"teacher",s:"tea-cher"}]}
+ ]
+},
+{
+ id:"s", icon:"S", nombre:"La Familia de la S", sub:"El morfema plural con fonología escondida: la misma S suena distinto según su vecino.",
+ reto:{t:"RETO DE LA FAMILIA S", f:"The cats, the dogs and the boxes are on the buses.", pista:"cats /s/ · dogs /z/ · boxes /iz/ · buses /iz/ — una S, tres voces."},
+ cards:[
+  {t:"Plural -S: una letra, tres sonidos", pat:"El morfema del plural suena según su vecino: tras voz sorda es /s/ (cats), tras voz sonora es /z/ (dogs), tras sibilante mete vocal /iz/ (boxes). La misma regla corre en las palabritas: is, was, his — la S zumba /z/.",
+   ancla:"Morfología cantada sin nombre técnico: el vecino decide la voz de la S.",
+   err:"Decir todas las eses igual: «box-es» con e fuerte. En boxes la S respira i-z.",
+   ej:[{w:"cats",s:"/s/"},{w:"dogs",s:"/z/"},{w:"boxes",s:"/iz/"},{w:"watches",s:"/iz/"},{w:"his",s:"/z/"}]},
+  {t:"S + Y = mishu", pat:"La S pegada a la y se funde hacia sh. miss you se oye mi-shu.",
+   ancla:"I miss you → ai mi-shu. La S+Y se vuelve sh.",
+   err:"«Miss you» con S seca y y fuerte.",
+   ej:[{w:"miss you",s:"mishu"},{w:"bless you",s:"bleshu"},{w:"guess you",s:"geshu"}]}
+ ]
+},
+{
+ id:"ed", icon:"ED", nombre:"La Familia del Pasado -ED", sub:"Tres vestidos del mismo morfema: el vecino decide.",
+ reto:{t:"RETO DEL PASADO", f:"I walked, played and wanted to talk.", pista:"walked /t/ · played /d/ · wanted /id/ — el pasado tiene tres voces."},
+ cards:[
+  {t:"-ED: tres sonidos", pat:"Tras voz sorda suena /t/ (walked), tras voz sonora suena /d/ (played), tras t o d mete vocal /id/ (wanted).",
+   ancla:"El mismo truco del plural: escucha al vecino y sabrás qué vestido trae.",
+   err:"Decir «walk-ed» con e fuerte en todas — el clásico del hispano.",
+   ej:[{w:"walked",s:"/t/"},{w:"played",s:"/d/"},{w:"wanted",s:"/id/"},{w:"needed",s:"/id/"}]}
+ ]
+},
+{
+ id:"ing", icon:"ING", nombre:"La Familia del -ING", sub:"Doctrina del Puente -ANDO: la G nunca se suelta, la n se hace atrás.",
+ reto:{t:"RETO DEL -ING", f:"I'm playing and singing all morning.", pista:"Ancla con -ANDO: plei-ing, sin-ing — la n de atrás, la G se medio traga."},
+ cards:[
+  {t:"-ING y el velo", pat:"La terminación suena con la n pegada atrás, en el velo del paladar — nunca una g explosiva ni una n de nariz española. La misma n de atrás aparece en think, bank, thank: antes de k la n se hace atrás.",
+   ancla:"PUENTE -ANDO: playing ↔ «estoy jugANDO». La misma n de cantar. Jamás «plein-gu».",
+   err:"Soltar la G como en «gato»: pleiN-GU. La g se medio traga.",
+   ej:[{w:"playing",s:"plei-ing"},{w:"singing",s:"sin-ing"},{w:"morning",s:"mor-ning"},{w:"think",s:"n atrás"}]}
+ ]
+},
+{
+ id:"the", icon:"THE", nombre:"Los Dos Vestidos de THE", sub:"El artículo cambia según lo que viene detrás — regla de vecindad pura.",
+ reto:{t:"RETO DEL THE", f:"I'm gonna go to the house and the airport.", pista:"da house (consonante) · di airport (vocal) — y en los dos, lengua zumbando, jamás una d española."},
+ cards:[
+  {t:"THE: da y di", pat:"Antes de consonante suena /da/ (the house → da house); antes de vocal suena /di/ (the airport → di airport) y se enlaza con la vocal siguiente.",
+   ancla:"Vocal con vocal se enlazan. La d de THE nunca es la d española seca: la lengua sale zumbando entre los dientes.",
+   err:"La d española «de haus» — la raíz de los 25 fallos clásicos del oído.",
+   ej:[{w:"the house",s:"da house"},{w:"the airport",s:"di-airport"},{w:"the end",s:"di-end"}]}
+ ]
+},
+{
+ id:"th", icon:"TH", nombre:"La TH — Sorda y Zumbada", sub:"Dos sonidos con la misma pose: lengua asomada entre los dientes.",
+ reto:{t:"RETO DE LA TH", f:"This thoughtful mother thinks about both.", pista:"think sorda sin voz · this/mother zumbada con voz — la lengua se ve afuera en todas."},
+ cards:[
+  {t:"TH sorda vs TH zumbada", pat:"think: lengua entre dientes, soplo sin voz. this: misma pose pero con la garganta zumbando.",
+   ancla:"Mano en la garganta: si vibra, es la zumbada (this, mother, with). Si solo pasa aire, es la sorda (think, bath).",
+   err:"Decir «tink» y «dis» con la lengua escondida — la lengua TIENE que verse entre los dientes.",
+   ej:[{w:"think",s:"sorda"},{w:"this",s:"zumbada"},{w:"mother",s:"zumbada"},{w:"bath",s:"sorda"}]}
+ ]
+},
+{
+ id:"w", icon:"W", nombre:"La Familia de la W", sub:"El famoso güeison del noroeste: la W no es gü — es una u rápida con beso.",
+ reto:{t:"RETO DE LA W", f:"We would walk one way with water.", pista:"Todas empiezan con u rápida de labios redondos — ni rastro de gü."},
+ cards:[
+  {t:"W — u rápida, jamás gü", pat:"La W es una u que arranca con los labios redondeados y se desliza a la vocal siguiente. Es un viento de labios, no una consonante dura.",
+   ancla:"would → u-uld con beso de labios. one empieza igual: uán. we → u-i.",
+   err:"El güeison clásico: decir «güi», «güater», «güould» — la W no es la gü de güey.",
+   ej:[{w:"we",s:"u-i"},{w:"would",s:"u-uld"},{w:"water",s:"ua-der"},{w:"one",s:"uán"}]}
+ ]
+},
+{
+ id:"bv", icon:"B/V", nombre:"El Par B y V", sub:"En español son la misma letra. En inglés viven en casas distintas.",
+ reto:{t:"RETO DEL PAR B/V", f:"I believe seven very good videos.", pista:"believe y seven con labios juntos; very y videos con labio en el diente."},
+ cards:[
+  {t:"B de labios, V de diente", pat:"La B se dice con los dos labios juntos. La V muerde: el labio de abajo toca los dientes de arriba y zumba.",
+   ancla:"very → con el labio en el diente, como si revisaras si aún tienes los dientes limpios. believe: be-LIE-ve con la v de diente.",
+   err:"El «bery»: decir very con la B de burro, labios juntos. En español b/v suenan igual — en inglés el oído los distingue.",
+   ej:[{w:"very",s:"diente"},{w:"video",s:"diente"},{w:"seven",s:"diente"},{w:"believe",s:"be-lie-ve"}]}
+ ]
+},
+{
+ id:"h", icon:"H", nombre:"La Familia de la H", sub:"Ni jota raspada ni silencio: la H inglesa sopla suave.",
+ reto:{t:"RETO DE LA H", f:"Hello, my house has an hour and I'm honest.", pista:"hello/house soplando suave; hour y honest sin nada — la H muda de esas dos."},
+ cards:[
+  {t:"H suave — y a veces muda", pat:"La H inglesa es un soplo suave de garganta, más delicado que la jota española. Y en hour, honest, heir ni suena: se calla completa.",
+   ancla:"house → j-ai-su suavecito, como si empañaras un vidrio. hour → au-r, sin h.",
+   err:"Raspar «JJJouse» con jota fuerte — o meterle h a hour («jaur»).",
+   ej:[{w:"house",s:"soplo suave"},{w:"hello",s:"he-lou"},{w:"hour",s:"au-r"},{w:"honest",s:"o-nes"}]}
+ ]
+},
+{
+ id:"mansas", icon:"🤫", nombre:"Las Letras Mansas", sub:"Consonantes que existen en el papel pero no en el oído.",
+ reto:{t:"RETO DE LAS MANSAS", f:"I know the knife can write and climb.", pista:"know = no · knife = nai-f · write = rait · climb = clai-m — las mansas ni suenan."},
+ cards:[
+  {t:"KN, WR y MB — las que se callan", pat:"Antes de la i o la n del final, la k de kn se calla (know → no); la w de wr se calla (write → rait); la b final tras m se calla (climb → clai-m).",
+   ancla:"Se escriben para dar miedo, pero el oído solo recibe a la que manda: la n de know, la r de write, la m de climb.",
+   err:"Pronunciar la letra callada: «kNow», «wRite» — delator de lector principiante.",
+   ej:[{w:"know",s:"no"},{w:"knife",s:"nai-f"},{w:"write",s:"rait"},{w:"climb",s:"clai-m"}]}
+ ]
+},
+{
+ id:"schwa", icon:"ə", nombre:"La Vocal Fantasma — Schwa", sub:"La vocal más común del americano y la más invisible: todas las átonas se apagan.",
+ reto:{t:"RETO DE LA SCHWA", f:"I'm going to the sofa to eat a banana.", pista:"Six schwas en una frase: going→gonna, to→tuh, the→thuh, sofa→so-fuh, a→uh, banana→buh-nan-uh."},
+ cards:[
+  {t:"Schwa — el uh universal", pat:"Toda sílaba sin acento se apaga en un uh relajado: about, sofa, banana. Es la razón por la que el inglés suena rápido.",
+   ancla:"Boca muerta, mandíbula suelta: el uh no cuesta nada. La sílaba acentuada se dice completa; las demás se venden de noche.",
+   err:"Decir cada vocal completa como en español — a-ba-na-na. El español es plano; el americano es montaña rusa.",
+   ej:[{w:"about",s:"uh-BOUT"},{w:"sofa",s:"SO-fuh"},{w:"banana",s:"buh-NA-nuh"},{w:"happen",s:"HAP-pun"}]}
+ ]
+},
+{
+ id:"link", icon:"🔗", nombre:"Las Conexiones — Linking", sub:"Las palabras no viven solas: se roban el aire del vecino.",
+ reto:{t:"RETO DEL LINKING", f:"I want to pick it up and hold on a minute.", pista:"pih-kit-tup · hol-don — seis conexiones en una frase."},
+ cards:[
+  {t:"Consonante roba vocal (C+V)", pat:"Cuando una palabra termina en consonante y la siguiente empieza en vocal, se cosen: pick it se oye pih-kit.",
+   ancla:"Piensa «pickit» como UNA palabra. La consonante se roba la vocal siguiente.",
+   err:"Separar palabra por palabra — eso delata al intermedio.",
+   ej:[{w:"pick it up",s:"pih-kit-tup"},{w:"hold on",s:"hol-don"},{w:"not at all",s:"no-ta-tall"}]},
+  {t:"Vocal + vocal: el puente invisible", pat:"Vocal seguida de vocal invita un sonido puente: w si los labios quedan redondos (go out), y si quedan estirados (see it).",
+   ancla:"go-(w)-out · see-(y)-it · I-(y)-am. El puente no se escribe: se siente.",
+   err:"Hacer pausa entre las dos vocales: «go… out».",
+   ej:[{w:"go out",s:"go-w-out"},{w:"see it",s:"see-y-it"},{w:"I am",s:"ai-y-am"}]}
+ ]
+},
+{
+ id:"recortes", icon:"✂️", nombre:"Los Recortes del Speaking", sub:"El inglés corrido se ahorra movidas: nobody says going to en la calle.",
+ reto:{t:"RETO DE LOS RECORTES", f:"I'm gonna wanna getta know what you mean.", pista:"gonna · wanna · gotta · whaddaya — el speaking real recorta y enlaza."},
+ cards:[
+  {t:"Gonna, wanna, gotta y compañía", pat:"going to → gonna, want to → wanna, got to → gotta, let me → lemme, what do you → whaddaya.",
+   ancla:"¿Whaddaya mean? = What do you mean. La boca se ahorra sílabas — economía motriz pura.",
+   err:"Decir cada palabra completa y pausada en plática corrida: suena a robot Presentador.",
+   ej:[{w:"gonna",s:"going to"},{w:"wanna",s:"want to"},{w:"gotta",s:"got to"},{w:"lemme",s:"let me"}]}
+ ]
+},
+{
+ id:"musica", icon:"🎵", nombre:"La Música — Stress y Melodía", sub:"No es qué dices: es qué aprietas y hacia dónde va la voz.",
+ reto:{t:"RETO DE LA MÚSICA", f:"You're coming to the party, aren't you?", pista:"Voz que BAJA = ya sé que sí · voz que SUBE = de verdad pregunto. Y aprieta la sílaba que importa."},
+ cards:[
+  {t:"El acento cambia el significado", pat:"La misma palabra cambia de empleo según la sílaba que se apriete: PREsent (regalo) vs preSENT (presentar). REcord (disco) vs reCORD (grabar).",
+   ancla:"La sílaba fuerte se dice más larga, más alta y más fuerte — las demás se apagan (ahí entra la schwa).",
+   err:"Apretar siempre la primera sílaba, como hace el español plano.",
+   ej:[{w:"PREsent",s:"regalo"},{w:"preSENT",s:"presentar"},{w:"REcord",s:"disco"},{w:"reCORD",s:"grabar"}]},
+  {t:"La melodía sube y baja", pat:"Las afirmaciones bajan la voz al final; las preguntas de sí/no la suben. La misma frase con distinta melodía significa cosas distintas.",
+   ancla:"You're coming, aren't you? con voz que BAJA = seguro que sí; con voz que SUBE = dime la verdad. La melodía es el significado.",
+   err:"El plano culichi: el español es más parejo; el americano canta montaña rusa.",
+   ej:[{w:"I like coffee",s:"baja"},{w:"Are you ready?",s:"sube"},{w:"You're coming, aren't you?",s:"depende"}]}
+ ]
+}
+];
+
+// ===================== AUDIO =====================
+let LENTO=false;
+function toggleLento(){LENTO=!LENTO;document.getElementById("lentoBtn").classList.toggle("on",LENTO);}
+let vozUS=null;
+function cargavoz(){
+  const vs=speechSynthesis.getVoices();
+  vozUS=vs.find(v=>v.lang==='en-US'&&/Google/i.test(v.name))||vs.find(v=>v.lang==='en-US')||vs.find(v=>/en[-_]/i.test(v.lang))||null;
+}
+if('speechSynthesis' in window){speechSynthesis.onvoiceschanged=cargavoz;cargavoz();}
+function esc(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
+function di(texto){
+  if(!('speechSynthesis' in window))return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(texto);
+  u.lang='en-US'; if(vozUS)u.voice=vozUS;
+  u.rate=LENTO?0.55:0.8;
+  speechSynthesis.speak(u);
+}
+function diTodos(arr){
+  if(!('speechSynthesis' in window))return;
+  speechSynthesis.cancel();
+  arr.forEach(w=>{
+    const u=new SpeechSynthesisUtterance(w);
+    u.lang='en-US'; if(vozUS)u.voice=vozUS;
+    u.rate=LENTO?0.55:0.75;
+    speechSynthesis.speak(u);
+  });
+}
+
+// ===================== ESTADO =====================
+const KEY='variacionesV1';
+let st={}; try{st=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+function salva(){localStorage.setItem(KEY,JSON.stringify(st))}
+function totalCards(){return FAM.reduce((a,f)=>a+f.cards.length,0)}
+
+// ===================== RENDER =====================
+const cont=document.getElementById('contenido');
+const nav=document.getElementById('nav');
+const famSel=document.getElementById('famSel');
+let html='',navh='',selh='<option value="">Familias…</option>';
+FAM.forEach((f,fi)=>{
+  navh+=`<button data-fam="${fi}" onclick="irA(${fi})">${f.icon} ${f.nombre}</button>`;
+  selh+=`<option value="${fi}">${f.icon} ${f.nombre}</option>`;
+  html+=`<div class="fam-head" id="fam-${fi}"><span class="fi">${f.icon}</span><h2>${f.nombre}</h2></div>
+  <p class="fam-sub">${f.sub}</p>`;
+  f.cards.forEach((c,ci)=>{
+    const id=`${fi}-${ci}`; const done=st[id]==='ok';
+    const ejemplos=c.ej.map(e=>`<span class="ej"><button onclick="di('${esc(e.w)}')" aria-label="escuchar ${esc(e.w)}">🔊</button><span class="w">${e.w}</span><span class="s">${e.s||''}</span></span>`).join('');
+    const todas=c.ej.map(e=>esc(e.w)).join("','");
+    html+=`<div class="card ${done?'done':''}" id="c-${id}">
+      <h3><span class="n">V${fi+1}.${ci+1}</span> ${c.t}</h3>
+      <p class="patron">${c.pat}</p>
+      <div class="ejemplos">${ejemplos}</div>
+      <button class="escucha-todos" onclick="diTodos(['${todas}'])">▶️ Escuchar todos</button>
+      <div class="caja ancla"><b>🥇 Ancla culichi</b>${c.ancla}</div>
+      <div class="caja error"><b>⚠️ El error del noroeste</b>${c.err}</div>
+      <div class="autoeval" data-id="${id}">
+        <button onclick="evaluar('${id}','ok',this)">😎 La domino</button>
+        <button onclick="evaluar('${id}','casi',this)">🤏 Casi</button>
+        <button onclick="evaluar('${id}','otra',this)">😅 Otra ronda</button>
+      </div>
+    </div>`;
+  });
+  html+=`<div class="reto"><b>🏆 ${f.reto.t}</b>
+    <p class="frase">“${f.reto.f}”</p>
+    <p style="font-size:.85rem;color:var(--muted)">${f.reto.pista}</p>
+    <button class="escucha-todos" style="background:var(--accent);color:var(--accent-fg);border-color:var(--accent);margin-top:.5rem" onclick="di('${esc(f.reto.f)}')">🔊 Oír el reto</button>
+  </div>`;
+});
+cont.innerHTML=html;
+nav.innerHTML=navh;
+famSel.innerHTML=selh;
+
+function irA(i){const el=document.getElementById('fam-'+i);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
+function evaluar(id,val,btn){
+  st[id]=val; salva();
+  const card=document.getElementById('c-'+id);
+  card.classList.toggle('done',val==='ok');
+  [...btn.parentNode.children].forEach(b=>b.classList.remove('pick'));
+  btn.classList.add('pick');
+  pintaProg();
+}
+function pintaProg(){
+  const tot=totalCards();
+  const ok=Object.values(st).filter(v=>v==='ok').length;
+  const pct=Math.round(ok/tot*100);
+  document.getElementById('bar').style.width=pct+'%';
+  document.getElementById('progTxt').textContent=`${ok} de ${tot} variaciones dominadas`;
+}
+pintaProg();
+</script>
+</body>
+</html>
