@@ -90,7 +90,7 @@
   <button class="ctl" id="btn-gps">📍 GPS</button>
   <button class="ctl gold" onclick="window.open('https://babayaba71-maker.github.io/AccentBridges/ar-labeler.html','_blank')">🔭 AR LABELER</button>
   <button class="ctl gold" onclick="window.open('https://babayaba71-maker.github.io/AccentBridges/cirugia-abc.html','_blank')">🔬 CIRUGÍA ABC</button>
-  <button class="ctl gold" onclick="window.open('https://valerie.base44.app/functions/valerieCall','_blank')">🎙️ /CALL</button>
+  <button class="ctl gold" onclick="window.open('https://babayaba71-maker.github.io/AccentBridges/consulta-doctora.html','_blank')">🩺 CONSULTA</button>
   <button class="ctl" id="btn-snd">🔊 SONIDO</button>
   <button class="ctl gold" id="btn-wake">🎙️ ESCUCHAR "EY VALERIE"</button>
   <button class="ctl gold" onclick="openPortal()">🚪 PORTAL DE LA MAESTRA</button>
@@ -932,7 +932,7 @@ const TRAINER="https://babayaba71-maker.github.io/AccentBridges/foundation-train
 const TECLADO="https://babayaba71-maker.github.io/AccentBridges/teclado.html";
 const MOUTHGYM="https://babayaba71-maker.github.io/AccentBridges/boca-gym.html";
 const AR="https://babayaba71-maker.github.io/AccentBridges/ar-labeler.html";
-const CALL="https://valerie.base44.app/functions/valerieCall";
+const CALL="https://babayaba71-maker.github.io/AccentBridges/consulta-doctora.html"; // directriz JJ 18-oct: Vapi fuera del menú — la voz en vivo vive con la Doctora (widget ElevenLabs)
 const VALHABLA="https://elevenlabs.io/app/talk-to?agent_id=agent_7401kqvpkpmhep5rqcf95j5kz41b&branch_id=agtbrch_9301ks2d5jxtee0bjq0e149kj6tm"; // VALERIE HABLADA (ElevenLabs Conversational AI, 13-oct-2026): voz del día a día. Vapi queda para sesiones largas ~10 min (doctrina de voz).
 const TG="https://t.me/+aWV2H9E252QwYTMx"; // grupo AccentBridges (link de invitación, JJ 17-sep)
 const TT="https://www.tiktok.com/@raul.ybarra0";
@@ -1015,7 +1015,7 @@ function maestraDose(pers,lvl){
     acciones.push({label:puerta.t+" → Trainer ("+puerta.tab+")",url:TRAINER+"?tab="+puerta.tab,gold:true});
   }
   if(objetivo.tab!==puerta.tab)acciones.push({label:"🎯 "+objetivo.t+" ("+objetivo.tab+")",url:TRAINER+"?tab="+objetivo.tab});
-  acciones.push({label:"🎙️ Practica conmigo en voz (/call)",url:CALL});
+  acciones.push({label:"🩺 Tu consulta de voz con la Doctora",url:CALL});
   const vObj=videoOfTab(objetivo.tab);
   if(vObj)acciones.push(vObj);
   // América: EL PUENTE FUERA DEL KINDERGARTEN — re-posicionada A0-alto→A1-bajo (JJ 15-oct; antes era A2m-B1a)
@@ -1090,7 +1090,7 @@ function renderPortal(){
       <a class="p-btn" href="${TECLADO}">🎹 TECLADO — alfabetización</a>
       <a class="p-btn" href="${MOUTHGYM}">🎤 MOUTH GYM — shadowing</a>
       <a class="p-btn" href="${AR}">🔭 AR LABELER</a>
-      <a class="p-btn" href="${CALL}">🎙️ VOZ EN VIVO</a>
+      <a class="p-btn" href="${CALL}">🩺 VOZ EN VIVO — Doctora</a>
       <a class="p-btn" href="${VALHABLA}" target="_blank" rel="noopener">📞 VALERIE HABLADA — ElevenLabs</a>
       <a class="p-btn" href="${TG}">✈️ TELEGRAM</a>
       <a class="p-btn" href="${YT}">YOUTUBE</a>
