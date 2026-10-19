@@ -2,396 +2,140 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Level Assessment — El Expediente · Myl AccentBridges</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prueba del Oído — Myl AccentBridges</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Newsreader:ital@0;1&display=swap" rel="stylesheet">
 <style>
-:root{--purple:#6366f1;--purple-dark:#4f46e5;--bg:#f9fafb;--card:#fff;--text:#1f2937;--soft:#6b7280;--pink:#fff1f2;--pink-border:#fecdd3;--ok:#10b981;--bad:#ef4444}
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center}
-header{width:100%;background:var(--purple);color:#fff;padding:14px 18px}
-.h-wrap{max-width:560px;margin:0 auto;display:flex;align-items:center;gap:12px}
-.h-flag{font-size:28px}
-h1{font-size:19px;font-weight:800}
-.h-sub{font-size:12px;opacity:.9;margin-top:1px}
-main{max-width:560px;width:100%;padding:16px 14px 30px}
-.card{background:var(--card);border-radius:16px;padding:22px 18px;box-shadow:0 2px 10px rgba(0,0,0,.07);text-align:center}
-.dim-chip{display:inline-block;background:var(--pink);border:1.5px solid var(--pink-border);color:#be123c;font-weight:800;font-size:13px;border-radius:999px;padding:6px 14px;margin-bottom:12px}
-.q-text{font-size:16px;font-weight:700;margin-bottom:14px}
-.q-audio{font-size:30px;font-weight:900;color:var(--purple);margin:6px 0 4px;letter-spacing:.5px}
-.q-anchor{font-size:13px;color:var(--soft);margin-bottom:14px}
-.opts{display:flex;flex-direction:column;gap:10px}
-.opt{background:#fff;border:2px solid #e5e7eb;border-radius:12px;padding:13px;font-size:16px;font-weight:700;color:var(--text);cursor:pointer;transition:.15s}
-.opt:active{transform:scale(.98)}
-.opt.ok{border-color:var(--ok);background:#ecfdf5}
-.opt.bad{border-color:var(--bad);background:#fef2f2}
-.explain{background:var(--pink);border:1.5px solid var(--pink-border);border-radius:12px;padding:11px 13px;font-size:13.5px;color:#9f1239;margin-top:13px;text-align:left;font-weight:600;line-height:1.45}
-.btn{display:block;width:100%;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:800;cursor:pointer;margin-top:12px}
-.btn-primary{background:var(--purple);color:#fff}
-.btn-ghost{background:#fff;border:2px solid #e5e7eb;color:var(--text);font-weight:700}
-.replay{background:var(--purple);color:#fff;border:none;border-radius:999px;padding:9px 18px;font-size:14px;font-weight:800;cursor:pointer;margin:6px auto 14px}
-.rec-zone{background:var(--pink);border:2px dashed var(--pink-border);border-radius:14px;padding:14px;margin-top:6px}
-.rec-btn{width:100%;background:var(--purple);color:#fff;border:none;border-radius:12px;padding:13px;font-size:16px;font-weight:800;cursor:pointer}
-.rec-btn.stop{background:var(--bad)}
-.score-num{font-size:42px;font-weight:900;line-height:1.1}
-.score-stars{font-size:15px;letter-spacing:1px;margin-top:2px}
-.score-msg{font-size:13px;font-weight:700;margin-top:2px}
-.dots{display:flex;justify-content:center;gap:6px;margin:14px 0}
-.dot{width:9px;height:9px;border-radius:50%;background:#e5e7eb}
-.dot.on{background:var(--purple)}
-.tree{font-size:40px;line-height:1}
-.lvl-chip{display:inline-block;font-weight:900;font-size:15px;border-radius:999px;padding:5px 14px;margin-top:4px}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
-.dimbox{background:#fafafa;border:1.5px solid #e5e7eb;border-radius:14px;padding:12px 6px}
-.dimbox h3{font-size:13px;margin-bottom:4px}
-.dose{background:#eef2ff;border:1.5px solid #c7d2fe;border-radius:12px;padding:11px 13px;font-size:13px;text-align:left;line-height:1.5;color:#3730a3;font-weight:600;margin-top:10px}
-.share{width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px;font-size:12px;margin-top:12px;background:#fafafa;color:var(--soft)}
-footer{text-align:center;font-size:11px;color:var(--soft);padding:12px;opacity:.8}
-.selfbtn{background:#fff;border:2px solid #e5e7eb;border-radius:12px;padding:12px;font-size:15px;font-weight:700;cursor:pointer;width:100%;margin-top:8px}
-/* ===== CALENTAMIENTO DE CANTANTE — intro de la dimensión Boca ===== */
-.wu-circle-wrap{display:flex;justify-content:center;margin:18px 0 8px}
-.wu-circle{width:80px;height:80px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#a78bfa,var(--purple));box-shadow:0 8px 24px rgba(122,74,255,.3);transform:scale(1)}
-.wu-phase{font-size:14.5px;font-weight:800;color:var(--purple);min-height:20px;margin:2px 0 10px}
-.wu-row{display:flex;gap:10px;margin-top:10px}
-.wu-row .btn{flex:1;margin-top:0}
-.wu-done{font-size:12.5px;color:#10b981;font-weight:700;margin-top:8px;min-height:16px}
+:root{--bg:#F9F5F0;--surface:#FFFFFF;--surface-2:#F2EBE5;--ink:#2B2622;--muted:#8A7F76;--accent:#F38B2D;--accent-fg:#fff;--ok:#4E9B5F;--err:#C25B4E;--border:#E5DCD2;--shadow:0 1px 3px rgba(43,38,34,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:1.2rem}
+.app{width:100%;max-width:430px}
+.chip{display:inline-block;background:var(--surface-2);border-radius:99px;padding:.3rem .9rem;font-size:.78rem;color:var(--muted);margin-bottom:.8rem}
+h1{font-size:1.5rem;margin-bottom:.6rem;text-align:center}
+.big{font-family:Newsreader,serif;font-size:1.15rem;line-height:1.55;text-align:center;margin-bottom:1.2rem}
+.card{background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow);border-radius:1rem;padding:1.4rem 1.2rem;margin-bottom:1rem}
+button{font-family:inherit;cursor:pointer;border:1px solid var(--border);background:var(--surface);border-radius:.8rem;padding:.9rem 1.2rem;font-size:1rem;box-shadow:var(--shadow)}
+button.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent);width:100%;padding:1rem;font-size:1.05rem;font-weight:700}
+input{width:100%;font-size:1.05rem;padding:.9rem;border:1px solid var(--border);border-radius:.8rem;background:var(--bg);font-family:inherit}
+.duo{display:flex;gap:.8rem;margin-top:1.2rem}
+.duo button{flex:1;font-size:1.2rem;font-weight:700;padding:1.2rem}
+.duo .b-igual{background:#EDF3EE;border-color:#CFE3D3}
+.duo .b-dif{background:#F7ECE9;border-color:#EBCFC8}
+.prog{text-align:center;font-size:.8rem;color:var(--muted);margin:.6rem 0}
+.barra{height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-bottom:1.2rem}
+.barra i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
+.replay{display:block;margin:1rem auto 0;background:var(--surface-2);font-size:.9rem;color:var(--muted)}
+.nivel{font-family:Newsreader,serif;font-size:3rem;text-align:center;color:var(--accent);margin:.4rem 0}
+.missed{background:var(--surface-2);border-radius:.6rem;padding:.8rem;font-size:.9rem;margin:1rem 0;line-height:1.7}
+.warn{background:#FBF3E4;border:1px solid #EAD3A8;border-radius:.6rem;padding:.8rem;font-size:.85rem;margin:1rem 0}
+a.cta{display:block;text-align:center;background:var(--accent);color:var(--accent-fg);border-radius:.8rem;padding:1rem;font-weight:700;text-decoration:none}
+.foot{color:var(--muted);font-size:.72rem;text-align:center;margin-top:1.6rem}
 </style>
 </head>
 <body>
-<header><div class="h-wrap"><span class="h-flag">🎓</span><div><h1>Level Assessment — El Expediente</h1><div class="h-sub">Tu perfil por dimensión · Oído 👂 · Ojo 👁 · Boca 👅 · Myl AccentBridges</div></div></div></header>
-<main><div class="card" id="app"></div><footer>Parte del ecosistema Myl AccentBridges 🇲🇽➡️🇺🇸 · Alma &amp; Clyde</footer></main>
-
+<div class="app" id="app"></div>
+<div class="foot">Myl AccentBridges · aquí no se lee: se escucha 🎧</div>
 <script>
-/* ============ ENGINE DATA (determinístico, 0 LLM) ============ */
-const BANDS=["A0","A1","A2","B1"];
-const DIMS=[
- {id:"ear",name:"Oído 👂",intro:"Vas a ESCUCHAR sonidos en inglés y elegir lo que oíste. Usa audífonos si tienes. No traduzcas — siente el sonido."},
- {id:"eye",name:"Ojo 👁",intro:"Preguntas de lo que VES: anclas, escritura y sílabas. El ojo también entrena."},
- {id:"mouth",name:"Boca 👅",intro:"Vas a GRABAR tu voz diciendo frases. Chrome te califica del 1 al 100. Habla fuerte y claro. ⚠️ IMPORTANTE: si abriste este enlace DENTRO de WhatsApp, no te va a escuchar — cópialo y ábrelo en CHROME puro (fuera de WhatsApp) para que el micrófono funcione."}
+const $=s=>document.querySelector(s);
+const app=document.getElementById("app");
+let vozUS=null;
+function cargaVoces(){try{const vs=speechSynthesis.getVoices()||[];vozUS=vs.find(v=>(v.lang||"").toLowerCase().startsWith("en-us"))||vs.find(v=>(v.lang||"").toLowerCase().startsWith("en"))||null;}catch(e){}}
+if("speechSynthesis" in window){cargaVoces();speechSynthesis.onvoiceschanged=cargaVoces;}
+function habla(txt,rate,alTerminar){
+  if(!("speechSynthesis" in window)){alert("Tu navegador no soporta audio. Ábrelo en Chrome.");return;}
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(txt);
+  u.lang="en-US";if(vozUS)u.voice=vozUS;u.rate=rate||0.85;
+  u.onend=()=>alTerminar&&setTimeout(alTerminar,350);u.onerror=u.onend;
+  speechSynthesis.speak(u);
+}
+/* La escalera: 12 rondas IGUAL/DIFERENTE — de lo obvio a lo que solo un oído entrenado caza.
+   CERO letras durante la prueba: solo oídos. (Doctrina: aquí no hay letras, nada más oídos.) */
+const RONDAS=[
+ {a:"cat",b:"cat",s:true},{a:"dog",b:"duck",s:false},{a:"day",b:"day",s:true},
+ {a:"ship",b:"sheep",s:false},{a:"cut",b:"cat",s:false},{a:"think",b:"sink",s:false},
+ {a:"very",b:"berry",s:false},{a:"pull",b:"pool",s:false},{a:"bit",b:"bit",s:true},
+ {a:"they",b:"day",s:false},{a:"hot",b:"hat",s:false},{a:"can",b:"can't",s:false}
 ];
-/* ============ BANCO DE PREGUNTAS v1.1 — anti-memorización ============
-   3 VARIANTES por banda por dimensión (36 preguntas). Cada intento
-   sortea UNA variante por banda y JAMÁS repite la del intento anterior
-   (guardado en localStorage). El shuffle de opciones sigue activo por
-   render. Doctrina: patrones no, medición real. "No es hacerlo duro
-   sino más eficiente" — Seeley, 15-sep-2026. */
-const QBANK={
- ear:[
-  [
-   {ask:"Escucha el sonido. ¿Qué ANCLA es?",audio:"I",opts:["ai","ei","oi"],ans:0,explain:"Era AI — como la queja culichi '¡ay!' 😅. EI es 'ey' de 'rey' y OI es 'oi' de 'oigo'."},
-   {ask:"Escucha la palabra. ¿Cuál es su ANCLA?",audio:"You",opts:["iu","eu","you"],ans:0,explain:"YOU = 'iu' — la o desliza hacia una u rápida, en una sola sílaba. Y lo mejor: tú y ustedes dicen la MISMA palabra."},
-   {ask:"Escucha la palabra. ¿Cuál es su ANCLA?",audio:"She",opts:["chi","shi","si"],ans:0,explain:"SHE se ancla CHI porque 'shi' NO existe en español — chi como chi-che chi-cho 🎯."}
-  ],
-  [
-   {ask:"Escucha la palabra. ¿Cuál es?",audio:"ship",opts:["ship (barco)","sheep (oveja)","shop (tienda)"],ans:0,explain:"SHIP = i corta (sh-ip). SHEEP = ii larga (sh-iip). La diferencia es la LONGITUD de la vocal."},
-   {ask:"Escucha la palabra. ¿Cuál es?",audio:"think",opts:["think (pensar)","sink (hundir)","thing (cosa)"],ans:0,explain:"THINK = lengua ENTRE los dientes. SINK = con s pura. Si la lengua no asoma, suena a sink 🥁."},
-   {ask:"Escucha la palabra. ¿Cuál es?",audio:"very",opts:["very (muy)","berry (baya)","ferry (bote)"],ans:0,explain:"VERY con V (labios + dientes). BERRY con B (labios + labios). Parecidas al oído, pero distintas — el oído va afinando."}
-  ],
-  [
-   {ask:"Escucha el número. ¿Cuál es?",audio:"thirteen",opts:["13 (thir-TIN)","30 (THIR-ti)","14 (for-TIN)"],ans:0,explain:"13 = acento ADELANTE (thir-TIN). 30 = acento ATRÁS (THIR-ti). El acento lo cambia TODO."},
-   {ask:"Escucha el número. ¿Cuál es?",audio:"nineteen",opts:["19 (nine-TIN)","90 (NINE-ti)","9 (nain)"],ans:0,explain:"19 = acento ADELANTE (nine-TIN). 90 = acento ATRÁS (NINE-ti). Mismo truco de la familia -teen / -ty."},
-   {ask:"Escucha el número. ¿Cuál es?",audio:"fifty",opts:["50 (FIF-ti)","15 (fif-TIN)","5 (faiv)"],ans:0,explain:"50 = acento ATRÁS (FIF-ti). 15 = acento ADELANTE (fif-TIN). Tercera ronda de la misma familia — ya se te hace costumbre 🎯."}
-  ],
-  [
-   {ask:"Escucha la palabra 'water'. ¿Cómo suena la T?",audio:"water",opts:["Como D suave (flap)","Como T limpia y fuerte","No suena"],ans:0,explain:"WATER = 'ua-der' — la T entre vocales se vuelve FLAP, como la R suave de 'pero'. ¡Ya la tienes desde el español!"},
-   {ask:"Escucha la palabra 'little'. ¿Cómo suena la TT?",audio:"little",opts:["D suave doble ('liddle')","T limpia doble","Silencio"],ans:0,explain:"LITTLE = 'lidl' — doble flap, otra vez la R suave de 'pero' pero dos veces seguidas 👅."},
-   {ask:"Escucha la frase. ¿Qué es 'gonna'?",audio:"I'm gonna eat",opts:["going to (reducido)","gone (ido)","un arma"],ans:0,explain:"GONNA = 'going to' fundido — connected speech real. El inglés de la calle no dice cada palabra: las derrite ⚡."}
-  ]
- ],
- eye:[
-  [
-   {ask:"El ancla 'uan' es de cuál palabra?",opts:["one (uno)","won (ganó)","no"],ans:0,explain:"ONE = 'uan' — la O se desliza a u+a en una sola voz. La palabra más traicionera del inglés básico 🎯."},
-   {ask:"¿Cuál es el ANCLA de 'I'?",opts:["ai","ei","io"],ans:0,explain:"I = 'ai' — como la queja culichi '¡ay!'. Dos letras, un solo sonido que ya vives."},
-   {ask:"El ancla 'ji' es de cuál palabra?",opts:["he (él)","she (ella)","we (nosotros)"],ans:0,explain:"HE = 'ji' — la H es MUDA (primo mexicano de la h de hola 🤫). SHE sería 'chi' y WE sería 'ui'."}
-  ],
-  [
-   {ask:"¿Cuál se escribe CORRECTAMENTE?",opts:["forty","fourty","fourtee"],ans:0,explain:"FORTY sin u — trampa clásica (four PIERDE la u al hacerse decena). Hasta nativos la tuitean mal 😂."},
-   {ask:"¿Cuál se escribe CORRECTAMENTE?",opts:["listen","lisen","listhen"],ans:0,explain:"LISTEN con T — pero la T es MUDA: se oye 'li-sen'. Letra muda: prima mexicana de la u de que-so."},
-   {ask:"¿Cuál se escribe CORRECTAMENTE?",opts:["knife","knive","nife"],ans:0,explain:"KNIFE con K muda — se oye 'naif'. El ojo la ve, el oído la ignora: cada vez que la leas, sáltatela 🚫."}
-  ],
-  [
-   {ask:"¿Qué palabra suena como el ancla 'dey'?",opts:["they (ellos)","day (día)","de"],ans:0,explain:"THEY = 'dey' — rima con 'rey' 👑. El diptongo /eɪ/ siempre termina deslizándose en 'y'."},
-   {ask:"¿Qué palabra suena como el ancla 'ui'?",opts:["we (nosotros)","you (tú)","wue"],ans:0,explain:"WE = 'ui' — una sílaba que se desliza de u a i. Y YOU = 'iu' es su espejo al revés."},
-   {ask:"¿Qué palabra suena como 'strit' — SIN la E de contrabando?",opts:["street","estreet","streat"],ans:0,explain:"STREET = 'strit'. El español jamás arranca con s+consonante (e-special, e-strella) — el ancla no contrabandea la E 🚫."}
-  ],
-  [
-   {ask:"¿Cuál es la sílaba ACENTUADA de 'banana'?",opts:["ba-NA-na","BA-na-na","ba-na-NA"],ans:0,explain:"ba-NA-na 🔵 — la del medio suena fuerte y clara; las otras dos se reducen a 'buh' y 'nuh' (schwa)."},
-   {ask:"¿Cuál es la sílaba ACENTUADA de 'photography'?",opts:["pho-TO-gra-phy","PHO-to-gra-phy","pho-to-GRA-phy"],ans:0,explain:"fo-TO-gra-fi — el acento VIAJA con el sufijo. En PHO-to-graph se muda otra vez 🧳."},
-   {ask:"¿Cuál es la sílaba ACENTUADA de 'important'?",opts:["im-POR-tant","IM-por-tant","im-por-TANT"],ans:0,explain:"im-POR-tant — la sílaba fuerte cae ANTES del final (misma familia de acento que -tion)."}
-  ]
- ],
- mouth:[
-  [
-   {target:"I am here",anchor:"ai em jir",explain:"Tu PRIMERA oración real — como el niño que dice '¡agua!'. Sujeto + SER + lugar."},
-   {target:"You are here",anchor:"iu ar jir",explain:"La misma oración con YOU = iu — tú y ustedes la dicen IGUAL. Sujeto + SER + lugar."},
-   {target:"She is here",anchor:"chi is jir",explain:"SHE = CHI (shi no existe en español — chi-che chi-cho). Sujeto + SER + lugar."}
-  ],
-  [
-   {target:"I am eating",anchor:"ai em ii-ting",explain:"La FÓRMULA MÁGICA: sujeto + SER + verbo-ing = lo que pasa AHORA 🪄."},
-   {target:"He is running",anchor:"ji is ra-ning",explain:"RUNNING dobla la n antes de -ing. La fórmula mágica con HE = ji."},
-   {target:"She is dancing",anchor:"chi is dan-sing",explain:"DANCING — la e muda se cae con -ing (write→writing, dance→dancing) 🪄."}
-  ],
-  [
-   {target:"Betty bought a bit of better butter",anchor:"Beddy bought a bit of bedder budder",explain:"Cinco FLAP T — como la R suave de 'pero'. La lengua toca el techo una vez y ya 👅."},
-   {target:"I need a little bit of water",anchor:"ai nid a liddle bit of ua-der",explain:"LITTLE = 'lidl' y WATER = 'ua-der' — flaps como la R suave de 'pero', dos en una línea 👅."},
-   {target:"The pretty kitty got a lot of butter",anchor:"de pridi kiti got a lot of budder",explain:"PRIDI-KITI-BUDDER: tres flaps en fila. La lengua da saltitos, no martillazos 🎯."}
-  ],
-  [
-   {target:"The thoughtful mother took a bath in the north",anchor:"de thot-ful ma-der tuk a bat in de nor",explain:"Cinco TH — lengua entre los dientes cada vez. El reto máximo del Episodio 1 🔥."},
-   {target:"Her mother and father think together",anchor:"jar ma-der an fa-der tink tu-ge-der",explain:"TH en toda la familia: ma-der y fa-der (sonoros), tink (sordo), tu-GE-der — la palabra que te quedó tarareando 😄."},
-   {target:"Both brothers think this is the best birthday",anchor:"bous bro-ders tink dis is de best bert-dey",explain:"SEIS TH: bous, bro-ders, tink, dis, de, bert-dey. La lengua entre dientes no descansa 🔥."}
-  ]
- ]};
-function pickVariant(pool,last){
-  let idxs=pool.map((_,i)=>i).filter(i=>i!==last);
-  if(!idxs.length)idxs=[0];
-  return idxs[Math.floor(Math.random()*idxs.length)];
-}
-function buildSession(){
-  let last={};
-  try{last=JSON.parse(localStorage.getItem("ab_qbank_last")||"{}")||{}}catch(e){last={}}
-  const picks={},q={};
-  for(const dim of ["ear","eye","mouth"]){
-    q[dim]=[];picks[dim]=[];
-    QBANK[dim].forEach((pool,band)=>{
-      const lastArr=(typeof last[dim]==="object"&&last[dim]!==null)?last[dim]:[];
-      const chosen=pickVariant(pool,lastArr[band]);
-      const v=Object.assign({},pool[chosen]);v.band=band;
-      q[dim].push(v);picks[dim][band]=chosen;
-    });
-  }
-  try{localStorage.setItem("ab_qbank_last",JSON.stringify(picks))}catch(e){}
-  return q;
-}
-let Q=buildSession();
-const DOSE={
- ear:{"A0":"Quiz de Oído diario en el grupo + pestaña Melodía del Trainer","A1":"Episodios diarios + minimal pairs (ship/sheep, think/sink)","A2":"Números y acentos en el Trainer + quizzes con audio","B1":"AccentBridges Pro — la orilla avanzada del puente"},
- eye:{"A0":"Vocales + Alfabeto Americano del Trainer (anclas)","A1":"Números y Frases del Trainer","A2":"WordBank + reglas de acento escritas","B1":"Pro — currículum B1+ completo"},
- mouth:{"A0":"Saludos y Pronombres del Trainer + /call con Valerie","A1":"Combos del Trainer (Fórmula Mágica)","A2":"Flap T y linking + /call diario","B1":"Pro Accent Lab + retos de acento alto"}};
-const TREE={"A0":"🌱","A1":"🌿","A2":"🌳","B1":"🌳✨"};
-const LVLColor={"A0":"#10b981","A1":"#22c55e","A2":"#eab308","B1":"#f97316"};
+const NIVELES=[[11,"B1+","Tu oído ya cruza el puente con vuelo propio"],[9,"A2","Oído puente adelante: se te escapan los pares finos"],[7,"A1","El puente está en construcción: la base ya suena"],[5,"A0-alto","Nivel fundador: el oído empieza a despertar"],[3,"A0-medio","Empieza por sonidos: el oído es un músculo bebé"],[0,"A0-bajo","Bienvenida a la orilla: aquí empiezan todos"]];
+let nombre="",idx=0,aciertos=0,falladas=[];
 
-/* ============ STATE ============ */
-const $=id=>document.getElementById(id);
-let dimIdx=0,qIdx=0,results={},isRecording=false,SR=window.SpeechRecognition||window.webkitSpeechRecognition,recog=null,heard=[],lastRecogErr=null,recogStarts=0;
-let curOrder=[],curAns=0;
-function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-
-/* ============ TTS ============ */
-function speak(text){
-  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=.9;
-  const vs=speechSynthesis.getVoices().filter(v=>v.lang&&v.lang.startsWith("en"));
-  if(vs.length)u.voice=vs.find(v=>v.lang==="en-US")||vs[0];
-  speechSynthesis.speak(u);}catch(e){}
+function pIntro(){
+ app.innerHTML=`<span class="chip">🎧 PRUEBA DEL OÍDO</span>
+ <h1>3 minutos. Solo tu oído.</h1>
+ <p class="big">Vas a escuchar <b>dos palabras</b>. Tu única misión: decirme si suenan <b>iguales</b> o <b>diferentes</b>.</p>
+ <div class="card"><p class="big" style="margin:0">Aquí no hay letras que te ayuden.<br>No hay examen, no hay calificación.<br>Solo un oído estrenándose. 🎧</p></div>
+ <label style="font-size:.9rem;color:var(--muted);display:block;margin-bottom:.4rem">¿Cómo te llamas?</label>
+ <input id="nb" placeholder="Tu nombre" autocomplete="given-name">
+ <button class="primary" style="margin-top:1rem" onclick="empezar()">Empezar 🎧</button>`;
 }
-
-/* ============ SCORING ENGINE (del Foundation Trainer v2.4) ============ */
-const NUMWORD={1:"one",2:"two",3:"three",4:"four",5:"five",6:"six",7:"seven",8:"eight",9:"nine",10:"ten"};
-function normTxt(s){return String(s||"").toLowerCase().replace(/[.,!?;:'"()]/g," ").replace(/\s+/g," ").trim()}
-function normTokens(t){return normTxt(t).split(" ").filter(Boolean).flatMap(w=>{const r=NUMWORD[w.toUpperCase()]||NUMWORD[w]||w;return String(r).split(" ")})}
-function lev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=Array.from({length:n+1},(_,j)=>j),c=new Array(n+1);for(let i=1;i<=m;i++){c[0]=i;for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));[p,c]=[c,p]}return p[n]}
-function pronScore(alts,target){
-  const tgt=normTokens(target);if(!tgt.length)return null;let best=0,heardTxt="";
-  for(const alt of alts){const ht=normTokens(alt);if(!ht.length)continue;
-    let sum=0;const used=new Array(ht.length).fill(false);
-    for(const tw of tgt){let sw=0,bi=-1;ht.forEach((hw,hi)=>{if(used[hi])return;const d=lev(tw,hw);const tol=(Math.max(tw.length,hw.length)>=6)?2:1;const s=(d===0)?1:(d<=tol?(d===1?0.6:0.3):0);if(s>sw){sw=s;bi=hi}});if(bi>=0)used[bi]=true;sum+=sw}
-    const sc=Math.round(100*sum/tgt.length);if(sc>best){best=sc;heardTxt=alt}}
-  return{score:Math.min(100,best),heard:heardTxt}
+function empezar(){
+ nombre=(document.getElementById("nb").value||"").trim()||"Anónima/o";
+ idx=0;aciertos=0;falladas=[];
+ pRonda();
 }
-
-/* ============ FLOW ============ */
-function intro(){
-  $("app").innerHTML=`<div class="dim-chip">🧠 Antes de empezar</div>
-  <div class="q-text">No tienes UN nivel. Tienes un <b>PERFIL</b>: tu oído, tu ojo y tu boca pueden estar en niveles distintos — y cada uno se entrena en SU escalón.</div>
-  <div class="explain">👂 <b>Oído</b> — percibes los sonidos<br>👁 <b>Ojo</b> — reconoces anclas y escritura<br>👅 <b>Boca</b> — produces las frases<br><br>⏱ 12 preguntas o menos · 🎧 usa audífonos · 📱 mejor en Chrome · 🎲 cada intento trae preguntas NUEVAS (banco de 36)</div>
-  <input id="abName" placeholder="¿Cómo te llamas? (para tu expediente)" style="width:90%;max-width:420px;padding:12px 16px;border-radius:14px;border:1px solid #334155;background:#f8fafc;font-size:15px;margin:6px auto 12px;display:block">
-  <button class="btn btn-primary" onclick="window.abName=(document.getElementById('abName').value||'').trim()||'Anónima/o';startDim(0)">Empezar mi expediente →</button>`;
+function pRonda(){
+ const r=RONDAS[idx];
+ const pct=Math.round(idx/RONDAS.length*100);
+ app.innerHTML=`<span class="chip">🎧 Ronda ${idx+1} de ${RONDAS.length}</span>
+ <div class="barra"><i style="width:${pct}%"></i></div>
+ <div class="card">
+   <p class="big" style="margin-bottom:0">Oye las dos palabras.<br>¿<b>Iguales</b> o <b>diferentes</b>?</p>
+   <button class="replay" onclick="suena()">🔊 Escuchar otra vez</button>
+   <div class="duu"></div>
+   <div class="duo">
+     <button class="b-igual" onclick="responde(true)">🔁 Iguales</button>
+     <button class="b-dif" onclick="responde(false)">✂️ Diferentes</button>
+   </div>
+ </div>`;
+ setTimeout(suena,500);
 }
-/* ============ CALENTAMIENTO DE CANTANTE (doctrina Vocalización — rampa de la Boca) ============ */
-let wuAC=null,wuTimers=[];const wuDone=[false,false,false];
-function wuClear(){wuTimers.forEach(clearTimeout);wuTimers=[]}
-function wuAudio(){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;if(!wuAC)wuAC=new AC();if(wuAC.state==="suspended")wuAC.resume();return wuAC}
-function wuTone(freq,dur,type,vol,mod){const ac=wuAudio();if(!ac)return;try{
- const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=freq;
- const t=ac.currentTime;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.05);
- g.gain.setValueAtTime(vol,t+dur-.1);g.gain.linearRampToValueAtTime(0,t+dur);
- o.connect(g);g.connect(ac.destination);
- if(mod){const l=ac.createOscillator(),lg=ac.createGain();l.frequency.value=mod;lg.gain.value=vol*.8;l.connect(lg);lg.connect(g.gain);l.start(t);l.stop(t+dur)}
- o.start(t);o.stop(t+dur)}catch(e){}}
-function wuSetCircle(scale,dur){const c=$("wuCircle");if(!c)return;c.style.transition="transform "+dur+"s ease-in-out";c.style.transform="scale("+scale+")"}
-function wuPhase(txt){const p=$("wuPhase");if(p)p.textContent=txt}
-function wuDoneTxt(){const el=$("wuDone");if(el)el.textContent="✅ "+wuDone.filter(Boolean).length+"/3 listo"}
-function warmupOffer(){
-  $("app").innerHTML=`<div class="dim-chip">🎤 Calentamiento de Cantante</div>
-  <div class="q-text">Antes de grabar tu voz, la boca se calienta como la del cantante: relajada fluye mejor.</div>
-  <div class="explain">🫁 Respiración · 😤 Zumbido · 🫠 Motor de labios<br><br>💡 Lo que vas a oír grabada es la voz que el mundo oye — la única honesta. Con calma suena mejor.</div>
-  <button class="btn btn-primary" onclick="warmupGo()">🎤 Calentar mi boca (~1 min) →</button>
-  <button class="btn btn-primary" style="margin-top:10px" onclick="mouthIntro()">Sin calentamiento, directo →</button>`;
+function suena(){
+ const r=RONDAS[idx];
+ habla(r.a,.8,()=>habla(r.b,.8,null));
 }
-function warmupGo(){
-  $("app").innerHTML=`<div class="dim-chip">🎤 Calienta tu boca</div>
-  <div class="wu-circle-wrap"><div class="wu-circle" id="wuCircle"></div></div>
-  <div class="wu-phase" id="wuPhase">Elige tu ejercicio 👇</div>
-  <div class="wu-row"><button class="btn btn-primary" onclick="wuBreath()">🫁 Respirar</button>
-  <button class="btn btn-primary" onclick="wuHum()">😤 Zumbido</button>
-  <button class="btn btn-primary" onclick="wuTrill()">🫠 Motor</button></div>
-  <div class="wu-done" id="wuDone"></div>
-  <button class="btn btn-primary" style="margin-top:14px" onclick="mouthIntro()">✅ Boca lista — a la prueba →</button>`;
+function responde(dijo){
+ const r=RONDAS[idx];
+ speechSynthesis.cancel();
+ if(dijo===r.s){aciertos++;}else{falladas.push(r.a+" / "+r.b);}
+ idx++;
+ if(idx<RONDAS.length){pRonda();}else{pFinal();}
 }
-function wuBreath(){wuClear();wuPhase("Inhala 4…");wuSetCircle(1.5,4);
- wuTimers.push(setTimeout(()=>{wuPhase("Sostén 2…")},4000));
- wuTimers.push(setTimeout(()=>{wuPhase("Suelta 6…");wuSetCircle(1,6)},6000));
- wuTimers.push(setTimeout(()=>{wuPhase("✅ Aire listo");wuDone[0]=true;wuDoneTxt()},12000))}
-function wuHum(){wuClear();wuPhase("“mmm” — acompaña el zumbido");wuSetCircle(1.35,3.8);wuTone(150,4,"sine",.16);
- wuTimers.push(setTimeout(()=>{wuSetCircle(1,.4)},4100));
- wuTimers.push(setTimeout(()=>{wuPhase("✅ Zumbido listo");wuDone[1]=true;wuDoneTxt()},4500))}
-function wuTrill(){wuClear();wuPhase("“brrr” — labios flojitos");wuSetCircle(1.3,2.3);wuTone(85,2.4,"sawtooth",.08,22);
- wuTimers.push(setTimeout(()=>{wuSetCircle(1,.4)},2500));
- wuTimers.push(setTimeout(()=>{wuPhase("✅ Motor listo");wuDone[2]=true;wuDoneTxt()},2800))}
-function mouthIntro(){
-  const d=DIMS[dimIdx];
-  $("app").innerHTML=`<div class="dim-chip">Dimensión ${dimIdx+1} de 3 · ${d.name}</div>
-  <div class="q-text">${d.intro}</div>
-  <button class="btn btn-primary" onclick="nextQ()">Entendido →</button>`;
+function nivelDe(n){
+ for(const[min,lv,desc]of NIVELES){if(n>=min)return[lv,desc];}
+ return["A0-bajo","Bienvenida a la orilla"];
 }
-
-function startDim(i){
-  dimIdx=i;qIdx=0;results[DIMS[i].id]={answered:0,level:null};
-  const d=DIMS[i];
-  if(d.id==="mouth"){return warmupOffer()}
-  $("app").innerHTML=`<div class="dim-chip">Dimensión ${i+1} de 3 · ${d.name}</div>
-  <div class="q-text">${d.intro}</div>
-  <button class="btn btn-primary" onclick="nextQ()">Entendido →</button>`;
+function pFinal(){
+ const[lv,desc]=nivelDe(aciertos);
+ const code=`PRUEBA DEL OÍDO v2 · ${aciertos}/${RONDAS.length} · ${nombre} · Nivel del oído: ${lv}`+(falladas.length?` · Falladas: ${falladas.join(", ")}`:" · Limpia");
+ app.innerHTML=`<span class="chip">🎧 RESULTADO</span>
+ <div class="card">
+  <p style="text-align:center;font-size:.85rem;color:var(--muted)">Tu oído quedó medido en</p>
+  <div class="nivel">${lv}</div>
+  <p class="big" style="margin-top:.4rem">${desc}</p>
+  <p class="prog">${aciertos} de ${RONDAS.length} acertadas</p>
+  ${falladas.length?`<div class="missed"><b>Tus pares (esto es entre tú y tu maestra):</b><br>${falladas.join("<br>")}</div>`:`<div class="missed">🎯 Cero errores: un oído fino.</div>`}
+  <div id="repStat" style="display:none" class="warn"></div>
+  <a class="cta" href="consulta-doctora.html">Ahora saluda a la Doctora →</a>
+  <button class="replay" style="margin-top:1rem" onclick="reportar()">🔄 Reintentar el registro</button>
+ </div>`;
+ reportar();
 }
-function dotsHtml(){return `<div class="dots">${Array.from({length:4},(_,k)=>`<div class="dot ${k<qIdx?"on":""}"></div>`).join("")}</div>`}
-function nextQ(){
-  const d=DIMS[dimIdx],r=results[d.id];
-  if(qIdx>=Q[d.id].length||r.failed){return endDim()}
-  const q=Q[d.id][qIdx];
-  if(d.id==="mouth")return renderMouth(q);
-  $("app").innerHTML=`<div class="dim-chip">Dimensión ${dimIdx+1} · ${d.name} · Nivel ${BANDS[q.band]}</div>${dotsHtml()}
-  <div class="q-text">${q.ask}</div>
-  ${q.audio?`<button class="replay" onclick="replayAudio()">🔊 Escuchar de nuevo</button><div class="q-anchor">(toca el botón las veces que necesites)</div>`:""}
-  <div class="opts">${(()=>{curOrder=shuffle(q.opts.map((_,i)=>i));curAns=curOrder.indexOf(q.ans);return curOrder.map((oi,pos)=>`<button class="opt" onclick="answer(${pos})">${q.opts[oi]}</button>`).join("")})()}</div>`;
-  if(q.audio)speak(q.audio);
+function reportar(){
+ const[lv]=nivelDe(aciertos);
+ const code=`PRUEBA DEL OÍDO v2 · ${aciertos}/${RONDAS.length} · Nivel del oído: ${lv}`+(falladas.length?` · Falladas: ${falladas.join(", ")}`:" · Limpia");
+ const stat=document.getElementById("repStat");
+ fetch("https://valerie.base44.app/functions/logAssessmentResult",{
+  method:"POST",headers:{"Content-Type":"application/json","api_key":"ABVC-PILOTO-2026"},
+  body:JSON.stringify({studentName:nombre,assessmentType:"level",ear:lv,code:code})
+ }).then(r=>r.json()).then(j=>{
+   if(stat){stat.style.display=j.ok?"none":"block";stat.textContent=j.ok?"":"⚠️ Tu expediente no llegó al sistema. Usa el botón 🔄 o mándale este mensaje a tu coach: "+code;}
+   if(!j.ok)console.warn("reporte falló",j);
+ }).catch(()=>{
+   if(stat){stat.style.display="block";stat.textContent="⚠️ Sin conexión con el expediente. Usa 🔄 o mándale este mensaje a tu coach: "+code;}
+ });
 }
-function replayAudio(){const q=Q[DIMS[dimIdx].id][qIdx];if(q&&q.audio)speak(q.audio)}
-function answer(k){
-  const d=DIMS[dimIdx],q=Q[d.id][qIdx],ok=(k===curAns);
-  document.querySelectorAll(".opt").forEach((el,j)=>{el.onclick=null;const cls=j===curAns?"ok":(j===k?"bad":null);if(cls)el.classList.add(cls)});
-  results[d.id].answered++;results[d.id]["b"+q.band]=ok;
-  if(!ok)results[d.id].failed=true;
-  const box=document.createElement("div");box.className="explain";box.innerHTML=(ok?"✅ ¡Correcto! ":"🎯 Casi — ")+q.explain;
-  $("app").appendChild(box);
-  qIdx++;
-  const btn=document.createElement("button");btn.className="btn btn-primary";btn.textContent="Siguiente →";btn.onclick=()=>nextQ();
-  $("app").appendChild(btn);
-  window.scrollTo(0,document.body.scrollHeight);
-}
-function renderMouth(q){
-  const d=DIMS[dimIdx];
-  if(!SR){
-    $("app").innerHTML=`<div class="dim-chip">Dimensión ${dimIdx+1} · ${d.name} · Nivel ${BANDS[q.band]}</div>${dotsHtml()}
-    <div class="q-text">Di en voz alta:</div><div class="q-audio">${q.target}</div><div class="q-anchor">DÍLO ASÍ: ${q.anchor}</div>
-    <div class="explain">Tu navegador no puede calificar la voz. Sé tu propio juez — con honestidad 🙏</div>
-    <button class="selfbtn" onclick="selfEval(true)">😎 Me salió bien</button>
-    <button class="selfbtn" onclick="selfEval(false)">🤔 Se me atoró</button>`;
-    return;
-  }
-  $("app").innerHTML=`<div class="dim-chip">Dimensión ${dimIdx+1} · ${d.name} · Nivel ${BANDS[q.band]}</div>${dotsHtml()}
-  <div class="q-text">Di en voz alta:</div><div class="q-audio">${q.target}</div><div class="q-anchor">DÍLO ASÍ: ${q.anchor}</div>
-  <div class="rec-zone">
-    <button class="rec-btn" id="recBtn" onclick="toggleRec()">⏺ Grabar mi voz</button>
-    <button class="selfbtn" onclick="micTest(this)">🎤 Probar micrófono</button>
-    <div id="scoreBox" style="display:none;margin-top:10px"></div>
-  </div>
-  <div class="explain">${q.explain}</div>`;
-}
-function toggleRec(){
-  const b=$("recBtn");
-  if(isRecording){isRecording=false;try{recog.stop()}catch(e){};b.classList.remove("stop");b.textContent="⏳ Calificando...";setTimeout(gradeMouth,1300);return}
-  if(!SR){alert("Este navegador no soporta reconocimiento de voz — usa Chrome");return}
-  heard=[];
-  try{
-    lastRecogErr=null;recogStarts=0;
-    recog=new SR();recog.lang="en-US";recog.interimResults=false;recog.maxAlternatives=3;recog.continuous=true;
-    recog.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal){const al=e.results[i];for(let j=0;j<al.length;j++)if(al[j].transcript&&heard.length<6)heard.push(al[j].transcript)}}};
-    recog.onerror=e=>{lastRecogErr=e.error};
-    recog.onend=()=>{if(isRecording&&recogStarts<8){recogStarts++;try{recog.start()}catch(e){}}};
-    recog.start();recogStarts++;
-    isRecording=true;
-    b.classList.add("stop");b.textContent="⏹ Parar y calificar";
-  }catch(e){alert("No pude acceder al micrófono 😢")}
-}
-function micTest(b){
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){b.textContent="🚫 Este navegador NO soporta microfono — abre en Chrome";b.style.background="#ef4444";b.style.color="#fff";return}
-  b.textContent="...probando el microfono";
-  navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{
-    s.getTracks().forEach(x=>x.stop());
-    b.textContent="✅ El microfono SIRVE — graba normal";
-    b.style.background="#10b981";b.style.color="#fff";
-  }).catch(()=>{
-    b.textContent="🚫 Microfono BLOQUEADO — toca el 🔒 junto a la URL, Permisos, y permite el microfono";
-    b.style.background="#ef4444";b.style.color="#fff";
-  });
-}
-function gradeMouth(){
-  const q=Q[DIMS[dimIdx].id][qIdx];const box=$("scoreBox");if(!box||box.dataset.done)return;box.dataset.done="1";const rb=$("recBtn");if(rb){rb.classList.remove("stop");rb.textContent="⏺ Grabar mi voz"}
-  const res=pronScore(heard,q.target);
-  if(!res||(!res.score&&!res.heard)){box.innerHTML='<div class="score-msg" style="color:#ef4444">🔇 No te escuché bien — habla fuerte y reintenta. Si estás dentro de WhatsApp, ábreme en CHROME (fuera de WhatsApp) para que el micrófono funcione</div><div class="score-msg" style="color:#94a3b8;font-size:12px">debug: '+(lastRecogErr||"sin datos")+'</div><button class="selfbtn" onclick="retryMouth()">🔁 Reintentar</button><button class="selfbtn" onclick="selfEval(false)">🤔 Se me atoró</button>';box.style.display="block";return}
-  const ok=res.score>=70;
-  box.innerHTML=`<div class="score-num" style="color:${ok?"#10b981":"#eab308"}">${res.score}<span style="font-size:16px">/100</span></div>
-  <div class="score-stars">${"⭐".repeat(Math.max(1,Math.round(res.score/20)))}</div>
-  <div class="score-msg">${res.heard?("👂 Te escuché: “"+res.heard+"”"):""}</div>
-  <div class="score-msg" style="color:${ok?"#10b981":"#eab308"}">${ok?"✅ ¡Pasaste este nivel!":"🎯 Aún no — se necesita 70 para pasar"}</div>
-  <button class="selfbtn" onclick="mouthResult(${ok})">Siguiente →</button>`;
-  box.style.display="block";
-}
-function retryMouth(){renderMouth(Q[DIMS[dimIdx].id][qIdx])}
-function mouthResult(ok){
-  const d=DIMS[dimIdx],q=Q[d.id][qIdx];
-  results[d.id].answered++;results[d.id]["b"+q.band]=ok;
-  if(!ok)results[d.id].failed=true;
-  qIdx++;nextQ();
-}
-function selfEval(ok){mouthResult(ok)}
-function endDim(){
-  const d=DIMS[dimIdx],r=results[d.id];let lvl=0;
-  for(let k=0;k<4;k++){if(r["b"+k])lvl=k;else break}
-  r.level=BANDS[lvl];
-  $("app").innerHTML=`<div class="dim-chip">Dimensión ${dimIdx+1} completada</div>
-  <div class="tree">${TREE[r.level]}</div>
-  <div class="q-text">${d.name} quedó en</div>
-  <div class="lvl-chip" style="background:${LVLColor[r.level]}22;color:${LVLColor[r.level]}">NIVEL ${r.level}</div>
-  <div class="explain">Cada dimensión se entrena en su propio escalón — el manzano no se entrena a dar naranjas por exigencia, sino por injerto 🌱.</div>
-  <button class="btn btn-primary" onclick="${dimIdx<2?`startDim(${dimIdx+1})`:`renderResults()`}">${dimIdx<2?"Siguiente dimensión →":"Ver mi expediente 📋"}</button>`;
-  dimIdx++;
-}
-function renderResults(){
-  const es={ear:"Oído",eye:"Ojo",mouth:"Boca"};
-  const dims=["ear","eye","mouth"].map(id=>{
-    const r=results[id],l=r.level;
-    return `<div class="dimbox"><h3>${es[id]}</h3><div class="tree">${TREE[l]}</div><div class="lvl-chip" style="background:${LVLColor[l]}22;color:${LVLColor[l]}">${l}</div></div>`;
-  }).join("");
-  const doses=["ear","eye","mouth"].map(id=>`<div class="dose"><b>${es[id]}</b> (${results[id].level}) → ${DOSE[id][results[id].level]}</div>`).join("");
-  const code=`EXPEDIENTE ACCENTBRIDGES
-Oído: ${results.ear.level} · Ojo: ${results.eye.level} · Boca: ${results.mouth.level}
-Dosis recomendada:
-${["ear","eye","mouth"].map(id=>"· "+es[id]+" ("+results[id].level+"): "+DOSE[id][results[id].level]).join("\n")}
-— Level Assessment · ${new Date().toLocaleDateString("es-MX")}`;
-  try{localStorage.setItem("ab_expediente",JSON.stringify({date:new Date().toISOString(),ear:results.ear.level,eye:results.eye.level,mouth:results.mouth.level}))}catch(e){}
-  try{fetch("https://valerie.base44.app/functions/logAssessmentResult",{method:"POST",headers:{"Content-Type":"application/json","api_key":"ABVC-PILOTO-2026"},body:JSON.stringify({studentName:window.abName||"Anónima/o",assessmentType:"level",ear:results.ear.level,eye:results.eye.level,mouth:results.mouth.level,code:code})}).catch(()=>{})}catch(e){}
-  $("app").innerHTML=`<div class="dim-chip">📋 Expediente completo</div>
-  <div class="q-text">Tu árbol por dimensión 🌳</div>
-  <div class="grid3">${dims}</div>
-  <div class="q-text" style="font-size:14px">Tu DOSIS (i+1 por dimensión):</div>${doses}
-  <div class="explain">Siéntete orgulloso/a: acabas de usar el pasaporte entre las dos orillas del puente. Con este perfil, tu maestra dosifica cada clase a TU escalón.</div>
-  <textarea class="share" rows="7" readonly onclick="this.select()">${code}</textarea>
-  <div class="q-anchor">✅ Tu resultado ya viajó solo a tu maestra — el texto de abajo es tu respaldo por si quieres mandarlo también 📲</div>
-  <button class="btn btn-ghost" onclick="location.reload()">🔄 Repetir el assessment</button>`;
-}
-/* demo interno: assessment.html#demo */
-if(location.hash==="#demo"){results={ear:{level:"A2"},eye:{level:"A1"},mouth:{level:"A1"}};renderResults()}
-else intro();
+pIntro();
 </script>
 </body>
 </html>
