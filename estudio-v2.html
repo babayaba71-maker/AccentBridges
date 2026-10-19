@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Action Bridges — Estudio Integrado v2 (QA)</title>
+<meta name="description" content="Coaching de acento americano para hispanohablantes. El oído entrena antes que la boca, la boca antes que la letra." />
+<meta name="theme-color" content="#3d5a73" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+
+<style>
+:root {
+  --bg:#f3efe6; --surface:#faf7f0; --surface-2:#ebe4d6; --ink:#1c1915;
+  --muted:#6b6458; --accent:#3d5a73; --accent-fg:#faf7f0; --accent-soft:#dfe6ec;
+  --border:#ddd4c4; --good:#2d6a4f; --good-soft:rgba(45,106,79,.12);
+  --warn:#b05a18; --warn-soft:rgba(176,90,24,.12);
+  --yellow-lab:#facc15; --yellow-lab-fg:#713f12; --yellow-lab-border:#eab308;
+  --shadow: 0 1px 3px rgba(28,25,21,.08), 0 1px 2px rgba(28,25,21,.04);
+  --shadow-h: 0 8px 20px rgba(28,25,21,.12);
+  --bar:rgba(250,247,240,.96);
+  touch-action:manipulation;
+}
+
+html.dark {
+  --bg:#14110d; --surface:#1c1813; --surface-2:#262017; --ink:#ece5d8;
+  --muted:#b0a692; --accent:#a9c7e2; --accent-fg:#10141b; --accent-soft:#28313d;
+  --border:#342c20; --good:#52b788; --good-soft:rgba(82,183,136,.15);
+  --warn:#e08738; --warn-soft:rgba(224,135,56,.15);
+  --yellow-lab:#eab308; --yellow-lab-fg:#1e1402; --yellow-lab-border:#ca8a04;
+  --shadow: 0 1px 3px rgba(0,0,0,.4);
+  --shadow-h: 0 8px 24px rgba(0,0,0,.6);
+  --bar:rgba(20,17,13,.96);
+}
+
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Source Sans 3",system-ui,sans-serif; line-height:1.55;
+  user-select:none; -webkit-user-select:none;
+}
+
+h1,h2,h3{font-family:"Newsreader",Georgia,serif; font-weight:500; letter-spacing:-.02em}
+button{font:inherit; cursor:pointer; touch-action:manipulation}
+button:disabled{opacity:.4; cursor:not-allowed}
+
+.wrap{
+  max-width:44rem; margin:0 auto; min-height:100dvh; display:flex;
+  flex-direction:column; padding:0.75rem 1rem 6rem;
+}
+
+.masthead{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:0.5rem 0; border-bottom:1px solid var(--border); margin-bottom:1rem;
+}
+.brand b{font-family:"Newsreader",serif; font-size:1.35rem; display:block; line-height:1.1}
+.brand span{font-size:.76rem; color:var(--muted)}
+.header-actions{display:flex; gap:.4rem}
+.icon-btn{
+  width:2.4rem; height:2.4rem; border-radius:99px; border:1px solid var(--border);
+  background:var(--surface); display:grid; place-items:center; font-size:1.1rem;
+}
+
+.narrator-bar{
+  position:sticky; top:0.5rem; z-index:30; background:var(--bar);
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  border:1px solid var(--accent); border-radius:1rem;
+  padding:0.75rem 1rem; box-shadow:var(--shadow-h); margin-bottom:1.25rem;
+}
+.narrator-top{display:flex; align-items:center; justify-content:space-between; gap:.75rem}
+.narrator-badge{
+  font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:.08em;
+  padding:.2rem .55rem; border-radius:.35rem; background:var(--accent-soft); color:var(--accent);
+}
+.audio-status{font-size:.85rem; color:var(--muted); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.btn-narrate{
+  background:var(--accent); color:var(--accent-fg); border:0; border-radius:.6rem;
+  padding:.45rem .85rem; font-weight:600; font-size:.85rem; display:inline-flex; align-items:center; gap:.35rem;
+}
+
+.lesson-head{margin-bottom:1.25rem}
+.lesson-day{font-size:.8rem; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--accent)}
+.lesson-title{font-size:1.85rem; margin:.2rem 0 .3rem; line-height:1.2}
+.lesson-hook{font-size:1.02rem; color:var(--muted); font-style:italic}
+
+.step-card{
+  background:var(--surface); border:1px solid var(--border); border-radius:1rem;
+  padding:1.2rem; margin-bottom:1.2rem; box-shadow:var(--shadow);
+  transition:border-color .2s, box-shadow .2s;
+}
+.step-card.active{
+  border-color:var(--accent); box-shadow:var(--shadow-h);
+  outline:2px solid var(--accent-soft); outline-offset:2px;
+}
+.step-card.completed{border-left:5px solid var(--good)}
+.step-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:.65rem}
+.step-tag{display:flex; align-items:center; gap:.5rem; font-size:.88rem; font-weight:600; color:var(--accent)}
+.step-num{
+  width:1.6rem; height:1.6rem; border-radius:99px; background:var(--surface-2);
+  display:grid; place-items:center; font-size:.78rem; border:1px solid var(--border);
+}
+.step-card.completed .step-num{background:var(--good); color:#fff; border-color:var(--good)}
+.step-speech{
+  background:var(--surface-2); border-left:3px solid var(--accent);
+  padding:.7rem .9rem; border-radius:0 .5rem .5rem 0; font-size:.93rem; margin-bottom:.9rem;
+}
+
+.interactive-box{
+  background:var(--bg); border:1px dashed var(--border); border-radius:.85rem;
+  padding:1.1rem; margin-top:.75rem; text-align:center;
+}
+
+.ear-pact-btn{
+  width:5.4rem; height:5.4rem; border-radius:99px; border:2px solid var(--accent);
+  background:var(--surface); font-size:2.4rem; display:inline-grid; place-items:center;
+  margin:.4rem auto; box-shadow:var(--shadow); transition:transform .15s, background .15s;
+}
+.ear-pact-btn:active{transform:scale(0.92)}
+.ear-pact-btn.pact-sealed{background:var(--accent); color:var(--accent-fg); border-color:var(--accent)}
+
+.vowel-row{display:flex; justify-content:center; gap:.5rem; flex-wrap:wrap; margin:.6rem 0}
+.vowel-btn{
+  width:3.3rem; height:3.8rem; border-radius:.6rem; border:1px solid var(--border);
+  background:var(--surface); font-family:"Newsreader",serif; font-size:1.55rem;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  box-shadow:var(--shadow); transition:transform .15s;
+}
+.vowel-btn:active{transform:scale(0.9)}
+.vowel-btn.played{border-color:var(--good); color:var(--good); background:var(--good-soft)}
+
+.blind-choices{display:flex; gap:.6rem; justify-content:center; margin-top:.75rem}
+.choice-btn{
+  flex:1; max-width:13.5rem; padding:.7rem .8rem; border-radius:.6rem; border:1px solid var(--border);
+  background:var(--surface); font-size:.88rem; font-weight:600;
+}
+.choice-btn.selected{border-color:var(--accent); background:var(--accent-soft); color:var(--accent)}
+
+.yellow-lab-box{
+  background:rgba(250,204,21,.12); border:2px solid var(--yellow-lab-border);
+  border-radius:.95rem; padding:1.2rem 1rem; text-align:center;
+}
+.lab-badge{
+  font-size:.7rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+  background:var(--yellow-lab); color:var(--yellow-lab-fg); padding:.22rem .6rem; border-radius:.35rem;
+}
+.lab-pair-trigger{
+  width:100%; max-width:17rem; margin:1rem auto; padding:.8rem; border-radius:.75rem;
+  border:0; background:var(--accent); color:var(--accent-fg); font-weight:600; font-size:1rem;
+  display:flex; align-items:center; justify-content:center; gap:.5rem; box-shadow:var(--shadow);
+}
+.lab-pair-trigger:active{transform:scale(0.97)}
+.lab-answers{display:flex; gap:.75rem; justify-content:center; max-width:21rem; margin:0 auto}
+.lab-ans-btn{
+  flex:1; height:3.6rem; border-radius:.8rem; border:2px solid var(--yellow-lab-border);
+  background:var(--surface); font-size:1.02rem; font-weight:700; color:var(--ink); box-shadow:var(--shadow);
+}
+.lab-ans-btn:active{transform:scale(0.95)}
+
+.gym-box{margin-top:1.25rem; padding-top:1.25rem; border-top:1px dashed var(--border); text-align:center}
+.self-eval-row{display:flex; gap:.5rem; justify-content:center; margin-top:.65rem}
+.eval-btn{
+  padding:.6rem .8rem; border-radius:.6rem; border:1px solid var(--border);
+  background:var(--surface); font-size:.88rem; font-weight:600;
+}
+.eval-btn.picked{border-color:var(--good); background:var(--good-soft); color:var(--good)}
+
+.hint-banner{
+  background:var(--warn-soft); border-left:3px solid var(--warn);
+  padding:.6rem .8rem; font-size:.84rem; text-align:left; margin-top:.65rem; border-radius:0 .4rem .4rem 0;
+}
+
+.expediente-card{
+  background:var(--surface); border:1px solid var(--good); border-radius:.95rem;
+  padding:1.25rem; text-align:left; margin-top:.75rem;
+}
+.exp-row{display:flex; justify-content:space-between; padding:.4rem 0; font-size:.9rem; border-bottom:1px solid var(--border)}
+.exp-row:last-child{border-bottom:0}
+.btn-primary{
+  background:var(--good); color:#fff; border:0; border-radius:.75rem;
+  padding:.85rem 1.25rem; font-weight:600; font-size:1rem; width:100%; box-shadow:var(--shadow);
+}
+.btn-primary:active{transform:scale(0.98)}
+
+.drawer-backdrop{
+  position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:50;
+  display:none; backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
+}
+.drawer-backdrop.open{display:block}
+.drawer{
+  position:fixed; bottom:0; left:0; right:0; max-height:85dvh; background:var(--surface);
+  border-radius:1.35rem 1.35rem 0 0; padding:1.25rem; z-index:51; overflow-y:auto;
+  box-shadow:0 -8px 25px rgba(0,0,0,.3); transform:translateY(100%); transition:transform .25s ease-out;
+}
+.drawer-backdrop.open .drawer{transform:translateY(0)}
+.days-grid{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(4.2rem, 1fr));
+  gap:.6rem; margin-top:1rem; padding-bottom:1.5rem;
+}
+.day-node{
+  padding:.7rem .3rem; border-radius:.65rem; border:1px solid var(--border);
+  background:var(--surface-2); text-align:center; font-size:.85rem; font-weight:700;
+}
+.day-node.unlocked{background:var(--surface); border-color:var(--accent); color:var(--accent); cursor:pointer}
+.day-node.current{background:var(--accent); color:var(--accent-fg); border-color:var(--accent)}
+.day-node.completed{border-color:var(--good); color:var(--good)}
+
+.toast{
+  position:fixed; bottom:1.25rem; left:50%; transform:translateX(-50%) translateY(1.5rem);
+  background:var(--ink); color:var(--bg); padding:.7rem 1.1rem; border-radius:.75rem;
+  font-size:.9rem; font-weight:600; z-index:60; opacity:0; pointer-events:none;
+  transition:opacity .25s, transform .25s; max-width:90vw; text-align:center;
+  box-shadow:var(--shadow-h);
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="brand">
+      <b>Action Bridges</b>
+      <span>Método Valerie · Oído → Boca → Letra</span>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="btn-open-days" title="Ver 57 días">🗓️</button>
+      <button class="icon-btn" id="btn-theme" title="Modo oscuro">🌙</button>
+    </div>
+  </header>
+
+  <div class="narrator-bar">
+    <div class="narrator-top">
+      <span class="narrator-badge">Maestra Lee</span>
+      <span class="audio-status" id="narrator-status">Lista para iniciar la clase</span>
+      <button class="btn-narrate" id="btn-narrate">
+        <span id="narrate-icon">▶</span>
+        <span id="narrate-label">Escuchar</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="lesson-head">
+    <div class="lesson-day" id="lesson-phase-tag">Fase 1: El Oído</div>
+    <h1 class="lesson-title" id="lesson-title">Cargando...</h1>
+    <p class="lesson-hook" id="lesson-hook">...</p>
+  </div>
+
+  <div id="lesson-steps"></div>
+</div>
+
+<!-- Toast (puntada 6: nada de alerts nativos) -->
+<div class="toast" id="toast"></div>
+
+<div class="drawer-backdrop" id="days-drawer">
+  <div class="drawer">
+    <div style="display:flex; justify-content:space-between; align-items:center">
+      <h2 style="margin:0; font-size:1.3rem">Ruta de los 57 Días</h2>
+      <button class="icon-btn" onclick="toggleDrawer(false)">✕</button>
+    </div>
+    <p style="font-size:.85rem; color:var(--muted); margin:.3rem 0 1rem">
+      Cada día se abre al sellar el expediente anterior. No hay atajos para el cerebro.
+    </p>
+    <p style="font-size:.78rem; color:var(--muted); margin:0 0 .4rem">
+      Días 1-2: contenido completo. Días 3-57: relleno de demostración — el contenido real del banco se integra tras el QA.
+    </p>
+    <div class="days-grid" id="days-grid"></div>
+  </div>
+</div>
+
+<script>
+function haptic(ms = 25) {
+  if ('vibrate' in navigator) navigator.vibrate(ms);
+}
+
+/* ===== PUNTADA 2: VOZ DE LA MAESTRA (doctrina de tanque) =====
+   Cadena: MP3 horneado (assets/narracion/, se hornea al recargar)
+   -> voz es del telefono. JAMAS boca viva por reproduccion. */
+if ('speechSynthesis' in window) { try { speechSynthesis.getVoices(); } catch(e){} }
+function esVoice() {
+  if (!('speechSynthesis' in window)) return null;
+  const vs = speechSynthesis.getVoices();
+  return vs.find(v=>/es[-_]MX/i.test(v.lang)) || vs.find(v=>/^es[-_]?/i.test(v.lang)) || null;
+}
+function setStatus(t){ const el=document.getElementById("narrator-status"); if(el) el.textContent=t; }
+
+const LESSONS_DB = {
+  1: {
+    day: 1,
+    title: "El sonido no es la letra",
+    hook: "Antes de alfabetizar, se despega el oído del ojo.",
+    phase: "oido",
+    level: "a0-bajo",
+    scripts: {
+      s1: "Bienvenido. Hacemos un pacto: primero oímos, luego la boca siente, y al final vemos letras. En español lo que ves es lo que suena; en inglés no. Toca la oreja grande para sellar el pacto y despertar tu oído.",
+      s2: "Reconoce tu tesoro: en español posees cinco vocales perfectas, fijas y firmes: A, E, I, O, U. Tócalas en orden antes de cruzarte con los sonidos del inglés.",
+      s3: "Escucha estas tres palabras a ciegas. No intentes adivinar cómo se escriben; solo siente si suenan igual a tus vocales o si hay algo extraño.",
+      s4: "Recreo de práctica. Tu oído ya detectó la diferencia; ahora afina el reflejo en el laboratorio amarillo. Consigue 5 aciertos y haz tu primer eco.",
+      s5: "Día uno cumplido. Cero letras consultadas y tu cerebro ya no asume que la 'a' suena igual en todas partes. Mañana exploraremos el motor del cuello."
+    }
+  },
+  2: {
+    day: 2,
+    title: "Voz y sordera: el motor del cuello",
+    hook: "Tus cuerdas vocales son un motor que se enciende y se apaga.",
+    phase: "oido",
+    level: "a0-bajo",
+    scripts: {
+      s1: "Día dos. Pon dos dedos en tu garganta. En español casi todo vibra; en inglés la mitad de los sonidos son puro aire sordo.",
+      s2: "Siente el motor: toca el sonido que vibra y luego el que es puro aire.",
+      s3: "Escucha dos consonantes en inglés a ciegas y siente tu garganta.",
+      s4: "Laboratorio amarillo: distingue pares con motor encendido y apagado.",
+      s5: "Expediente del Día 2 sellado. Tu cuello ya sabe cuándo apagar el motor."
+    }
+  }
+};
+
+for (let d = 3; d <= 57; d++) {
+  const isOido = d <= 15;
+  const isBoca = d > 15 && d <= 40;
+  LESSONS_DB[d] = {
+    day: d,
+    title: isOido ? `Calibración Auditiva #${d}` : (isBoca ? `Gimnasio Muscular #${d}` : `Confesión de la Letra #${d}`),
+    hook: isOido ? "El oído manda." : (isBoca ? "La boca imita." : "La ortografía confiesa."),
+    phase: isOido ? "oido" : (isBoca ? "boca" : "letra"),
+    level: d < 41 ? "a0-bajo" : "a1-fonico",
+    scripts: {
+      s1: `Iniciamos la sesión del Día ${d}. Concéntrate en la vibración sonora.`,
+      s2: "Calibramos el ancla muscular en tu memoria auditiva.",
+      s3: "Discriminación a ciegas sin ortografía.",
+      s4: "Laboratorio amarillo de reflejo rápido.",
+      s5: `Expediente del Día ${d} listo para guardarse.`
+    }
+  };
+}
+
+const PROG_KEY = "morfofono_prog"; // PUNTADA 4: misma llave que el Estudio vivo — una sola verdad
+const progArr = (()=>{ try { return JSON.parse(localStorage.getItem(PROG_KEY) || "[]"); } catch(e){ return []; } })();
+const state = {
+  currentDay: 1,
+  completedDays: new Set(progArr),
+  highestUnlocked: progArr.length ? Math.max(...progArr) + 1 : 1,
+  step: 1,
+  pactSealed: false,
+  l1Explored: new Set(),
+  blindDone: false,
+  labScore: 0,
+  labErrors: 0,
+  labTarget: 5,
+  labPairIdx: 0,
+  gymRated: false,
+  gymRating: null,
+  consecutiveFails: 0
+};
+
+const LAB_PAIRS = [
+  { a: "cat", b: "cat", same: true, id: "c_c" },
+  { a: "cat", b: "what", same: false, id: "c_w" },
+  { a: "beat", b: "bit", same: false, id: "b_bt" },
+  { a: "one", b: "one", same: true, id: "o_o" },
+  { a: "sheep", b: "ship", same: false, id: "s_sp" },
+  { a: "yacht", b: "what", same: false, id: "y_w" },
+  { a: "two", b: "two", same: true, id: "t_t" }
+];
+
+const audioEl = new Audio();
+let audioUnlocked = false;
+
+function unlockAudio() {
+  if (audioUnlocked) return;
+  const silent = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAA=");
+  silent.play().then(() => { audioUnlocked = true; }).catch(() => {});
+}
+
+/* ===== PUNTADA 7: cadena de audio con evento de fin, nunca temporizador fijo ===== */
+function ttsWord(clean, lang, res) {
+  if (!('speechSynthesis' in window)) { res(); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(clean);
+  const v = /^es/i.test(lang||"") ? esVoice() : null;
+  if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = lang || "en-US"; }
+  u.rate = 0.85; u.onend = () => res(); u.onerror = () => res();
+  try { speechSynthesis.speak(u); } catch(e) { res(); }
+}
+
+function playWord(word, lang) {
+  const clean = String(word).replace(/[^a-zA-Z]/g, "").toLowerCase();
+  return new Promise(res => {
+    audioEl.onended = () => { audioEl.onended = null; audioEl.onerror = null; res(); };
+    audioEl.onerror = () => { audioEl.onerror = null; ttsWord(clean, lang || "en-US", res); };
+    audioEl.src = `https://babayaba71-maker.github.io/AccentBridges/assets/oido-audio/${clean}.mp3`;
+    audioEl.play().catch(() => { audioEl.onerror = null; ttsWord(clean, lang || "en-US", res); });
+  });
+}
+
+function playSound(token, lang) { haptic(20); return playWord(token, lang); }
+
+/* ===== PUNTADA 3: vocales L1 con eco doblado — JAMAS letra suelta al sintetizador ===== */
+function speakL1Vowel(v) {
+  const mp3 = `assets/l1-audio/${v}.mp3`;
+  fetch(mp3, { method: "HEAD" }).then(r => {
+    if (r.ok) { audioEl.src = mp3; audioEl.play().catch(() => ttsL1Vowel(v)); }
+    else ttsL1Vowel(v);
+  }).catch(() => ttsL1Vowel(v));
+}
+function ttsL1Vowel(v) {
+  const voice = esVoice();
+  if (!voice) { setStatus("Sin voz de español en este teléfono: la vocal se hornea en audio pronto."); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(`${v}, ${v}`); // eco doblado X, X (regla de oro)
+  u.voice = voice; u.lang = voice.lang; u.rate = 0.85;
+  try { speechSynthesis.speak(u); } catch(e) {}
+}
+
+function speakMaestra(text, onEnd) {
+  setStatus(text);
+  if ('mediaSession' in navigator) {
+    try { navigator.mediaSession.metadata = new MediaMetadata({
+      title: `Día ${state.currentDay} · Action Bridges`,
+      artist: "Maestra Lee",
+      album: "Método Valerie"
+    }); } catch(e){}
+  }
+  const mp3 = `assets/narracion/dia${state.currentDay}-s${state.step}.mp3`;
+  fetch(mp3, { method: "HEAD" }).then(r => {
+    if (r.ok) { audioEl.onended = () => { audioEl.onended = null; onEnd && onEnd(); };
+      audioEl.src = mp3;
+      audioEl.play().catch(() => ttsMaestra(text, onEnd));
+    } else ttsMaestra(text, onEnd);
+  }).catch(() => ttsMaestra(text, onEnd));
+}
+
+function ttsMaestra(text, onEnd) {
+  const v = ('speechSynthesis' in window) ? esVoice() : null;
+  if (!v) {
+    setStatus("Sin voz de español en este teléfono — lee la tarjeta en pantalla");
+    setTimeout(() => onEnd && onEnd(), 1200);
+    return;
+  }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.voice = v; u.lang = v.lang; u.rate = 0.95;
+  u.onend = () => onEnd && onEnd();
+  u.onerror = () => onEnd && onEnd();
+  try { speechSynthesis.speak(u); } catch(e) { onEnd && onEnd(); }
+}
+
+function loadDayFromHash() {
+  const hash = window.location.hash;
+  const match = hash.match(/#dia-(\d+)/);
+  let requestedDay = match ? parseInt(match[1], 10) : 1;
+
+  if (requestedDay > state.highestUnlocked) {
+    requestedDay = state.highestUnlocked;
+    window.location.hash = `#dia-${requestedDay}`;
+  }
+
+  state.currentDay = requestedDay;
+  state.step = 1;
+  state.pactSealed = false;
+  state.l1Explored.clear();
+  state.blindDone = false;
+  state.labScore = 0;
+  state.labErrors = 0;
+  state.gymRated = false;
+  state.consecutiveFails = 0;
+
+  renderApp();
+}
+
+function renderApp() {
+  const lesson = LESSONS_DB[state.currentDay];
+  document.getElementById("lesson-phase-tag").textContent = `Fase: ${lesson.phase.toUpperCase()} · Día ${lesson.day} de 57`;
+  document.getElementById("lesson-title").textContent = lesson.title;
+  document.getElementById("lesson-hook").textContent = `"${lesson.hook}"`;
+
+  const container = document.getElementById("lesson-steps");
+  container.innerHTML = `
+    <div class="step-card ${state.step === 1 ? 'active' : ''} ${state.pactSealed ? 'completed' : ''}" id="s1-card">
+      <div class="step-header">
+        <div class="step-tag"><span class="step-num">1</span> Contrato del Método</div>
+        <span style="font-size:.85rem; font-weight:700">${state.pactSealed ? '✓ Sellado' : 'Compuerta'}</span>
+      </div>
+      <div class="step-speech">"${lesson.scripts.s1}"</div>
+      <div class="interactive-box">
+        <button class="ear-pact-btn ${state.pactSealed ? 'pact-sealed' : ''}" onclick="onPactClick()">👂</button>
+        <p style="font-size:.85rem; color:var(--muted); margin:.4rem 0 0">
+          ${state.pactSealed ? '✓ Oído calibrado. Modo sin letras activado.' : 'Toca la oreja grande para sellar el pacto.'}
+        </p>
+      </div>
+    </div>
+
+    <div class="step-card ${state.step === 2 ? 'active' : ''} ${state.l1Explored.size >= 5 ? 'completed' : ''}" id="s2-card">
+      <div class="step-header">
+        <div class="step-tag"><span class="step-num">2</span> Tus 5 Vocales del Español</div>
+        <span style="font-size:.85rem; font-weight:700">${state.l1Explored.size} / 5</span>
+      </div>
+      <div class="step-speech">"${lesson.scripts.s2}"</div>
+      <div class="interactive-box">
+        <div class="vowel-row">
+          ${["a","e","i","o","u"].map(v => `
+            <button class="vowel-btn ${state.l1Explored.has(v) ? 'played' : ''}" onclick="onVowelClick('${v}')">
+              ${v.toUpperCase()}
+              <span style="font-size:.6rem; color:var(--muted)">L1</span>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card ${state.step === 3 ? 'active' : ''} ${state.blindDone ? 'completed' : ''}" id="s3-card">
+      <div class="step-header">
+        <div class="step-tag"><span class="step-num">3</span> Estímulo a Ciegas (Cero Texto)</div>
+        <span style="font-size:.85rem; font-weight:700">${state.blindDone ? '✓ Listo' : 'Compuerta'}</span>
+      </div>
+      <div class="step-speech">"${lesson.scripts.s3}"</div>
+      <div class="interactive-box">
+        <button class="btn-narrate" style="margin:.4rem auto" onclick="playBlindBurst()">
+          🔊 Escuchar ráfaga (3 sonidos)
+        </button>
+        <div class="blind-choices">
+          <button class="choice-btn" onclick="onBlindChoice('familiar')">Sonó igual a mis vocales</button>
+          <button class="choice-btn" onclick="onBlindChoice('extrano')">Sonó extraño / diferente</button>
+        </div>
+        ${state.blindDone ? `
+          <div class="hint-banner">
+            <b>Explicación de la Maestra Lee:</b> Las 3 palabras que escuchaste se escriben con la letra "A" en inglés, pero suenan con tres vocales completamente distintas. Tu oído no se dejó engañar.
+          </div>
+        ` : ''}
+      </div>
+    </div>
+
+    <div class="step-card ${state.step === 4 ? 'active' : ''} ${(state.labScore >= state.labTarget && state.gymRated) ? 'completed' : ''}" id="s4-card">
+      <div class="step-header">
+        <div class="step-tag"><span class="step-num">4</span> Recreo: Laboratorio Amarillo</div>
+        <span style="font-size:.85rem; font-weight:700">Meta: ${state.labScore} / ${state.labTarget}</span>
+      </div>
+      <div class="step-speech">"${lesson.scripts.s4}"</div>
+
+      <div class="yellow-lab-box">
+        <span class="lab-badge">Laboratorio Oído Inglés</span>
+        <p style="font-size:.9rem; font-weight:700; margin:.5rem 0">¿Los dos sonidos son IGUALES o DISTINTOS?</p>
+        <button class="lab-pair-trigger" onclick="playLabPair()">🔊 Reproducir Par Sonoro</button>
+        <div class="lab-answers">
+          <button class="lab-ans-btn" onclick="onLabAnswer(true)">[ = ] IGUAL</button>
+          <button class="lab-ans-btn" onclick="onLabAnswer(false)">[ ≠ ] DISTINTO</button>
+        </div>
+        <p id="lab-status" style="font-size:.84rem; color:var(--muted); margin-top:.5rem">Toca el botón azul para escuchar.</p>
+
+        ${renderScaffoldingHint()}
+      </div>
+
+      ${state.labScore >= state.labTarget ? `
+        <div class="gym-box">
+          <p style="font-weight:700; font-size:.92rem; color:var(--good); margin:0 0 .4rem">👄 Primer Eco (Shadowing Muscular)</p>
+          <button class="lab-ans-btn" style="height:2.6rem; max-width:14rem; margin:0 auto; font-size:.85rem" onclick="playSound('cat')">
+            🔊 Escuchar modelo
+          </button>
+          <div class="self-eval-row">
+            <button class="eval-btn ${state.gymRating==='logre'?'picked':''}" onclick="onGymRate('logre')">😎 Lo logré</button>
+            <button class="eval-btn ${state.gymRating==='casi'?'picked':''}" onclick="onGymRate('casi')">🤏 Casi</button>
+            <button class="eval-btn ${state.gymRating==='todavia'?'picked':''}" onclick="onGymRate('todavia')">😅 Todavía no</button>
+          </div>
+          ${state.gymRating ? `<p style="font-size:.8rem; color:var(--good); margin-top:.4rem">✓ Autoevaluación registrada con honestidad.</p>` : ''}
+        </div>
+      ` : ''}
+    </div>
+
+    <div class="step-card ${state.step === 5 ? 'active' : ''}" id="s5-card">
+      <div class="step-header">
+        <div class="step-tag"><span class="step-num">5</span> Expediente del Día ${state.currentDay}</div>
+      </div>
+      <div class="step-speech">"${lesson.scripts.s5}"</div>
+
+      ${(state.labScore >= state.labTarget && state.gymRated) ? `
+        <div class="expediente-card">
+          <h3 style="margin:0 0 .5rem; font-size:1.15rem">Expediente Sellado con Éxito</h3>
+          <div class="exp-row"><span>👂 Discriminación Auditiva:</span> <b>${state.labScore} aciertos (${state.labErrors} reintentos)</b></div>
+          <div class="exp-row"><span>👄 Eco Muscular:</span> <b>${state.gymRating || 'Completado'}</b></div>
+          <div class="exp-row"><span>🛡️ Doctrina:</span> <b>0 letras consultadas (Oído puro)</b></div>
+          <div style="margin-top:1rem">
+            <button class="btn-primary" onclick="sealDayExpediente()">
+              🔓 Guardar y Desbloquear Día ${state.currentDay + 1}
+            </button>
+          </div>
+        </div>
+      ` : `
+        <p style="font-size:.85rem; color:var(--muted); text-align:center">Completa el laboratorio amarillo y el eco muscular para destrabar el expediente.</p>
+      `}
+    </div>
+  `;
+}
+
+function renderScaffoldingHint() {
+  if (state.consecutiveFails >= 5) {
+    return `<div class="hint-banner"><b>Pista nivel 3 (Imagen mental):</b> Piensa en la primera como una sonrisa amplia y en la segunda como un bostezo relajado.</div>`;
+  } else if (state.consecutiveFails >= 3) {
+    return `<div class="hint-banner"><b>Pista nivel 2 (Ancla español):</b> El primer sonido estira los labios hacia los lados; el segundo cae sin tensión al pecho.</div>`;
+  } else if (state.consecutiveFails >= 1) {
+    return `<div class="hint-banner"><b>Pista nivel 1:</b> Escucha con atención a la duración y al aire entre ambos disparos.</div>`;
+  }
+  return '';
+}
+
+function onPactClick() {
+  haptic(40);
+  unlockAudio();
+  state.pactSealed = true;
+  state.step = 2;
+  renderApp();
+  speakMaestra(LESSONS_DB[state.currentDay].scripts.s2);
+  document.getElementById("s2-card").scrollIntoView({ behavior: 'smooth' });
+}
+
+function onVowelClick(v) {
+  haptic(20);
+  state.l1Explored.add(v);
+  speakL1Vowel(v);
+  if (state.l1Explored.size >= 5 && state.step === 2) {
+    state.step = 3;
+    setTimeout(() => {
+      renderApp();
+      speakMaestra(LESSONS_DB[state.currentDay].scripts.s3);
+      document.getElementById("s3-card").scrollIntoView({ behavior: 'smooth' });
+    }, 600);
+  } else {
+    renderApp();
+  }
+}
+
+async function playBlindBurst() {
+  setStatus("🎧 Escuchando la ráfaga...");
+  for (const w of ["cat", "what", "yacht"]) {
+    await playWord(w);
+    await new Promise(r => setTimeout(r, 650));
+  }
+  setStatus("¿Cómo te sonó? Elige con honestidad.");
+}
+
+function onBlindChoice(choice) {
+  haptic(25);
+  state.blindChoice = choice;
+  state.blindDone = true;
+  state.step = 4;
+  renderApp();
+  speakMaestra(LESSONS_DB[state.currentDay].scripts.s4);
+  document.getElementById("s4-card").scrollIntoView({ behavior: 'smooth' });
+}
+
+let activeLabPair = LAB_PAIRS[0];
+
+async function playLabPair() {
+  activeLabPair = LAB_PAIRS[state.labPairIdx % LAB_PAIRS.length];
+  setStatus("🎧 Sonido A...");
+  await playWord(activeLabPair.a);
+  await new Promise(r => setTimeout(r, 350));
+  setStatus("🎧 Sonido B...");
+  await playWord(activeLabPair.b);
+  setStatus("¿IGUAL o DISTINTO? Tú decides.");
+}
+
+function onLabAnswer(saidSame) {
+  const isCorrect = (saidSame === activeLabPair.same);
+  haptic(isCorrect ? 30 : 60);
+
+  if (isCorrect) {
+    state.labScore++;
+    state.consecutiveFails = 0;
+    document.getElementById("lab-status").innerHTML = "<b style='color:var(--good)'>✓ ¡Correcto! Tu oído captó la relación.</b>";
+  } else {
+    state.labErrors++;
+    state.consecutiveFails++;
+    document.getElementById("lab-status").innerHTML = "<b style='color:var(--warn)'>Reintenta con calma.</b>";
+  }
+
+  // PUNTADA 1: la telemetria se acumula en sesion y se envia al sellar el dia
+  // (endpoint real: logMorfofonoSession — mismo patron del Estudio vivo)
+  state.labPairIdx++;
+  setTimeout(() => {
+    renderApp();
+  }, 750);
+}
+
+function onGymRate(rate) {
+  haptic(25);
+  state.gymRating = rate;
+  state.gymRated = true;
+  state.step = 5;
+  renderApp();
+  speakMaestra(LESSONS_DB[state.currentDay].scripts.s5);
+  document.getElementById("s5-card").scrollIntoView({ behavior: 'smooth' });
+}
+
+/* ===== PUNTADA 1: EXPEDIENTE REAL (logMorfofonoSession) ===== */
+const EXP_URL = "https://valerie.base44.app/functions/logMorfofonoSession";
+const EXP_KEY = "ABVC-PILOTO-2026";
+const T0 = Date.now();
+
+function expSend(rec) {
+  return fetch(EXP_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "api_key": EXP_KEY },
+    body: JSON.stringify(rec)
+  }).then(r => r.json()).then(j => !!(j && j.ok)).catch(() => false);
+}
+
+function sealDayExpediente() {
+  haptic([30, 50, 30]);
+  const d = state.currentDay;
+  const nextDay = d + 1;
+  const lesson = LESSONS_DB[d];
+
+  // una sola verdad: la misma llave del Estudio vivo
+  const prog = new Set(JSON.parse(localStorage.getItem(PROG_KEY) || "[]"));
+  prog.add(d);
+  localStorage.setItem(PROG_KEY, JSON.stringify([...prog].sort((a,b)=>a-b)));
+  state.completedDays.add(d);
+  if (nextDay > state.highestUnlocked) state.highestUnlocked = nextDay;
+
+  // expediente: un registro por dia, como el vivo
+  const sent = JSON.parse(localStorage.getItem("est2_days_sent") || "[]");
+  if (sent.includes(d)) {
+    toast("Este día ya vive en tu expediente. La puerta del Día " + nextDay + " está abierta.");
+  } else {
+    const intentos = state.labScore + state.labErrors;
+    const acc = intentos ? Math.round(state.labScore / intentos * 100) : 100;
+    const rec = {
+      topic: "Estudio Integrado v2 — Día " + d + ": " + lesson.title,
+      userId: localStorage.getItem("morfofono_student") || "Estudiante v2",
+      passed: true,
+      accuracy: acc,
+      challengeSentence: lesson.hook,
+      spokenText: "estudio-v2 · pacto:" + (state.pactSealed?1:0) +
+        " · ciegas:" + (state.blindChoice || "-") +
+        " · lab:" + state.labScore + "/" + intentos +
+        " · eco:" + (state.gymRating || "-") +
+        " · t:" + Math.round((Date.now()-T0)/1000) + "s",
+      location: "Estudio v2",
+      sessionId: "est2-d" + d + "-" + Date.now()
+    };
+    expSend(rec).then(ok => {
+      if (ok) {
+        localStorage.setItem("est2_days_sent", JSON.stringify([...sent, d]));
+        toast("Expediente del Día " + d + " sellado. La puerta del Día " + nextDay + " está abierta.");
+      } else {
+        toast("Día guardado en este teléfono; el servidor no respondió — se reenviará al repetir.");
+      }
+    });
+  }
+  window.location.hash = "#dia-" + nextDay;
+}
+
+let toastT = null;
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove("show"), 4000);
+}
+
+function toggleDrawer(open) {
+  const drawer = document.getElementById("days-drawer");
+  if (open) {
+    buildDaysGrid();
+    drawer.classList.add("open");
+  } else {
+    drawer.classList.remove("open");
+  }
+}
+
+function buildDaysGrid() {
+  const grid = document.getElementById("days-grid");
+  grid.innerHTML = "";
+  for (let d = 1; d <= 57; d++) {
+    const isUnlocked = d <= state.highestUnlocked;
+    const isCurrent = d === state.currentDay;
+    const div = document.createElement("div");
+    div.className = `day-node ${isCurrent ? 'current' : (isUnlocked ? 'unlocked' : '')}`;
+    div.textContent = `D${d}`;
+    if (isUnlocked) {
+      div.onclick = () => {
+        toggleDrawer(false);
+        window.location.hash = `#dia-${d}`;
+      };
+    } else {
+      div.style.opacity = ".35";
+      div.style.cursor = "not-allowed";
+    }
+    grid.appendChild(div);
+  }
+}
+
+document.getElementById("btn-open-days").onclick = () => toggleDrawer(true);
+
+const btnTheme = document.getElementById("btn-theme");
+btnTheme.onclick = () => {
+  const isDark = document.documentElement.classList.toggle("dark");
+  btnTheme.textContent = isDark ? "☀️" : "🌙";
+  localStorage.setItem("ab_theme", isDark ? "dark" : "light");
+};
+if (localStorage.getItem("ab_theme") === "dark") {
+  document.documentElement.classList.add("dark");
+  btnTheme.textContent = "☀️";
+}
+
+document.getElementById("btn-narrate").onclick = () => {
+  const script = LESSONS_DB[state.currentDay].scripts[`s${state.step}`];
+  speakMaestra(script);
+};
+
+window.addEventListener("hashchange", loadDayFromHash);
+loadDayFromHash();
+</script>
+<div style="position:fixed;bottom:2px;right:5px;font-size:9px;opacity:.5;z-index:99;background:#0008;color:#fff;padding:1px 5px;border-radius:4px">🔊 estudio v2 · QA</div>
+</body>
+</html>
