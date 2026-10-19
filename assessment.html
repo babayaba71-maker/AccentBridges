@@ -78,7 +78,9 @@ function ttsFallback(txt){
   });
 }
 async function palabra(w){ // reproduce UNA palabra por cualquier boca disponible
+  setEstado('<span class="sonando">⬇️ Descargando la voz…</span>');
   const url=await bocaFetch(w);
+  setEstado('<span class="sonando">🔊 Sonando…</span>');
   if(url){try{await playUrl(url);return;}catch(e){}}
   await ttsFallback(w);
 }
@@ -108,6 +110,7 @@ function empezar(){
  nombre=(document.getElementById("nb").value||"").trim()||"Anónima/o";
  idx=0;aciertos=0;falladas=[];
  getAudio(); // el elemento de audio nace con el gesto del botón
+ (async()=>{for(const r of RONDAS){await bocaFetch(r.a);await bocaFetch(r.b);}})(); // prewarm silencioso de las 19 palabras
  pRonda();
 }
 function pRonda(){
