@@ -87,11 +87,16 @@ async function palabra(w){ // reproduce UNA palabra por cualquier boca disponibl
 
 /* La escalera: 12 rondas IGUAL/DIFERENTE — de lo obvio a lo que solo un oído entrenado caza.
    CERO letras durante la prueba: solo oídos. */
+/* Escalera v2.3 — PALABRAS DE LA VIDA REAL (pedido de JJ: "esas preguntas son muy
+   avanzadas... I hate those words... what about 'Live or Leave'?" — nada de vocabulario
+   de libro de texto; palabras que la gente VIVE: no, day, eat, live, leave, sit, seat,
+   three, tree, cat, cut, can. El par man/men quedó DESCARTADO: el QA boca→oído detectó
+   que Sarah pronunció man como men — par roto prohibido). */
 const RONDAS=[
- {a:"cat",b:"cat",s:true},{a:"dog",b:"duck",s:false},{a:"day",b:"day",s:true},
- {a:"ship",b:"sheep",s:false},{a:"cut",b:"cat",s:false},{a:"think",b:"sink",s:false},
- {a:"very",b:"berry",s:false},{a:"pull",b:"pool",s:false},{a:"bit",b:"bit",s:true},
- {a:"they",b:"day",s:false},{a:"hot",b:"hat",s:false},{a:"can",b:"can't",s:false}
+ {a:"no",b:"no",s:true},{a:"dog",b:"duck",s:false},{a:"day",b:"day",s:true},
+ {a:"day",b:"they",s:false},{a:"eat",b:"eat",s:true},{a:"ship",b:"sheep",s:false},
+ {a:"live",b:"leave",s:false},{a:"sit",b:"seat",s:false},{a:"very",b:"very",s:true},
+ {a:"three",b:"tree",s:false},{a:"cat",b:"cut",s:false},{a:"can",b:"can't",s:false}
 ];
 const NIVELES=[[11,"B1+","Tu oído ya cruza el puente con vuelo propio"],[9,"A2","Oído puente adelante: se te escapan los pares finos"],[7,"A1","El puente está en construcción: la base ya suena"],[5,"A0-alto","Nivel fundador: el oído empieza a despertar"],[3,"A0-medio","Empieza por sonidos: el oído es un músculo bebé"],[0,"A0-bajo","Bienvenida a la orilla: aquí empiezan todos"]];
 let nombre="",idx=0,aciertos=0,falladas=[],sonando=false;
@@ -162,7 +167,7 @@ function nivelDe(n){
 }
 function pFinal(){
  const[lv,desc]=nivelDe(aciertos);
- const code=`PRUEBA DEL OÍDO v2.1 · ${aciertos}/${RONDAS.length} · ${nombre} · Nivel del oído: ${lv}`+(falladas.length?` · Falladas: ${falladas.join(", ")}`:" · Limpia");
+ const code=`PRUEBA DEL OÍDO v2.3 · ${aciertos}/${RONDAS.length} · ${nombre} · Nivel del oído: ${lv}`+(falladas.length?` · Falladas: ${falladas.join(", ")}`:" · Limpia");
  app.innerHTML=`<span class="chip">🎧 RESULTADO</span>
  <div class="card">
   <p style="text-align:center;font-size:.85rem;color:var(--muted)">Tu oído quedó medido en</p>
@@ -178,7 +183,7 @@ function pFinal(){
 }
 function reportar(){
  const[lv]=nivelDe(aciertos);
- const code=`PRUEBA DEL OÍDO v2.1 · ${aciertos}/${RONDAS.length} · Nivel del oído: ${lv}`+(falladas.length?` · Falladas: ${falladas.join(", ")}`:" · Limpia");
+ const code=`PRUEBA DEL OÍDO v2.3 · ${aciertos}/${RONDAS.length} · Nivel del oído: ${lv}`+(falladas.length?` · Falladas: ${falladas.join(", ")}`:" · Limpia");
  const stat=document.getElementById("repStat");
  fetch("https://valerie.base44.app/functions/logAssessmentResult",{
   method:"POST",headers:{"Content-Type":"application/json","api_key":"ABVC-PILOTO-2026"},
