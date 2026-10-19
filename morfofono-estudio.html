@@ -602,7 +602,11 @@ function stopReader(msg){
 }
 function readerAvanzar(seg){ readerQueue.shift(); LEE_MODO[document.visibilityState === "visible" ? "pantalla" : "manos"]++; setTimeout(readerSpeakNext, seg.lang === "en" ? 650 : 220); }
 function readerNavegador(seg){ // RESPALDO: voz del navegador si la boca falla
-  const avanzar = () => readerAvanzar(seg);
+  // PERRO GUARDIÁN (19-oct, créditos ElevenLabs agotados + teléfonos sin TTS): si ninguna
+  // voz dispara onend/onerror en el tiempo estimado de lectura, el bloque AVANZA SOLO —
+  // la cadena nunca se cuelga en silencio; el auto-scroll guía la lectura silenciosa.
+  var guard = null;
+  const avanzar = () => { if (guard) clearTimeout(guard); guard = null; readerAvanzar(seg); };
   const u = new SpeechSynthesisUtterance(seg.t);
   if (seg.lang === "en") {
     u.lang = "en-US"; u.rate = slowMode ? 0.60 : 0.80;
@@ -613,6 +617,12 @@ function readerNavegador(seg){ // RESPALDO: voz del navegador si la boca falla
   }
   u.onend = avanzar;
   u.onerror = avanzar;
+  const estMs = Math.max(3500, seg.t.length * 90) + 5000; // ritmo lectura + margen generoso
+  guard = setTimeout(function(){
+    guard = null;
+    try{ window.speechSynthesis.cancel(); }catch(e){}
+    avanzar();
+  }, estMs);
   try{ window.speechSynthesis.speak(u); }catch(e){ avanzar(); }
 }
 function readerSpeakNext(){
