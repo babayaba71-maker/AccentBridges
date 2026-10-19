@@ -629,7 +629,7 @@ const PAIRS = [
   ["sip", "ship"], ["chair", "share"], ["sing", "sin"]
 ];
 /* ESCALERA DE PISTAS DEL BISTURÍ (Maestro JJ, 15-oct): 1 fallo → palabra en inglés (zas, los ojos);
-   3 fallos → + ancla culichi (zas); 5 fallos → + figura (si es un barco, sale un barco).
+   3 fallos → + ancla en español (zas); 5 fallos → + figura (si es un barco, sale un barco).
    Rondas de 10: umbral 70 → 65 → 60 → 55 → 50 (respira con cada ronda no pasada).
    10-15 repeticiones = evaluación viva: la persistencia también mide. */
 const ANCLA_E = {"sheep":"shiip","ship":"ship","cat":"kat","cut":"kat","cot":"kot","fool":"fuul","full":"ful","bed":"bed","bad":"bad","wet":"uet","wait":"ueit","pat":"pat","bat":"bat","fan":"fan","van":"van","very":"VE-ri","berry":"BE-ri","think":"tink","sink":"sink","this":"dis","dis":"dis","sip":"sip","zip":"zip","chair":"cher","share":"sher","sing":"sing","sin":"sin"};
@@ -678,7 +678,7 @@ function judgePair(guessedSame) {
     if (L >= 2) rev += ` · 🧭 ${ANCLA_E[currentPair.a] || currentPair.a} / ${ANCLA_E[currentPair.b] || currentPair.b}`;
     if (L >= 3) rev += ` · ${EMO_E[currentPair.a] || "🔊"} ${EMO_E[currentPair.b] || "🔊"}`;
     html += `<div class='faint' style='margin-top:.4rem;border-left:3px solid var(--warn);padding:6px 10px'>${rev}` +
-      (L > preL ? (L === 1 ? " — 👁️ ZAS: la palabra sale en inglés, los ojos entran a ayudar." : L === 2 ? " — 🧭 ZAS: el ancla culichi entra." : " — ⚓ ZAS: la figura entra. Si es un barco, sale un barco.") : "") +
+      (L > preL ? (L === 1 ? " — 👁️ ZAS: la palabra sale en inglés, los ojos entran a ayudar." : L === 2 ? " — 🧭 ZAS: el ancla en español entra." : " — ⚓ ZAS: la figura entra. Si es un barco, sale un barco.") : "") +
       ` · pistas nivel ${L}</div>`;
   }
   if (rondaN >= 10) {
