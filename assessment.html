@@ -6,7 +6,7 @@
 <title>Prueba del Oído — Myl AccentBridges</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Newsreader:ital@0;1&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#F9F5F0;--surface:#FFFFFF;--surface-2:#F2EBE5;--ink:#2B2622;--muted:#8A7F76;--accent:#F38B2D;--accent-fg:#fff;--ok:#4E9B5F;--err:#C25B4E;--border:#E5DCD2;--shadow:0 1px 3px rgba(43,38,34,.08)}
+:root{--bg:#F9F5F0;--surface:#FFFFFF;--surface-2:#F2EBE5;--ink:#2B2622;--muted:#8A7F76;--accent:#F38B2D;--accent-fg:#fff;--border:#E5DCD2;--shadow:0 1px 3px rgba(43,38,34,.08)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:1.2rem}
 .app{width:100%;max-width:430px}
@@ -24,6 +24,8 @@ input{width:100%;font-size:1.05rem;padding:.9rem;border:1px solid var(--border);
 .prog{text-align:center;font-size:.8rem;color:var(--muted);margin:.6rem 0}
 .barra{height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-bottom:1.2rem}
 .barra i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
+.estado{text-align:center;font-size:.85rem;color:var(--muted);margin-top:.8rem;min-height:1.2rem}
+.estado .sonando{color:var(--accent);font-weight:700}
 .replay{display:block;margin:1rem auto 0;background:var(--surface-2);font-size:.9rem;color:var(--muted)}
 .nivel{font-family:Newsreader,serif;font-size:3rem;text-align:center;color:var(--accent);margin:.4rem 0}
 .missed{background:var(--surface-2);border-radius:.6rem;padding:.8rem;font-size:.9rem;margin:1rem 0;line-height:1.7}
@@ -38,19 +40,51 @@ a.cta{display:block;text-align:center;background:var(--accent);color:var(--accen
 <script>
 const $=s=>document.querySelector(s);
 const app=document.getElementById("app");
-let vozUS=null;
-function cargaVoces(){try{const vs=speechSynthesis.getVoices()||[];vozUS=vs.find(v=>(v.lang||"").toLowerCase().startsWith("en-us"))||vs.find(v=>(v.lang||"").toLowerCase().startsWith("en"))||null;}catch(e){}}
-if("speechSynthesis" in window){cargaVoces();speechSynthesis.onvoiceschanged=cargaVoces;}
-function habla(txt,rate,alTerminar){
-  if(!("speechSynthesis" in window)){alert("Tu navegador no soporta audio. Ábrelo en Chrome.");return;}
-  speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(txt);
-  u.lang="en-US";if(vozUS)u.voice=vozUS;u.rate=rate||0.85;
-  u.onend=()=>alTerminar&&setTimeout(alTerminar,350);u.onerror=u.onend;
-  speechSynthesis.speak(u);
+
+// ================= BOCA OFICIAL v2 — patrón sellado del ecosistema =================
+// Audio PRE-HORNEADO y QA'd (boca→oído, 19/19) en assets — determinista, $0 por sesión.
+// Un SOLO elemento <audio> persistente (doctrina Manos Libres v2: Android rechaza play()
+// de elementos nuevos) + fallback bocaValerie + fallback navegador con guarda de timeout.
+const BOCA_URL="https://valerie.base44.app/functions/bocaValerie";
+let AUDIO=null;const CACHE={};
+const wfile=w=>("cant"===w?"cant":w)+".mp3";
+function getAudio(){if(!AUDIO){AUDIO=new Audio();AUDIO.preload="auto";document.body.appendChild(AUDIO);}return AUDIO;}
+async function bocaFetch(w){
+  if(CACHE[w])return CACHE[w];
+  // 1) asset pre-horneado
+  const url="assets/assessment-audio/"+wfile(w);
+  try{const r=await fetch(url);if(r.ok){const b=await r.blob();return CACHE[w]=URL.createObjectURL(b);}}catch(e){}
+  // 2) bocaValerie en vivo
+  try{
+    const r=await fetch(BOCA_URL,{method:"POST",headers:{"Content-Type":"application/json","x-abvc-key":"ABVC-PILOTO-2026"},body:JSON.stringify({text:w})});
+    if(r.ok){const b=await r.blob();if(b.size>2000)return CACHE[w]=URL.createObjectURL(b);}
+  }catch(e){}
+  return null;
 }
+const espera=ms=>new Promise(r=>setTimeout(r,ms));
+function playUrl(url){return new Promise((res,rej)=>{const a=getAudio();a.src=url;a.onended=res;a.onerror=rej;a.play().catch(rej);});}
+// Fallback navegador: JAMÁS cuelga — si onend nunca llega (bug documentado de Chrome
+// Android que atoraba la prueba), la guarda de tiempo lo resuelve.
+function ttsFallback(txt){
+  return new Promise(res=>{
+    try{
+      speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance(txt);u.lang="en-US";u.rate=.8;
+      const done=()=>{u.onend=null;clearTimeout(g);res();};
+      u.onend=done;u.onerror=done;
+      speechSynthesis.speak(u);
+      const g=setTimeout(done,txt.length*300+2200);
+    }catch(e){res();}
+  });
+}
+async function palabra(w){ // reproduce UNA palabra por cualquier boca disponible
+  const url=await bocaFetch(w);
+  if(url){try{await playUrl(url);return;}catch(e){}}
+  await ttsFallback(w);
+}
+
 /* La escalera: 12 rondas IGUAL/DIFERENTE — de lo obvio a lo que solo un oído entrenado caza.
-   CERO letras durante la prueba: solo oídos. (Doctrina: aquí no hay letras, nada más oídos.) */
+   CERO letras durante la prueba: solo oídos. */
 const RONDAS=[
  {a:"cat",b:"cat",s:true},{a:"dog",b:"duck",s:false},{a:"day",b:"day",s:true},
  {a:"ship",b:"sheep",s:false},{a:"cut",b:"cat",s:false},{a:"think",b:"sink",s:false},
@@ -58,8 +92,9 @@ const RONDAS=[
  {a:"they",b:"day",s:false},{a:"hot",b:"hat",s:false},{a:"can",b:"can't",s:false}
 ];
 const NIVELES=[[11,"B1+","Tu oído ya cruza el puente con vuelo propio"],[9,"A2","Oído puente adelante: se te escapan los pares finos"],[7,"A1","El puente está en construcción: la base ya suena"],[5,"A0-alto","Nivel fundador: el oído empieza a despertar"],[3,"A0-medio","Empieza por sonidos: el oído es un músculo bebé"],[0,"A0-bajo","Bienvenida a la orilla: aquí empiezan todos"]];
-let nombre="",idx=0,aciertos=0,falladas=[];
+let nombre="",idx=0,aciertos=0,falladas=[],sonando=false;
 
+function setEstado(html){const e=$("#estado");if(e)e.innerHTML=html;}
 function pIntro(){
  app.innerHTML=`<span class="chip">🎧 PRUEBA DEL OÍDO</span>
  <h1>3 minutos. Solo tu oído.</h1>
@@ -72,6 +107,7 @@ function pIntro(){
 function empezar(){
  nombre=(document.getElementById("nb").value||"").trim()||"Anónima/o";
  idx=0;aciertos=0;falladas=[];
+ getAudio(); // el elemento de audio nace con el gesto del botón
  pRonda();
 }
 function pRonda(){
@@ -81,22 +117,38 @@ function pRonda(){
  <div class="barra"><i style="width:${pct}%"></i></div>
  <div class="card">
    <p class="big" style="margin-bottom:0">Oye las dos palabras.<br>¿<b>Iguales</b> o <b>diferentes</b>?</p>
-   <button class="replay" onclick="suena()">🔊 Escuchar otra vez</button>
-   <div class="duu"></div>
+   <button class="replay" id="btnReplay" onclick="suena()">🔊 Escuchar otra vez</button>
+   <div class="estado" id="estado"></div>
    <div class="duo">
      <button class="b-igual" onclick="responde(true)">🔁 Iguales</button>
      <button class="b-dif" onclick="responde(false)">✂️ Diferentes</button>
    </div>
  </div>`;
- setTimeout(suena,500);
+ bocaFetch(r.a);bocaFetch(r.b); // prefetch: cuando toques 🔊 ya está listo
+ setTimeout(suena,600);
 }
-function suena(){
+let tocadoSuena=false;
+async function suena(){
+ if(sonando)return;
+ sonando=true;tocadoSuena=true;
  const r=RONDAS[idx];
- habla(r.a,.8,()=>habla(r.b,.8,null));
+ const btn=$("#btnReplay");if(btn)btn.textContent="🔊 Sonando…";
+ setEstado('<span class="sonando">🔊 Sonando…</span>');
+ try{
+   await palabra(r.a);
+   await espera(900);
+   await palabra(r.b);
+   setEstado("Listo 🎧 — puedes responder");
+   if(btn)btn.textContent="🔊 Escuchar otra vez";
+ }catch(e){
+   setEstado("Toca 🔊 para escuchar");
+   if(btn)btn.textContent="▶ Toca para escuchar";
+ }
+ sonando=false;
 }
 function responde(dijo){
  const r=RONDAS[idx];
- speechSynthesis.cancel();
+ if(sonando){getAudio().pause();sonando=false;}
  if(dijo===r.s){aciertos++;}else{falladas.push(r.a+" / "+r.b);}
  idx++;
  if(idx<RONDAS.length){pRonda();}else{pFinal();}
@@ -107,7 +159,7 @@ function nivelDe(n){
 }
 function pFinal(){
  const[lv,desc]=nivelDe(aciertos);
- const code=`PRUEBA DEL OÍDO v2 · ${aciertos}/${RONDAS.length} · ${nombre} · Nivel del oído: ${lv}`+(falladas.length?` · Falladas: ${falladas.join(", ")}`:" · Limpia");
+ const code=`PRUEBA DEL OÍDO v2.1 · ${aciertos}/${RONDAS.length} · ${nombre} · Nivel del oído: ${lv}`+(falladas.length?` · Falladas: ${falladas.join(", ")}`:" · Limpia");
  app.innerHTML=`<span class="chip">🎧 RESULTADO</span>
  <div class="card">
   <p style="text-align:center;font-size:.85rem;color:var(--muted)">Tu oído quedó medido en</p>
@@ -123,7 +175,7 @@ function pFinal(){
 }
 function reportar(){
  const[lv]=nivelDe(aciertos);
- const code=`PRUEBA DEL OÍDO v2 · ${aciertos}/${RONDAS.length} · Nivel del oído: ${lv}`+(falladas.length?` · Falladas: ${falladas.join(", ")}`:" · Limpia");
+ const code=`PRUEBA DEL OÍDO v2.1 · ${aciertos}/${RONDAS.length} · Nivel del oído: ${lv}`+(falladas.length?` · Falladas: ${falladas.join(", ")}`:" · Limpia");
  const stat=document.getElementById("repStat");
  fetch("https://valerie.base44.app/functions/logAssessmentResult",{
   method:"POST",headers:{"Content-Type":"application/json","api_key":"ABVC-PILOTO-2026"},
