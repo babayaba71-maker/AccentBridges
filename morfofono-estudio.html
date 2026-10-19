@@ -440,9 +440,32 @@ function bocaPrefetch(text){
   if (!text || BOCAS.cache.get(text)) return;
   bocaFetch(text).then(url => BOCAS.cache.set(text, url)).catch(() => {});
 }
+const OID_MP3="assets/oido-audio/",ASM_MP3="assets/assessment-audio/";
+const OID_MAN=["about", "bad", "banana", "bat", "bed", "cab", "cap", "computer", "cot", "fan", "fool", "full", "i-want-to-go-to-the-store", "one", "pat", "photograph", "photography", "problem", "shape", "sofa", "support", "telephone", "the-book", "the", "two", "van", "what", "yacht"];
+const ASM_MAN=["berry", "bit", "can", "cant", "cat", "cut", "day", "dog", "duck", "eat", "go", "hat", "hot", "leave", "live", "man", "men", "no", "pool", "pull", "seat", "sheep", "ship", "sink", "sit", "they", "think", "three", "tree", "very", "yes"];
+let OID_EL=null;
+function mp3Of(w){
+  const s=String(w).toLowerCase().replace(/[^a-z' ]/g,"").trim().replace(/\s+/g,"-");
+  if(!s)return null;
+  if(OID_MAN.indexOf(s)>=0)return OID_MP3+s+".mp3";
+  if(ASM_MAN.indexOf(s)>=0)return ASM_MP3+s+".mp3";
+  return null;
+}
 function speak(text) {
   if (readerOn) stopReader(); // no empalmar la lectura
-  bocaSpeak(text, null, () => {
+  const f=mp3Of(text);
+  if(f){
+    try{
+      if(!OID_EL){OID_EL=document.createElement("audio");OID_EL.preload="auto";document.body.appendChild(OID_EL);}
+      OID_EL.onerror=null; OID_EL.src=f;
+      OID_EL.playbackRate=slowMode?0.6:1;
+      OID_EL.play().catch(function(){ bocaSpeak(text, null, () => estTts(text)); });
+      return;
+    }catch(e){}
+  }
+  bocaSpeak(text, null, () => estTts(text));
+}
+function estTts(text) {
     if (!('speechSynthesis' in window)) {
       alert("Tu navegador no soporta síntesis de voz.");
       return;
@@ -452,7 +475,6 @@ function speak(text) {
     u.lang = 'en-US';
     u.rate = slowMode ? 0.60 : 0.85;
     window.speechSynthesis.speak(u);
-  });
 }
 
 function practiceListen(word, btnElement) {

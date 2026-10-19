@@ -50,7 +50,32 @@ const TTS='speechSynthesis' in window;let voice;
 function pick(){const v=speechSynthesis.getVoices();voice=v.find(x=>/en[-_]US/.test(x.lang))||v.find(x=>x.lang.startsWith("en"))}
 if(TTS){pick();speechSynthesis.onvoiceschanged=pick}
 let U;function warn(t){let m=document.getElementById("w");if(!m){m=document.createElement("p");m.id="w";m.className="no";m.style.cssText="position:sticky;top:0;background:var(--bg);margin:0;padding:8px 16px";document.body.prepend(m)}m.textContent=t}
-function say(w){if(!TTS)return warn("Este navegador no tiene voz. Prueba con Chrome o Safari.");const go=()=>{if(!voice)pick();U=new SpeechSynthesisUtterance(w);U.lang="en-US";if(voice)U.voice=voice;U.rate=(steps&&steps[st]&&steps[st][0]=="rep")?SPR[SP]:.75;U.onerror=e=>{if(e.error!="canceled"&&e.error!="interrupted")warn("No se pudo reproducir la voz ("+e.error+"). Sube el volumen y revisa que el teléfono no esté en silencio.")};try{speechSynthesis.speak(U)}catch(err){warn("La voz del teléfono no respondió. Reinicia el teléfono para revivirla — puedes seguir contestando.")}};try{if(speechSynthesis.speaking||speechSynthesis.pending){speechSynthesis.cancel();setTimeout(go,90);return}}catch(e){}go()}
+const OID_MP3="assets/oido-audio/",ASM_MP3="assets/assessment-audio/";
+const OID_MAN=["about", "bad", "banana", "bat", "bed", "cab", "cap", "computer", "cot", "fan", "fool", "full", "i-want-to-go-to-the-store", "one", "pat", "photograph", "photography", "problem", "shape", "sofa", "support", "telephone", "the-book", "the", "two", "van", "what", "yacht"];
+const ASM_MAN=["berry", "bit", "can", "cant", "cat", "cut", "day", "dog", "duck", "eat", "go", "hat", "hot", "leave", "live", "man", "men", "no", "pool", "pull", "seat", "sheep", "ship", "sink", "sit", "they", "think", "three", "tree", "very", "yes"];
+let OID_EL=null;
+function mp3Of(w){
+  const s=String(w).toLowerCase().replace(/[^a-z' ]/g,"").trim().replace(/\s+/g,"-");
+  if(!s)return null;
+  if(OID_MAN.indexOf(s)>=0)return OID_MP3+s+".mp3";
+  if(ASM_MAN.indexOf(s)>=0)return ASM_MP3+s+".mp3";
+  return null;
+}
+function say(w){
+  const f=mp3Of(w);
+  if(f){
+    try{
+      if(!OID_EL){OID_EL=document.createElement("audio");OID_EL.preload="auto";document.body.appendChild(OID_EL);}
+      OID_EL.onerror=function(){OID_EL.onerror=null;ttsSay(w);};
+      OID_EL.src=f;
+      OID_EL.playbackRate=(steps&&steps[st]&&steps[st][0]=="rep")?(typeof SPR!=="undefined"&&SPR&&SPR[SP]?SPR[SP]:0.6):1;
+      OID_EL.play().catch(function(){ttsSay(w);});
+      return;
+    }catch(e){}
+  }
+  ttsSay(w);
+}
+function ttsSay(w){if(!TTS)return warn("Este navegador no tiene voz. Prueba con Chrome o Safari.");const go=()=>{if(!voice)pick();U=new SpeechSynthesisUtterance(w);U.lang="en-US";if(voice)U.voice=voice;U.rate=(steps&&steps[st]&&steps[st][0]=="rep")?SPR[SP]:.75;U.onerror=e=>{if(e.error!="canceled"&&e.error!="interrupted")warn("No se pudo reproducir la voz ("+e.error+"). Sube el volumen y revisa que el teléfono no esté en silencio.")};try{speechSynthesis.speak(U)}catch(err){warn("La voz del teléfono no respondió. Reinicia el teléfono para revivirla — puedes seguir contestando.")}};try{if(speechSynthesis.speaking||speechSynthesis.pending){speechSynthesis.cancel();setTimeout(go,90);return}}catch(e){}go()}
 const $=document.getElementById("app");
 const sh=a=>a.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
 const esc=s=>s.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
