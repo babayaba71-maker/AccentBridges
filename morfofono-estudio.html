@@ -89,6 +89,9 @@ nav.side button:hover, nav.bottom a:hover{background:var(--surface-2);color:var(
 .lesson-link:hover,.ph:hover,.mh:hover{box-shadow:var(--shadow-h)}
 .search-bar{width:100%;padding:.65rem .9rem;border-radius:.6rem;border:1px solid var(--border);background:var(--surface);color:var(--ink);margin:.75rem 0 .4rem}
 .lee-hi{outline:3px solid var(--accent);outline-offset:3px;transition:outline .25s}
+.day-locked{opacity:.5}
+.day-today{border:2px solid var(--accent)}
+.warn-banner{border:1px solid var(--border);border-radius:.6rem;padding:.6rem .85rem;margin-bottom:1rem;font-size:.92rem;background:var(--surface)}
 textarea{width:100%;min-height:5.5rem;border:1px solid var(--border);border-radius:.6rem;background:var(--surface);box-shadow:var(--shadow);padding:.75rem;font:inherit;resize:vertical;color:var(--ink);margin-top:.5rem}
 .flash-good{outline:2px solid var(--good)!important;background:rgba(61,92,69,.08)!important}
 .flash-bad{outline:2px solid var(--warn)!important;background:rgba(138,90,50,.08)!important}
@@ -793,8 +796,26 @@ function renderNav() {
   `).join('');
 }
 
+/* ============ COMPUERTA DE DÍAS (aprobada JJ 19-oct ~00:00 "Sí... tipo Duolingo
+   pero compuerta": el Día N+1 se abre al completar el N. Sin corazones ni puntos:
+   la recompensa es la puerta abriéndose. Modo maestra: el fundador abre todo.) ============ */
+function esMaestra(){ return /(^|[^a-z])(jj|j\.j|jay jay|jacob|maestra|teacher)([^a-z]|$)/i.test((studentName||"").trim()); }
+function diaAbierto(day){
+  if (esMaestra()) return true;         // el fundador ya caminó el puente: todas abiertas
+  if (day <= 1) return true;           // la orilla siempre está abierta
+  return completedDays.has(day - 1);    // la llave del N+1 es terminar el N
+}
+function proximoDia(){ for (let d = 1; d <= 57; d++){ if (!completedDays.has(d)) return d; } return 57; }
+let avisoTxt = "";
+function avisoCompuerta(){
+  avisoTxt = "Ese día todavía está cerrado. El camino se abre paso a paso: primero termina tu Día " + proximoDia() + ". Cuando lo completes, la siguiente puerta se abre sola.";
+  if (currentView.route !== "lessons" || currentView.id){ currentView = { route: "lessons", id: null }; renderNav(); renderApp(); }
+  else { renderLessonList(document.getElementById("app")); }
+  window.scrollTo(0, 0);
+}
 function navigate(route, id = null) {
   stopReaderSilent();
+  if (route === "lessons" && id && !diaAbierto(id)) { avisoCompuerta(); return; }
   currentView = { route, id };
   renderNav();
   renderApp();
@@ -850,20 +871,25 @@ function renderLessonList(container) {
 
   filtered.forEach(l => {
     const isDone = completedDays.has(l.day);
+    const abierto = diaAbierto(l.day);
+    const esHoy = l.day === proximoDia() && !isDone;
     html += `
-      <button class="lesson-link ${isDone ? 'flash-good' : ''}" onclick="navigate('lessons', ${l.day})">
+      <button class="lesson-link ${isDone ? 'flash-good' : ''} ${!abierto ? 'day-locked' : ''} ${esHoy ? 'day-today' : ''}" ${abierto ? `onclick="navigate('lessons', ${l.day})"` : 'onclick="avisoCompuerta()"'}>
         <div class="row" style="justify-content:space-between; width:100%">
           <span class="badge ${l.level === 'a0-bajo' ? 'acc' : ''}">Día ${l.day} • Semana ${l.week}</span>
           <span class="faint">${isDone ? '✓ Completado • ' : ''}${l.minutes} min</span>
         </div>
         <div style="font-weight:600;font-size:1.05rem;margin-top:.3rem">${l.title}</div>
         <div class="faint" style="margin-top:.15rem">${l.hook}</div>
+        ${esHoy ? '<div style="margin-top:.35rem;font-weight:700;color:var(--accent)">👉 Tu día de hoy</div>' : ''}
+        ${!abierto ? '<div class="faint" style="margin-top:.3rem;font-size:.85rem">Se abre cuando termines tu Día ' + proximoDia() + '</div>' : ''}
       </button>
     `;
   });
 
   html += `</div>`;
-  container.innerHTML = html;
+  container.innerHTML = (avisoTxt ? '<div class="warn-banner">🔒 ' + avisoTxt + '</div>' : "") + html;
+  avisoTxt = "";
 }
 
 function renderLessonDetail(container, dayNum) {
