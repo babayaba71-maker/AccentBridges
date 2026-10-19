@@ -77,12 +77,18 @@ function ttsFallback(txt){
     }catch(e){res();}
   });
 }
-async function palabra(w){ // reproduce UNA palabra por cualquier boca disponible
+/* REGLA DE ORO v2.4: UNA ronda = UNA voz. Se resuelven AMBAS fuentes antes de
+   sonar la primera nota; si una falla, TODA la ronda sale con la voz del sistema.
+   (Bug de v2.3 firmado por Josefina: 0/4 en pares iguales — palabra A con una
+   voz y palabra B con otra porque el MP3 falló a media ronda.) */
+async function rondaConsistente(r){
   setEstado('<span class="sonando">⬇️ Descargando la voz…</span>');
-  const url=await bocaFetch(w);
+  const [ua,ub]=await Promise.all([bocaFetch(r.a),bocaFetch(r.b)]);
   setEstado('<span class="sonando">🔊 Sonando…</span>');
-  if(url){try{await playUrl(url);return;}catch(e){}}
-  await ttsFallback(w);
+  if(ua&&ub){
+    try{await playUrl(ua);await espera(900);await playUrl(ub);return;}catch(e){}
+  }
+  await ttsFallback(r.a);await espera(900);await ttsFallback(r.b);
 }
 
 /* La escalera: 12 rondas IGUAL/DIFERENTE — de lo obvio a lo que solo un oído entrenado caza.
@@ -141,11 +147,8 @@ async function suena(){
  sonando=true;tocadoSuena=true;
  const r=RONDAS[idx];
  const btn=$("#btnReplay");if(btn)btn.textContent="🔊 Sonando…";
- setEstado('<span class="sonando">🔊 Sonando…</span>');
  try{
-   await palabra(r.a);
-   await espera(900);
-   await palabra(r.b);
+   await rondaConsistente(r);
    setEstado("Listo 🎧 — puedes responder");
    if(btn)btn.textContent="🔊 Escuchar otra vez";
  }catch(e){
@@ -167,7 +170,7 @@ function nivelDe(n){
 }
 function pFinal(){
  const[lv,desc]=nivelDe(aciertos);
- const code=`PRUEBA DEL OÍDO v2.3 · ${aciertos}/${RONDAS.length} · ${nombre} · Nivel del oído: ${lv}`+(falladas.length?` · Falladas: ${falladas.join(", ")}`:" · Limpia");
+ const code=`PRUEBA DEL OÍDO v2.4 · ${aciertos}/${RONDAS.length} · ${nombre} · Nivel del oído: ${lv}`+(falladas.length?` · Falladas: ${falladas.join(", ")}`:" · Limpia");
  app.innerHTML=`<span class="chip">🎧 RESULTADO</span>
  <div class="card">
   <p style="text-align:center;font-size:.85rem;color:var(--muted)">Tu oído quedó medido en</p>
@@ -183,7 +186,7 @@ function pFinal(){
 }
 function reportar(){
  const[lv]=nivelDe(aciertos);
- const code=`PRUEBA DEL OÍDO v2.3 · ${aciertos}/${RONDAS.length} · Nivel del oído: ${lv}`+(falladas.length?` · Falladas: ${falladas.join(", ")}`:" · Limpia");
+ const code=`PRUEBA DEL OÍDO v2.4 · ${aciertos}/${RONDAS.length} · Nivel del oído: ${lv}`+(falladas.length?` · Falladas: ${falladas.join(", ")}`:" · Limpia");
  const stat=document.getElementById("repStat");
  fetch("https://valerie.base44.app/functions/logAssessmentResult",{
   method:"POST",headers:{"Content-Type":"application/json","api_key":"ABVC-PILOTO-2026"},
