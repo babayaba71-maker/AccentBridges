@@ -88,6 +88,7 @@ nav.side button:hover, nav.bottom a:hover{background:var(--surface-2);color:var(
 .lesson-link,.ph,.mh{display:block;padding:.9rem 1rem;background:var(--surface);box-shadow:var(--shadow);border-radius:.7rem;text-decoration:none;color:inherit;border:0;width:100%;text-align:left}
 .lesson-link:hover,.ph:hover,.mh:hover{box-shadow:var(--shadow-h)}
 .search-bar{width:100%;padding:.65rem .9rem;border-radius:.6rem;border:1px solid var(--border);background:var(--surface);color:var(--ink);margin:.75rem 0 .4rem}
+.lee-hi{outline:3px solid var(--accent);outline-offset:3px;transition:outline .25s}
 textarea{width:100%;min-height:5.5rem;border:1px solid var(--border);border-radius:.6rem;background:var(--surface);box-shadow:var(--shadow);padding:.75rem;font:inherit;resize:vertical;color:var(--ink);margin-top:.5rem}
 .flash-good{outline:2px solid var(--good)!important;background:rgba(61,92,69,.08)!important}
 .flash-bad{outline:2px solid var(--warn)!important;background:rgba(138,90,50,.08)!important}
@@ -506,7 +507,63 @@ function sanearIPA(text){
   t = t.replace(/\bvs\b/gi," contra ").replace(/\//g," ");
   return t.replace(/\s+/g," ").trim();
 }
+/* ================= SEGUIMIENTO VISUAL + MODO DE LECTURA (pedido JJ 19-oct) ================
+   (1) AUTO-SCROLL: mientras la Maestra Lee, la pantalla sigue al bloque que suena
+   (trasplante del auto-scroll de la Guía de Vecindad). Solo con pantalla encendida.
+   (2) MODO: cada bloque oído se cuenta como PANTALLA (pantalla encendida) o
+   MANOS LIBRES (pantalla apagada/bloqueada — gracias a MediaSession la voz sigue).
+   Al terminar la lectura se reporta al expediente cómo estudió el alumno. */
+let LEE_MODO = { pantalla: 0, manos: 0 };
+let leeCtx = null; // { day, title } de la lectura en curso
+function leeSegEl(seg){
+  if (!seg) return null;
+  const L = (seg.label || "").trim();
+  try{
+    if (seg.lang === "en"){
+      const chips = document.querySelectorAll(".speak b");
+      for (const b of chips){ if (b.textContent.trim() === L) return b.closest(".speak"); }
+      return document.getElementById("lr-listen");
+    }
+    if (L === "Por qué importa") return document.getElementById("lr-why");
+    const m = L.match(/^Paso (\d+) de \d+$/);
+    if (m){ const st = document.querySelectorAll(".step"); return st[parseInt(m[1],10)-1] || st[0]; }
+    if (L === "Pasos"){ const st = document.querySelectorAll(".step"); return st[0]; }
+    if (L === "Escucha y repite") return document.getElementById("lr-listen");
+    if (L === "Bitácora"){ const n = document.getElementById("lesson-note"); return n ? (n.closest(".interactive-card") || n) : null; }
+    const h1 = document.querySelector("h1");
+    if (h1 && h1.textContent.trim() === L) return h1.closest(".card") || h1;
+    return null;
+  }catch(e){ return null; }
+}
+let leeHiT = null;
+function seguimiento(seg){
+  if (document.visibilityState !== "visible") return; // manos libres: la pantalla duerme
+  const el = leeSegEl(seg);
+  if (!el) return;
+  try{ el.scrollIntoView({ behavior: "smooth", block: "center" }); }catch(e){ el.scrollIntoView(); }
+  el.classList.add("lee-hi");
+  clearTimeout(leeHiT); leeHiT = setTimeout(() => { try{ el.classList.remove("lee-hi"); }catch(e){} }, 1400);
+}
+function reportarModoLectura(){
+  const tot = LEE_MODO.pantalla + LEE_MODO.manos;
+  if (!leeCtx || tot < 3){ LEE_MODO = { pantalla: 0, manos: 0 }; leeCtx = null; return; }
+  const pct = Math.round(LEE_MODO.pantalla * 100 / tot);
+  const rec = {
+    topic: "\ud83c\udfa7 Modo de lectura \u2014 D\u00eda " + leeCtx.day + ": " + leeCtx.title.slice(0,60),
+    userId: studentName || "Estudiante 0",
+    passed: true,
+    accuracy: pct, // % de bloques oidos CON pantalla encendida
+    challengeSentence: leeCtx.title.slice(0,120),
+    spokenText: "\ud83d\udcf1 Con pantalla: " + LEE_MODO.pantalla + " bloques (" + pct + "%) \u00b7 \ud83d\udd12 Manos libres: " + LEE_MODO.manos + " bloques (" + (100-pct) + "%)",
+    location: "Estudio",
+    sessionId: "est-lee-d" + leeCtx.day + "-" + Date.now()
+  };
+  sendExpediente(rec); // telemetria auxiliar: si se pierde sin red, no estorba el dia
+  LEE_MODO = { pantalla: 0, manos: 0 };
+  leeCtx = null;
+}
 function stopReader(msg){
+  const estabaLeyendo = readerOn;
   readerOn = false;
   try{ window.speechSynthesis.cancel(); }catch(e){}
   if (BOCAS.cur){ try{ BOCAS.cur.pause(); }catch(e){} BOCAS.cur = null; }
@@ -516,8 +573,9 @@ function stopReader(msg){
   if (b) { b.textContent = "▶ Escuchar lección"; b.classList.remove("sec"); b.classList.add("pri"); }
   const card = document.querySelector(".reader-card"); if (card) card.classList.remove("on");
   if (s) s.textContent = msg || "";
+  if (estabaLeyendo) reportarModoLectura();
 }
-function readerAvanzar(seg){ readerQueue.shift(); setTimeout(readerSpeakNext, seg.lang === "en" ? 650 : 220); }
+function readerAvanzar(seg){ readerQueue.shift(); LEE_MODO[document.visibilityState === "visible" ? "pantalla" : "manos"]++; setTimeout(readerSpeakNext, seg.lang === "en" ? 650 : 220); }
 function readerNavegador(seg){ // RESPALDO: voz del navegador si la boca falla
   const avanzar = () => readerAvanzar(seg);
   const u = new SpeechSynthesisUtterance(seg.t);
@@ -541,6 +599,7 @@ function readerSpeakNext(){
   const card = document.querySelector(".reader-card"); if (card) card.classList.add("on");
   if (s) s.textContent = (seg.lang === "en" ? "🇺🇸 Escucha y repite: " + seg.label : "📖 " + (seg.label || "Leyendo…"));
   mediaSession(seg.label, "Morfofónico 1 · Estudio");
+  seguimiento(seg);
   bocaSpeak(seg.t, () => readerAvanzar(seg), () => readerNavegador(seg));
   if (readerQueue[1]) bocaPrefetch(readerQueue[1].t);
 }
@@ -587,6 +646,8 @@ function toggleReader(dayNum){
   }
   encolar({ t: "Fin de la lección. Pregunta para tu bitácora: " + sanearIPA(lesson.methodPrompt), lang: "es", label: "Bitácora" });
   readerOn = true;
+  LEE_MODO = { pantalla: 0, manos: 0 };
+  leeCtx = { day: lesson.day, title: lesson.title };
   try{ window.speechSynthesis.cancel(); }catch(e){}
   readerSpeakNext();
 }
@@ -843,7 +904,7 @@ function renderLessonDetail(container, dayNum) {
       </div>
     </div>
 
-    <div class="card" style="padding:1rem;margin-bottom:1.25rem">
+    <div class="card" id="lr-why" style="padding:1rem;margin-bottom:1.25rem">
       <b style="color:var(--accent)">Por qué importa este paso:</b>
       <p style="margin-top:.3rem;font-size:.95rem">${lesson.why}</p>
     </div>
@@ -869,7 +930,7 @@ function renderLessonDetail(container, dayNum) {
 
   if (lesson.listen && lesson.listen.length > 0) {
     html += `
-      <h3 style="margin-top:1.5rem">Entrenamiento de Oído y Eco</h3>
+      <h3 id="lr-listen" style="margin-top:1.5rem">Entrenamiento de Oído y Eco</h3>
       <div class="chips">
     `;
     lesson.listen.forEach(item => {
