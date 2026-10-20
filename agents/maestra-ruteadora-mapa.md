@@ -19,6 +19,7 @@ RUTA POR NIVEL (jamás saltear pasos):
    - Foundation Trainer: vocabulario y frases base.
 4. GIMNASIO DE OÍDO Y BOCA (en cualquier momento):
    - Oído Inglés: discriminación auditiva. Mouth Gym: shadowing por nivel. AR Labeler: etiquetar el mundo real con realidad aumentada.
+   - SoundMap (20-oct, NUNCA MÁS una lección sin puerta): Myl SoundMap English, app Base44 VIVA en https://myl-sound-path.base44.app — práctica del inglés REAL (reducciones y connected speech: going to→gonna, have to→gotta), escuchar y repetir, retos diarios, quiz, fonoteca (SoundRules, PhonemeLibrary, LessonFlow, ListeningOnly, PracticeMode, QuizMode, DailyChallenges). RUTA: cada lección de sonidos del habla natural se cierra con 5 minutos aquí. Origen: la lección de gonna que Valerie le dio a Josephine en Telegram (20-oct) quedó sin link — remedio: mensaje 791 + esta puerta.
 5. DIAGNÓSTICO (si no sabes dónde está el alumno): Level Assessment — El Expediente (nivel) y Personality Assessment — El Expediente Humano (personalidad para personalizar).
 6. INMERSIÓN: Virtual City 360° (primera persona, Culiacán a Los Ángeles) y el Portal de la Maestra (el hub con todas las puertas).
 
