@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Action Bridges — Estudio Integrado v3</title>
+<meta name="theme-color" content="#3d5a73"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@500;600&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#f3efe6;--sf:#faf7f0;--sf2:#ebe4d6;--ink:#1c1915;--mut:#6b6458;--ac:#3d5a73;--acf:#faf7f0;--acs:#dfe6ec;--bd:#ddd4c4;--good:#2d6a4f;--goods:rgba(45,106,79,.12);--bad:#b05a18;--bads:rgba(176,90,24,.12);--sh:0 1px 3px rgba(28,25,21,.1);--bar:rgba(250,247,240,.96)}
+html.dark{--bg:#14110d;--sf:#1c1813;--sf2:#262017;--ink:#ece5d8;--mut:#b0a692;--ac:#a9c7e2;--acf:#10141b;--acs:#28313d;--bd:#342c20;--good:#52b788;--goods:rgba(82,183,136,.15);--bad:#e08738;--bads:rgba(224,135,56,.15);--bar:rgba(20,17,13,.96)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Source Sans 3",system-ui,sans-serif;line-height:1.5;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+h1,h2{font-family:Newsreader,Georgia,serif;font-weight:500;letter-spacing:-.02em;margin:0}
+button{font:inherit;cursor:pointer;color:inherit}button:disabled{opacity:.4;cursor:not-allowed}
+.wrap{max-width:44rem;margin:0 auto;min-height:100dvh;padding:calc(.75rem + env(safe-area-inset-top,0px)) 1rem calc(5rem + env(safe-area-inset-bottom,0px))}
+.mast{display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid var(--bd);margin-bottom:.9rem}
+.mast b{font-family:Newsreader,serif;font-size:1.3rem;display:block;line-height:1.1}.mast span{font-size:.76rem;color:var(--mut)}
+.ib{width:2.4rem;height:2.4rem;border-radius:99px;border:1px solid var(--bd);background:var(--sf);font-size:1.1rem;margin-left:.4rem}
+.nar{position:sticky;top:.5rem;z-index:30;background:var(--bar);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--ac);border-radius:1rem;padding:.6rem .8rem;box-shadow:var(--sh);margin-bottom:1rem;display:flex;gap:.6rem;align-items:center}
+.badge{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:.2rem .5rem;border-radius:.35rem;background:var(--acs);color:var(--ac)}
+#nst{flex:1;font-size:.82rem;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn{background:var(--ac);color:var(--acf);border:0;border-radius:.65rem;padding:.6rem 1rem;font-weight:600;margin:.25rem}
+.btn.good{background:var(--good);color:#fff;width:100%;padding:.85rem;margin:.6rem 0 0;font-size:1rem}
+.btn.rec{background:var(--bad);color:#fff}
+#tag{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--ac)}
+#title{font-size:1.75rem;line-height:1.2;margin:.15rem 0 .25rem}#hook{color:var(--mut);font-style:italic;margin:0 0 1rem}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:1rem;padding:.9rem 1rem;margin-bottom:.8rem;box-shadow:var(--sh)}
+.card.cur{border-color:var(--ac);outline:2px solid var(--acs);outline-offset:2px;padding:1.1rem}
+.card:not(.cur):not(.done){opacity:.5}
+.ch{display:flex;align-items:center;gap:.55rem;color:var(--ac)}
+.num{width:1.6rem;height:1.6rem;border-radius:99px;background:var(--sf2);border:1px solid var(--bd);display:grid;place-items:center;font-size:.8rem}
+.card.done .num{background:var(--good);color:#fff;border-color:var(--good)}
+.sp{background:var(--sf2);border-left:3px solid var(--ac);padding:.65rem .85rem;border-radius:0 .5rem .5rem 0;margin:.7rem 0;font-size:.95rem}
+.box{text-align:center;padding:.4rem 0}
+.grp{border:1px dashed var(--bd);border-radius:.8rem;padding:.7rem;margin:.6rem 0;text-align:center}
+.grp b{display:block;margin-bottom:.3rem}
+.snd{background:var(--sf2);border:1px solid var(--bd);border-radius:.6rem;padding:.55rem .8rem;margin:.2rem;font-weight:600}
+.snd.anc{border-color:var(--ac);color:var(--ac)}
+.two,.three{display:flex;gap:.6rem;margin:.7rem 0}
+.ans{flex:1;border:2px solid var(--bd);background:var(--sf);border-radius:.85rem;padding:.7rem .4rem;display:flex;flex-direction:column;align-items:center;gap:.2rem}
+.ans span{font-size:2rem;line-height:1}.ans small{font-size:.75rem;color:var(--mut)}
+.ans.right{border-color:var(--good);background:var(--goods)}.ans.wrong{border-color:var(--bad);background:var(--bads)}
+.rt{flex:1;border:1px solid var(--bd);background:var(--sf);border-radius:.6rem;padding:.6rem .3rem;font-size:.85rem;font-weight:600}
+.mut{color:var(--mut);font-size:.85rem;text-align:center;margin:.3rem 0}
+.ok{color:var(--good);font-weight:700;text-align:center}.no{color:var(--bad);font-weight:700;text-align:center}
+.hint{background:var(--bads);border-left:3px solid var(--bad);padding:.55rem .75rem;font-size:.85rem;border-radius:0 .4rem .4rem 0;margin:.6rem 0;text-align:left}
+.big{font-size:1.2rem;font-weight:700;text-align:center;margin:.3rem 0}
+.row{display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--bd);font-size:.92rem}
+.dr{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;display:none}.dr.open{display:block}
+.dp{position:absolute;bottom:0;left:0;right:0;max-height:85dvh;overflow-y:auto;background:var(--sf);border-radius:1.3rem 1.3rem 0 0;padding:1.2rem 1.2rem calc(1.5rem + env(safe-area-inset-bottom,0px))}
+.dg{display:grid;grid-template-columns:repeat(auto-fill,minmax(4rem,1fr));gap:.55rem;margin-top:1rem}
+.dn{padding:.65rem .2rem;border-radius:.6rem;border:1px solid var(--bd);background:var(--sf2);text-align:center;font-weight:700;font-size:.85rem;opacity:.4}
+.dn.on{opacity:1;background:var(--sf);border-color:var(--ac);color:var(--ac);cursor:pointer}.dn.cur{background:var(--ac);color:var(--acf)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="mast">
+    <div><b>Action Bridges</b><span>Oído → Boca → Letra</span></div>
+    <div><button class="ib" id="bd" aria-label="Ver días">🗓️</button><button class="ib" id="bt" aria-label="Modo oscuro">🌙</button></div>
+  </header>
+  <div class="nar"><span class="badge">Maestra Lee</span><span id="nst">Toca Escuchar para oír la instrucción</span><button class="btn" id="bn" style="margin:0">▶ Escuchar</button></div>
+  <div id="tag"></div><h1 id="title"></h1><p id="hook"></p>
+  <div id="steps"></div>
+</div>
+<div class="dr" id="dr"><div class="dp">
+  <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="font-size:1.3rem">Ruta de los 57 días</h2><button class="ib" onclick="drawer(false)">✕</button></div>
+  <p class="mut" style="text-align:left">Cada día se abre al sellar el anterior. Los días en gris están en preparación.</p>
+  <div class="dg" id="dg"></div>
+</div></div>
+
+<script>
+/* ===== DATOS: cada día se define aquí. Para agregar un día, copia un bloque y cambia los sonidos. ===== */
+const CDN="https://babayaba71-maker.github.io/AccentBridges/assets/oido-audio/";
+const snd=(k,say,lang)=>({k,say:say||k,lang:lang||"en-US"});
+const es=(k,say)=>snd("es-"+k,say,"es-MX");
+const W=(...ks)=>ks.map(k=>snd(k));
+const LESSONS={
+1:{title:"El sonido no es la letra",hook:"Una letra puede sonar de muchas formas. Primero oímos, luego vemos.",
+  intro:"Regla de oro: primero el oído, después la boca y al final las letras. En este curso no leerás nada hasta que tu oído esté listo.",
+  goal:"Hoy aprenderás a oír la diferencia entre tu A del español y la A de la palabra cat.",
+  A:{i:"🔵",n:"Como tu A del español",anchor:es("a","a, a"),words:W("hot","stop","lot")},
+  B:{i:"🟠",n:"La A de cat (nueva)",anchor:snd("cat"),words:W("cat","hat","man")},
+  trials:[["hot","A"],["cat","B"],["stop","A"],["hat","B"],["father","A"],["man","B"],["lot","A"],["black","B"]],
+  hints:["Vuelve a escuchar el ancla de cada grupo y compara.","El sonido naranja es más abierto y tenso; el azul es tu A relajada.","Pon la mano bajo la barbilla: en el naranja la mandíbula baja más."],
+  mouth:"Para el sonido naranja: baja la mandíbula, estira un poco los labios hacia los lados y deja la lengua plana. Escucha el modelo, grábate tres segundos y compara.",mouthModel:snd("cat")},
+2:{title:"Con motor y sin motor",hook:"Tu garganta es un motor que se enciende y se apaga.",
+  goal:"Hoy sentirás cuándo tu garganta vibra y cuándo solo sale aire.",
+  A:{i:"📳",n:"Con motor: vibra",anchor:es("mmm","mmm"),words:W("zoo","zip","zone")},
+  B:{i:"🔇",n:"Sin motor: solo aire",anchor:snd("sss"),words:W("sue","sip","sun")},
+  trials:[["zoo","A"],["sip","B"],["zip","A"],["sun","B"],["zone","A"],["seal","B"],["zeal","A"],["sue","B"]],
+  hints:["Repite el ancla mmm (vibra) y sss (aire) y compara.","Con dos dedos en la garganta: en el grupo con motor sientes cosquillas.","Escucha solo el comienzo de la palabra: ¿hay zumbido o solo aire?"],
+  mouth:"Pon dos dedos en la garganta. Alarga el sonido: zzz vibra, sss no. Escucha el modelo, grábate y comprueba si tus dedos sienten el motor.",mouthModel:snd("zoo")},
+3:{title:"Larga y corta",hook:"Dos vocales que parecen una sola, pero no lo son.",
+  goal:"Hoy oirás la diferencia entre una vocal larga y tensa, y otra corta y relajada.",
+  A:{i:"🟢",n:"Larga y tensa",anchor:es("i","i, i"),words:W("sheep","beat","seat")},
+  B:{i:"🟣",n:"Corta y relajada",anchor:snd("ship"),words:W("ship","bit","sit")},
+  trials:[["sheep","A"],["ship","B"],["beat","A"],["bit","B"],["seat","A"],["sit","B"],["feet","A"],["fit","B"]],
+  hints:["Compara las anclas: una se alarga, la otra cae rápido.","La verde dura más y los labios se estiran; la morada es breve.","Cuenta mentalmente: verde = dos tiempos, morada = uno."],
+  mouth:"Para el sonido morado: labios relajados, sin sonrisa, y suéltalo rápido. Escucha el modelo, grábate y compara.",mouthModel:snd("ship")}
+};
+const MAXD=Math.max(...Object.keys(LESSONS).map(Number));
+const TITLES=["Meta del día","Escucha y ancla","Discriminación","Boca: graba y compara","Cierre"];
+const RATES={logre:"😎 Lo logré",casi:"🤏 Casi",todavia:"😅 Todavía no"};
+
+/* ===== ESTADO ===== */
+const $=id=>document.getElementById(id);
+const st={day:1,step:1,heard:new Set(),rate:null,recUrl:null,noMic:false,rec:false};
+/* COSIDO ALMA: una sola verdad — la llave del Estudio vivo (morfofono_prog) */
+const PROG_KEY="morfofono_prog";
+const progArr=(()=>{try{return JSON.parse(localStorage.getItem(PROG_KEY)||"[]")}catch(e){return[]}})();
+let unlocked=progArr.length?Math.max(...progArr)+1:1;
+const TR={};
+const haptic=ms=>{if("vibrate" in navigator)navigator.vibrate(ms)};
+const shuffle=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
+
+/* ===== AUDIO: mp3 local -> CDN -> voz del navegador. Devuelve promesa para poder encadenar ===== */
+const au=new Audio();
+function play(s){
+  haptic(15);
+  return new Promise(res=>{
+    const urls=[`assets/oido-audio/${s.k}.mp3`,CDN+s.k+".mp3"];let i=0;
+    const tts=()=>{
+      if(!("speechSynthesis" in window))return res();
+      speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance(s.say);u.lang=s.lang;u.rate=.85;
+      u.onend=u.onerror=()=>res();speechSynthesis.speak(u);
+    };
+    const next=()=>{if(i<urls.length){au.src=urls[i++];au.play().catch(()=>{})}else tts()};
+    au.onended=()=>res();au.onerror=next;next();
+  });
+}
+async function seq(list,gap=350){for(const s of list){await play(s);await new Promise(r=>setTimeout(r,gap))}}
+/* COSIDO ALMA: MP3 horneado -> voz es del telefono. Jamas boca viva (doctrina de tanque). */
+function esVoice(){if(!("speechSynthesis" in window))return null;const vs=speechSynthesis.getVoices();return vs.find(v=>/es[-_]MX/i.test(v.lang))||vs.find(v=>/^es[-_]?/i.test(v.lang))||null}
+function speak(text){
+  $("nst").textContent=text;
+  if("mediaSession" in navigator){try{navigator.mediaSession.metadata=new MediaMetadata({title:"Día "+st.day+" · Action Bridges",artist:"Maestra Lee",album:"Método Valerie"})}catch(e){}}
+  const mp3="assets/narracion3/dia"+st.day+"-s"+st.step+".mp3";
+  fetch(mp3,{method:"HEAD"}).then(r=>{
+    if(r.ok){au.onended=null;au.src=mp3;au.play().catch(()=>ttsSpeak(text))}
+    else ttsSpeak(text);
+  }).catch(()=>ttsSpeak(text));
+}
+function ttsSpeak(text){
+  if(!("speechSynthesis" in window))return;
+  const v=esVoice();if(!v)return;
+  speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.voice=v;u.lang=v.lang;u.rate=.95;speechSynthesis.speak(u);
+}
+if("speechSynthesis" in window){try{speechSynthesis.getVoices()}catch(e){}}
+
+/* ===== GUIONES DE LA MAESTRA (sin emojis, para que se lean bien en voz) ===== */
+function script(n){
+  const L=LESSONS[st.day];
+  if(n===1)return (L.intro?L.intro+" ":"")+L.goal;
+  if(n===2)return `Escucha el ancla de cada grupo y luego los ejemplos. Primero: ${L.A.n}. Después: ${L.B.n}. No pienses en letras, solo en sonidos.`;
+  if(n===3)return `Te voy a dar un sonido. Elige: ${L.A.n}, o ${L.B.n}. Necesitas 6 de 8. Si fallas, te diré cuál era.`;
+  if(n===4)return L.mouth;
+  return `Cierre del día ${st.day}. Revisa tu expediente y guarda tu progreso.`;
+}
+
+/* ===== MOTOR DE INTENTOS (se usa en la discriminación y en el repaso) ===== */
+function newTrial(key,L,n,need){TR[key]={L,list:shuffle(L.trials).slice(0,n),need,i:0,ok:0,fails:0,played:false,answered:null,done:false}}
+function trialHTML(k){
+  const T=TR[k];if(!T)return"";const L=T.L;
+  if(T.done){
+    const pass=T.ok>=T.need;
+    return `<p class="big">${T.ok} de ${T.list.length} aciertos ${pass?"✓":""}</p>`+(pass?"":`<p class="hint">Necesitas ${T.need}. Repite con calma: el objetivo es oír bien, no adivinar.</p><button class="btn" onclick="retry('${k}')">Repetir ronda</button>`);
+  }
+  const t=T.list[T.i],a=T.answered;
+  let h=`<p class="mut">Intento ${T.i+1} de ${T.list.length}</p><div class="box"><button class="btn" onclick="playTrial('${k}')">🔊 Escuchar</button></div><div class="two">`;
+  h+=["A","B"].map(x=>`<button class="ans ${a&&x===t[1]?"right":""} ${a&&x===a&&a!==t[1]?"wrong":""}" ${T.played&&!a?"":"disabled"} onclick="answer('${k}','${x}')"><span>${L[x].i}</span><small>${L[x].n}</small></button>`).join("")+"</div>";
+  if(!T.played)h+=`<p class="mut">Escucha primero y luego elige.</p>`;
+  if(a){
+    const ok=a===t[1];
+    h+=`<p class="${ok?"ok":"no"}">${ok?"✓ Correcto.":"✗ Era "+L[t[1]].i+" "+L[t[1]].n+"."}</p><div class="box"><button class="btn" onclick="nextTrial('${k}')">Siguiente →</button></div>`;
+  }else if(T.fails>=2&&k==="main"){
+    h+=`<div class="hint"><b>Pista:</b> ${L.hints[Math.min(T.fails-2,2)]}</div>`;
+  }
+  return h;
+}
+function playTrial(k){const T=TR[k];T.played=true;play(snd(T.list[T.i][0]));draw()}
+function answer(k,x){
+  const T=TR[k],t=T.list[T.i],ok=x===t[1];
+  T.answered=x;haptic(ok?30:60);
+  if(ok){T.ok++;T.fails=0}else T.fails++;
+  /* COSIDO ALMA: el tally vive en sesion y se envia al sellar (endpoint real) */
+  seq([snd(t[0]),T.L[t[1]].anchor]);draw();
+}
+function nextTrial(k){const T=TR[k];T.i++;T.played=false;T.answered=null;if(T.i>=T.list.length)T.done=true;draw()}
+function retry(k){const T=TR[k];newTrial(k,T.L,T.list.length,T.need);TR[k].fails=T.fails;draw()}
+
+/* ===== RENDER ===== */
+function draw(){
+  const L=LESSONS[st.day];
+  $("tag").textContent=`Día ${st.day} de 57`;$("title").textContent=L.title;$("hook").textContent=L.hook;
+  $("steps").innerHTML=TITLES.map((t,i)=>{
+    const n=i+1,cur=n===st.step,done=n<st.step;
+    return `<section class="card ${cur?"cur":""} ${done?"done":""}" id="c${n}"><div class="ch"><span class="num">${done?"✓":n}</span><b>${t}</b></div>${cur?`<div class="sp">${script(n)}</div>${body(n,L)}`:""}</section>`;
+  }).join("");
+}
+function body(n,L){
+  if(n===1)return `<div class="box"><button class="btn good" onclick="goStep(2)">Empezar ▶</button></div>`;
+  if(n===2){
+    const g=x=>`<div class="grp"><b>${L[x].i} ${L[x].n}</b><button class="snd anc" onclick="hear('${x}',-1)">⚓ Ancla</button>${L[x].words.map((w,j)=>`<button class="snd" onclick="hear('${x}',${j})">🔊 ${j+1}</button>`).join("")}</div>`;
+    const ready=st.heard.has("A")&&st.heard.has("B");
+    return g("A")+g("B")+(ready?"":`<p class="mut">Escucha al menos un sonido de cada grupo para continuar.</p>`)+`<button class="btn good" ${ready?"":"disabled"} onclick="goStep(3)">Continuar</button>`;
+  }
+  if(n===3){
+    const T=TR.main;
+    return trialHTML("main")+(T.done&&T.ok>=T.need?`<button class="btn good" onclick="goStep(4)">Continuar</button>`:"");
+  }
+  if(n===4){
+    const has=st.recUrl||st.noMic;
+    return `<div class="box"><button class="btn" onclick="playMouth()">🔊 Modelo</button><button class="btn ${st.rec?"rec":""}" onclick="record()">${st.rec?"● Grabando…":"🎙️ Grabar (3 s)"}</button>${st.recUrl?`<button class="btn" onclick="playMine()">▶ Mi voz</button>`:""}</div>`
+      +(st.noMic?`<div class="hint">No pude usar el micrófono. Imita en voz alta y evalúate igualmente.</div>`:"")
+      +(has?`<p class="mut">Compara tu voz con el modelo. ¿Se parecen?</p><div class="three">${Object.keys(RATES).map(r=>`<button class="rt" style="${st.rate===r?"border-color:var(--good);background:var(--goods)":""}" onclick="rate('${r}')">${RATES[r]}</button>`).join("")}</div>`:"")
+      +(st.rate?`<button class="btn good" onclick="goStep(5)">Continuar</button>`:"");
+  }
+  const T=TR.main,nx=st.day+1,has=LESSONS[nx];
+  return `<div class="grp" style="text-align:left;border-style:solid;border-color:var(--good)">
+    <div class="row"><span>👂 Discriminación</span><b>${T.ok} de ${T.list.length}</b></div>
+    <div class="row"><span>👄 Boca</span><b>${RATES[st.rate]||"—"}</b></div></div>`
+    +(TR.rev?`<p class="mut"><b>Repaso rápido del día anterior (opcional)</b></p>${trialHTML("rev")}`:"")
+    +(has?`<button class="btn good" onclick="seal()">🔓 Guardar y abrir el día ${nx}</button>`:`<p class="hint" style="border-color:var(--good);background:var(--goods)">¡Completaste todos los días disponibles! Los siguientes están en preparación.</p><button class="btn good" onclick="seal()">Guardar progreso</button>`);
+}
+
+/* ===== ACCIONES ===== */
+function goStep(n){
+  haptic(30);const L=LESSONS[st.day];st.step=n;
+  if(n===3)newTrial("main",L,8,6);
+  if(n===5&&LESSONS[st.day-1])newTrial("rev",LESSONS[st.day-1],2,0);
+  draw();speak(script(n));
+  $("c"+n).scrollIntoView({behavior:"smooth",block:"start"});
+}
+function hear(x,j){const L=LESSONS[st.day][x];st.heard.add(x);play(j<0?L.anchor:L.words[j]);if(st.heard.size===2&&!st.readyShown){st.readyShown=1;draw()}}
+function playMouth(){play(LESSONS[st.day].mouthModel)}
+function playMine(){if(st.recUrl)new Audio(st.recUrl).play()}
+function rate(r){st.rate=r;draw()}
+async function record(){
+  if(st.rec)return;
+  try{
+    const s=await navigator.mediaDevices.getUserMedia({audio:true}),mr=new MediaRecorder(s),ch=[];
+    mr.ondataavailable=e=>ch.push(e.data);
+    mr.onstop=()=>{s.getTracks().forEach(t=>t.stop());st.recUrl=URL.createObjectURL(new Blob(ch));st.rec=false;st.noMic=false;draw()};
+    st.rec=true;draw();mr.start();setTimeout(()=>{if(mr.state==="recording")mr.stop()},3000);
+  }catch(e){st.rec=false;st.noMic=true;draw()}
+}
+/* COSIDO ALMA: expediente real (logMorfofonoSession) + llave unificada */
+const EXP_URL="https://valerie.base44.app/functions/logMorfofonoSession";
+const EXP_KEY="ABVC-PILOTO-2026";
+const T0=Date.now();
+function expSend(rec){return fetch(EXP_URL,{method:"POST",headers:{"Content-Type":"application/json","api_key":EXP_KEY},body:JSON.stringify(rec)}).then(r=>r.json()).then(j=>!!(j&&j.ok)).catch(()=>false)}
+function seal(){
+  haptic([30,50,30]);const d=st.day,nx=d+1,L=LESSONS[d];
+  const prog=new Set(JSON.parse(localStorage.getItem(PROG_KEY)||"[]"));prog.add(d);
+  localStorage.setItem(PROG_KEY,JSON.stringify([...prog].sort((a,b)=>a-b)));
+  if(LESSONS[nx]&&nx>unlocked)unlocked=nx;
+  const sent=JSON.parse(localStorage.getItem("est3_days_sent")||"[]");
+  if(!sent.includes(d)){
+    const rec={topic:"Estudio Integrado v3 — Día "+d+": "+L.title,
+      userId:localStorage.getItem("morfofono_student")||"Estudiante v3",
+      passed:true,accuracy:Math.round(TR.main.ok/Math.max(1,TR.main.list.length)*100),
+      challengeSentence:L.hook,
+      spokenText:"est3-v3 · disc:"+TR.main.ok+"/"+TR.main.list.length+" · boca:"+(RATES[st.rate]||"-")+" · regrabada:"+(st.recUrl?"si":(st.noMic?"sin micro":"no"))+" · t:"+Math.round((Date.now()-T0)/1000)+"s",
+      location:"Estudio v3",sessionId:"est3-d"+d+"-"+Date.now()};
+    expSend(rec).then(ok=>{if(ok)localStorage.setItem("est3_days_sent",JSON.stringify([...sent,d]))});
+  }
+  if(LESSONS[nx])location.hash="#dia-"+nx;else{speak("Progreso guardado.")}
+}
+function loadDay(){
+  const m=location.hash.match(/#dia-(\d+)/);let d=m?parseInt(m[1],10):1;
+  d=Math.max(1,Math.min(d,unlocked,MAXD));
+  Object.assign(st,{day:d,step:1,rate:null,recUrl:null,noMic:false,rec:false,readyShown:0});st.heard=new Set();
+  for(const k in TR)delete TR[k];
+  draw();window.scrollTo(0,0);
+}
+
+/* ===== CAJÓN DE DÍAS, TEMA, NARRADORA ===== */
+function drawer(open){
+  if(open){
+    $("dg").innerHTML=Array.from({length:57},(_,i)=>{
+      const d=i+1,on=d<=unlocked&&LESSONS[d];
+      return `<div class="dn ${on?"on":""} ${d===st.day?"cur":""}" ${on?`onclick="drawer(false);location.hash='#dia-${d}'"`:""}>D${d}</div>`;
+    }).join("");
+  }
+  $("dr").classList.toggle("open",open);
+}
+$("bd").onclick=()=>drawer(true);
+$("bn").onclick=()=>speak(script(st.step));
+const bt=$("bt");
+bt.onclick=()=>{const d=document.documentElement.classList.toggle("dark");bt.textContent=d?"☀️":"🌙";localStorage.setItem("ab_theme",d?"dark":"light")};
+if(localStorage.getItem("ab_theme")==="dark"){document.documentElement.classList.add("dark");bt.textContent="☀️"}
+window.addEventListener("hashchange",loadDay);
+loadDay();
+</script>
+<div style="position:fixed;bottom:2px;right:5px;font-size:9px;opacity:.5;z-index:99;background:#0008;color:#fff;padding:1px 5px;border-radius:4px">🔊 estudio v3 · QA</div>
+</body>
+</html>
