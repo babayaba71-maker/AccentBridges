@@ -40,6 +40,11 @@
     .hud-reticle .bl { bottom: 0; left: 0; border-bottom: 2px solid; border-left: 2px solid; border-bottom-left-radius: 4px; }
     .hud-reticle .br { bottom: 0; right: 0; border-bottom: 2px solid; border-right: 2px solid; border-bottom-right-radius: 4px; }
     .hud-reticle.locked { width: 74px; height: 74px; filter: drop-shadow(0 0 6px rgba(74,222,128,.8)); }
+    /* 👶 MODO MAMÁ: dieta visual — la cámara es la estrella */
+    body.mama-on .hud-top-bar, body.mama-on .hud-reticle,
+    body.mama-on #panel-difficulty, body.mama-on #panel-objects,
+    body.mama-on #phoneme-heatmap-layer, body.mama-on .bifocal-reading-zone,
+    body.mama-on #lang-nav, body.mama-on #mode-cluster { display: none !important; }
     .hud-reticle.locked .hud-reticle-corner { border-color: rgba(74,222,128,.95); }
 
     /* ===== Right peripheral buttons (glasses mode) ===== */
@@ -195,7 +200,7 @@
   </div>
 
   <!-- 3.1 PANEL DE DIFICULTAD FONÉTICA -->
-  <aside class="absolute top-20 left-4 z-20 pointer-events-auto">
+  <aside id="panel-difficulty" class="absolute top-20 left-4 z-20 pointer-events-auto">
     <div class="bg-slate-900/95 backdrop-blur-md border border-cyan-500/40 rounded-2xl p-3 shadow-2xl space-y-2.5 w-[270px] sm:w-[290px]">
       <div class="flex items-center justify-between">
         <span class="text-xs font-black uppercase text-cyan-300">Dificultad Fonética</span>
@@ -238,7 +243,7 @@
   </div>
 
   <!-- 5. CARRUSEL DE OBJETOS DETECTADOS -->
-  <footer class="absolute bottom-4 left-4 z-20 max-w-sm sm:max-w-md pointer-events-auto">
+  <footer id="panel-objects" class="absolute bottom-4 left-4 z-20 max-w-sm sm:max-w-md pointer-events-auto">
     <div class="bg-slate-900/90 backdrop-blur-md border border-indigo-500/40 rounded-2xl p-3 shadow-2xl space-y-2">
       <div class="flex items-center space-x-2 text-xs font-black text-white uppercase tracking-wider">
         <div class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></div>
@@ -378,6 +383,8 @@ let frameCount = 0;
 const LITE = new URLSearchParams(location.search).get("lite") === "1" ||
   (navigator.deviceMemory && navigator.deviceMemory <= 2) ||
   (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+/* ===== 👶 MODO MAMÁ: declaración temprana (la usa processDetections) ===== */
+let MAMA = new URLSearchParams(location.search).get("mama") === "1" || localStorage.getItem("mama_mode") === "1";
 
 const video = document.getElementById("webcam");
 const heatmapLayer = document.getElementById("phoneme-heatmap-layer");
@@ -581,13 +588,13 @@ function processDetections(detections) {
     heatmapLayer.appendChild(card);
 
     // 👤 MODO PERSONA (v1.5): ancla sujeto — la persona es "You", el estudiante es "I"
-    if (raw === "person" && (w * h) > (cW * cH) * 0.12 && now2() - lastPersonLesson > 180000) {
+    if (raw === "person" && !MAMA && (w * h) > (cW * cH) * 0.12 && now2() - lastPersonLesson > 180000) {
       lastPersonLesson = now2();
       personAnchorLesson();
     }
 
     // Auto-pronunciación por proximidad (bbox > 18% del cuadro)
-    if (autoPronOn && (w * h) > (cW * cH) * 0.18) {
+    if (autoPronOn && (w * h) > (cW * cH) * 0.18 && !(MAMA && raw === "person")) {
       const last = spokenObjects.get(raw) || 0;
       if (now2() - last > 15000) {
         spokenObjects.set(raw, now2());
@@ -669,6 +676,7 @@ function speakStep(text, lang, rate) {
 }
 
 function personAnchorLesson() {
+  if (MAMA) return; // modo mamá: el brain de personas manda
   const duo = (window.__framePersonCount || 1) >= 2;
   if (!duo && !studentName && !window.__nameAsked) {
     window.__nameAsked = true;
@@ -942,7 +950,6 @@ document.getElementById("btn-lesson").addEventListener("click", lessonScan);
 /* ===== 👶 MODO MAMÁ — clasificador de personas (arBrainPerson) + retos baby ===== */
 const MAMA_URL = "https://valerie.base44.app/functions/arBrainPerson";
 const BABY_AUDIO = "assets/baby-audio/";
-let MAMA = new URLSearchParams(location.search).get("mama") === "1" || localStorage.getItem("mama_mode") === "1";
 let mamaBusy = false, lastMamaTime = 0;
 const mamaToday = () => new Date().toLocaleDateString("en-CA");
 let mamaDay = JSON.parse(localStorage.getItem("mama_day") || "null") || { date: mamaToday(), retos: 0, cats: [] };
@@ -971,7 +978,16 @@ async function mamaScan() {
     snap.height = Math.round(snap.width * ((video.videoHeight || 480) / (video.videoWidth || 640)));
     snap.getContext("2d").drawImage(video, 0, 0, snap.width, snap.height);
     const base64 = snap.toDataURL("image/jpeg", 0.7).split(",")[1];
-    const resp = await fetch(MAMA_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ image: base64 }) });
+    const resp = await fetch(MAMA_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
+        image: base64,
+        context: {
+          student: "Josephine",
+          profile: "mamá; su bebé de año y medio; su niña mayor es su big girl; su esposo es Daddy",
+          hour: new Date().getHours(),
+          period: new Date().getHours() < 12 ? "mañana" : (new Date().getHours() < 19 ? "tarde" : "noche"),
+          seenToday: mamaDay.cats.slice(-4)
+        }
+      }) });
     const r = await resp.json();
     if (r.configured === false) { toast("🧠 Falta la key del clasificador — avísale a tu maestro"); }
     else if (r.error) { toast("⚠️ " + String(r.detail || r.error).slice(0, 60)); }
@@ -981,10 +997,10 @@ async function mamaScan() {
 }
 
 function showMamaCard(r) {
-  const old = document.getElementById("mama-card"); if (old) old.remove();
+  ["mama-card", "brain-card", "lesson-card"].forEach(id => { const el = document.getElementById(id); if (el) el.remove(); });
   const card = document.createElement("div");
   card.id = "mama-card";
-  card.style.cssText = "position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:31;width:min(320px,86%);background:rgba(46,9,38,.96);border:1px solid rgba(244,114,182,.7);border-radius:18px;padding:14px 16px;backdrop-filter:blur(8px);box-shadow:0 8px 28px rgba(0,0,0,.6);font-size:12.5px;color:#fdf2f8";
+  card.style.cssText = "position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:31;width:min(300px,78%);background:rgba(46,9,38,.96);border:1px solid rgba(244,114,182,.7);border-radius:18px;padding:14px 16px;backdrop-filter:blur(8px);box-shadow:0 8px 28px rgba(0,0,0,.6);font-size:12.5px;color:#fdf2f8";
   const vocab = (r.vocab || []).map(v => "<span style='color:#f9a8d4'>" + v.es + "</span> = <span style='color:#67e8f9'>" + v.en + "</span>").join(" • ");
   card.innerHTML =
     '<div style="font:800 10px ui-monospace,monospace;color:#f472b6;margin-bottom:6px">👶 MODO MAMÁ — PERSONA DETECTADA</div>' +
@@ -1039,6 +1055,7 @@ const btnMama = document.getElementById("btn-mama");
 function renderMamaBtn() {
   btnMama.style.background = MAMA ? "#db2777" : "";
   btnMama.style.color = MAMA ? "#fff" : "";
+  document.body.classList.toggle("mama-on", MAMA);
 }
 btnMama.addEventListener("click", () => {
   MAMA = !MAMA;
