@@ -151,6 +151,7 @@
     <button id="btn-tint" class="hud-btn" title="Filtro Tinte Oscuro">🕶️</button>
     <button id="btn-gemini" class="hud-btn" title="Escaneo Multimodal Gemini">✨</button>
     <button id="btn-lesson" class="hud-btn" title="Clase Bilingual Bridge del objeto">📖</button>
+    <button id="btn-mama" class="hud-btn" title="Modo Mamá: clasifica personas y da retos para su bebé">👶</button>
   </div>
 
   <!-- 3. BARRA DE CONTROL SUPERIOR -->
@@ -937,6 +938,116 @@ function showLessonCard(l) {
   setTimeout(() => speakLocalVoice(l.sensory_en + ". " + l.sensory_en, "en-US"), 8000);
 }
 document.getElementById("btn-lesson").addEventListener("click", lessonScan);
+
+/* ===== 👶 MODO MAMÁ — clasificador de personas (arBrainPerson) + retos baby ===== */
+const MAMA_URL = "https://valerie.base44.app/functions/arBrainPerson";
+const BABY_AUDIO = "assets/baby-audio/";
+let MAMA = new URLSearchParams(location.search).get("mama") === "1" || localStorage.getItem("mama_mode") === "1";
+let mamaBusy = false, lastMamaTime = 0;
+const mamaToday = () => new Date().toLocaleDateString("en-CA");
+let mamaDay = JSON.parse(localStorage.getItem("mama_day") || "null") || { date: mamaToday(), retos: 0, cats: [] };
+if (mamaDay.date !== mamaToday()) mamaDay = { date: mamaToday(), retos: 0, cats: [] };
+const slugB = t => (t || "").toLowerCase().trim().replace(/[^a-z0-9 ]/g, "").replace(/\s+/g, "-").slice(0, 40);
+
+function playBaby(en, fallbackRate) {
+  try {
+    const a = new Audio(BABY_AUDIO + slugB(en) + ".mp3");
+    a.onerror = () => speakLocalVoice(en, "en-US");
+    const p = a.play();
+    if (p && p.catch) p.catch(() => speakLocalVoice(en, "en-US"));
+  } catch (e) { speakLocalVoice(en, "en-US"); }
+}
+
+async function mamaScan() {
+  if (mamaBusy || MAMA === false) return;
+  if (performance.now() - lastMamaTime < 15000) return;
+  if (video.readyState < 2) return;
+  if (!window.__framePersonCount) return;
+  mamaBusy = true; lastMamaTime = performance.now();
+  toast("👶 Persona detectada — la estoy mirando con cariño...");
+  try {
+    const snap = document.createElement("canvas");
+    snap.width = Math.min(video.videoWidth || 640, 640);
+    snap.height = Math.round(snap.width * ((video.videoHeight || 480) / (video.videoWidth || 640)));
+    snap.getContext("2d").drawImage(video, 0, 0, snap.width, snap.height);
+    const base64 = snap.toDataURL("image/jpeg", 0.7).split(",")[1];
+    const resp = await fetch(MAMA_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ image: base64 }) });
+    const r = await resp.json();
+    if (r.configured === false) { toast("🧠 Falta la key del clasificador — avísale a tu maestro"); }
+    else if (r.error) { toast("⚠️ " + String(r.detail || r.error).slice(0, 60)); }
+    else if (r.category && r.category !== "none") { showMamaCard(r); }
+  } catch (e) {}
+  mamaBusy = false;
+}
+
+function showMamaCard(r) {
+  const old = document.getElementById("mama-card"); if (old) old.remove();
+  const card = document.createElement("div");
+  card.id = "mama-card";
+  card.style.cssText = "position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:31;width:min(320px,86%);background:rgba(46,9,38,.96);border:1px solid rgba(244,114,182,.7);border-radius:18px;padding:14px 16px;backdrop-filter:blur(8px);box-shadow:0 8px 28px rgba(0,0,0,.6);font-size:12.5px;color:#fdf2f8";
+  const vocab = (r.vocab || []).map(v => "<span style='color:#f9a8d4'>" + v.es + "</span> = <span style='color:#67e8f9'>" + v.en + "</span>").join(" • ");
+  card.innerHTML =
+    '<div style="font:800 10px ui-monospace,monospace;color:#f472b6;margin-bottom:6px">👶 MODO MAMÁ — PERSONA DETECTADA</div>' +
+    '<div style="font-size:20px;font-weight:900;color:#f9a8d4">' + (r.en_word || r.category) + '</div>' +
+    '<div style="color:#fbcfe8;font-family:monospace;font-size:11px;margin:2px 0 8px">' + (r.ipa || "") + ' · ' + (r.es_word || "") + '</div>' +
+    '<div style="margin-bottom:8px">' + (r.warm_line || "") + '</div>' +
+    '<div style="margin-bottom:8px;background:rgba(255,255,255,.08);border-radius:12px;padding:8px 10px">💜 <b>Reto:</b> dile a tu ' + (r.es_word || r.category) + ': <b style="color:#fde047">' + (r.challenge_en || "I love you") + '</b><br><span style="color:#f9a8d4">' + (r.challenge_es || "") + '</span></div>' +
+    (vocab ? '<div style="margin-bottom:8px">' + vocab + '</div>' : '') +
+    '<div style="display:flex;gap:8px;justify-content:flex-end">' +
+    '<button id="mama-say" style="background:#db2777;border:none;color:#fff;font-weight:800;font-size:11px;padding:8px 12px;border-radius:12px">🔊 Escuchar</button>' +
+    '<button id="mama-dijo" style="background:#7c3aed;border:none;color:#fff;font-weight:800;font-size:11px;padding:8px 12px;border-radius:12px">💜 Se la dije</button>' +
+    '<button id="mama-close" style="background:#3f3f46;border:none;color:#d4d4d8;font-weight:800;font-size:11px;padding:8px 12px;border-radius:12px">✕</button></div>';
+  container.appendChild(card);
+  const sayWord = () => {
+    if ((r.en_word || "").toLowerCase() === "baby") playBaby("baby");
+    else speakLocalVoice(r.en_word || "person", "en-US");
+  };
+  card.querySelector("#mama-say").onclick = () => { sayWord(); setTimeout(() => playBaby(r.challenge_en || "I love you"), 1600); };
+  card.querySelector("#mama-dijo").onclick = () => {
+    mamaDay.retos++; if (mamaDay.cats.indexOf(r.category) === -1) mamaDay.cats.push(r.category);
+    localStorage.setItem("mama_day", JSON.stringify(mamaDay));
+    if ("vibrate" in navigator) navigator.vibrate(40);
+    toast("💜 ¡Le dijiste \u201C" + (r.challenge_en || "") + "\u201D a tu " + (r.es_word || "baby") + "!");
+    if (mamaDay.retos === 3) mamaSeal();
+    card.remove();
+  };
+  card.querySelector("#mama-close").onclick = () => card.remove();
+  sayWord();
+}
+
+function mamaSeal() {
+  const rec = {
+    topic: "AR Labeler — Modo Mamá",
+    userId: localStorage.getItem("morfofono_student") || "Josefina",
+    passed: true,
+    accuracy: Math.min(100, mamaDay.retos * 10),
+    challengeSentence: "Modo Mamá: " + mamaDay.cats.join(", "),
+    spokenText: "ar-mama · retos dichos hoy:" + mamaDay.retos + " · personas:" + mamaDay.cats.join(",") + " · sid:ar-" + Date.now(),
+    location: "AR Labeler",
+    sessionId: "ar-" + Date.now()
+  };
+  fetch("https://valerie.base44.app/functions/logMorfofonoSession", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "api_key": "ABVC-PILOTO-2026" },
+    body: JSON.stringify(rec)
+  }).catch(() => {});
+}
+
+setInterval(() => { if (MAMA && !frozen) mamaScan(); }, 4000);
+
+const btnMama = document.getElementById("btn-mama");
+function renderMamaBtn() {
+  btnMama.style.background = MAMA ? "#db2777" : "";
+  btnMama.style.color = MAMA ? "#fff" : "";
+}
+btnMama.addEventListener("click", () => {
+  MAMA = !MAMA;
+  localStorage.setItem("mama_mode", MAMA ? "1" : "0");
+  renderMamaBtn();
+  toast(MAMA ? "👶 Modo Mamá ACTIVADO — apunta a tu bebé" : "👶 Modo Mamá apagado");
+});
+renderMamaBtn();
+
 
 /* Idiomas */
 document.querySelectorAll(".lang-btn").forEach(btn => {
