@@ -1,0 +1,524 @@
+{
+ "banco": "baby-words-1",
+ "version": 1,
+ "fecha": "2026-10-20",
+ "estudiante": "Josephine",
+ "audiencia_principal": "su bebé de 1.5 años — el sparring de entrenamiento (audiencia sin juicio, celebra TODO)",
+ "audiencia_secundaria": "su esposo (segundo plano, sin presión)",
+ "contexto_familiar": "pareja late twenties / early thirties",
+ "doctrine": "La bebé es el gimnasio perfecto: hablarle en inglés 24/7 = práctica diaria gratis, cero vergüenza, amor como combustible. El registro es infant-directed speech: lento, claro, cantado — que es EXACTAMENTE la práctica fonética que ella necesita.",
+ "tiers": {
+  "palabras": [
+   {
+    "en": "mama",
+    "ipa": "/ˈmɑmə/",
+    "pron_es": "mam",
+    "es": "mamá",
+    "momento": "siempre",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "daddy",
+    "ipa": "/ˈdædi/",
+    "pron_es": "da-di",
+    "es": "papá",
+    "momento": "siempre",
+    "confesion": "La A de daddy es el sonido nuevo de cat — no la A del español.",
+    "tier": "palabras"
+   },
+   {
+    "en": "baby",
+    "ipa": "/ˈbeɪbi/",
+    "pron_es": "bei-bi",
+    "es": "bebé",
+    "momento": "siempre",
+    "confesion": "La A gringa dice su nombre: 'ei'. Dos veces en baby.",
+    "tier": "palabras"
+   },
+   {
+    "en": "milk",
+    "ipa": "/mɪlk/",
+    "pron_es": "milk",
+    "es": "leche",
+    "momento": "comida",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "water",
+    "ipa": "/ˈwɔtər/",
+    "pron_es": "wa-der",
+    "es": "agua",
+    "momento": "comida",
+    "confesion": "La T entre vocales se vuelve D suave (flap) — wa-der, no wa-ter.",
+    "tier": "palabras"
+   },
+   {
+    "en": "more",
+    "ipa": "/mɔr/",
+    "pron_es": "mor",
+    "es": "más",
+    "momento": "comida",
+    "confesion": "La R americana: la lengua se jala atrás, no vibra.",
+    "tier": "palabras"
+   },
+   {
+    "en": "all done",
+    "ipa": "/ɔl dʌn/",
+    "pron_es": "ol dan",
+    "es": "¡se acabo!",
+    "momento": "comida",
+    "confesion": "Ritual de los 18 meses. La O de 'all' se abre como en 'hot'.",
+    "tier": "palabras"
+   },
+   {
+    "en": "uh-oh",
+    "ipa": "/ʌˈoʊ/",
+    "pron_es": "a-ou",
+    "es": "¡uy!",
+    "momento": "juego",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "bye-bye",
+    "ipa": "/baɪ baɪ/",
+    "pron_es": "bai bai",
+    "es": "adiós",
+    "momento": "salidas",
+    "confesion": "La Y final dice su nombre: 'ai'.",
+    "tier": "palabras"
+   },
+   {
+    "en": "good morning",
+    "ipa": "/ɡʊd ˈmɔrnɪŋ/",
+    "pron_es": "gud mor-ning",
+    "es": "buenos días",
+    "momento": "mañana",
+    "confesion": "¡Ella ya saluda así con su maestro! Su frase más natural.",
+    "tier": "palabras"
+   },
+   {
+    "en": "good night",
+    "ipa": "/ɡʊd naɪt/",
+    "pron_es": "gud nait",
+    "es": "buenas noches",
+    "momento": "sueño",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "kiss",
+    "ipa": "/kɪs/",
+    "pron_es": "kis",
+    "es": "beso",
+    "momento": "amor",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "hug",
+    "ipa": "/hʌɡ/",
+    "pron_es": "jag",
+    "es": "abrazo",
+    "momento": "amor",
+    "confesion": "La H respira: es como una j suave. La U dice 'a' cortita.",
+    "tier": "palabras"
+   },
+   {
+    "en": "shoes",
+    "ipa": "/ʃuz/",
+    "pron_es": "shuz",
+    "es": "zapatos",
+    "momento": "salidas",
+    "confesion": "S+H son DOS letras pero UN sonido: sh.",
+    "tier": "palabras"
+   },
+   {
+    "en": "ball",
+    "ipa": "/bɔl/",
+    "pron_es": "bol",
+    "es": "bola",
+    "momento": "juego",
+    "confesion": "La L final se medio traga (oscura), como en 'school'.",
+    "tier": "palabras"
+   },
+   {
+    "en": "banana",
+    "ipa": "/bəˈnænə/",
+    "pron_es": "be-ne-ne",
+    "es": "plátano",
+    "momento": "comida",
+    "confesion": "Las tres A suenan DISTINTAS: be-NE-ne. La locura vocálica del inglés en una palabra.",
+    "tier": "palabras"
+   },
+   {
+    "en": "apple",
+    "ipa": "/ˈæpl/",
+    "pron_es": "a-pl",
+    "es": "manzana",
+    "momento": "comida",
+    "confesion": "La A de cat, cortita y abierta.",
+    "tier": "palabras"
+   },
+   {
+    "en": "sleep",
+    "ipa": "/slip/",
+    "pron_es": "sliip",
+    "es": "dormir",
+    "momento": "sueño",
+    "confesion": "La EE es larga y tensa, como sheep.",
+    "tier": "palabras"
+   },
+   {
+    "en": "dance",
+    "ipa": "/dæns/",
+    "pron_es": "dans",
+    "es": "bailar",
+    "momento": "juego",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "yes",
+    "ipa": "/jɛs/",
+    "pron_es": "ies",
+    "es": "sí",
+    "momento": "siempre",
+    "confesion": null,
+    "tier": "palabras"
+   }
+  ],
+  "frases": [
+   {
+    "en": "I love you",
+    "ipa": "/aɪ lʌv ju/",
+    "pron_es": "ai lav iu",
+    "es": "te amo",
+    "momento": "amor",
+    "confesion": "LA FRASE DEL BANCO. LOVE dice 'lav': la O miente, suena A cortita. La palabra que más dirá en su vida.",
+    "tier": "palabras"
+   },
+   {
+    "en": "I love you so much",
+    "ipa": "/aɪ lʌv ju soʊ mʌtʃ/",
+    "pron_es": "ai lav iu sou mach",
+    "es": "te amo muchísimo",
+    "momento": "amor",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "Come here",
+    "ipa": "/kʌm hɪr/",
+    "pron_es": "kam jir",
+    "es": "ven aquí",
+    "momento": "siempre",
+    "confesion": "COME dice 'kam', no 'come' en español. La O miente otra vez.",
+    "tier": "palabras"
+   },
+   {
+    "en": "Come to mommy",
+    "ipa": "/kʌm tu ˈmɑmi/",
+    "pron_es": "kam tu ma-mi",
+    "es": "ven con mamá",
+    "momento": "amor",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "Give me a kiss",
+    "ipa": "/ɡɪv mi ə kɪs/",
+    "pron_es": "giv mi a kis",
+    "es": "dame un beso",
+    "momento": "amor",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "Good morning, baby",
+    "ipa": "/ɡʊd ˈmɔrnɪŋ ˈbeɪbi/",
+    "pron_es": "gud mor-ning bei-bi",
+    "es": "buenos días, bebé",
+    "momento": "mañana",
+    "confesion": "Su saludo ya existente — ahora completo.",
+    "tier": "palabras"
+   },
+   {
+    "en": "Are you hungry?",
+    "ipa": "/ɑr ju ˈhʌŋɡri/",
+    "pron_es": "ar iu jan-gri",
+    "es": "¿tienes hambre?",
+    "momento": "comida",
+    "confesion": "La H de hungry respira suave.",
+    "tier": "palabras"
+   },
+   {
+    "en": "Time to eat",
+    "ipa": "/taɪm tu it/",
+    "pron_es": "taim tu iit",
+    "es": "hora de comer",
+    "momento": "comida",
+    "confesion": "TIME es magic e: la I dice su nombre 'ai' y la E calla.",
+    "tier": "palabras"
+   },
+   {
+    "en": "One more bite",
+    "ipa": "/wʌn mɔr baɪt/",
+    "pron_es": "uan mor bait",
+    "es": "un bocado más",
+    "momento": "comida",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "Let's go",
+    "ipa": "/lɛts ɡoʊ/",
+    "pron_es": "lets gou",
+    "es": "vámonos",
+    "momento": "salidas",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "Hold my hand",
+    "ipa": "/hoʊld maɪ hænd/",
+    "pron_es": "jold mai jand",
+    "es": "dame la mano",
+    "momento": "salidas",
+    "confesion": "La O de hold dice 'ou'. La A de hand es la de cat.",
+    "tier": "palabras"
+   },
+   {
+    "en": "Where's daddy?",
+    "ipa": "/wɛrz ˈdædi/",
+    "pron_es": "jwerz da-di",
+    "es": "¿dónde está papá?",
+    "momento": "familia",
+    "confesion": "SEGUNDO PLANO. La W dice 'u' rápida: juer.",
+    "tier": "palabras"
+   },
+   {
+    "en": "Daddy's home!",
+    "ipa": "/ˈdædiz hoʊm/",
+    "pron_es": "da-dis joum",
+    "es": "¡llegó papá!",
+    "momento": "familia",
+    "confesion": "HOME dice 'joum': la O dice 'ou' y la E calla.",
+    "tier": "palabras"
+   },
+   {
+    "en": "You did it!",
+    "ipa": "/ju dɪd ɪt/",
+    "pron_es": "iu did it",
+    "es": "¡lo lograste!",
+    "momento": "celebración",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "Good job",
+    "ipa": "/ɡʊd dʒɑb/",
+    "pron_es": "gud chob",
+    "es": "bien hecho",
+    "momento": "celebración",
+    "confesion": "JOB dice 'chob': la J inglesa es una ch sonora, jamás la jota española.",
+    "tier": "palabras"
+   },
+   {
+    "en": "Be careful",
+    "ipa": "/bi ˈkɛrfəl/",
+    "pron_es": "bi ker-fel",
+    "es": "cuidado",
+    "momento": "cuidado",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "Time to sleep",
+    "ipa": "/taɪm tu slip/",
+    "pron_es": "taim tu sliip",
+    "es": "hora de dormir",
+    "momento": "sueño",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "Good night, my baby",
+    "ipa": "/ɡʊd naɪt maɪ ˈbeɪbi/",
+    "pron_es": "gud nait mai bei-bi",
+    "es": "buenas noches, mi bebé",
+    "momento": "sueño",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "Sweet dreams",
+    "ipa": "/swit drimz/",
+    "pron_es": "suit drims",
+    "es": "dulces sueños",
+    "momento": "sueño",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "Let's play",
+    "ipa": "/lɛts pleɪ/",
+    "pron_es": "lets plei",
+    "es": "juguemos",
+    "momento": "juego",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "Where is it?",
+    "ipa": "/wɛr ɪz ɪt/",
+    "pron_es": "jwer is it",
+    "es": "¿dónde está?",
+    "momento": "juego",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "Here it is!",
+    "ipa": "/hɪr ɪz ɪt/",
+    "pron_es": "jir is it",
+    "es": "¡aquí está!",
+    "momento": "juego",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "Clap your hands",
+    "ipa": "/klæp jɔr hændz/",
+    "pron_es": "klap ior jands",
+    "es": "aplaude",
+    "momento": "juego",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "You're so pretty",
+    "ipa": "/jɜr soʊ ˈprɪti/",
+    "pron_es": "ior sou pri-ti",
+    "es": "eres tan bonita",
+    "momento": "amor",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "I'm so proud of you",
+    "ipa": "/aɪm soʊ praʊd əv ju/",
+    "pron_es": "aim sou praud ov iu",
+    "es": "estoy muy orgullosa de ti",
+    "momento": "amor",
+    "confesion": "PROUD dice 'praud': la OU es el diptongo 'au'.",
+    "tier": "palabras"
+   },
+   {
+    "en": "You make me happy",
+    "ipa": "/ju meɪk mi ˈhæpi/",
+    "pron_es": "iu meik mi ja-pi",
+    "es": "me haces feliz",
+    "momento": "amor",
+    "confesion": "MAKE: magic e otra vez — la A dice 'ei'.",
+    "tier": "palabras"
+   },
+   {
+    "en": "You're my whole world",
+    "ipa": "/jɜr maɪ hoʊl wɜrld/",
+    "pron_es": "ior mai joul world",
+    "es": "eres todo mi mundo",
+    "momento": "amor",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "Mommy loves you forever",
+    "ipa": "/ˈmɑmi lʌvz ju fɔrˈɛvər/",
+    "pron_es": "ma-mi lovs iu for-e-ver",
+    "es": "mamá te ama para siempre",
+    "momento": "amor",
+    "confesion": null,
+    "tier": "palabras"
+   },
+   {
+    "en": "You're my big girl",
+    "ipa": "/jɜr maɪ bɪɡ ɡɜrl/",
+    "pron_es": "ior mai big girl",
+    "es": "eres mi niña grande",
+    "momento": "hija",
+    "confesion": "Para su hija mayor — su sueño de comunicarse con ella.",
+    "tier": "palabras"
+   },
+   {
+    "en": "I love you, daddy",
+    "ipa": "/aɪ lʌv ju ˈdædi/",
+    "pron_es": "ai lav iu da-di",
+    "es": "te amo, papá",
+    "momento": "familia",
+    "confesion": "La frase de pareja. En su tiempo, sin presión.",
+    "tier": "palabras"
+   }
+  ],
+  "mini": [
+   {
+    "escena": "Saludo al bebé",
+    "lines": [
+     {
+      "quien": "mama",
+      "en": "Hi baby! How are you?",
+      "pron_es": "jai bei-bi jau ar iu"
+     },
+     {
+      "quien": "mama",
+      "en": "I love you.",
+      "pron_es": "ai lav iu"
+     }
+    ]
+   },
+   {
+    "escena": "¿Dónde está papá?",
+    "lines": [
+     {
+      "quien": "mama",
+      "en": "Where's daddy?",
+      "pron_es": "jwerz da-di"
+     },
+     {
+      "quien": "mama",
+      "en": "He's at work.",
+      "pron_es": "jis at work"
+     },
+     {
+      "quien": "mama",
+      "en": "Daddy's home!",
+      "pron_es": "da-dis joum"
+     }
+    ]
+   },
+   {
+    "escena": "Hora de comer",
+    "lines": [
+     {
+      "quien": "mama",
+      "en": "Are you hungry?",
+      "pron_es": "ar iu jan-gri"
+     },
+     {
+      "quien": "mama",
+      "en": "More, please.",
+      "pron_es": "mor plis"
+     },
+     {
+      "quien": "mama",
+      "en": "All done!",
+      "pron_es": "ol dan"
+     }
+    ]
+   }
+  ]
+ },
+ "audio_base": "assets/baby-audio/"
+}
