@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Baby Words — El inglés de mamá</title>
+<meta name="theme-color" content="#3d5a73"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@500;600&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#f3efe6;--sf:#faf7f0;--sf2:#ebe4d6;--ink:#1c1915;--mut:#6b6458;--ac:#3d5a73;--acf:#faf7f0;--acs:#dfe6ec;--bd:#ddd4c4;--good:#2d6a4f;--goods:rgba(45,106,79,.12);--love:#8e4d6b;--loves:rgba(142,77,107,.12);--sh:0 1px 3px rgba(28,25,21,.1)}
+html.dark{--bg:#14110d;--sf:#1c1813;--sf2:#262017;--ink:#ece5d8;--mut:#b0a692;--ac:#a9c7e2;--acf:#10141b;--acs:#28313d;--bd:#342c20;--good:#52b788;--goods:rgba(82,183,136,.15);--love:#d8a3bd;--loves:rgba(216,163,189,.15)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Source Sans 3",system-ui,sans-serif;line-height:1.5;touch-action:manipulation}
+h1,h2{font-family:Newsreader,Georgia,serif;font-weight:500;letter-spacing:-.02em;margin:0}
+button{font:inherit;cursor:pointer;color:inherit}button:disabled{opacity:.4;cursor:not-allowed}
+.wrap{max-width:42rem;margin:0 auto;min-height:100dvh;padding:calc(.75rem + env(safe-area-inset-top,0px)) 1rem calc(6rem + env(safe-area-inset-bottom,0px))}
+.mast{display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid var(--bd);margin-bottom:.8rem}
+.mast b{font-family:Newsreader,serif;font-size:1.35rem;display:block;line-height:1.1}.mast span{font-size:.78rem;color:var(--mut)}
+.ib{width:2.4rem;height:2.4rem;border-radius:99px;border:1px solid var(--bd);background:var(--sf);font-size:1.1rem;margin-left:.4rem}
+.intro{background:var(--loves);border-left:3px solid var(--love);padding:.7rem .9rem;border-radius:0 .6rem .6rem 0;margin:.6rem 0 1rem;font-size:.92rem}
+.bar{display:flex;gap:.4rem;overflow-x:auto;padding:.2rem 0 .6rem;scrollbar-width:none}
+.bar::-webkit-scrollbar{display:none}
+.chip{border:1px solid var(--bd);background:var(--sf);border-radius:99px;padding:.35rem .8rem;font-size:.82rem;font-weight:600;white-space:nowrap;color:var(--mut)}
+.chip.on{background:var(--ac);color:var(--acf);border-color:var(--ac)}
+.tally{text-align:center;color:var(--mut);font-size:.85rem;margin:.4rem 0 .8rem}
+.tally b{color:var(--ink)}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:1rem;padding:.9rem 1rem;margin-bottom:.7rem;box-shadow:var(--sh)}
+.en{font-size:1.28rem;font-weight:700;line-height:1.25}
+.pron{color:var(--love);font-size:.9rem;margin:.15rem 0}
+.tr{color:var(--mut);font-size:.88rem;margin:.1rem 0 .5rem}
+.acts{display:flex;gap:.5rem;flex-wrap:wrap}
+.btn{background:var(--ac);color:var(--acf);border:0;border-radius:.7rem;padding:.55rem .95rem;font-weight:600;font-size:.9rem}
+.btn.love{background:var(--love);color:#fff}
+.btn.playing{opacity:.55}
+.said{background:var(--loves);border:1px solid var(--love);color:var(--love)}
+.why{margin-top:.5rem;font-size:.85rem;background:var(--sf2);border-left:3px solid var(--ac);padding:.55rem .7rem;border-radius:0 .5rem .5rem 0;display:none}
+.card.open .why{display:block}
+.why b{color:var(--ac)}
+.mom{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--love);margin-bottom:.2rem}
+.seal{position:fixed;left:0;right:0;bottom:0;padding:.8rem 1rem calc(.8rem + env(safe-area-inset-bottom,0px));background:var(--bg);border-top:1px solid var(--bd);z-index:40}
+.seal button{width:100%;padding:.9rem;font-size:1rem;border-radius:.8rem;border:0;background:var(--love);color:#fff;font-weight:700;box-shadow:var(--sh)}
+.done-msg{text-align:center;color:var(--good);font-weight:700;padding:.6rem}
+.h2s{display:flex;justify-content:space-between;align-items:baseline;margin:1.2rem 0 .5rem}
+.h2s h2{font-size:1.15rem}
+.h2s span{font-size:.78rem;color:var(--mut)}
+.esc{border:1px dashed var(--bd);border-radius:.8rem;padding:.7rem .8rem;margin:.5rem 0}
+.esc b{display:block;margin-bottom:.3rem}
+.esc .line{display:flex;justify-content:space-between;align-items:center;gap:.5rem;padding:.3rem 0;border-bottom:1px solid var(--sf2)}
+.esc .line:last-child{border-bottom:0}
+.esc .line span{font-size:.95rem}
+.smb{border:1px solid var(--bd);background:var(--sf2);border-radius:.5rem;padding:.35rem .6rem;font-size:.8rem;font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="mast">
+    <div><b>Baby Words 💜</b><span>El inglés de mamá para tu bebé</span></div>
+    <div><button class="ib" id="bt" aria-label="Modo oscuro">🌙</button></div>
+  </header>
+  <div class="intro">Primero <b>escucha</b> la frase dichita. Después <b>dísela a tu bebé</b> en voz alta, como te salga. Él celebra todo lo que le digas. Cuando la digas, toca el corazón.</div>
+  <div class="bar" id="chips"></div>
+  <div class="tally" id="tally"></div>
+  <div id="list"></div>
+  <div class="h2s"><h2>Mini escenas</h2><span>para platicar un ratito</span></div>
+  <div id="escenas"></div>
+</div>
+<div class="seal"><div class="done-msg" id="dmsg" style="display:none"></div><button id="sealb" onclick="seal()">💜 Terminé por hoy</button></div>
+<script>
+const $=id=>document.getElementById(id);
+const BASE="assets/baby-audio/";
+const API="https://valerie.base44.app/functions/logMorfofonoSession";
+const KEY="ABVC-PILOTO-2026";
+const T0=Date.now();
+let BANK=null;
+const slug=t=>t.toLowerCase().trim().replace(/[^a-z0-9 ]/g,"").replace(/\s+/g,"-").slice(0,40);
+const today=()=>new Date().toLocaleDateString("en-CA");
+let day=JSON.parse(localStorage.getItem("bw_today")||"null");
+if(!day||day.date!==today())day={date:today(),heard:0,said:0};
+let saidMap=JSON.parse(localStorage.getItem("bw_said")||"{}");
+let streak=JSON.parse(localStorage.getItem("bw_streak")||"null")||{last:"",count:0};
+let filter="todas";
+let sentToday=localStorage.getItem("bw_sent")===today();
+const haptic=ms=>{if("vibrate" in navigator)navigator.vibrate(ms)};
+let curAudio=null;
+
+function playPhrase(en,btn){
+  haptic(15);
+  if(curAudio){curAudio.pause()}
+  const a=new Audio(BASE+slug(en)+".mp3");
+  curAudio=a;
+  if(btn){btn.classList.add("playing");a.onended=a.onerror=()=>btn.classList.remove("playing")}
+  a.play().catch(()=>{
+    if("speechSynthesis" in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(en);u.lang="en-US";u.rate=.8;speechSynthesis.speak(u)}
+  });
+  day.heard++;saveDay();renderTally();
+}
+function sayIt(idx,en){
+  haptic(30);
+  saidMap[idx]=(saidMap[idx]||0)+1;
+  day.said++;
+  localStorage.setItem("bw_said",JSON.stringify(saidMap));
+  saveDay();renderTally();renderList();
+  if(day.said>=10&&!sentToday)autoSeal();
+}
+function saveDay(){localStorage.setItem("bw_today",JSON.stringify(day))}
+function renderTally(){
+  $("tally").innerHTML=`Hoy: <b>${day.heard}</b> oídas · <b>${day.said}</b> dichas a tu bebé · Racha: <b>${streak.count}</b> ${streak.count===1?"día":"días"}`;
+}
+function cardHTML(it,i){
+  const idx=it.tier+":"+i;
+  const n=saidMap[idx]||0;
+  return `<div class="card" id="c${i}">
+    <div class="mom">${it.tier==="palabras"?"Palabra":"Frase de mamá"} · ${it.momento}</div>
+    <div class="en">${it.en}</div>
+    <div class="pron">se dice: <b>${it.pron_es}</b></div>
+    <div class="tr">${it.es}</div>
+    <div class="acts">
+      <button class="btn" id="p${i}" onclick="playPhrase('${it.en.replace(/'/g,"\\'")}',this)">🔊 Escuchar</button>
+      <button class="btn love ${n?"said":""}" onclick="sayIt('${idx}',${i})">💜 La dije${n?" ("+n+")":""}</button>
+      ${it.confesion?`<button class="btn" style="background:var(--sf2);color:var(--mut)" onclick="document.getElementById('c${i}').classList.toggle('open');this.textContent=this.textContent==='✨ ¿Por qué suena así?'?'✨ Cerrar':'✨ ¿Por qué suena así?'">✨ ¿Por qué suena así?</button>`:""}
+    </div>
+    ${it.confesion?`<div class="why"><b>Las letras que ya lees te mintieron:</b> ${it.confesion}</div>`:""}
+  </div>`;
+}
+function renderList(){
+  if(!BANK)return;
+  const items=[...BANK.tiers.palabras.map(x=>({...x,tier:"palabras"})),...BANK.tiers.frases.map(x=>({...x,tier:"frases"}))];
+  const f=filter==="todas"?items:items.filter(x=>x.momento===filter);
+  $("list").innerHTML=f.map((it,i)=>cardHTML(it,items.indexOf(it))).join("");
+}
+function renderChips(){
+  const cats=["todas","amor","mañana","comida","juego","salidas","sueño","familia","celebración"];
+  $("chips").innerHTML=cats.map(c=>`<button class="chip ${filter===c?"on":""}" onclick="setFilter('${c}')">${c==="todas"?"Todas":c[0].toUpperCase()+c.slice(1)}</button>`).join("");
+}
+function setFilter(c){filter=c;renderChips();renderList()}
+function renderEscenas(){
+  $("escenas").innerHTML=BANK.tiers.mini.map(m=>`<div class="esc"><b>${m.escena}</b>${m.lines.map(l=>`<div class="line"><span>${l.en}<br><small style="color:var(--mut)">se dice: ${l.pron_es}</small></span><button class="smb" onclick="playPhrase('${l.en.replace(/'/g,"\\'")}')">🔊</button></div>`).join("")}</div>`).join("");
+}
+function seal(){
+  if(sentToday){$("dmsg").style.display="block";$("dmsg").textContent="Tu expediente de hoy ya está guardado. 💜";return}
+  haptic([30,50,30]);
+  const yest=new Date(Date.now()-864e5).toLocaleDateString("en-CA");
+  if(streak.last!==today()){streak.count=(streak.last===yest)?streak.count+1:1;streak.last=today();localStorage.setItem("bw_streak",JSON.stringify(streak))}
+  const rec={topic:"Baby Words — práctica con su bebé",
+    userId:localStorage.getItem("morfofono_student")||"Josefina",
+    passed:true,
+    accuracy:day.heard?Math.round(day.said/day.heard*100):0,
+    challengeSentence:BANK.tiers.frases[0].en,
+    spokenText:`baby-words · oídas:${day.heard} · dichas:${day.said} · racha:${streak.count} · t:${Math.round((Date.now()-T0)/1000)}s · sid:bw-${Date.now()}`,
+    location:"Baby Words",sessionId:"bw-"+Date.now()};
+  fetch(API,{method:"POST",headers:{"Content-Type":"application/json","api_key":KEY},body:JSON.stringify(rec)}).then(r=>r.json()).then(j=>{
+    if(j&&j.ok){sentToday=true;localStorage.setItem("bw_sent",today())}
+  }).catch(()=>{});
+  $("dmsg").style.display="block";
+  $("dmsg").textContent=`¡Buen trabajo, mamá! Racha de ${streak.count} ${streak.count===1?"día":"días"}. Tu expediente quedó guardado. 💜`;
+  renderTally();
+}
+function autoSeal(){seal()}
+fetch("banks/baby-words-1.json").then(r=>r.json()).then(b=>{BANK=b;renderList();renderEscenas()}).catch(()=>{ $("list").innerHTML="<p class='tally'>No pude cargar el banco. Revisa tu conexión y vuelve a abrir.</p>" });
+renderChips();renderTally();
+const bt=$("bt");
+bt.onclick=()=>{const d=document.documentElement.classList.toggle("dark");bt.textContent=d?"☀️":"🌙";localStorage.setItem("bw_theme",d?"dark":"light")};
+if(localStorage.getItem("bw_theme")==="dark"){document.documentElement.classList.add("dark");bt.textContent="☀️"}
+</script>
+</body>
+</html>
