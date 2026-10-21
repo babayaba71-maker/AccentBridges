@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prueba del Ojo — Myl AccentBridges</title>
+<style>
+  :root{--bg:#faf6ef;--card:#fffdf8;--ink:#1c1917;--muted:#78716c;--amber:#f59e0b;--green:#10b981;--red:#ef4444;--purple:#a78bfa;--border:#e7dfd3}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding:16px 14px 32px}
+  .wrap{max-width:480px;margin:0 auto}
+  .brand{text-align:center;font-size:12px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-bottom:14px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px 18px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+  h1{font-size:22px;text-align:center;margin-bottom:6px}
+  .sub{text-align:center;color:var(--muted);font-size:14.5px;line-height:1.5;margin-bottom:16px}
+  .dots{display:flex;justify-content:center;gap:6px;margin-bottom:14px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--border)}
+  .dot.on{background:var(--amber)}.dot.done{background:var(--green)}
+  .tag{display:inline-block;background:var(--amber);color:#fff;font-size:11px;font-weight:700;letter-spacing:.12em;padding:4px 10px;border-radius:999px;margin-bottom:10px;text-transform:uppercase}
+  .pair{font-size:46px;font-weight:700;text-align:center;letter-spacing:.06em;margin:22px 0 8px;font-family:Georgia,"Times New Roman",serif;word-break:break-word}
+  .sentence{font-size:21px;text-align:center;line-height:1.6;margin:18px 6px;font-family:Georgia,serif}
+  .ask{text-align:center;color:var(--muted);font-size:13.5px;margin-bottom:14px}
+  .tally{text-align:center;font-size:13px;color:var(--muted);margin-top:10px}
+  .btn{display:block;width:100%;min-height:62px;border:1px solid var(--border);border-radius:14px;background:#fff;color:var(--ink);font-size:17px;font-weight:600;margin-top:10px;cursor:pointer}
+  .btn:active{transform:scale(.98)}
+  .btn.ok{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.bad{background:var(--red);border-color:var(--red);color:#fff}
+  .btn.amber{background:var(--amber);border-color:var(--amber);color:#fff}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+  .grid2 .btn{margin-top:0}
+  .score{font-size:52px;font-weight:800;text-align:center;margin:8px 0;color:var(--amber)}
+  .level{text-align:center;font-size:16px;line-height:1.55;margin:6px 0 14px}
+  .detail{font-size:13px;color:var(--muted);text-align:center;line-height:1.6;margin-bottom:14px}
+  .seal{display:block;width:100%;min-height:58px;border:none;border-radius:14px;background:var(--purple);color:#fff;font-size:17px;font-weight:700;cursor:pointer}
+  .msg{text-align:center;font-size:14px;color:var(--green);margin-top:12px;display:none}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">Myl AccentBridges · Expediente</div>
+
+  <div id="intro" class="card">
+    <span class="tag">Diagnóstico del ojo</span>
+    <h1>La Prueba del Ojo 👁</h1>
+    <p class="sub">¿Qué tanto ves? Letras que se disfrazan, números gemelos, colores y palabras de verdad.<br><b>2 minutos.</b> Sin micrófono, sin prisa. Solo tus ojos.</p>
+    <button id="start" class="btn amber" style="margin-top:6px">Empezar 👁</button>
+  </div>
+
+  <div id="quiz" class="card hidden">
+    <div class="dots" id="dots"></div>
+    <div id="tagline" class="tag"></div>
+    <div id="pair" class="pair"></div>
+    <div id="sentence" class="sentence hidden"></div>
+    <div id="ask" class="ask"></div>
+    <div id="answers"></div>
+    <div class="tally" id="tally"></div>
+  </div>
+
+  <div id="end" class="card hidden">
+    <span class="tag">Resultado</span>
+    <div class="score" id="score"></div>
+    <div class="level" id="level"></div>
+    <div class="detail" id="detail"></div>
+    <button id="sealBtn" class="seal">Terminé por hoy 💜</button>
+    <div class="msg" id="smsg"></div>
+    <button id="again" class="btn" style="margin-top:12px">Intentar de nuevo</button>
+  </div>
+</div>
+
+<script>
+const API="https://valerie.base44.app/functions/logMorfofonoSession";
+const KEY="ABVC-PILOTO-2026";
+const T0=Date.now();
+
+// Bloques: b1 letras gemelas, b2 señuelos, b3 colores, b4 números escritos, b5 lectura real
+const BANK=[
+ {tag:"Letras gemelas",ask:"¿Iguales o distintas?",items:[
+   {a:"b",b:"b",same:true},{a:"d",b:"b",same:false},{a:"m",b:"n",same:false},
+   {a:"u",b:"u",same:true},{a:"v",b:"u",same:false},{a:"h",b:"h",same:true}]},
+ {tag:"Números y señuelos",ask:"¿Iguales o distintos?",items:[
+   {a:"1",b:"l",same:false},{a:"5",b:"5",same:true},{a:"0",b:"O",same:false},{a:"6",b:"6",same:true}]},
+ {tag:"Palabras de colores",ask:"¿Iguales o distintas?",items:[
+   {a:"white",b:"white",same:true},{a:"white",b:"write",same:false},{a:"red",b:"red",same:true},
+   {a:"black",b:"block",same:false},{a:"blue",b:"blue",same:true},{a:"red",b:"bed",same:false}]},
+ {tag:"Números escritos",ask:"¿Iguales o distintas?",items:[
+   {a:"one",b:"one",same:true},{a:"one",b:"won",same:false},{a:"two",b:"two",same:true},
+   {a:"two",b:"too",same:false},{a:"three",b:"three",same:true},{a:"four",b:"for",same:false}]},
+ {tag:"Lectura de verdad",ask:"Toca la palabra:",items:[
+   {sentence:"I wake up at seven.",word:"at",opts:["wake","at","seven","up"]},
+   {sentence:"My baby has blue eyes.",word:"blue",opts:["baby","blue","eyes","has"]},
+   {sentence:"We go to work by bus.",word:"work",opts:["bus","go","work","to"]}]}
+];
+
+let bi=0,ii=0,correct=0,total=0,blockScore=[0,0,0,0,0],answered=false;
+const $=id=>document.getElementById(id);
+const haptic=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
+
+function countTotal(){return BANK.reduce((s,b)=>s+b.items.length,0)}
+
+function renderDots(){
+  $("dots").innerHTML=BANK.map((b,i)=>{
+    const c=i<bi?"done":(i===bi?"on":"");
+    return `<div class="dot ${c}"></div>`;
+  }).join("");
+}
+
+function renderItem(){
+  answered=false;
+  const block=BANK[bi];
+  renderDots();
+  $("tagline").textContent=block.tag;
+  $("ask").textContent=block.ask;
+  const it=block.items[ii];
+  if(block.tag==="Lectura de verdad"){
+    $("pair").classList.add("hidden");
+    $("sentence").classList.remove("hidden");
+    $("sentence").textContent=it.sentence;
+    $("ask").textContent=`Toca la palabra "${it.word}"`;
+    $("answers").innerHTML='<div class="grid2">'+it.opts.map(o=>
+      `<button class="btn" data-w="${o}">${o}</button>`).join("")+'</div>';
+    $("answers").querySelectorAll("button").forEach(btn=>btn.onclick=()=>grade(btn,btn.dataset.w===it.word,it.word));
+  }else{
+    $("sentence").classList.add("hidden");
+    $("pair").classList.remove("hidden");
+    $("pair").textContent=it.a+"   "+it.b;
+    $("answers").innerHTML='<div class="grid2">'+
+      `<button class="btn" data-s="1">Iguales</button><button class="btn" data-s="0">Distintas</button></div>`;
+    $("answers").querySelectorAll("button").forEach(btn=>btn.onclick=()=>grade(btn,(btn.dataset.s==="1")===it.same));
+  }
+  $("tally").textContent=`${correct} de ${total} · bloque ${bi+1} de ${BANK.length}`;
+}
+
+function grade(btn,ok,word){
+  if(answered)return; answered=true;
+  total++;
+  if(ok){correct++;blockScore[bi]++;btn.classList.add("ok")}
+  else{btn.classList.add("bad");haptic([40,60,40])}
+  if(ok)haptic(20);
+  setTimeout(next,ok?380:700);
+}
+
+function next(){
+  ii++;
+  if(ii>=BANK[bi].items.length){ii=0;bi++}
+  if(bi>=BANK.length){finish();return}
+  renderItem();
+}
+
+function finish(){
+  $("quiz").classList.add("hidden");
+  $("end").classList.remove("hidden");
+  const pct=Math.round(correct/countTotal()*100);
+  $("score").textContent=pct+"%";
+  let lvl;
+  if(pct>=90)lvl="Tu ojo es fuerte. Ves las trampas de las letras y separas las palabras como una lectora avanzada.";
+  else if(pct>=70)lvl="Tu ojo es funcional. Lees bien y solo te faltan las trampas finas: las letras gemelas y las palabras disfrazadas.";
+  else lvl="Tu ojo está en construcción. Vamos a empezar por las letras que se disfrazan, una por una. No pasa nada: para eso está la escuela.";
+  $("level").textContent=lvl;
+  const names=["Letras gemelas","Señuelos","Colores","Números escritos","Lectura real"];
+  const sizes=[6,4,6,6,3];
+  $("detail").innerHTML=names.map((n,i)=>`${n}: ${blockScore[i]}/${sizes[i]}`).join(" · ");
+  sendLog(pct);
+}
+
+function sendLog(pct){
+  try{
+    const rec={topic:"Prueba del Ojo — lectura",
+      userId:localStorage.getItem("morfofono_student")||"Josefina",
+      passed:pct>=70,
+      accuracy:pct,
+      challengeSentence:"I wake up at seven.",
+      spokenText:`prueba-del-ojo · L1:${blockScore[0]}/6 · L2:${blockScore[1]}/4 · L3:${blockScore[2]}/6 · L4:${blockScore[3]}/6 · L5:${blockScore[4]}/3 · t:${Math.round((Date.now()-T0)/1000)}s · sid:ojo-${Date.now()}`,
+      location:"Prueba del Ojo",sessionId:"ojo-"+Date.now()};
+    fetch(API,{method:"POST",headers:{"Content-Type":"application/json","api_key":KEY},body:JSON.stringify(rec)})
+      .then(r=>r.json()).then(j=>{if(j&&j.ok)$("smsg").textContent="Tu expediente quedó guardado 💜";$("smsg").style.display="block"}).catch(()=>{});
+  }catch(e){}
+}
+
+$("start").onclick=()=>{haptic(20);$("intro").classList.add("hidden");$("quiz").classList.remove("hidden");renderItem()};
+$("sealBtn").onclick=()=>{haptic([30,50,30]);$("smsg").style.display="block";$("smsg").textContent="Buen trabajo. Tu expediente quedó anotado. 💜"};
+$("again").onclick=()=>{bi=0;ii=0;correct=0;total=0;blockScore=[0,0,0,0,0];$("end").classList.add("hidden");$("quiz").classList.remove("hidden");renderItem()};
+</script>
+</body>
+</html>
