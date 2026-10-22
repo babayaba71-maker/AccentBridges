@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prueba del Cerebro — Myl AccentBridges</title>
+</head>
+<style>
+  :root{--bg:#faf6ef;--card:#fffdf8;--ink:#1c1917;--muted:#78716c;--amber:#f59e0b;--green:#10b981;--red:#ef4444;--purple:#a78bfa;--border:#e7dfd3}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding:16px 14px 32px}
+  .wrap{max-width:480px;margin:0 auto}
+  .brand{text-align:center;font-size:12px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-bottom:14px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px 18px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+  h1{font-size:22px;text-align:center;margin-bottom:6px}
+  .sub{text-align:center;color:var(--muted);font-size:14.5px;line-height:1.5;margin-bottom:16px}
+  .dots{display:flex;justify-content:center;gap:6px;margin-bottom:14px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--border)}
+  .dot.on{background:var(--amber)}.dot.done{background:var(--green)}
+  .tag{display:inline-block;background:var(--amber);color:#fff;font-size:11px;font-weight:700;letter-spacing:.12em;padding:4px 10px;border-radius:999px;margin-bottom:10px;text-transform:uppercase}
+  .en{font-size:22px;font-weight:700;text-align:center;line-height:1.45;margin:16px 6px 10px;font-family:Georgia,"Times New Roman",serif}
+  .story{font-size:17px;text-align:center;line-height:1.75;margin:14px 8px 6px;font-family:Georgia,serif;background:#faf3e6;border:1px solid var(--border);border-radius:12px;padding:14px 12px}
+  .ask{text-align:center;color:var(--muted);font-size:13.5px;margin-bottom:14px}
+  .tally{text-align:center;font-size:13px;color:var(--muted);margin-top:10px}
+  .btn{display:block;width:100%;min-height:58px;border:1px solid var(--border);border-radius:14px;background:#fff;color:var(--ink);font-size:16.5px;font-weight:600;margin-top:10px;cursor:pointer}
+  .btn:active{transform:scale(.98)}
+  .btn.ok{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.bad{background:var(--red);border-color:var(--red);color:#fff}
+  .btn.amber{background:var(--amber);border-color:var(--amber);color:#fff}
+  .score{font-size:52px;font-weight:800;text-align:center;margin:8px 0;color:var(--amber)}
+  .level{text-align:center;font-size:16px;line-height:1.55;margin:6px 0 14px}
+  .detail{font-size:13px;color:var(--muted);text-align:center;line-height:1.6;margin-bottom:14px}
+  .seal{display:block;width:100%;min-height:58px;border:none;border-radius:14px;background:var(--purple);color:#fff;font-size:17px;font-weight:700;cursor:pointer}
+  .msg{text-align:center;font-size:14px;color:var(--green);margin-top:12px;display:none}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">Myl AccentBridges · Expediente</div>
+
+  <div id="intro" class="card">
+    <span class="tag">Diagnóstico del cerebro</span>
+    <h1>La Prueba del Cerebro 🧠</h1>
+    <p class="sub">Lees una frase en inglés y tocas lo que significa.<br><b>3 minutos.</b> Sin micrófono, sin prisa. Nada de memorizar: solo entender.</p>
+    <button id="start" class="btn amber" style="margin-top:6px">Empezar 🧠</button>
+  </div>
+
+  <div id="quiz" class="card hidden">
+    <div class="dots" id="dots"></div>
+    <div id="tagline" class="tag"></div>
+    <div id="story" class="story hidden"></div>
+    <div id="en" class="en"></div>
+    <div id="ask" class="ask">¿Qué significa?</div>
+    <div id="answers"></div>
+    <div class="tally" id="tally"></div>
+  </div>
+
+  <div id="end" class="card hidden">
+    <span class="tag">Resultado</span>
+    <div class="score" id="score"></div>
+    <div class="level" id="level"></div>
+    <div class="detail" id="detail"></div>
+    <button id="sealBtn" class="seal">Terminé por hoy 💜</button>
+    <div class="msg" id="smsg"></div>
+    <button id="again" class="btn" style="margin-top:12px">Intentar de nuevo</button>
+  </div>
+</div>
+
+<script>
+const API="https://valerie.base44.app/functions/logMorfofonoSession";
+const KEY="ABVC-PILOTO-2026";
+const T0=Date.now();
+
+// 4 bloques: b1 frases de tu día, b2 tu bebé, b3 instrucciones reales, b4 mini-cuento
+// Opciones trampa: reciclan palabras clave del enunciado — atrapan al que lee solo palabras sueltas.
+const STORY="Maria is a mama. She has a baby girl and a big daughter. Every morning, she wakes up at seven. She makes coffee and gives milk to her baby. In the afternoon, her baby sleeps and Maria studies English. She practices: \u201CI love you. Good night, my baby.\u201D";
+const BANK=[
+ {tag:"Frases de tu día",items:[
+   {en:"I wake up at seven.",opts:["Me despierto a las siete","Son las siete de la mañana","Trabajo hasta las siete","Ella despierta a las siete"],c:0},
+   {en:"I have coffee with my family.",opts:["Mi familia tiene café","Tomo café con mi familia","El café es de mi familia","Compro café para mi familia"],c:1},
+   {en:"I go to work by bus.",opts:["El autobús va a mi trabajo","Trabajo en el autobús","Voy al trabajo en autobús","Camino al trabajo temprano"],c:2}]},
+ {tag:"Tu bebé",items:[
+   {en:"Your baby is sleeping.",opts:["Tu bebé quiere dormir","Tu bebé está durmiendo","Despierta a tu bebé","Tu bebé sueña despierto"],c:1},
+   {en:"She is a big girl now.",opts:["Ella ya es una niña grande","La niña es muy alta","Esa chica es mi hija mayor","La mayor es mi niña"],c:0},
+   {en:"I love you. Good night, my baby.",opts:["Buenas noches, te extraño","Amo las noches tranquilas","Te amo. Buenas noches, mi bebé","Las noches son de amor"],c:2}]},
+ {tag:"Instrucciones de la vida real",items:[
+   {en:"Wait for me here, please.",opts:["Espérame aquí, por favor","Espera conmigo en la casa","Vamos a esperar juntos","Ahora vienes conmigo"],c:0},
+   {en:"The water is very hot.",opts:["El agua es para el café","Necesito agua caliente","El agua está fría","El agua está muy caliente"],c:3},
+   {en:"Come here and sit with me.",opts:["Ven aquí y siéntate conmigo","Siéntate cuando yo llegue","Vamos a sentarnos después","Aquí se sienta mi mamá"],c:0}]},
+ {tag:"Un mini-cuento",story:true,items:[
+   {ask:"¿Quién es Maria?",en:STORY,opts:["Una maestra de inglés","Una mamá con dos hijas","Una mamá con dos hijos","Una niña que estudia"],c:1},
+   {ask:"¿Qué hace Maria en la tarde?",en:STORY,opts:["Estudia inglés cuando su bebé duerme","Hace café para su esposo","Trabaja en el autobús","Duerme con su bebé grande"],c:0},
+   {ask:"¿A qué hora se despierta Maria?",en:STORY,opts:["Cuando llora su bebé","A las seis","A las siete","El cuento no lo dice"],c:2}]}
+];
+
+let bi=0,ii=0,correct=0,total=0,blockScore=[0,0,0,0],answered=false;
+const $=id=>document.getElementById(id);
+const haptic=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
+const countTotal=()=>BANK.reduce((s,b)=>s+b.items.length,0);
+
+function renderDots(){
+  $("dots").innerHTML=BANK.map((b,i)=>{
+    const c=i<bi?"done":(i===bi?"on":"");
+    return `<div class="dot ${c}"></div>`;
+  }).join("");
+}
+
+function renderItem(){
+  answered=false;
+  const block=BANK[bi];
+  renderDots();
+  $("tagline").textContent=block.tag;
+  const it=block.items[ii];
+  if(block.story){
+    $("story").classList.remove("hidden");
+    $("story").textContent=it.en;
+    $("en").textContent="";
+    $("ask").textContent=it.ask;
+  }else{
+    $("story").classList.add("hidden");
+    $("en").textContent=it.en;
+    $("ask").textContent="¿Qué significa?";
+  }
+  $("answers").innerHTML=it.opts.map((o,k)=>
+    `<button class="btn" data-k="${k}">${o}</button>`).join("");
+  $("answers").querySelectorAll("button").forEach(btn=>
+    btn.onclick=()=>grade(btn,+btn.dataset.k===it.c));
+  $("tally").textContent=`${correct} de ${total} · bloque ${bi+1} de ${BANK.length}`;
+}
+
+function grade(btn,ok){
+  if(answered)return; answered=true;
+  total++;
+  if(ok){correct++;blockScore[bi]++;btn.classList.add("ok");haptic(20)}
+  else{btn.classList.add("bad");haptic([40,60,40])}
+  setTimeout(next,ok?380:800);
+}
+
+function next(){
+  ii++;
+  if(ii>=BANK[bi].items.length){ii=0;bi++}
+  if(bi>=BANK.length){finish();return}
+  renderItem();
+}
+
+function finish(){
+  $("quiz").classList.add("hidden");
+  $("end").classList.remove("hidden");
+  const pct=Math.round(correct/countTotal()*100);
+  $("score").textContent=pct+"%";
+  let lvl;
+  if(pct>=90)lvl="Tu comprensión de lectura es fuerte. Entiendes frases completas, no solo palabras sueltas. El inglés ya te entra por los ojos.";
+  else if(pct>=70)lvl="Tu comprensión es funcional. Entiendes lo esencial de lo que lees y solo se te escapan las trampas: las frases con doble sentido y el orden de las palabras.";
+  else lvl="Tu comprensión está en construcción. Entiendes palabras, y vamos a aprender a unirlas como ideas completas. Para eso está la escuela.";
+  $("level").textContent=lvl;
+  const names=["Frases de tu día","Tu bebé","Instrucciones","Mini-cuento"];
+  const sizes=[3,3,3,3];
+  $("detail").innerHTML=names.map((n,i)=>`${n}: ${blockScore[i]}/${sizes[i]}`).join(" · ");
+  sendLog(pct);
+}
+
+function sendLog(pct){
+  try{
+    const rec={topic:"Prueba de Comprensión — canal Cerebro",
+      userId:localStorage.getItem("morfofono_student")||"Josefina",
+      passed:pct>=70,
+      accuracy:pct,
+      challengeSentence:"I wake up at seven.",
+      spokenText:`prueba-comprension · B1:${blockScore[0]}/3 · B2:${blockScore[1]}/3 · B3:${blockScore[2]}/3 · B4:${blockScore[3]}/3 · t:${Math.round((Date.now()-T0)/1000)}s · sid:cerebro-${Date.now()}`,
+      location:"Prueba de Comprensión",sessionId:"cerebro-"+Date.now()};
+    fetch(API,{method:"POST",headers:{"Content-Type":"application/json","api_key":KEY},body:JSON.stringify(rec)})
+      .then(r=>r.json()).then(j=>{if(j&&j.ok)$("smsg").textContent="Tu expediente quedó guardado 💜";$("smsg").style.display="block"}).catch(()=>{});
+  }catch(e){}
+}
+
+$("start").onclick=()=>{haptic(20);$("intro").classList.add("hidden");$("quiz").classList.remove("hidden");renderItem()};
+$("sealBtn").onclick=()=>{haptic([30,50,30]);$("smsg").style.display="block";$("smsg").textContent="Buen trabajo. Tu expediente quedó anotado. 💜"};
+$("again").onclick=()=>{bi=0;ii=0;correct=0;total=0;blockScore=[0,0,0,0];$("end").classList.add("hidden");$("quiz").classList.remove("hidden");renderItem()};
+</script>
+</body>
+</html>
