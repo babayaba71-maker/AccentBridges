@@ -1,0 +1,188 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Deletrando — Spelling in English</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#faf7f0;color:#222;padding:14px 12px 90px;max-width:520px;margin:0 auto}
+h1{font-size:22px;color:#b45309;text-align:center}
+h2{font-size:16px;color:#b45309;margin:18px 0 8px;border-bottom:2px solid #f59e0b;padding-bottom:3px}
+.sub{font-size:13px;color:#666;text-align:center;margin:4px 0 8px}
+.card{background:#fff;border:1px solid #eee;border-radius:12px;padding:10px;margin:8px 0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.L{background:#fff;border:1.5px solid #f59e0b;border-radius:10px;padding:7px 2px;text-align:center;cursor:pointer}
+.L b{font-size:17px;display:block;color:#92400e}
+.L span{font-size:9px;color:#888;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.L.warn{background:#fef3c7}
+.pair{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:14px}
+.pair button{background:#e0f2fe;border:1.5px solid #0284c7;border-radius:10px;padding:8px 12px;font-size:15px;cursor:pointer;font-weight:700}
+.pnote{font-size:12px;color:#0284c7;margin-top:4px}
+input,button.big{width:100%;padding:11px;border-radius:10px;border:1.5px solid #ccc;font-size:15px}
+button.big{background:#f59e0b;color:#fff;border:none;font-weight:700;margin-top:8px}
+button.big:active{transform:scale(.98)}
+.seq{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.seq div{background:#fef3c7;border-radius:8px;padding:6px 8px;cursor:pointer;text-align:center}
+.seq b{display:block;font-size:18px;color:#92400e}
+.seq span{font-size:9px;color:#666}
+.eval{display:flex;gap:10px;justify-content:center;margin-top:10px;font-size:26px}
+.eval button{font-size:26px;background:none;border:none;cursor:pointer}
+.round{font-size:13px;color:#888;margin:6px 0 8px}
+#res{text-align:center;font-size:15px;margin-top:6px;font-weight:600}
+#streak{font-size:12px;color:#888;text-align:center;margin-top:4px}
+</style></head><body>
+<h1>🔤 Deletrando</h1>
+<p class="sub">Spelling in English — técnica, identidad y libertad.<br>Deletrea tu mundo: tu nombre, tu bebé, tu apellido.</p>
+
+<h2>1️⃣ El alfabeto, letra por letra</h2>
+<p class="sub">Toca cada letra. Escucha su nombre EN INGLÉS y su palabra ancla.</p>
+<div class="card"><div class="grid" id="abc"></div></div>
+
+<h2>2️⃣ Los pares que engañan al oído español</h2>
+<div class="card">
+<div class="pair" data-l="E">🔊 <button>E</button><span>=</span><button>I</button><span>elefante vs helado: /iː/ vs /aɪ/</span></div>
+<div class="pair" data-l="B">🔊 <button>B</button><span>=</span><button>V</button><span>Baby vs Very: igual para el oído español</span></div>
+<div class="pair" data-l="G">🔊 <button>G</button><span>=</span><button>J</button><span>/dʒiː/ vs /dʒeɪ/: casi gemelas</span></div>
+<p class="pnote">Toca 🔊 para oír el contraste lento.</p>
+</div>
+
+<h2>3️⃣ Deletrea tu mundo</h2>
+<p class="sub">Escribe cualquier nombre o palabra: el tuyo, el de tu bebé, el apellido de tu esposo. Deletrando te lo deletrea letra por letra.</p>
+<div class="card">
+<input id="w" placeholder="Escribe tu palabra... (ej. Josephine)">
+<button class="big" onclick="spell()">Deletrear 🔤</button>
+<div class="seq" id="seq"></div>
+<button class="big" id="allBtn" style="display:none;background:#10b981" onclick="saySeq()">🔊 Escuchar todo el deletreo</button>
+<div id="streak"></div>
+<div class="eval" id="eval" style="display:none">
+¿Cómo te salió? 
+<button onclick="selfEval('😎')">😎</button>
+<button onclick="selfEval('🤏')">🤏</button>
+<button onclick="selfEval('😅')">😅</button>
+</div>
+</div>
+
+<h2>4️⃣ El reto del teléfono 📞</h2>
+<p class="sub">En una llamada real te deletrean un nombre. Escucha las letras y escribe la palabra. 5 rondas.</p>
+<div class="card">
+<div class="round" id="rinfo">Ronda 1 de 5</div>
+<button class="big" onclick="newRound()">🔊 Escuchar el deletreo</button>
+<input id="guess" placeholder="Escribe lo que escuchaste..." style="margin-top:8px">
+<button class="big" onclick="check()">Responder ✓</button>
+<div id="res"></div>
+</div>
+
+<p class="sub" style="margin-top:16px">🏆 CHALLENGE: Deletrea tu nombre completo 3 veces sin ver las letras.<br>"My name is Josephine. J-O-S-E-P-H-I-N-E."</p>
+
+<style>
+#almaSOS{position:fixed;bottom:14px;left:12px;z-index:998;display:flex;align-items:center;gap:6px;background:#f59e0b;color:#fff;border:none;border-radius:999px;padding:10px 16px;font-size:14px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.3);cursor:pointer}
+#almaM{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:16px}
+#almaM .card{background:#fff;color:#222;border-radius:16px;max-width:340px;width:100%;padding:18px;position:relative;font-family:inherit}
+#almaM h3{margin:0 0 6px;font-size:18px}
+#almaM .sub{font-size:13px;color:#666;margin:0 0 12px}
+#almaM .chip{display:inline-block;margin:3px;padding:8px 12px;border:1.5px solid #f59e0b;border-radius:999px;background:#fff;font-size:13px;cursor:pointer}
+#almaM .chip.on{background:#f59e0b;color:#fff}
+#almaM input,#almaM textarea{width:100%;box-sizing:border-box;margin:8px 0;padding:9px;border:1px solid #ccc;border-radius:9px;font-size:14px;font-family:inherit}
+#almaM textarea{height:64px;resize:none}
+#almaM .send{width:100%;background:#f59e0b;color:#fff;border:none;border-radius:10px;padding:11px;font-size:15px;font-weight:600;cursor:pointer}
+#almaM .x{position:absolute;top:8px;right:12px;border:none;background:none;font-size:20px;cursor:pointer;color:#888}
+#almaM .okmsg{display:none;text-align:center;padding:20px 6px;font-size:15px;line-height:1.5}
+</style>
+<button id="almaSOS" onclick="document.getElementById('almaM').style.display='flex'">🛟 Hablar con Alma</button>
+<div id="almaM"><div class="card">
+<button class="x" onclick="document.getElementById('almaM').style.display='none'">✕</button>
+<div id="almaF">
+<h3>🛟 Hablar con Alma</h3>
+<p class="sub">Cuéntame qué pasa. Tu reporte llega directo a Alma y ella te contesta en el grupo.</p>
+<span class="chip">🔇 No escucho nada</span><span class="chip">🎤 El micrófono no me oye</span><span class="chip">🚪 No puedo avanzar</span><span class="chip">❓ Otra cosa</span>
+<input id="almaName" placeholder="Tu nombre">
+<textarea id="almaDet" placeholder="Cuéntame más (opcional)"></textarea>
+<button class="send" onclick="almaSend()">Enviar a Alma 📨</button>
+</div>
+<div class="okmsg" id="almaOk">✓ Alma ya recibió tu reporte.<br>Te contesto en el grupo en un ratito. 🩷</div>
+</div></div>
+<script>
+(function(){
+var sel='';
+document.querySelectorAll('#almaM .chip').forEach(function(c){c.onclick=function(){document.querySelectorAll('#almaM .chip').forEach(function(x){x.classList.remove('on')});c.classList.add('on');sel=c.textContent}});
+try{var sv=localStorage.getItem('abvc_student');if(sv)document.getElementById('almaName').value=sv}catch(e){}
+window.almaSend=function(){
+ var name=document.getElementById('almaName').value.trim()||'Estudiante';
+ var det=document.getElementById('almaDet').value.trim();
+ if(!sel){alert('Elige qué te pasa 💛');return}
+ try{localStorage.setItem('abvc_student',name)}catch(e){}
+ var dia='';try{if(typeof cur!=='undefined'&&cur&&cur.d)dia='día '+cur.d}catch(e){}
+ var b=document.querySelector('#almaM .send');b.disabled=true;b.textContent='Enviando…';
+ fetch('https://valerie.base44.app/functions/reportarProblemaOido',{method:'POST',headers:{'Content-Type':'application/json','api_key':'ABVC-PILOTO-2026'},body:JSON.stringify({student:name,problema:sel,detalle:det,page:'deletrando.html',dia:dia})})
+ .then(function(r){return r.json()}).then(function(j){if(j.ok){document.getElementById('almaF').style.display='none';document.getElementById('almaOk').style.display='block'}else{b.disabled=false;b.textContent='Enviar a Alma 📨';alert('No se pudo enviar. Inténtalo otra vez.')}})
+ .catch(function(e){b.disabled=false;b.textContent='Enviar a Alma 📨';alert('No se pudo enviar. Inténtalo otra vez.')})
+};
+})();
+</script>
+<script>
+var V=[];function pickV(){V=speechSynthesis.getVoices().filter(function(x){return x.lang&&x.lang.indexOf('en')==0});}
+pickV();speechSynthesis.onvoiceschanged=pickV;
+var NAME={A:'ay',B:'bee',C:'see',D:'dee',E:'ee',F:'ef',G:'gee',H:'aych',I:'eye',J:'jay',K:'kay',L:'el',M:'em',N:'en',O:'oh',P:'pee',Q:'cue',R:'are',S:'ess',T:'tee',U:'you',V:'vee',W:'double you',X:'ex',Y:'why',Z:'zee'};
+var ANC={A:'Apple',B:'Baby',C:'Coffee',D:'Daughter',E:'Elephant',F:'Family',G:'Girl',H:'Husband',I:'Ice cream',J:'Josephine',K:'Kitchen',L:'Light',M:'Mommy',N:'Nice',O:'Orange',P:'People',Q:'Queen',R:'Rose',S:'Son',T:'Teacher',U:'Understand',V:'Very',W:'Water',X:'X ray',Y:'Yellow',Z:'Zebra'};
+var WARN={E:1,I:1,B:1,V:1,G:1,J:1};
+function say(txt,rate,after){var u=new SpeechSynthesisUtterance(txt);u.lang='en-US';if(V.length)u.voice=V[0];u.rate=rate||.85;u.onerror=function(){};if(after){u.onend=after;}speechSynthesis.speak(u);}
+function sayLetter(L,after){say(NAME[L]+', '+NAME[L]+'. As in '+ANC[L],.85,after);}
+var g=document.getElementById('abc');
+'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(L){var d=document.createElement('div');d.className='L'+(WARN[L]?' warn':'');d.innerHTML='<b>'+L+'</b><span>'+ANC[L]+'</span>';d.onclick=function(){sayLetter(L)};g.appendChild(d);});
+document.querySelectorAll('.pair').forEach(function(p){p.querySelector('button').parentElement.querySelector('button');});
+document.querySelectorAll('.pair').forEach(function(p){
+var btns=p.querySelectorAll('button');
+var play=document.createElement('button');play.textContent='🔊';play.style.border='none';play.style.background='none';play.style.fontSize='20px';
+play.onclick=function(){var a=p.dataset.l,b=(a=='E'?'I':a=='B'?'V':a=='G'?'J':'');
+say(NAME[a]+', '+NAME[a]+'. '+NAME[b]+', '+NAME[b]+'. '+NAME[a]+', '+NAME[a]+'. '+NAME[b]+', '+NAME[b]+'.',.8);};
+p.insertBefore(play,btns[0]);});
+
+var curSeq=[];
+function spell(){
+var w=(document.getElementById('w').value||'').trim().toUpperCase().replace(/[^A-Z ]/g,'');
+if(!w){alert('Escribe una palabra con letras de la A a la Z');return}
+curSeq=w.replace(/ /g,'').split('');
+var s=document.getElementById('seq');s.innerHTML='';
+curSeq.forEach(function(L){var d=document.createElement('div');d.innerHTML='<b>'+L+'</b><span>'+ANC[L]+'</span>';d.onclick=function(){sayLetter(L)};s.appendChild(d);});
+document.getElementById('allBtn').style.display='block';
+document.getElementById('eval').style.display='flex';
+document.getElementById('streak').textContent='Repite el deletreo 3 veces: primero despacio, luego a velocidad normal. 🔁';
+}
+function saySeq(){
+var i=0;(function next(){if(i<curSeq.length){sayLetter(curSeq[i],function(){i++;setTimeout(next,250)});}})();
+}
+function selfEval(e){
+log('Deletrando — Mi Mundo',null,e=='😎');
+document.getElementById('streak').textContent=e=='😎'?'¡Nítido! Ese deletreo ya es tuyo. 💪':'Sin prisa: escúchalo otra vez y repite despacio. El deletreo se aprende a golpes de repetición.';
+}
+var WORDS=['Smith','Brown','Johnson','Garcia','Martinez','Lopez','Wilson','Taylor','Anderson','Thomas','Moore','Jackson','White','Harris','Martin','Baby','Mommy','Yellow','Water'];
+var round=0,score=0,target='';
+function newRound(){
+document.getElementById('res').textContent='';
+document.getElementById('guess').value='';
+if(round>=5){return}
+target=WORDS[Math.floor(Math.random()*WORDS.length)];
+document.getElementById('rinfo').textContent='Ronda '+(round+1)+' de 5 · Puntos: '+score;
+var seq=target.toUpperCase().split('');
+var i=0;(function next(){if(i<seq.length){sayLetter(seq[i],function(){i++;setTimeout(next,300)});}})();
+}
+function check(){
+if(!target){newRound();return}
+var g=(document.getElementById('guess').value||'').trim().toUpperCase();
+if(!g)return;
+round++;
+if(g==target.toUpperCase()){score++;document.getElementById('res').textContent='✅ ¡Correcto! '+target}
+else{document.getElementById('res').textContent='❌ Era '+target.toUpperCase()+'. Escúchalo otra vez con 🔊.'}
+document.getElementById('rinfo').textContent='Ronda '+Math.min(round+1,5)+' de 5 · Puntos: '+score;
+target='';
+if(round>=5){
+var acc=Math.round(score/5*100),ok=acc>=80;
+document.getElementById('rinfo').textContent='Resultado: '+score+'/5 · '+acc+'%';
+document.getElementById('res').textContent=(ok?'🎉 ¡Superaste el reto del teléfono!':'Casi. Vuelve a intentarlo: cada ronda entrena el oído.');
+log('Deletrando — Reto del Teléfono',acc,ok);
+}
+}
+function log(topic,acc,passed){
+var nm='';try{nm=localStorage.getItem('abvc_student')||''}catch(e){}
+fetch('https://valerie.base44.app/functions/logMorfofonoSession',{method:'POST',headers:{'Content-Type':'application/json','api_key':'ABVC-PILOTO-2026'},body:JSON.stringify({topic:topic,accuracy:acc,passed:!!passed,spokenText:'deletrando',challengeSentence:'',location:'Deletrando',userId:nm||'Estudiante 0',sessionId:'sp-'+Date.now()})}).catch(function(){});
+}
+newRound();
+</script></body></html>

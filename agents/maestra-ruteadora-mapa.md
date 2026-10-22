@@ -36,3 +36,4 @@ REGLAS DE RUTEO:
 
 ---
 *ACTUALIZADO 15-16-oct (voz JJ ~19:15): America y Pro DEFINIDAS y agregadas al mapa + a los dos agentes (verificado GET). RE-POSICIONAMIENTO DE AMERICA: antes A2m-B1a (17-sep), ahora A0-ALTO → A1-BAJO = el puente fuera del kindergarten; el router del wallpaper actualizado (umbral best>=A1, etiqueta nueva). PENDIENTES: (a) URL de Action Bridges Pro (Replit) para encender su puerta en el portal; (b) FASE 2: expediente dinámico por estudiante (inyección por dynamic variables al abrir el widget desde el ecosistema con la identidad del alumno).*
+- Puerta #22 — Deletrando (spelling en inglés: alfabeto con anclas, pares E/I B/V G/J, deletreo de tu mundo, reto del teléfono con telemetría): https://babayaba71-maker.github.io/AccentBridges/deletrando.html
