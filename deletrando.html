@@ -61,13 +61,15 @@ button.big:active{transform:scale(.98)}
 </div>
 
 <h2>4️⃣ El reto del teléfono 📞</h2>
-<p class="sub">En una llamada real te deletrean un nombre. Escucha las letras y escribe la palabra. 5 rondas.</p>
+<p class="sub">Te deletrean un nombre LETRA POR LETRA, como en una llamada real. Junta las letras en tu cabeza y escribe la PALABRA que forman. 5 rondas.</p>
 <div class="card">
 <div class="round" id="rinfo">Ronda 1 de 5</div>
-<button class="big" onclick="newRound()">🔊 Escuchar el deletreo</button>
-<input id="guess" placeholder="Escribe lo que escuchaste..." style="margin-top:8px">
+<div class="round" id="rhint" style="color:#b45309;font-weight:600"></div>
+<button class="big" id="playBtn" onclick="playSpelling()">🔊 Escuchar el deletreo (repítelo las veces que necesites)</button>
+<input id="guess" placeholder="La palabra que forman las letras..." style="margin-top:8px">
 <button class="big" onclick="check()">Responder ✓</button>
 <div id="res"></div>
+<button class="big" id="sigBtn" style="display:none;background:#0284c7" onclick="next()">Siguiente ronda →</button>
 </div>
 
 <p class="sub" style="margin-top:16px">🏆 CHALLENGE: Deletrea tu nombre completo 3 veces sin ver las letras.<br>"My name is Josephine. J-O-S-E-P-H-I-N-E."</p>
@@ -154,31 +156,43 @@ log('Deletrando — Mi Mundo',null,e=='😎');
 document.getElementById('streak').textContent=e=='😎'?'¡Nítido! Ese deletreo ya es tuyo. 💪':'Sin prisa: escúchalo otra vez y repite despacio. El deletreo se aprende a golpes de repetición.';
 }
 var WORDS=['Smith','Brown','Johnson','Garcia','Martinez','Lopez','Wilson','Taylor','Anderson','Thomas','Moore','Jackson','White','Harris','Martin','Baby','Mommy','Yellow','Water'];
-var round=0,score=0,target='';
+var round=0,score=0,target='',answered=false,finished=false;
 function newRound(){
+answered=false;target=WORDS[Math.floor(Math.random()*WORDS.length)];
+document.getElementById('rinfo').textContent='Ronda '+(round+1)+' de 5 · Puntos: '+score;
+document.getElementById('rhint').textContent='Pista: tiene '+target.length+' letras.';
 document.getElementById('res').textContent='';
 document.getElementById('guess').value='';
-if(round>=5){return}
-target=WORDS[Math.floor(Math.random()*WORDS.length)];
-document.getElementById('rinfo').textContent='Ronda '+(round+1)+' de 5 · Puntos: '+score;
-var seq=target.toUpperCase().split('');
-var i=0;(function next(){if(i<seq.length){sayLetter(seq[i],function(){i++;setTimeout(next,300)});}})();
+document.getElementById('playBtn').disabled=false;
+document.getElementById('sigBtn').style.display='none';
+}
+function playSpelling(){
+if(target&&!answered&&!finished){var seq=target.toUpperCase().split('');
+var i=0;(function nx(){if(i<seq.length){sayLetter(seq[i],function(){i++;setTimeout(nx,250)});}})();}
 }
 function check(){
-if(!target){newRound();return}
+if(!target||answered)return;
 var g=(document.getElementById('guess').value||'').trim().toUpperCase();
 if(!g)return;
-round++;
-if(g==target.toUpperCase()){score++;document.getElementById('res').textContent='✅ ¡Correcto! '+target}
-else{document.getElementById('res').textContent='❌ Era '+target.toUpperCase()+'. Escúchalo otra vez con 🔊.'}
-document.getElementById('rinfo').textContent='Ronda '+Math.min(round+1,5)+' de 5 · Puntos: '+score;
-target='';
+answered=true;round++;
+var t=target.toUpperCase(),letras=t.split('').join('-');
+if(g==t){score++;document.getElementById('res').innerHTML='✅ ¡Correcto! La palabra es <b>'+t+'</b> · '+letras;}
+else{document.getElementById('res').innerHTML='❌ Era <b>'+t+'</b> · '+letras+'<br>Cada letra que oíste forma esta palabra. Escucha 👇';}
+say('The word is '+target+'.',.9,null);
+document.getElementById('rinfo').textContent='Ronda '+Math.min(round,5)+' de 5 · Puntos: '+score;
+document.getElementById('playBtn').disabled=true;
+var b=document.getElementById('sigBtn');b.style.display='block';
 if(round>=5){
-var acc=Math.round(score/5*100),ok=acc>=80;
+var acc=Math.round(score/5*100),ok=acc>=80;finished=true;
 document.getElementById('rinfo').textContent='Resultado: '+score+'/5 · '+acc+'%';
-document.getElementById('res').textContent=(ok?'🎉 ¡Superaste el reto del teléfono!':'Casi. Vuelve a intentarlo: cada ronda entrena el oído.');
+document.getElementById('res').innerHTML+=(ok?'<br>🎉 ¡Superaste el reto del teléfono!':'<br>Casi. Otra vuelta: cada deletreo entrena el oído. 💪');
 log('Deletrando — Reto del Teléfono',acc,ok);
+b.textContent='Empezar otra vez 🔁';
+}else{b.textContent='Siguiente ronda →';}
 }
+function next(){
+if(finished){round=0;score=0;finished=false;}
+newRound();
 }
 function log(topic,acc,passed){
 var nm='';try{nm=localStorage.getItem('abvc_student')||''}catch(e){}
