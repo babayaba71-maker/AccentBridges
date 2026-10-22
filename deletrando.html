@@ -120,11 +120,11 @@ window.almaSend=function(){
 <script>
 var V=[];function pickV(){V=speechSynthesis.getVoices().filter(function(x){return x.lang&&x.lang.indexOf('en')==0});}
 pickV();speechSynthesis.onvoiceschanged=pickV;
-var NAME={A:'ay',B:'bee',C:'see',D:'dee',E:'ee',F:'ef',G:'gee',H:'aych',I:'eye',J:'jay',K:'kay',L:'el',M:'em',N:'en',O:'oh',P:'pee',Q:'cue',R:'are',S:'ess',T:'tee',U:'you',V:'vee',W:'double you',X:'ex',Y:'why',Z:'zee'};
+var NAME={A:'ay',B:'bee',C:'see',D:'dee',E:'ee',F:'ef',G:'gee',H:'aitch',I:'eye',J:'jay',K:'kay',L:'el',M:'em',N:'en',O:'oh',P:'pee',Q:'cue',R:'are',S:'ess',T:'tee',U:'you',V:'vee',W:'double you',X:'ex',Y:'why',Z:'zee'};
 var ANC={A:'Apple',B:'Baby',C:'Coffee',D:'Daughter',E:'Elephant',F:'Family',G:'Girl',H:'Husband',I:'Ice cream',J:'Josephine',K:'Kitchen',L:'Light',M:'Mommy',N:'Nice',O:'Orange',P:'People',Q:'Queen',R:'Rose',S:'Son',T:'Teacher',U:'Understand',V:'Very',W:'Water',X:'X ray',Y:'Yellow',Z:'Zebra'};
 var WARN={E:1,I:1,B:1,V:1,G:1,J:1};
 function say(txt,rate,after){var u=new SpeechSynthesisUtterance(txt);u.lang='en-US';if(V.length)u.voice=V[0];u.rate=rate||.85;u.onerror=function(){};if(after){u.onend=after;}speechSynthesis.speak(u);}
-function sayLetter(L,after){say(NAME[L]+', '+NAME[L]+'. As in '+ANC[L],.85,after);}
+function sayLetter(L,after){var d=after||null;var fb=function(){say(NAME[L]+', '+NAME[L]+'. As in '+ANC[L],.85,d)};try{var a=new Audio('assets/spelling-audio/'+L+'.mp3');a.onended=d;a.onerror=fb;a.play().catch(fb);}catch(e){fb()}}
 var g=document.getElementById('abc');
 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(L){var d=document.createElement('div');d.className='L'+(WARN[L]?' warn':'');d.innerHTML='<b>'+L+'</b><span>'+ANC[L]+'</span>';d.onclick=function(){sayLetter(L)};g.appendChild(d);});
 document.querySelectorAll('.pair').forEach(function(p){p.querySelector('button').parentElement.querySelector('button');});
@@ -132,7 +132,7 @@ document.querySelectorAll('.pair').forEach(function(p){
 var btns=p.querySelectorAll('button');
 var play=document.createElement('button');play.textContent='🔊';play.style.border='none';play.style.background='none';play.style.fontSize='20px';
 play.onclick=function(){var a=p.dataset.l,b=(a=='E'?'I':a=='B'?'V':a=='G'?'J':'');
-say(NAME[a]+', '+NAME[a]+'. '+NAME[b]+', '+NAME[b]+'. '+NAME[a]+', '+NAME[a]+'. '+NAME[b]+', '+NAME[b]+'.',.8);};
+sayLetter(a,function(){sayLetter(b,function(){sayLetter(a,function(){sayLetter(b)})})});};
 p.insertBefore(play,btns[0]);});
 
 var curSeq=[];
