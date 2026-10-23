@@ -401,7 +401,7 @@ function playWord(word, lang) {
   return new Promise(res => {
     audioEl.onended = () => { audioEl.onended = null; audioEl.onerror = null; res(); };
     audioEl.onerror = () => { audioEl.onerror = null; ttsWord(clean, lang || "en-US", res); };
-    audioEl.src = `https://babayaba71-maker.github.io/AccentBridges/assets/oido-audio/${clean}.mp3`;
+    audioEl.src = `https://babayaba71-maker.github.io/AccentBridges/assets/oido-audio/${clean}.mp3?v=A2`;
     audioEl.play().catch(() => { audioEl.onerror = null; ttsWord(clean, lang || "en-US", res); });
   });
 }

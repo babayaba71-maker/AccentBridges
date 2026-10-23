@@ -164,7 +164,7 @@ const au=new Audio();
 function play(s){
   haptic(15);
   return new Promise(res=>{
-    const urls=[`assets/oido-audio/${s.k}.mp3`,CDN+s.k+".mp3"];let i=0;
+    const urls=[`assets/oido-audio/${s.k}.mp3?v=A2`,CDN+s.k+".mp3?v=A2"];let i=0;
     const tts=()=>{
       if(!("speechSynthesis" in window))return res();
       speechSynthesis.cancel();
@@ -181,7 +181,7 @@ function esVoice(){if(!("speechSynthesis" in window))return null;const vs=speech
 function speak(text){
   $("nst").textContent=text;
   if("mediaSession" in navigator){try{navigator.mediaSession.metadata=new MediaMetadata({title:"Día "+st.day+" · Action Bridges",artist:"Maestra Lee",album:"Método Valerie"})}catch(e){}}
-  const mp3="assets/narracion3/dia"+st.day+"-s"+st.step+".mp3";
+  const mp3="assets/narracion3/dia"+st.day+"-s"+st.step+".mp3?v=A2";
   fetch(mp3,{method:"HEAD"}).then(r=>{
     if(r.ok){au.onended=null;au.src=mp3;au.play().catch(()=>ttsSpeak(text))}
     else ttsSpeak(text);

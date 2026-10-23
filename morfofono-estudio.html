@@ -447,8 +447,8 @@ let OID_EL=null;
 function mp3Of(w){
   const s=String(w).toLowerCase().replace(/[^a-z' ]/g,"").trim().replace(/\s+/g,"-");
   if(!s)return null;
-  if(OID_MAN.indexOf(s)>=0)return OID_MP3+s+".mp3";
-  if(ASM_MAN.indexOf(s)>=0)return ASM_MP3+s+".mp3";
+  if(OID_MAN.indexOf(s)>=0)return OID_MP3+s+".mp3?v=A2";
+  if(ASM_MAN.indexOf(s)>=0)return ASM_MP3+s+".mp3?v=A2";
   return null;
 }
 function speak(text) {
