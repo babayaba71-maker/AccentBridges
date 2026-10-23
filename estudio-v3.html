@@ -340,7 +340,7 @@ if(localStorage.getItem("ab_theme")==="dark"){document.documentElement.classList
 /* ===== PROGRESO EN LA NUBE + MODO MAESTRA ===== */
 const SYNCAPI="https://valerie.base44.app/functions/syncProgresoApp";
 function stu(){return (localStorage.getItem("morfofono_student")||localStorage.getItem("abvc_student")||"").trim()}
-function isMaestra(){return /\b(jj|j\.j|jay jay|jacob|maestra|teacher)\b/i.test(stu())}
+function isMaestra(){return [localStorage.getItem("morfofono_student"),localStorage.getItem("abvc_student")].some(x=>/\b(jj|j\.j|jay jay|jacob|maestra|teacher)\b/i.test(String(x||"").trim()))}
 function syncSave(){const s=stu();if(!s)return;try{fetch(SYNCAPI,{method:"POST",headers:{"Content-Type":"application/json",api_key:"ABVC-PILOTO-2026"},body:JSON.stringify({student:s,app:"morfofono_prog",payload:localStorage.getItem(PROG_KEY)||"[]"})}).catch(()=>{})}catch(e){}}
 function nombreNubeUI(){
   const b=document.createElement("div");
@@ -351,7 +351,13 @@ function nombreNubeUI(){
   o.onclick=()=>{if(i.value.trim()){localStorage.setItem("abvc_student",i.value.trim());syncSave();location.reload()}};
   b.append(i,o);document.body.append(b);
 }
-if(isMaestra()){unlocked=MAXD}
+if(isMaestra()){
+  unlocked=MAXD;
+  const badge=document.createElement("div");
+  badge.textContent="👩‍🏫 Modo maestra activo · todos los días disponibles";
+  badge.style.cssText="margin:10px 0;padding:10px 12px;border-radius:12px;background:#fff1c2;color:#704b00;font-weight:700;text-align:center;border:1px solid #f4c542";
+  document.querySelector(".wrap").insertBefore(badge,document.querySelector(".nar"));
+}
 else if(!stu()){nombreNubeUI()}
 /* Aplicar permisos ANTES de resolver el hash. Antes se limitaba #dia-3 a día 1. */
 window.addEventListener("hashchange",loadDay);
