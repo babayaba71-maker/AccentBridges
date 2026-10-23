@@ -337,8 +337,6 @@ $("bn").onclick=()=>speak(script(st.step));
 const bt=$("bt");
 bt.onclick=()=>{const d=document.documentElement.classList.toggle("dark");bt.textContent=d?"☀️":"🌙";localStorage.setItem("ab_theme",d?"dark":"light")};
 if(localStorage.getItem("ab_theme")==="dark"){document.documentElement.classList.add("dark");bt.textContent="☀️"}
-window.addEventListener("hashchange",loadDay);
-loadDay();
 /* ===== PROGRESO EN LA NUBE + MODO MAESTRA ===== */
 const SYNCAPI="https://valerie.base44.app/functions/syncProgresoApp";
 function stu(){return (localStorage.getItem("morfofono_student")||localStorage.getItem("abvc_student")||"").trim()}
@@ -355,6 +353,9 @@ function nombreNubeUI(){
 }
 if(isMaestra()){unlocked=MAXD}
 else if(!stu()){nombreNubeUI()}
+/* Aplicar permisos ANTES de resolver el hash. Antes se limitaba #dia-3 a día 1. */
+window.addEventListener("hashchange",loadDay);
+loadDay();
 (async()=>{const s=stu();if(!s)return;try{
   const r=await fetch(SYNCAPI+"?student="+encodeURIComponent(s)+"&app=morfofono_prog",{headers:{api_key:"ABVC-PILOTO-2026"}});
   const j=await r.json();
