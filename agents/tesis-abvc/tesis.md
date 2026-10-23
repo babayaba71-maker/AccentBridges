@@ -26,3 +26,15 @@
 
 ## Formato de la tarea diaria de Ada (la manda Alma por el puente, 22:30)
 Ada recibe: (a) este núcleo, (b) el avance del día anterior. Entrega: análisis científico del día (no filosófico), 1 insight nuevo, 1 conexión con la pedagogía viva (evidencia real del ecosistema: Josephine, Estudio v3, telemetría), 1 propuesta comprobable para el día siguiente.
+
+## Extensión 23-oct ~13:30 — EL OÍDO RECEPTOR Y LAS DOS CAPACIDADES (segunda siembra de JJ)
+9. **La comunicación es un sistema de DOS: productor + receptor.** La capacidad de comunicarse no vive solo en producir sonidos (atada al background: mexicoamericano, italoamericano, afroamericano, anglosajón del noreste — cada quien produce según su región y raíces) — vive TAMBIÉN en el oído del que recibe: su capacidad de entender el acento del otro.
+10. **Los acentos/dialectos son demasiados para enseñarlos todos** (regiones de USA, Inglaterra vs USA, Australia). ESTRATEGIA DE LA TESIS: (a) PRODUCCIÓN → UN solo estándar: el inglés general neutro americano (el de las noticias, "General American"); (b) COMPRENSIÓN → no se enseñan todos los acentos: se enseña a COMPRENDER al que habla diferente, por exposición escalonada por capas.
+11. **El acento sigue a la COMUNIDAD, no a la biología.** (Ejemplo JJ: tardó en entender a los afroamericanos — no por el color, por el background: el barrio, el pidgin/slang propio del sector.) Comprender AAVE es ENTRENABLE por sus rasgos sistemáticos — candidato a capa B1+.
+12. **EL SONIDO ES EFÍMERO; LA LETRA ES SU FÓSIL.** Un ancla sonando desaparece en el aire (lenta 3×, igual desaparece). La letra permanece para el ojo. Para el individuo de canal fuerte OJO (la estudiante piloto: 100% ojo vs 45% oído), el video con subtítulos/imágenes convierte lo efímero en permanente: el ojo guarda lo que el aire se lleva. Por eso el spelling bee y la morfología (desarmar la palabra → los sonidos dentro de las letras) son el PUENTE del canal ojo hacia la fonética — y por eso las reglas escritas→sonido del inglés estándar se enseñan por ese puente, no antes.
+13. **LA SEPARACIÓN QUE MANDA (dos capacidades, entrenables por separado):** (a) CAPACIDAD DE COMUNICARSE = producción (boca/motor); (b) CAPACIDAD DE COMPRENDER A OTROS COMUNICÁNDOSE CON ÉL = recepción (oído/percepción). El ecosistema YA las entrena separadas: la discriminación 6/8 es recepción; el Mouth Gym es producción. La tesis les pone nombre y porqué: se miden por separado en el expediente de 4 canales (oído/boca/ojo/cerebro).
+
+### Preguntas abiertas nuevas
+- ¿Cómo se entrena la comprensión de variedades no estándar (AAVE, pidgins) sin estereotipos y a qué capa? ¿Lámina de rasgos sistemáticos (reducción de grupos consonánticos, etc.) como "mapa del acento"?
+- Escalera de exposición: ¿cuántas variedades y en qué dosis por capa sin re-abrir el costo cognitivo que ya cerramos en el Estudio v3?
+- La memoria ecoica (~2-4 s) como límite del ancla: ¿chunking de 2-3 palabras (El Pegamento) es la dosis máxima del oído sin apoyo del ojo?
