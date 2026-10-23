@@ -366,8 +366,23 @@ async function logPairAttempt(guessedSame, ok) {
 
 function saveProg() {
   localStorage.setItem("morfofono_prog", JSON.stringify([...completedDays]));
+  try{syncSave()}catch(e){}
   updateProgUI();
 }
+/* ===== PROGRESO EN LA NUBE (mismo registro que Estudio v3) ===== */
+const SYNCAPI="https://valerie.base44.app/functions/syncProgresoApp";
+function stu(){return (localStorage.getItem("morfofono_student")||localStorage.getItem("abvc_student")||"").trim()}
+function syncSave(){const s=stu();if(!s)return;try{fetch(SYNCAPI,{method:"POST",headers:{"Content-Type":"application/json",api_key:"ABVC-PILOTO-2026"},body:JSON.stringify({student:s,app:"morfofono_prog",payload:localStorage.getItem("morfofono_prog")||"[]"})}).catch(()=>{})}catch(e){}}
+(async()=>{const s=stu();if(!s)return;try{
+  const r=await fetch(SYNCAPI+"?student="+encodeURIComponent(s)+"&app=morfofono_prog",{headers:{api_key:"ABVC-PILOTO-2026"}});
+  const j=await r.json();
+  if(j.ok&&j.payload){
+    const cloud=JSON.parse(j.payload);if(!Array.isArray(cloud))return;
+    const local=JSON.parse(localStorage.getItem("morfofono_prog")||"[]");
+    const merge=[...new Set([...local,...cloud])].sort((a,b)=>a-b);
+    if(merge.length>(local.length||0)){localStorage.setItem("morfofono_prog",JSON.stringify(merge));location.reload()}
+  }
+}catch(e){}})();
 
 function toggleStep(day, stepId) {
   const key = String(day);
