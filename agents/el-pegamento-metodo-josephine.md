@@ -71,3 +71,12 @@ FORMATO: ficha con confesión de 2 min (lectora) + práctica oído→boca: oír 
 2. MAÑANA: Alma construye y entrega Prueba de Comprensión; se manda.
 3. Con ojo + cerebro medidos: VIERNES el informe profesional completo de 4 canales + tareas de fin de semana.
 4. LUNES: primera clase de El Pegamento (will → 'll: "I'll try again" — su propia frase, la de ella, es la Lección 1. Su mocha se vuelve el material).
+
+## TO POR POSICIÓN — LAS TRES VIDAS DEL TO (confesión de vecindad, JJ 23-oct ~17:10)
+Doctrina confirmada por JJ ("am I wrong?" — NO, correcto): la preposición TO cambia de conducta según DÓNDE cae en la frase. Es la vecindad aplicada al pegamento:
+1. **TO INICIAL (empieza la respuesta/frase) = FULL T ASPIRADA** [tʰə]: "What are you gonna do today?" → "To work." — T crispada, con su soplido. Ella puede EMPEZAR a hablar con una preposición y esa T es limpia.
+2. **TO DENTRO DEL CHUNK (tras vocal, enlazado) = FLAP T** [ɾə]: "I'm gonna go to the store" → "go-da store" — la T se hace R suave "que suena gringa" (la doble D de JJ). Mismo TO, otra conducta.
+3. **EN AMBOS CASOS LA VOCAL SE ENCOGE** a "tuh" (es function word: reducción doctrinal).
+Paralelos del banco: la L clara inicial vs L dark final; the = da/di. El TO reúne los empleos de la T en UNA palabra — joya para El Pegamento peldaño 2.
+**LECCIÓN PARA JOSEPHINE (su propia frase en dos versiones):** "To work." (full T inicial) vs "I'm gonna go to work." (flap dentro) — una T, dos sonidos, en SU frase. Oído primero (discriminar), boca después (producir ambas), con la cadena and (to work AND then to make AND...).
+**MEDICIÓN DE BOCA — EL HUECO DEL EXPEDIENTE SE LLENA CON ESTE MATERIAL (directriz JJ):** los ejercicios de preposiciones+conectores SON la batería formal del canal BOCA — cadenas con to/and/will + autoeval (loop lees→comprendes→repites→te oyes→repites) + verificación presencial del oído de JJ. El % boca del expediente de 4 canales nace de aquí. Al volver a verla: batería = cadenas to/and/will × Betty ×3 + TH + very/berry.
