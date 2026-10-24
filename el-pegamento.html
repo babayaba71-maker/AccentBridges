@@ -44,7 +44,7 @@ h1{font-family:Georgia,serif;font-size:1.5rem;margin:8px 0 2px}
 .okmsg{display:none;margin-top:10px;color:#1a7a45;font-weight:600;font-size:.9rem}
 </style></head><body>
 <header><b>EL PEGAMENTO</b><span id="hday">Día 1 de 5</span></header>
-<div class="nar"><span class="badge">Maestra Lee</span><span id="nst">Toca Escuchar para oír la instrucción</span><button class="btn" id="bn" style="margin:0;width:auto;padding:8px 12px">▶</button></div>
+<div class="nar"><span class="badge">Maestra Lee</span><span id="nst">Toca Escuchar para oír la instrucción</span><span style="display:flex;gap:4px;margin-right:6px"><button id="spL" style="border:1px solid #456;background:#1e2933;color:#cfe;border-radius:8px;padding:5px 9px;cursor:pointer;font-size:15px" title="Modo lento">🐢</button><button id="spN" style="border:1px solid #456;background:#7bb1ff;color:#122;border-radius:8px;padding:5px 9px;cursor:pointer;font-size:15px" title="Velocidad normal">🏃</button></span><button class="btn" id="bn" style="margin:0;width:auto;padding:8px 12px">▶</button></div>
 <main id="app"></main>
 <div id="fab"><button onclick="almOpen()">🛟 Hablar con Alma</button></div>
 <div id="alm"><div class="sh"><h3>🛟 Hablar con Alma</h3>
@@ -60,6 +60,12 @@ h1{font-family:Georgia,serif;font-size:1.5rem;margin:8px 0 2px}
 Doctrina: primero el oído, el ojo es el puente, la letra confiesa después.
 Loop sellado JJ: "lo lees, lo comprendes, repítelo, óyelo salir de tu boca, ¿te gusta?"
 Producción = formas completas (I will try). Reducciones = solo comprensión. */
+const CLASES={
+1:"Will es un pegamento, no un verbo de acción. Nunca cambia de forma (I will, she will, they will) y siempre va seguido del verbo en su forma base: will try. En el inglés hablado esta palabrita se encoge hasta volverse casi invisible, pero tú por ahora la dices completa y clara: es la que convierte tus deseos en planes.",
+2:"En inglés real las palabras no viajan solas: se toman de la mano. Cuando una palabra termina en sonido y la siguiente empieza en sonido, se pegan: pick it se oye pih-kit; hold on se oye hol-don. Y cuando la T queda atrapada entre dos vocales, como en go to, se suaviza hasta volverse un toque suave: go-da. No es flojera: es la manera en que el inglés respira.",
+3:"Las ideas se conectan con puentes: and suma, but contrasta, because explica, so concluye, then ordena. Donde tu mente hace una pausa para pensar qué sigue, el conector sostiene la frase un momento más y te da tiempo. Con cinco puentes tienes frases infinitas.",
+4:"La misma palabra to cambia de conducta según dónde cae. Al principio de tu respuesta, su T sale limpia y con aire: To work. Dentro de la frase, cuando queda entre vocales, la T se suaviza: going to suena gonno-goda, con un toque suave donde estaba la T. La posición manda: una palabra, tres conductas.",
+5:"Tu boca aprende en pedazos: primero dos palabras, luego tres, luego la frase entera. El inglés agrupa con golpes de sentido y su melodía sube y baja como la del español. Hoy pegas todo lo de la semana en un solo respiro: la frase completa de tu vida."};
 const TITLES=["Meta del día","Escucha y ancla","Repite conmigo","Cierre"];
 const RATES={logre:"😎 Lo logré",casi:"🤏 Casi",todavia:"😅 Todavía no"};
 const DAYS={
@@ -119,13 +125,14 @@ function syncSave(){const s=stu();if(!s)return;try{fetch(SYNCAPI,{method:"POST",
 function expSend(rec){return fetch(EXP_URL,{method:"POST",headers:{"Content-Type":"application/json",api_key:EXP_KEY},body:JSON.stringify(rec)}).then(r=>r.json()).then(j=>!!(j&&j.ok)).catch(()=>false)}
 /* ===== AUDIO: mp3 horneado -> CDN -> TTS navegador ===== */
 const au=new Audio();
+let SPD=localStorage.getItem("peg_spd")==="0.72"?0.72:1;
 function playKey(k,after){
   haptic(15);
   const urls=[AUD+k+".mp3?v=P1",CDN+k+".mp3?v=P1"];let i=0;
   const tts=()=>{if(!("speechSynthesis" in window)){if(after)after();return}
     speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(k);u.lang="en-US";u.rate=.85;
     u.onend=u.onerror=()=>{if(after)after()};speechSynthesis.speak(u)};
-  const next=()=>{if(i<urls.length){au.onended=()=>{if(after)after()};au.onerror=next;au.src=urls[i++];au.play().catch(()=>{})}else tts()};
+  const next=()=>{if(i<urls.length){au.onended=()=>{if(after)after()};au.onerror=next;au.src=urls[i++];au.playbackRate=SPD;au.play().catch(()=>{})}else tts()};
   next();
 }
 function esVoice(){if(!("speechSynthesis" in window))return null;const vs=speechSynthesis.getVoices();return vs.find(v=>/es[-_]MX/i.test(v.lang))||vs.find(v=>/^es[-_]?/i.test(v.lang))||null}
@@ -156,7 +163,7 @@ function draw(){
   let h='<div class="steps">'+TITLES.map((t,i)=>"<i class='"+(i<st.step?"on":i+1===st.step?"on":"")+"'>"+(i+1)+" · "+t+"</i>").join("")+"</div>";
   h+="<h1>"+L.title+"</h1><p class='mut'>"+L.hook+"</p>";
   if(st.step===1){
-    h+="<div class='box'><p>"+L.goal+"</p><p class='hint'>"+L.rule+"</p><button class='btn good big' onclick='goStep(2)'>Continuar</button></div>";
+    h+="<div class='box'><p>"+L.goal+"</p><p class='hint'>"+L.rule+"</p></div>";if(CLASES[st.day])h+="<div style='text-align:left;background:#18202a;border:1px solid #2c3a4a;border-radius:12px;padding:12px 14px;margin:10px 0;line-height:1.55;font-size:.93rem;color:#d8e2ec'><b style='color:#ffc14d'>La clase</b><br>"+CLASES[st.day]+"</div>";h+="<button class='btn good big' onclick='goStep(2)'>Continuar</button>";
   }else if(st.step===2){
     h+="<p class='mut'>Lee con tus ojos, escucha con tus oídos.</p>"+L.phrases.map((p,i)=>
       "<div class='ph'><div class='en'>"+p.t+"</div><div class='cue'>"+p.cue+"</div>"+(p.brk?"<div class='brk'>"+p.brk+"</div>":"")+
@@ -235,6 +242,11 @@ function loadDay(){
   draw();
 }
 $("bn").onclick=()=>speak(script(st.step));
+const _spL=$("spL"),_spN=$("spN");
+function spdUI(){_spL.style.background=SPD<1?"#7bb1ff":"#1e2933";_spN.style.background=SPD<1?"#1e2933":"#7bb1ff";_spL.style.color=SPD<1?"#122":"#cfe";_spN.style.color=SPD<1?"#cfe":"#122"}
+_spL.onclick=()=>{SPD=.72;localStorage.setItem("peg_spd","0.72");spdUI()};
+_spN.onclick=()=>{SPD=1;localStorage.setItem("peg_spd","1");spdUI()};
+spdUI();
 window.addEventListener("hashchange",loadDay);
 /* ===== NUBE + MODO MAESTRA ===== */
 function nombreNubeUI(){
