@@ -4,7 +4,7 @@
 <style>
 :root{--bg:#121a21;--cd:#1a2430;--tx:#e8f0f8;--mut:#8fa3b8;--gold:#ffc14d;--blue:#7bb1ff;--gd:#50c878;--rj:#e98989;--line:#2c3a4a}
 *{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;min-height:100vh;padding-bottom:100px}
+body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;min-height:100vh;padding-bottom:60px}
 header{background:#f7f4eb;color:#24303a;padding:10px 14px;display:flex;justify-content:space-between;align-items:baseline}
 header b{color:#d35400;font-size:1.02rem}
 header span{font-size:.75rem;color:#7a6a55}
@@ -12,25 +12,27 @@ main{max-width:480px;margin:0 auto;padding:12px}
 .decks{display:flex;gap:8px;margin:10px 0}
 .decks button{flex:1;background:var(--cd);border:1px solid var(--line);color:var(--mut);border-radius:99px;padding:9px;font-size:.85rem;cursor:pointer}
 .decks button.on{background:var(--gold);color:#241f0d;font-weight:700;border-color:var(--gold)}
+.steps{display:flex;gap:6px;margin-top:10px}
+.steps button{flex:1;background:var(--bg);border:1px solid var(--line);color:var(--mut);border-radius:10px;padding:8px 4px;font-size:.78rem;cursor:pointer;line-height:1.3}
+.steps button.on{border-color:var(--gold);color:var(--gold);font-weight:700;background:rgba(255,193,77,.09)}
 .card{background:var(--cd);border:1px solid var(--line);border-radius:18px;padding:20px 16px;margin-top:10px;text-align:center;position:relative}
-.heart{font-size:1.4rem}
-.counter{position:absolute;top:12px;right:14px;color:var(--mut);font-size:.75rem}
-.phrase{font-family:Georgia,serif;font-size:1.9rem;line-height:1.3;margin:10px 0}
+.heart{font-size:1.3rem}
+.counter{position:absolute;top:12px;right:14px;color:var(--mut);font-size:.72rem}
+.phrase{font-family:Georgia,serif;font-size:1.8rem;line-height:1.35;margin:10px 0}
 .phrase b{color:var(--gold);transition:transform .15s}
-.phrase b.beat{transform:scale(1.12);text-shadow:0 0 14px rgba(255,193,77,.55)}
+.phrase b.beat{transform:scale(1.13);text-shadow:0 0 14px rgba(255,193,77,.55)}
 .phrase span{color:var(--mut);font-weight:400}
-.brk{color:var(--blue);font-size:.85rem;font-style:italic;margin-top:4px}
+.phrase.solo b{font-size:2.2rem}
+.brk{color:var(--blue);font-size:.85rem;font-style:italic;margin-top:6px}
 .cue{color:var(--mut);font-size:.85rem;margin-top:6px}
 .mel{color:var(--gd);font-size:.9rem;margin-top:6px;font-weight:600}
-.btn{display:block;width:100%;background:var(--cd);border:1px solid var(--line);color:var(--tx);border-radius:12px;padding:13px;font-size:.98rem;cursor:pointer;margin-top:8px}
+.btn{display:block;width:100%;background:var(--cd);border:1px solid var(--line);color:var(--tx);border-radius:12px;padding:13px;font-size:.95rem;cursor:pointer;margin-top:8px}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#241f0d;font-weight:700}
 .btn.good{background:var(--gd);border-color:var(--gd);color:#06220f;font-weight:700}
-.spd{display:flex;gap:8px;margin-top:8px}
-.spd button{flex:1;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--tx);cursor:pointer;font-size:.9rem}
-.spd button.on{border-color:var(--blue);background:rgba(123,177,255,.14);color:var(--blue);font-weight:700}
 .tempo{display:flex;gap:6px;justify-content:center;margin-top:10px}
-.tempo button{background:var(--bg);border:1px solid var(--line);color:var(--mut);border-radius:99px;padding:8px 14px;font-size:.82rem;cursor:pointer}
+.tempo button{background:var(--bg);border:1px solid var(--line);color:var(--mut);border-radius:99px;padding:8px 13px;font-size:.8rem;cursor:pointer}
 .tempo button.on{background:var(--gold);color:#241f0d;font-weight:700;border-color:var(--gold)}
-.hint{border-left:3px solid var(--gold);background:rgba(255,193,77,.08);padding:9px 12px;font-size:.82rem;border-radius:6px;margin-top:12px;line-height:1.5;text-align:left}
+.hint{border-left:3px solid var(--gold);background:rgba(255,193,77,.08);padding:9px 12px;font-size:.82rem;border-radius:6px;margin-top:12px;line-height:1.55;text-align:left}
 .tally{display:flex;justify-content:center;gap:16px;margin-top:14px;color:var(--mut);font-size:.85rem}
 .tally b{color:var(--gd)}
 .nav{display:flex;justify-content:space-between;margin-top:10px}
@@ -40,56 +42,62 @@ main{max-width:480px;margin:0 auto;padding:12px}
 <header><b> MOTOR DE RITMO</b><span> Action Bridges</span></header>
 <main>
 <div class="decks" id="decks"></div>
+<div class="steps" id="steps"></div>
 <div class="card" id="card"></div>
 <div class="tally">Dichas hoy: <b id="tn">0</b> · Racha: <b id="ts">0</b> días</div>
 <div class="okmsg" id="ok">✓ Guardado. ¡Buen trabajo!</div>
 </main>
 <script>
-/* ===== MOTOR DE RITMO v1 (25-oct) — doctrina: la máquina enseña las notas, el maestro la canción.
-Cartas: content words NEGRITAS (cargan el beat), function words grises (se reducen).
-Metronomo: clicks Web Audio $0 + palabras que pulsan al beat. Sarah horneada + modo lento. ===== */
+/* ===== MOTOR DE RITMO v2 (25-oct) — secuencia didáctica estilo maestro:
+PASO 1 EL ESQUELETO: solo content words, beat lento — los golpes solos.
+PASO 2 EL PEGAMENTO: llegan las function words, el beat se ACELERA, nace el enlace.
+PASO 3 LA CANTADA: frase completa con melodía, a tu velocidad. Shadowing con beat. ===== */
 const CDN="https://babayaba71-maker.github.io/AccentBridges/assets/ritmo/";
 const AUD="assets/ritmo/";
 const API="https://valerie.base44.app/functions/logMorfofonoSession";
 const KEY="ABVC-PILOTO-2026";
 const DECKS={
  vida:{name:"Su vida ❤️",cards:[
-  {k:"have-a-baby",p:[["I",0],["have",1],["a",0],["BA-by",1]],brk:"have a → ha-va",cue:"Tengo una bebé.",mel:"La voz baja al final ↘"},
-  {k:"name-aline",p:[["Her",0],["NAME",1],["is",0],["A-line",1]],brk:"name is → na-mis",cue:"Se llama Aline.",mel:"La voz baja al final ↘"},
-  {k:"love-my-baby",p:[["I",0],["LOVE",1],["my",0],["BA-by",1]],brk:"love my → lav-mai",cue:"Amo a mi bebé.",mel:"La voz baja al final ↘"},
-  {k:"feed-daughter",p:[["I'm",0],["GO-ing",1],["to",0],["FEED",1],["my",0],["DAUGH-ter",1]],brk:"going to → gunna · feed my → fee-mai",cue:"Voy a alimentar a mi hija.",mel:"Tres golpes: GO · FEED · DAUGH ↘"}]},
+  {k:"have-a-baby",sk:"Have. Baby.",p:[["I",0],["have",1],["a",0],["BA-by",1]],brk:"have a → ha-va",cue:"Tengo una bebé.",mel:"La voz baja al final ↘"},
+  {k:"name-aline",sk:"Name. Aline.",p:[["Her",0],["NAME",1],["is",0],["A-line",1]],brk:"name is → na-mis",cue:"Se llama Aline.",mel:"La voz baja al final ↘"},
+  {k:"love-my-baby",sk:"Love. Baby.",p:[["I",0],["LOVE",1],["my",0],["BA-by",1]],brk:"love my → lav-mai",cue:"Amo a mi bebé.",mel:"La voz baja al final ↘"},
+  {k:"feed-daughter",sk:"Going. Feed. Daughter.",p:[["I'm",0],["GO-ing",1],["to",0],["FEED",1],["my",0],["DAUGH-ter",1]],brk:"going to → gunna · feed my → fee-mai",cue:"Voy a alimentar a mi hija.",mel:"Tres golpes: GO · FEED · DAUGH ↘"}]},
  bebe:{name:"Baby Words 💜",cards:[
-  {k:"i-love-you",p:[["I",0],["LOVE",1],["you",0]],brk:"love you → lav-yu",cue:"Te amo.",mel:"La voz baja, suave ↘"},
-  {k:"good-morning-baby",p:[["GOOD",1],["MOR-ning",1],["my",0],["BA-by",1]],brk:"morning my → mor-ning-mai",cue:"Buenos días, mi bebé.",mel:"Dulce y despierto ↘"},
-  {k:"good-night-baby",p:[["GOOD",1],["NIGHT",1],["my",0],["BA-by",1]],brk:"night my → nai-mai",cue:"Buenas noches, mi bebé.",mel:"Baja como arrullo ↘"},
-  {k:"big-girl",p:[["You're",0],["my",0],["BIG",1],["GIRL",1]],brk:"You're my → yer-mai",cue:"Eres mi niña grande.",mel:"Orgullo: la voz baja firme ↘"},
-  {k:"are-you-hungry",p:[["Are",0],["you",0],["HUN-gry",1]],brk:"Are you → ar-ya",cue:"¿Tienes hambre?",mel:"Pregunta: la voz SUBE ↗"},
-  {k:"want-water",p:[["Do",0],["you",0],["want",1],["WA-ter",1]],brk:"Do you → di-ya · want water → wan-wa-der",cue:"¿Quieres agua? (water suena wa-der)",mel:"Pregunta: la voz SUBE ↗"},
-  {k:"come-to-mommy",p:[["COME",1],["to",0],["MOM-my",1]],brk:"come to → cum-tuh",cue:"Ven con mami.",mel:"Dos golpes: COME · MOM ↘"},
-  {k:"so-pretty",p:[["You're",0],["so",1],["PRET-ty",1]],brk:"You're so → yer-so",cue:"Estás muy bonita.",mel:"La voz baja al final ↘"},
-  {k:"i-missed-you",p:[["I",0],["MISSED",1],["you",0]],brk:"missed you → mist-ya",cue:"Te extrañé. (la -ed suena /t/)",mel:"La voz baja al final ↘"},
-  {k:"time-to-eat",p:[["TIME",1],["to",0],["EAT",1]],brk:"time to → tai-tuh",cue:"Hora de comer.",mel:"Dos golpes: TIME · EAT ↘"},
-  {k:"lets-go-outside",p:[["Let's",1],["GO",1],["out-SIDE",1]],brk:"go outside → go-(w)-outside",cue:"Vamos afuera. (aparece una w entre las vocales)",mel:"Tres golpes: LET'S · GO · -SIDE ↘"},
-  {k:"daddy-loves-you",p:[["DAD-dy",1],["LOVES",1],["you",0]],brk:"loves you → lavz-ya",cue:"Papá te ama. (la -s suena /z/)",mel:"La voz baja al final ↘"}]}
+  {k:"i-love-you",sk:"Love.",p:[["I",0],["LOVE",1],["you",0]],brk:"love you → lav-yu",cue:"Te amo.",mel:"La voz baja, suave ↘"},
+  {k:"good-morning-baby",sk:"Good. Morning. Baby.",p:[["GOOD",1],["MOR-ning",1],["my",0],["BA-by",1]],brk:"morning my → mor-ning-mai",cue:"Buenos días, mi bebé.",mel:"Dulce y despierto ↘"},
+  {k:"good-night-baby",sk:"Good. Night. Baby.",p:[["GOOD",1],["NIGHT",1],["my",0],["BA-by",1]],brk:"night my → nai-mai",cue:"Buenas noches, mi bebé.",mel:"Baja como arrullo ↘"},
+  {k:"big-girl",sk:"Big. Girl.",p:[["You're",0],["my",0],["BIG",1],["GIRL",1]],brk:"You're my → yer-mai",cue:"Eres mi niña grande.",mel:"Orgullo: la voz baja firme ↘"},
+  {k:"are-you-hungry",sk:"Hungry.",p:[["Are",0],["you",0],["HUN-gry",1]],brk:"Are you → ar-ya",cue:"¿Tienes hambre?",mel:"Pregunta: la voz SUBE ↗"},
+  {k:"want-water",sk:"Want. Water.",p:[["Do",0],["you",0],["want",1],["WA-ter",1]],brk:"Do you → di-ya · want water → wan-wa-der",cue:"¿Quieres agua? (water suena wa-der)",mel:"Pregunta: la voz SUBE ↗"},
+  {k:"come-to-mommy",sk:"Come. Mommy.",p:[["COME",1],["to",0],["MOM-my",1]],brk:"come to → cum-tuh",cue:"Ven con mami.",mel:"Dos golpes: COME · MOM ↘"},
+  {k:"so-pretty",sk:"So. Pretty.",p:[["You're",0],["so",1],["PRET-ty",1]],brk:"You're so → yer-so",cue:"Estás muy bonita.",mel:"La voz baja al final ↘"},
+  {k:"i-missed-you",sk:"Missed.",p:[["I",0],["MISSED",1],["you",0]],brk:"missed you → mist-ya",cue:"Te extrañé. (la -ed suena /t/)",mel:"La voz baja al final ↘"},
+  {k:"time-to-eat",sk:"Time. Eat.",p:[["TIME",1],["to",0],["EAT",1]],brk:"time to → tai-tuh",cue:"Hora de comer.",mel:"Dos golpes: TIME · EAT ↘"},
+  {k:"lets-go-outside",sk:"Let's. Go. Outside.",p:[["Let's",1],["GO",1],["out-SIDE",1]],brk:"go outside → go-(w)-outside",cue:"Vamos afuera. (aparece una w entre las vocales)",mel:"Tres golpes: LET'S · GO · -SIDE ↘"},
+  {k:"daddy-loves-you",sk:"Daddy. Loves.",p:[["DAD-dy",1],["LOVES",1],["you",0]],brk:"loves you → lavz-ya",cue:"Papá te ama. (la -s suena /z/)",mel:"La voz baja al final ↘"}]}
 };
+const STEPDEF=[
+ {n:"1️⃣ Esqueleto",bpm:70,tag:"Los golpes solos"},
+ {n:"2️⃣ Pegamento",bpm:95,tag:"Llega el enlace"},
+ {n:"3️⃣ La cantada",bpm:120,tag:"Frase completa"}
+];
 const $=id=>document.getElementById(id);
-const st={deck:"vida",i:0,spd:1,beat:false,bpm:95,clickTimer:null,ctx:null,dichas:0};
+const st={deck:"vida",i:0,step:1,beat:false,bpm:70,clickTimer:null,ctx:null,dichas:0};
 const haptic=ms=>{if("vibrate" in navigator)navigator.vibrate(ms)};
 const TALLY="ritmo_dichas_"+new Date().toISOString().slice(0,10);
 function stu(){return (localStorage.getItem("morfofono_student")||localStorage.getItem("abvc_student")||"Estudiante").trim()}
-/* AUDIO Sarah + fallback TTS */
 const au=new Audio();
 function playModel(){
   haptic(15);
-  const k=DECKS[st.deck].cards[st.i].k;
-  const urls=[AUD+k+".mp3?v=R1",CDN+k+".mp3?v=R1"];let i=0;
-  const next=()=>{if(i<urls.length){au.onended=null;au.onerror=next;au.src=urls[i++];au.playbackRate=st.spd;au.play().catch(()=>{})}else{
+  const C=DECKS[st.deck].cards[st.i];
+  const base=st.step===1?C.k+"-sk":C.k;
+  const urls=[AUD+base+".mp3?v=R2",CDN+base+".mp3?v=R2"];let i=0;
+  const next=()=>{if(i<urls.length){au.onended=null;au.onerror=next;au.src=urls[i++];au.play().catch(()=>{})}else{
     if(!("speechSynthesis" in window))return;
-    speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(k.replace(/-/g," ").replace(/\bBA\b/,"ba").replace(/\bDAUGH\b/,"daugh").replace(/\bMOR\b/,"mor").replace(/\bHUN\b/,"hun").replace(/\bWA\b/,"wa").replace(/\bMOM\b/,"mom").replace(/\bPRET\b/,"pret").replace(/\bOUT\b/,"out").replace(/\bSIDE\b/,"side").replace(/\bDAD\b/,"dad").replace(/\bGO\b/,"go").replace(/\bA\b/,"a").replace(/\bTIME\b/,"time").replace(/\bEAT\b/,"eat").replace(/\bBIG\b/,"big").replace(/\bGIRL\b/,"girl").replace(/\bNAME\b/,"name").replace(/\bFEED\b/,"feed").replace(/\bCOME\b/,"come").replace(/\bLOVE\b/,"love").replace(/\bGOOD\b/,"good").replace(/\bNIGHT\b/,"night").replace(/\bSO\b/,"so").replace(/\bMISSED\b/,"missed").replace(/\bTIME\b/,"time").replace(/\bLet's\b/,"lets"));
-    u.lang="en-US";u.rate=st.spd*.85;speechSynthesis.speak(u)}};
+    speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(st.step===1?C.sk:C.p.map(x=>x[0]).join(" ").replace(/-/g,"").replace(/BAby/,"baby").replace(/DAUGHter/,"daughter").replace(/GOing/,"going").replace(/MORning/,"morning").replace(/HUNgry/,"hungry").replace(/WAter/,"water").replace(/MOMmy/,"mommy").replace(/PRETty/,"pretty").replace(/outSIDE/,"outside").replace(/DADdy/,"daddy").replace(/Aline/,"Aline").replace(/NAME/,"name").replace(/FEED/,"feed").replace(/LOVE/,"love").replace(/GOOD/,"good").replace(/NIGHT/,"night").replace(/SO/,"so").replace(/BIG/,"big").replace(/GIRL/,"girl").replace(/TIME/,"time").replace(/EAT/,"eat").("Let's"));
+    u.lang="en-US";u.rate=.8;speechSynthesis.speak(u)}};
   next();
 }
-/* METRONOMO: clicks Web Audio $0 + palabras que pulsan */
 function click(){
   try{
     if(!st.ctx)st.ctx=new (window.AudioContext||window.webkitAudioContext)();
@@ -105,34 +113,10 @@ function beatToggle(on){
   if(st.clickTimer){clearInterval(st.clickTimer);st.clickTimer=null}
   if(on){click();st.clickTimer=setInterval(click,60000/st.bpm)}
 }
-function setBpm(v){st.bpm=v;if(st.beat)beatToggle(true),beatToggle(false),beatToggle(true)}
-/* RENDER */
-function draw(){
-  const D=DECKS[st.deck],C=D.cards[st.i];
-  $("decks").innerHTML=Object.keys(DECKS).map(d=>`<button class="${d===st.deck?'on':''}" onclick="setDeck('${d}')">${DECKS[d].name}</button>`).join("");
-  $("card").innerHTML=`
-   <span class="counter">Carta ${st.i+1} de ${D.cards.length}</span>
-   <div class="heart">❤️</div>
-   <div class="phrase">${C.p.map(([w,c])=>c?`<b>${w}</b>`:`<span>${w}</span>`).join(" ")}</div>
-   <div class="brk">${C.brk}</div>
-   <div class="mel">${C.mel}</div>
-   <div class="cue">${C.cue}</div>
-   <button class="btn" onclick="playModel()">🔊 Modelo${st.spd<1?" 🐢":""}</button>
-   <div class="spd"><button class="${st.spd<1?'on':''}" onclick="setSpd(.72)">🐢 Lento</button><button class="${st.spd===1?'on':''}" onclick="setSpd(1)">🏃 Normal</button></div>
-   <div class="tempo">
-     <button class="${st.beat?'on':''}" onclick="beatToggle(${!st.beat})">🥁 Beat ${st.beat?'ON':'OFF'}</button>
-     <button class="${st.bpm===70?'on':''}" onclick="setBpm(70)">🐢</button>
-     <button class="${st.bpm===95?'on':''}" onclick="setBpm(95)">🚶</button>
-     <button class="${st.bpm===120?'on':''}" onclick="setBpm(120)">🏃</button>
-   </div>
-   <button class="btn" onclick="laDije()">💜 La dije — siguiente carta</button>
-   <div class="hint">Las palabras <b style="color:var(--gold)">dorado</b> cargan el golpe; las grises se comprimen y se pegan. Con el 🥁 Beat prendido, di la frase CABALGANDO los clicks: los dorados caen en el golpe. Primero lento, luego a tu velocidad.</div>
-   <div class="nav"><button onclick="nav(-1)">← Anterior</button><button onclick="nav(1)">Siguiente →</button></div>`;
-  $("tn").textContent=st.dichas;
-}
-function setDeck(d){st.deck=d;st.i=0;haptic(20);draw()}
-function setSpd(v){st.spd=v;haptic(20);draw()}
-function nav(n){const L=DECKS[st.deck].cards.length;st.i=(st.i+n+L)%L;haptic(20);beatToggle(false);draw()}
+function setBpm(v){st.bpm=v;if(st.beat){beatToggle(false);beatToggle(true)}draw()}
+function setStep(n){st.step=n;st.bpm=STEPDEF[n-1].bpm;if(st.beat){beatToggle(false);beatToggle(true)}haptic(20);draw()}
+function setDeck(d){st.deck=d;st.i=0;st.step=1;st.bpm=70;beatToggle(false);haptic(20);draw()}
+function nav(n){const L=DECKS[st.deck].cards.length;st.i=(st.i+n+L)%L;st.step=1;st.bpm=70;beatToggle(false);haptic(20);draw()}
 function laDije(){
   haptic([20,40,20]);
   st.dichas=parseInt(localStorage.getItem(TALLY)||"0")+1;
@@ -141,15 +125,46 @@ function laDije(){
   nav(1);
 }
 function sello(){
-  const C=DECKS[st.deck].cards[(st.i-1+DECKS[st.deck].cards.length)%DECKS[st.deck].cards.length];
+  const C=DECKS[st.deck].cards[st.i];
   fetch(API,{method:"POST",headers:{"Content-Type":"application/json",api_key:KEY},body:JSON.stringify({
     topic:"Motor de Ritmo — "+DECKS[st.deck].name,
     userId:stu(),passed:true,
     accuracy:100,challengeSentence:C.p.map(x=>x[0]).join(" "),
-    spokenText:"ritmo · dichas:"+st.dichas+" · beat:"+(st.beat?st.bpm+"bpm":"off")+" · spd:"+st.spd,
+    spokenText:"ritmo3pasos · dichas:"+st.dichas+" · beat:"+(st.beat?st.bpm+"bpm":"off"),
     location:"Motor de Ritmo",sessionId:"ritmo-"+Date.now()})})
   .then(r=>r.json()).then(j=>{if(j&&j.ok){$("ok").style.display="block";setTimeout(()=>$("ok").style.display="none",2000)}})
   .catch(()=>{});
+}
+function draw(){
+  const D=DECKS[st.deck],C=D.cards[st.i],S=st.step;
+  $("decks").innerHTML=Object.keys(DECKS).map(d=>`<button class="${d===st.deck?'on':''}" onclick="setDeck('${d}')">${DECKS[d].name}</button>`).join("");
+  $("steps").innerHTML=STEPDEF.map((s,i)=>`<button class="${i+1===S?'on':''}" onclick="setStep(${i+1})">${s.n}<br><span style="font-size:.68rem">${s.tag}</span></button>`).join("");
+  const gold=C.p.filter(x=>x[1]).map(x=>`<b>${x[0]}</b>`).join(" ");
+  const full=C.p.map(([w,c])=>c?`<b>${w}</b>`:`<span>${w}</span>`).join(" ");
+  const phraseHtml=S===1?`<div class="phrase solo">${gold}</div>`:`<div class="phrase">${full}</div>`;
+  const brkHtml=S>=2?`<div class="brk">${C.brk}</div>`:"";
+  const melHtml=S===3?`<div class="mel">${C.mel}</div>`:"";
+  const cueHtml=S===3?`<div class="cue">${C.cue}</div>`:"";
+  const mainBtn=S<3?`<button class="btn gold" onclick="setStep(${S+1})">${S===1?"→ Llega el pegamento (el beat se acelera)":"→ La cantada (frase completa)"}</button>`
+                    :`<button class="btn good" onclick="laDije()">💜 La dije — siguiente carta</button>`;
+  const hint=S===1?"Paso 1: las palabras <b style='color:var(--gold)'>dorado</b> son los GOLPES de la frase. Prende el 🥁 Beat lento y di SOLO los golpes cayendo en cada click."
+   :S===2?"Paso 2: ¡llegó el pegamento! Las palabras <b style='color:var(--mut)'>grises</b> cabalgan ENTRE los golpes: se dicen rápido, pegadas, casi susurradas. El beat se acelera — las grises llenan el espacio."
+   :"Paso 3: la frase completa, cantada. Golpes firmes, grises suaves, melodía al final. Primero 🐢, luego sube la velocidad. Tu boca, tu cerebro y tu oído entrenando juntos.";
+  $("card").innerHTML=`
+   <span class="counter">Carta ${st.i+1} de ${D.cards.length}</span>
+   <div class="heart">❤️</div>
+   ${phraseHtml}${brkHtml}${melHtml}${cueHtml}
+   <button class="btn" onclick="playModel()">🔊 ${S===1?"Golpes solos":"Modelo"}</button>
+   <div class="tempo">
+     <button class="${st.beat?'on':''}" onclick="beatToggle(${!st.beat})">🥁 Beat ${st.beat?'ON':'OFF'}</button>
+     <button class="${st.bpm===70?'on':''}" onclick="setBpm(70)">🐢</button>
+     <button class="${st.bpm===95?'on':''}" onclick="setBpm(95)">🚶</button>
+     <button class="${st.bpm===120?'on':''}" onclick="setBpm(120)">🏃</button>
+   </div>
+   ${mainBtn}
+   <div class="hint">${hint}</div>
+   <div class="nav"><button onclick="nav(-1)">← Anterior</button><button onclick="nav(1)">Siguiente →</button></div>`;
+  $("tn").textContent=st.dichas;
 }
 draw();
 </script></body></html>
