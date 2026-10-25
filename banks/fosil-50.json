@@ -1,0 +1,659 @@
+{
+ "protocolo": "agents/tesis-abvc/fosil-abvc-pf-01.md",
+ "version": "1.0",
+ "fecha": "2026-10-24",
+ "words": [
+  {
+   "word": "cat",
+   "ipa": "kæt",
+   "split": [
+    "k",
+    "æ",
+    "t"
+   ],
+   "vowel": "/ae/",
+   "condition": "A",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "map",
+   "ipa": "mæp",
+   "split": [
+    "m",
+    "æ",
+    "p"
+   ],
+   "vowel": "/ae/",
+   "condition": "A",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "fan",
+   "ipa": "fæn",
+   "split": [
+    "f",
+    "æ",
+    "n"
+   ],
+   "vowel": "/ae/",
+   "condition": "A",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "hat",
+   "ipa": "hæt",
+   "split": [
+    "h",
+    "æ",
+    "t"
+   ],
+   "vowel": "/ae/",
+   "condition": "A",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "bed",
+   "ipa": "bɛd",
+   "split": [
+    "b",
+    "ɛ",
+    "d"
+   ],
+   "vowel": "/e/",
+   "condition": "A",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "pen",
+   "ipa": "pɛn",
+   "split": [
+    "p",
+    "ɛ",
+    "n"
+   ],
+   "vowel": "/e/",
+   "condition": "A",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "red",
+   "ipa": "ɹɛd",
+   "split": [
+    "ɹ",
+    "ɛ",
+    "d"
+   ],
+   "vowel": "/e/",
+   "condition": "A",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "ten",
+   "ipa": "tɛn",
+   "split": [
+    "t",
+    "ɛ",
+    "n"
+   ],
+   "vowel": "/e/",
+   "condition": "A",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "sit",
+   "ipa": "sɪt",
+   "split": [
+    "s",
+    "ɪ",
+    "t"
+   ],
+   "vowel": "/i/",
+   "condition": "A",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "pin",
+   "ipa": "pɪn",
+   "split": [
+    "p",
+    "ɪ",
+    "n"
+   ],
+   "vowel": "/i/",
+   "condition": "A",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "lip",
+   "ipa": "lɪp",
+   "split": [
+    "l",
+    "ɪ",
+    "p"
+   ],
+   "vowel": "/i/",
+   "condition": "A",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "fig",
+   "ipa": "fɪɡ",
+   "split": [
+    "f",
+    "ɪ",
+    "ɡ"
+   ],
+   "vowel": "/i/",
+   "condition": "A",
+   "role": "train",
+   "audio": "ok",
+   "nota": "sustituye a fin (Sarah no produce /ɪ/ limpia tras 4 tomas)"
+  },
+  {
+   "word": "hot",
+   "ipa": "hɑt",
+   "split": [
+    "h",
+    "ɑ",
+    "t"
+   ],
+   "vowel": "/a/",
+   "condition": "A",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "pot",
+   "ipa": "pɑt",
+   "split": [
+    "p",
+    "ɑ",
+    "t"
+   ],
+   "vowel": "/a/",
+   "condition": "A",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "top",
+   "ipa": "tɑp",
+   "split": [
+    "t",
+    "ɑ",
+    "p"
+   ],
+   "vowel": "/a/",
+   "condition": "A",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "job",
+   "ipa": "dʒɑb",
+   "split": [
+    "dʒ",
+    "ɑ",
+    "b"
+   ],
+   "vowel": "/a/",
+   "condition": "A",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "cup",
+   "ipa": "kʌp",
+   "split": [
+    "k",
+    "ʌ",
+    "p"
+   ],
+   "vowel": "/u/",
+   "condition": "A",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "sun",
+   "ipa": "sʌn",
+   "split": [
+    "s",
+    "ʌ",
+    "n"
+   ],
+   "vowel": "/u/",
+   "condition": "A",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "cut",
+   "ipa": "kʌt",
+   "split": [
+    "k",
+    "ʌ",
+    "t"
+   ],
+   "vowel": "/u/",
+   "condition": "A",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "run",
+   "ipa": "ɹʌn",
+   "split": [
+    "ɹ",
+    "ʌ",
+    "n"
+   ],
+   "vowel": "/u/",
+   "condition": "A",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "bag",
+   "ipa": "bæɡ",
+   "split": [
+    "b",
+    "æ",
+    "g"
+   ],
+   "vowel": "/ae/",
+   "condition": "B",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "cap",
+   "ipa": "kæp",
+   "split": [
+    "k",
+    "æ",
+    "p"
+   ],
+   "vowel": "/ae/",
+   "condition": "B",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "van",
+   "ipa": "væn",
+   "split": [
+    "v",
+    "æ",
+    "n"
+   ],
+   "vowel": "/ae/",
+   "condition": "B",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "mad",
+   "ipa": "mæd",
+   "split": [
+    "m",
+    "æ",
+    "d"
+   ],
+   "vowel": "/ae/",
+   "condition": "B",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "leg",
+   "ipa": "lɛɡ",
+   "split": [
+    "l",
+    "ɛ",
+    "g"
+   ],
+   "vowel": "/e/",
+   "condition": "B",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "net",
+   "ipa": "nɛt",
+   "split": [
+    "n",
+    "ɛ",
+    "t"
+   ],
+   "vowel": "/e/",
+   "condition": "B",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "jet",
+   "ipa": "dʒɛt",
+   "split": [
+    "dʒ",
+    "ɛ",
+    "t"
+   ],
+   "vowel": "/e/",
+   "condition": "B",
+   "role": "train",
+   "audio": "ok",
+   "nota": "sustituye a pet (Sarah produce 'pets' 4/4 tomas)"
+  },
+  {
+   "word": "den",
+   "ipa": "dɛn",
+   "split": [
+    "d",
+    "ɛ",
+    "n"
+   ],
+   "vowel": "/e/",
+   "condition": "B",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "hit",
+   "ipa": "hɪt",
+   "split": [
+    "h",
+    "ɪ",
+    "t"
+   ],
+   "vowel": "/i/",
+   "condition": "B",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "kit",
+   "ipa": "kɪt",
+   "split": [
+    "k",
+    "ɪ",
+    "t"
+   ],
+   "vowel": "/i/",
+   "condition": "B",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "win",
+   "ipa": "wɪn",
+   "split": [
+    "w",
+    "ɪ",
+    "n"
+   ],
+   "vowel": "/i/",
+   "condition": "B",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "big",
+   "ipa": "bɪɡ",
+   "split": [
+    "b",
+    "ɪ",
+    "g"
+   ],
+   "vowel": "/i/",
+   "condition": "B",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "hop",
+   "ipa": "hɑp",
+   "split": [
+    "h",
+    "ɑ",
+    "p"
+   ],
+   "vowel": "/a/",
+   "condition": "B",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "rob",
+   "ipa": "ɹɑb",
+   "split": [
+    "ɹ",
+    "ɑ",
+    "b"
+   ],
+   "vowel": "/a/",
+   "condition": "B",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "mop",
+   "ipa": "mɑp",
+   "split": [
+    "m",
+    "ɑ",
+    "p"
+   ],
+   "vowel": "/a/",
+   "condition": "B",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "nod",
+   "ipa": "nɑd",
+   "split": [
+    "n",
+    "ɑ",
+    "d"
+   ],
+   "vowel": "/a/",
+   "condition": "B",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "bus",
+   "ipa": "bʌs",
+   "split": [
+    "b",
+    "ʌ",
+    "s"
+   ],
+   "vowel": "/u/",
+   "condition": "B",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "fun",
+   "ipa": "fʌn",
+   "split": [
+    "f",
+    "ʌ",
+    "n"
+   ],
+   "vowel": "/u/",
+   "condition": "B",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "mud",
+   "ipa": "mʌd",
+   "split": [
+    "m",
+    "ʌ",
+    "d"
+   ],
+   "vowel": "/u/",
+   "condition": "B",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "hug",
+   "ipa": "hʌɡ",
+   "split": [
+    "h",
+    "ʌ",
+    "g"
+   ],
+   "vowel": "/u/",
+   "condition": "B",
+   "role": "train",
+   "audio": "ok"
+  },
+  {
+   "word": "jam",
+   "ipa": "dʒæm",
+   "split": [
+    "dʒ",
+    "æ",
+    "m"
+   ],
+   "vowel": "",
+   "condition": "A",
+   "role": "transfer",
+   "audio": "ok"
+  },
+  {
+   "word": "men",
+   "ipa": "mɛn",
+   "split": [
+    "m",
+    "ɛ",
+    "n"
+   ],
+   "vowel": "",
+   "condition": "A",
+   "role": "transfer",
+   "audio": "ok"
+  },
+  {
+   "word": "pig",
+   "ipa": "pɪɡ",
+   "split": [
+    "p",
+    "ɪ",
+    "g"
+   ],
+   "vowel": "",
+   "condition": "A",
+   "role": "transfer",
+   "audio": "ok"
+  },
+  {
+   "word": "lot",
+   "ipa": "lɑt",
+   "split": [
+    "l",
+    "ɑ",
+    "t"
+   ],
+   "vowel": "",
+   "condition": "A",
+   "role": "transfer",
+   "audio": "ok"
+  },
+  {
+   "word": "nut",
+   "ipa": "nʌt",
+   "split": [
+    "n",
+    "ʌ",
+    "t"
+   ],
+   "vowel": "",
+   "condition": "A",
+   "role": "transfer",
+   "audio": "ok"
+  },
+  {
+   "word": "rag",
+   "ipa": "ɹæɡ",
+   "split": [
+    "ɹ",
+    "æ",
+    "g"
+   ],
+   "vowel": "",
+   "condition": "B",
+   "role": "transfer",
+   "audio": "ok"
+  },
+  {
+   "word": "web",
+   "ipa": "wɛb",
+   "split": [
+    "w",
+    "ɛ",
+    "b"
+   ],
+   "vowel": "",
+   "condition": "B",
+   "role": "transfer",
+   "audio": "ok"
+  },
+  {
+   "word": "dig",
+   "ipa": "dɪɡ",
+   "split": [
+    "d",
+    "ɪ",
+    "g"
+   ],
+   "vowel": "",
+   "condition": "B",
+   "role": "transfer",
+   "audio": "ok"
+  },
+  {
+   "word": "not",
+   "ipa": "nɑt",
+   "split": [
+    "n",
+    "ɑ",
+    "t"
+   ],
+   "vowel": "",
+   "condition": "B",
+   "role": "transfer",
+   "audio": "ok"
+  },
+  {
+   "word": "gum",
+   "ipa": "ɡʌm",
+   "split": [
+    "g",
+    "ʌ",
+    "m"
+   ],
+   "vowel": "",
+   "condition": "B",
+   "role": "transfer",
+   "audio": "ok"
+  }
+ ]
+}
