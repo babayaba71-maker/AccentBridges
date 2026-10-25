@@ -94,8 +94,7 @@ function playModel(){
   const urls=[AUD+base+".mp3?v=R2",CDN+base+".mp3?v=R2"];let i=0;
   const next=()=>{if(i<urls.length){au.onended=null;au.onerror=next;au.src=urls[i++];au.play().catch(()=>{})}else{
     if(!("speechSynthesis" in window))return;
-    speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(st.step===1?C.sk:C.p.map(x=>x[0]).join(" ").replace(/-/g,"").replace(/BAby/,"baby").replace(/DAUGHter/,"daughter").replace(/GOing/,"going").replace(/MORning/,"morning").replace(/HUNgry/,"hungry").replace(/WAter/,"water").replace(/MOMmy/,"mommy").replace(/PRETty/,"pretty").replace(/outSIDE/,"outside").replace(/DADdy/,"daddy").replace(/Aline/,"Aline").replace(/NAME/,"name").replace(/FEED/,"feed").replace(/LOVE/,"love").replace(/GOOD/,"good").replace(/NIGHT/,"night").replace(/SO/,"so").replace(/BIG/,"big").replace(/GIRL/,"girl").replace(/TIME/,"time").replace(/EAT/,"eat").("Let's"));
-    u.lang="en-US";u.rate=.8;speechSynthesis.speak(u)}};
+    speechSynthesis.cancel();const plainTxt=(st.step===1?C.sk:C.p.map(x=>x[0]).join(" ")).replace(/-/g,"").replace(/[A-Z]{2,}/g,m=>m.toLowerCase());const u=new SpeechSynthesisUtterance(plainTxt);u.lang="en-US";u.rate=.8;speechSynthesis.speak(u)}};
   next();
 }
 function click(){
