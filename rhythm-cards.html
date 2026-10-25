@@ -77,12 +77,12 @@ const DECKS={
   {k:"daddy-loves-you",sk:"Daddy. Loves.",p:[["DAD-dy",1],["LOVES",1],["you",0]],brk:"loves you → lavz-ya",cue:"Papá te ama. (la -s suena /z/)",mel:"La voz baja al final ↘"}]}
 };
 const STEPDEF=[
- {n:"1️⃣ Esqueleto",bpm:70,tag:"Los golpes solos"},
- {n:"2️⃣ Pegamento",bpm:95,tag:"Llega el enlace"},
- {n:"3️⃣ La cantada",bpm:120,tag:"Frase completa"}
+ {n:"1️⃣ Esqueleto",bpm:50,tag:"Los golpes solos"},
+ {n:"2️⃣ Pegamento",bpm:70,tag:"Llega el enlace"},
+ {n:"3️⃣ La cantada",bpm:95,tag:"Frase completa"}
 ];
 const $=id=>document.getElementById(id);
-const st={deck:"vida",i:0,step:1,beat:false,bpm:70,clickTimer:null,ctx:null,dichas:0};
+const st={deck:"vida",i:0,step:1,beat:false,bpm:50,spd:.72,clickTimer:null,ctx:null,dichas:0};
 const haptic=ms=>{if("vibrate" in navigator)navigator.vibrate(ms)};
 const TALLY="ritmo_dichas_"+new Date().toISOString().slice(0,10);
 function stu(){return (localStorage.getItem("morfofono_student")||localStorage.getItem("abvc_student")||"Estudiante").trim()}
@@ -92,7 +92,7 @@ function playModel(){
   const C=DECKS[st.deck].cards[st.i];
   const base=st.step===1?C.k+"-sk":C.k;
   const urls=[AUD+base+".mp3?v=R2",CDN+base+".mp3?v=R2"];let i=0;
-  const next=()=>{if(i<urls.length){au.onended=null;au.onerror=next;au.src=urls[i++];au.play().catch(()=>{})}else{
+  const next=()=>{if(i<urls.length){au.onended=null;au.onerror=next;au.src=urls[i++];au.playbackRate=st.spd;au.play().catch(()=>{})}else{
     if(!("speechSynthesis" in window))return;
     speechSynthesis.cancel();const plainTxt=(st.step===1?C.sk:C.p.map(x=>x[0]).join(" ")).replace(/-/g,"").replace(/[A-Z]{2,}/g,m=>m.toLowerCase());const u=new SpeechSynthesisUtterance(plainTxt);u.lang="en-US";u.rate=.8;speechSynthesis.speak(u)}};
   next();
@@ -112,10 +112,11 @@ function beatToggle(on){
   if(st.clickTimer){clearInterval(st.clickTimer);st.clickTimer=null}
   if(on){click();st.clickTimer=setInterval(click,60000/st.bpm)}
 }
+function toggleSpd(){st.spd=st.spd<1?1:.72;haptic(20);draw()}
 function setBpm(v){st.bpm=v;if(st.beat){beatToggle(false);beatToggle(true)}draw()}
-function setStep(n){st.step=n;st.bpm=STEPDEF[n-1].bpm;if(st.beat){beatToggle(false);beatToggle(true)}haptic(20);draw()}
-function setDeck(d){st.deck=d;st.i=0;st.step=1;st.bpm=70;beatToggle(false);haptic(20);draw()}
-function nav(n){const L=DECKS[st.deck].cards.length;st.i=(st.i+n+L)%L;st.step=1;st.bpm=70;beatToggle(false);haptic(20);draw()}
+function setStep(n){st.step=n;st.bpm=STEPDEF[n-1].bpm;st.spd=n<3?.72:1;if(st.beat){beatToggle(false);beatToggle(true)}haptic(20);draw()}
+function setDeck(d){st.deck=d;st.i=0;st.step=1;st.bpm=50;beatToggle(false);haptic(20);draw()}
+function nav(n){const L=DECKS[st.deck].cards.length;st.i=(st.i+n+L)%L;st.step=1;st.bpm=50;beatToggle(false);haptic(20);draw()}
 function laDije(){
   haptic([20,40,20]);
   st.dichas=parseInt(localStorage.getItem(TALLY)||"0")+1;
@@ -153,12 +154,13 @@ function draw(){
    <span class="counter">Carta ${st.i+1} de ${D.cards.length}</span>
    <div class="heart">❤️</div>
    ${phraseHtml}${brkHtml}${melHtml}${cueHtml}
-   <button class="btn" onclick="playModel()">🔊 ${S===1?"Golpes solos":"Modelo"}</button>
+   <button class="btn" onclick="playModel()">🔊 ${S===1?"Golpes solos":"Modelo"} ${st.spd<1?"🐢":"🏃"}</button>
+   <button class="btn" style="border-style:dashed;font-size:.8rem" onclick="toggleSpd()">Cambiar audio a ${st.spd<1?"🏃 velocidad normal":"🐢 lento"}</button>
    <div class="tempo">
      <button class="${st.beat?'on':''}" onclick="beatToggle(${!st.beat})">🥁 Beat ${st.beat?'ON':'OFF'}</button>
-     <button class="${st.bpm===70?'on':''}" onclick="setBpm(70)">🐢</button>
-     <button class="${st.bpm===95?'on':''}" onclick="setBpm(95)">🚶</button>
-     <button class="${st.bpm===120?'on':''}" onclick="setBpm(120)">🏃</button>
+     <button class="${st.bpm===50?'on':''}" onclick="setBpm(50)">🐢</button>
+     <button class="${st.bpm===70?'on':''}" onclick="setBpm(70)">🚶</button>
+     <button class="${st.bpm===95?'on':''}" onclick="setBpm(95)">🏃</button>
    </div>
    ${mainBtn}
    <div class="hint">${hint}</div>
