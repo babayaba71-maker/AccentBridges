@@ -1,0 +1,155 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Motor de Ritmo · Action Bridges</title>
+<style>
+:root{--bg:#121a21;--cd:#1a2430;--tx:#e8f0f8;--mut:#8fa3b8;--gold:#ffc14d;--blue:#7bb1ff;--gd:#50c878;--rj:#e98989;--line:#2c3a4a}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;min-height:100vh;padding-bottom:100px}
+header{background:#f7f4eb;color:#24303a;padding:10px 14px;display:flex;justify-content:space-between;align-items:baseline}
+header b{color:#d35400;font-size:1.02rem}
+header span{font-size:.75rem;color:#7a6a55}
+main{max-width:480px;margin:0 auto;padding:12px}
+.decks{display:flex;gap:8px;margin:10px 0}
+.decks button{flex:1;background:var(--cd);border:1px solid var(--line);color:var(--mut);border-radius:99px;padding:9px;font-size:.85rem;cursor:pointer}
+.decks button.on{background:var(--gold);color:#241f0d;font-weight:700;border-color:var(--gold)}
+.card{background:var(--cd);border:1px solid var(--line);border-radius:18px;padding:20px 16px;margin-top:10px;text-align:center;position:relative}
+.heart{font-size:1.4rem}
+.counter{position:absolute;top:12px;right:14px;color:var(--mut);font-size:.75rem}
+.phrase{font-family:Georgia,serif;font-size:1.9rem;line-height:1.3;margin:10px 0}
+.phrase b{color:var(--gold);transition:transform .15s}
+.phrase b.beat{transform:scale(1.12);text-shadow:0 0 14px rgba(255,193,77,.55)}
+.phrase span{color:var(--mut);font-weight:400}
+.brk{color:var(--blue);font-size:.85rem;font-style:italic;margin-top:4px}
+.cue{color:var(--mut);font-size:.85rem;margin-top:6px}
+.mel{color:var(--gd);font-size:.9rem;margin-top:6px;font-weight:600}
+.btn{display:block;width:100%;background:var(--cd);border:1px solid var(--line);color:var(--tx);border-radius:12px;padding:13px;font-size:.98rem;cursor:pointer;margin-top:8px}
+.btn.good{background:var(--gd);border-color:var(--gd);color:#06220f;font-weight:700}
+.spd{display:flex;gap:8px;margin-top:8px}
+.spd button{flex:1;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--tx);cursor:pointer;font-size:.9rem}
+.spd button.on{border-color:var(--blue);background:rgba(123,177,255,.14);color:var(--blue);font-weight:700}
+.tempo{display:flex;gap:6px;justify-content:center;margin-top:10px}
+.tempo button{background:var(--bg);border:1px solid var(--line);color:var(--mut);border-radius:99px;padding:8px 14px;font-size:.82rem;cursor:pointer}
+.tempo button.on{background:var(--gold);color:#241f0d;font-weight:700;border-color:var(--gold)}
+.hint{border-left:3px solid var(--gold);background:rgba(255,193,77,.08);padding:9px 12px;font-size:.82rem;border-radius:6px;margin-top:12px;line-height:1.5;text-align:left}
+.tally{display:flex;justify-content:center;gap:16px;margin-top:14px;color:var(--mut);font-size:.85rem}
+.tally b{color:var(--gd)}
+.nav{display:flex;justify-content:space-between;margin-top:10px}
+.nav button{background:none;border:1px solid var(--line);color:var(--mut);border-radius:10px;padding:10px 16px;cursor:pointer;font-size:.85rem}
+.okmsg{display:none;text-align:center;color:var(--gd);font-weight:700;margin-top:12px}
+</style></head><body>
+<header><b> MOTOR DE RITMO</b><span> Action Bridges</span></header>
+<main>
+<div class="decks" id="decks"></div>
+<div class="card" id="card"></div>
+<div class="tally">Dichas hoy: <b id="tn">0</b> · Racha: <b id="ts">0</b> días</div>
+<div class="okmsg" id="ok">✓ Guardado. ¡Buen trabajo!</div>
+</main>
+<script>
+/* ===== MOTOR DE RITMO v1 (25-oct) — doctrina: la máquina enseña las notas, el maestro la canción.
+Cartas: content words NEGRITAS (cargan el beat), function words grises (se reducen).
+Metronomo: clicks Web Audio $0 + palabras que pulsan al beat. Sarah horneada + modo lento. ===== */
+const CDN="https://babayaba71-maker.github.io/AccentBridges/assets/ritmo/";
+const AUD="assets/ritmo/";
+const API="https://valerie.base44.app/functions/logMorfofonoSession";
+const KEY="ABVC-PILOTO-2026";
+const DECKS={
+ vida:{name:"Su vida ❤️",cards:[
+  {k:"have-a-baby",p:[["I",0],["have",1],["a",0],["BA-by",1]],brk:"have a → ha-va",cue:"Tengo una bebé.",mel:"La voz baja al final ↘"},
+  {k:"name-aline",p:[["Her",0],["NAME",1],["is",0],["A-line",1]],brk:"name is → na-mis",cue:"Se llama Aline.",mel:"La voz baja al final ↘"},
+  {k:"love-my-baby",p:[["I",0],["LOVE",1],["my",0],["BA-by",1]],brk:"love my → lav-mai",cue:"Amo a mi bebé.",mel:"La voz baja al final ↘"},
+  {k:"feed-daughter",p:[["I'm",0],["GO-ing",1],["to",0],["FEED",1],["my",0],["DAUGH-ter",1]],brk:"going to → gunna · feed my → fee-mai",cue:"Voy a alimentar a mi hija.",mel:"Tres golpes: GO · FEED · DAUGH ↘"}]},
+ bebe:{name:"Baby Words 💜",cards:[
+  {k:"i-love-you",p:[["I",0],["LOVE",1],["you",0]],brk:"love you → lav-yu",cue:"Te amo.",mel:"La voz baja, suave ↘"},
+  {k:"good-morning-baby",p:[["GOOD",1],["MOR-ning",1],["my",0],["BA-by",1]],brk:"morning my → mor-ning-mai",cue:"Buenos días, mi bebé.",mel:"Dulce y despierto ↘"},
+  {k:"good-night-baby",p:[["GOOD",1],["NIGHT",1],["my",0],["BA-by",1]],brk:"night my → nai-mai",cue:"Buenas noches, mi bebé.",mel:"Baja como arrullo ↘"},
+  {k:"big-girl",p:[["You're",0],["my",0],["BIG",1],["GIRL",1]],brk:"You're my → yer-mai",cue:"Eres mi niña grande.",mel:"Orgullo: la voz baja firme ↘"},
+  {k:"are-you-hungry",p:[["Are",0],["you",0],["HUN-gry",1]],brk:"Are you → ar-ya",cue:"¿Tienes hambre?",mel:"Pregunta: la voz SUBE ↗"},
+  {k:"want-water",p:[["Do",0],["you",0],["want",1],["WA-ter",1]],brk:"Do you → di-ya · want water → wan-wa-der",cue:"¿Quieres agua? (water suena wa-der)",mel:"Pregunta: la voz SUBE ↗"},
+  {k:"come-to-mommy",p:[["COME",1],["to",0],["MOM-my",1]],brk:"come to → cum-tuh",cue:"Ven con mami.",mel:"Dos golpes: COME · MOM ↘"},
+  {k:"so-pretty",p:[["You're",0],["so",1],["PRET-ty",1]],brk:"You're so → yer-so",cue:"Estás muy bonita.",mel:"La voz baja al final ↘"},
+  {k:"i-missed-you",p:[["I",0],["MISSED",1],["you",0]],brk:"missed you → mist-ya",cue:"Te extrañé. (la -ed suena /t/)",mel:"La voz baja al final ↘"},
+  {k:"time-to-eat",p:[["TIME",1],["to",0],["EAT",1]],brk:"time to → tai-tuh",cue:"Hora de comer.",mel:"Dos golpes: TIME · EAT ↘"},
+  {k:"lets-go-outside",p:[["Let's",1],["GO",1],["out-SIDE",1]],brk:"go outside → go-(w)-outside",cue:"Vamos afuera. (aparece una w entre las vocales)",mel:"Tres golpes: LET'S · GO · -SIDE ↘"},
+  {k:"daddy-loves-you",p:[["DAD-dy",1],["LOVES",1],["you",0]],brk:"loves you → lavz-ya",cue:"Papá te ama. (la -s suena /z/)",mel:"La voz baja al final ↘"}]}
+};
+const $=id=>document.getElementById(id);
+const st={deck:"vida",i:0,spd:1,beat:false,bpm:95,clickTimer:null,ctx:null,dichas:0};
+const haptic=ms=>{if("vibrate" in navigator)navigator.vibrate(ms)};
+const TALLY="ritmo_dichas_"+new Date().toISOString().slice(0,10);
+function stu(){return (localStorage.getItem("morfofono_student")||localStorage.getItem("abvc_student")||"Estudiante").trim()}
+/* AUDIO Sarah + fallback TTS */
+const au=new Audio();
+function playModel(){
+  haptic(15);
+  const k=DECKS[st.deck].cards[st.i].k;
+  const urls=[AUD+k+".mp3?v=R1",CDN+k+".mp3?v=R1"];let i=0;
+  const next=()=>{if(i<urls.length){au.onended=null;au.onerror=next;au.src=urls[i++];au.playbackRate=st.spd;au.play().catch(()=>{})}else{
+    if(!("speechSynthesis" in window))return;
+    speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(k.replace(/-/g," ").replace(/\bBA\b/,"ba").replace(/\bDAUGH\b/,"daugh").replace(/\bMOR\b/,"mor").replace(/\bHUN\b/,"hun").replace(/\bWA\b/,"wa").replace(/\bMOM\b/,"mom").replace(/\bPRET\b/,"pret").replace(/\bOUT\b/,"out").replace(/\bSIDE\b/,"side").replace(/\bDAD\b/,"dad").replace(/\bGO\b/,"go").replace(/\bA\b/,"a").replace(/\bTIME\b/,"time").replace(/\bEAT\b/,"eat").replace(/\bBIG\b/,"big").replace(/\bGIRL\b/,"girl").replace(/\bNAME\b/,"name").replace(/\bFEED\b/,"feed").replace(/\bCOME\b/,"come").replace(/\bLOVE\b/,"love").replace(/\bGOOD\b/,"good").replace(/\bNIGHT\b/,"night").replace(/\bSO\b/,"so").replace(/\bMISSED\b/,"missed").replace(/\bTIME\b/,"time").replace(/\bLet's\b/,"lets"));
+    u.lang="en-US";u.rate=st.spd*.85;speechSynthesis.speak(u)}};
+  next();
+}
+/* METRONOMO: clicks Web Audio $0 + palabras que pulsan */
+function click(){
+  try{
+    if(!st.ctx)st.ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const c=st.ctx,o=c.createOscillator(),g=c.createGain();
+    o.frequency.value=1000;o.type="sine";g.gain.setValueAtTime(.25,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.06);
+    o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.07);
+  }catch(e){}
+  document.querySelectorAll(".phrase b").forEach(b=>{b.classList.add("beat");setTimeout(()=>b.classList.remove("beat"),120)});
+}
+function beatToggle(on){
+  st.beat=on;
+  if(st.clickTimer){clearInterval(st.clickTimer);st.clickTimer=null}
+  if(on){click();st.clickTimer=setInterval(click,60000/st.bpm)}
+}
+function setBpm(v){st.bpm=v;if(st.beat)beatToggle(true),beatToggle(false),beatToggle(true)}
+/* RENDER */
+function draw(){
+  const D=DECKS[st.deck],C=D.cards[st.i];
+  $("decks").innerHTML=Object.keys(DECKS).map(d=>`<button class="${d===st.deck?'on':''}" onclick="setDeck('${d}')">${DECKS[d].name}</button>`).join("");
+  $("card").innerHTML=`
+   <span class="counter">Carta ${st.i+1} de ${D.cards.length}</span>
+   <div class="heart">❤️</div>
+   <div class="phrase">${C.p.map(([w,c])=>c?`<b>${w}</b>`:`<span>${w}</span>`).join(" ")}</div>
+   <div class="brk">${C.brk}</div>
+   <div class="mel">${C.mel}</div>
+   <div class="cue">${C.cue}</div>
+   <button class="btn" onclick="playModel()">🔊 Modelo${st.spd<1?" 🐢":""}</button>
+   <div class="spd"><button class="${st.spd<1?'on':''}" onclick="setSpd(.72)">🐢 Lento</button><button class="${st.spd===1?'on':''}" onclick="setSpd(1)">🏃 Normal</button></div>
+   <div class="tempo">
+     <button class="${st.beat?'on':''}" onclick="beatToggle(${!st.beat})">🥁 Beat ${st.beat?'ON':'OFF'}</button>
+     <button class="${st.bpm===70?'on':''}" onclick="setBpm(70)">🐢</button>
+     <button class="${st.bpm===95?'on':''}" onclick="setBpm(95)">🚶</button>
+     <button class="${st.bpm===120?'on':''}" onclick="setBpm(120)">🏃</button>
+   </div>
+   <button class="btn" onclick="laDije()">💜 La dije — siguiente carta</button>
+   <div class="hint">Las palabras <b style="color:var(--gold)">dorado</b> cargan el golpe; las grises se comprimen y se pegan. Con el 🥁 Beat prendido, di la frase CABALGANDO los clicks: los dorados caen en el golpe. Primero lento, luego a tu velocidad.</div>
+   <div class="nav"><button onclick="nav(-1)">← Anterior</button><button onclick="nav(1)">Siguiente →</button></div>`;
+  $("tn").textContent=st.dichas;
+}
+function setDeck(d){st.deck=d;st.i=0;haptic(20);draw()}
+function setSpd(v){st.spd=v;haptic(20);draw()}
+function nav(n){const L=DECKS[st.deck].cards.length;st.i=(st.i+n+L)%L;haptic(20);beatToggle(false);draw()}
+function laDije(){
+  haptic([20,40,20]);
+  st.dichas=parseInt(localStorage.getItem(TALLY)||"0")+1;
+  localStorage.setItem(TALLY,st.dichas);
+  if(st.dichas%5===0)sello();
+  nav(1);
+}
+function sello(){
+  const C=DECKS[st.deck].cards[(st.i-1+DECKS[st.deck].cards.length)%DECKS[st.deck].cards.length];
+  fetch(API,{method:"POST",headers:{"Content-Type":"application/json",api_key:KEY},body:JSON.stringify({
+    topic:"Motor de Ritmo — "+DECKS[st.deck].name,
+    userId:stu(),passed:true,
+    accuracy:100,challengeSentence:C.p.map(x=>x[0]).join(" "),
+    spokenText:"ritmo · dichas:"+st.dichas+" · beat:"+(st.beat?st.bpm+"bpm":"off")+" · spd:"+st.spd,
+    location:"Motor de Ritmo",sessionId:"ritmo-"+Date.now()})})
+  .then(r=>r.json()).then(j=>{if(j&&j.ok){$("ok").style.display="block";setTimeout(()=>$("ok").style.display="none",2000)}})
+  .catch(()=>{});
+}
+draw();
+</script></body></html>
