@@ -22,6 +22,7 @@ main{max-width:480px;margin:0 auto;padding:12px}
 .phrase b{color:var(--gold);transition:transform .15s}
 .phrase b.beat{transform:scale(1.13);text-shadow:0 0 14px rgba(255,193,77,.55)}
 .phrase span{color:var(--mut);font-weight:400}
+.phrase .uns{color:#c9a24a;font-weight:600}
 .phrase.solo b{font-size:2.2rem}
 .brk{color:var(--blue);font-size:.85rem;font-style:italic;margin-top:6px}
 .cue{color:var(--mut);font-size:.85rem;margin-top:6px}
@@ -139,16 +140,24 @@ function draw(){
   const D=DECKS[st.deck],C=D.cards[st.i],S=st.step;
   $("decks").innerHTML=Object.keys(DECKS).map(d=>`<button class="${d===st.deck?'on':''}" onclick="setDeck('${d}')">${DECKS[d].name}</button>`).join("");
   $("steps").innerHTML=STEPDEF.map((s,i)=>`<button class="${i+1===S?'on':''}" onclick="setStep(${i+1})">${s.n}<br><span style="font-size:.68rem">${s.tag}</span></button>`).join("");
-  const gold=C.p.filter(x=>x[1]).map(x=>`<b>${x[0]}</b>`).join(" ");
-  const full=C.p.map(([w,c])=>c?`<b>${w}</b>`:`<span>${w}</span>`).join(" ");
+  const wordHtml=([w,c])=>{
+    if(!c) return `<span>${w}</span>`;
+    const parts=w.split("-");
+    if(parts.length===1) return `<b>${w}</b>`;
+    return parts.map((p,i)=>p===p.toUpperCase()
+      ?`<b>${p}</b>`
+      :`<span class="uns">${i>0?"·"+p:p+"·"}</span>`).join("");
+  };
+  const gold=C.p.filter(x=>x[1]).map(wordHtml).join(" ");
+  const full=C.p.map(wordHtml).join(" ");
   const phraseHtml=S===1?`<div class="phrase solo">${gold}</div>`:`<div class="phrase">${full}</div>`;
   const brkHtml=S>=2?`<div class="brk">${C.brk}</div>`:"";
   const melHtml=S===3?`<div class="mel">${C.mel}</div>`:"";
   const cueHtml=S===3?`<div class="cue">${C.cue}</div>`:"";
   const mainBtn=S<3?`<button class="btn gold" onclick="setStep(${S+1})">${S===1?"→ Llega el pegamento (el beat se acelera)":"→ La cantada (frase completa)"}</button>`
                     :`<button class="btn good" onclick="laDije()">💜 La dije — siguiente carta</button>`;
-  const hint=S===1?"Paso 1: las palabras <b style='color:var(--gold)'>dorado</b> son los GOLPES de la frase. Prende el 🥁 Beat lento y di SOLO los golpes cayendo en cada click."
-   :S===2?"Paso 2: ¡llegó el pegamento! Las palabras <b style='color:var(--mut)'>grises</b> cabalgan ENTRE los golpes: se dicen rápido, pegadas, casi susurradas. El beat se acelera — las grises llenan el espacio."
+  const hint=S===1?"Paso 1: el golpe NO cae en la palabra entera: cae en la <b style='color:var(--gold)'>SÍLABA FUERTE</b> (dorado brillante). Las sílabas suaves van pegaditas y quietas. Prende el 🥁 Beat lento y di SOLO las sílabas fuertes cayendo en cada click."
+   :S===2?"Paso 2: ¡llegó el pegamento! Las palabras <b style='color:var(--mut)'>grises</b> cabalgan ENTRE los golpes: rápidas, pegadas, casi susurradas. La sílaba fuerte golpea; todo lo demás se comprime a su alrededor."
    :"Paso 3: la frase completa, cantada. Golpes firmes, grises suaves, melodía al final. Primero 🐢, luego sube la velocidad. Tu boca, tu cerebro y tu oído entrenando juntos.";
   $("card").innerHTML=`
    <span class="counter">Carta ${st.i+1} de ${D.cards.length}</span>
