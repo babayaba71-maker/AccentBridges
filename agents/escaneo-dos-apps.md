@@ -33,3 +33,18 @@ Curriculum por niveles Low/Middle/Upper: A2 Rhythm Bridges (schwa, PUENTE -ANDO,
 - Máquina mide: discriminación (etapa 1), latencia, sonido→imagen, letras→imagen (Fósil).
 - MAESTRO (E01) mide: boca — inicial/vocal/final, por separado, con grabación.
 - Estudiante mide: su honestidad (autoeval 😎🤏😅) — se enseña a dirigir sus propios músculos (MyoGym = self-directed muscle development, directriz JJ 25-oct).
+
+## ESTUDIO PROFUNDO ACTION BRIDGES COACH (25-oct ~14:00, pedido JJ) — inventario vivo
+**BAUTIZO OFICIAL (JJ):** la de Replit se llama **ACTION BRIDGES COACH** (accent-bridge-coach.replit.app) = el COACHING para REPASAR (avanzados); la de Lovable = ACCENTBRIDGE PRO (desde cero). Material se compila DE ABAJO HACIA ARRIBA: lo desarrollado desde cero (Pro/piloto) sube al Coach.
+
+### Inventario vivo (7 rutas)
+/ (landing: doctrina identidad "You already speak with precision. Now we redirect it" + 3 de las 5 ramas resumidas: Phonetics, Phonology, Prosody) · /curriculum (A2→C2, Low/Middle/Upper, IPA desde B1, "oír antes de producir", PUENTE -ANDO en A2) · /practice (drills demo: minimal pairs bit/beat CON grabación, stress-rhythm shadowing, TH/R/schwa/cognados; "thousands of drills" tras login) · /pricing ($49/mes · $399/año MOST POPULAR · $899/mes 1-on-1 con 4 sesiones privadas + audio feedback ilimitado + Slack directo = LA MELODÍA DEL MAESTRO MONETIZADA) · /branches (las 5 ramas = Motor Lingüístico) · /quiz Find My Level (4 min, sin cuenta — el diagnóstico que debe alimentar el expediente) · EN/ES bilingüe.
+
+### EL LOOP INTEGRADO (directriz JJ 25-oct — DOOR_MAP entre apps)
+Estudiante en Coach falla reactivo (no entiende la teoría / no produce el sonido) → PUERTA 1: video explicativo rápido (lámina+voz 40-90 seg, "bien pero no largo" — el estilo del video de conectores aprobado) → PUERTA 2: Cloud Morfofónico (Estudio v3) a PRACTICAR → regreso al Coach a re-verificar. El Coach lleva LAS 4 ETAPAS dentro: 1) verificar oído (¿discriminas motor/sin motor?) → 2) imagen → 3) comprensión → 4) PRODÚCELO + autoevaluación.
+
+### LO QUE NECESITAMOS PARA TRABAJAR (pendiente de JJ)
+1. **EL REPO DE REPLIT INTEGRADO A GITHUB** — el único bloqueador para la costura doctrinal profunda (como ya hice con Pro): en el editor de Replit, conectar Git/GitHub (Tools → Git → connect, repo sugerido: accent-bridge-coach) con su cuenta babayaba71-maker; alternativa exprés: descargar el Repl como zip y mandármelo por chat (audito YA, sincronía real después).
+2. Con el repo en mano: auditoría completa (como la de Pro: código, DB, TTS vivo vs MP3, gaps doctrinales) + costura por git $0.
+3. Videos: fábrica lámina+voz produce la teoría visual por rama/módulo (mismo estilo aprobado, piel profesional del Coach).
+4. Telemetría: Coach → logMorfofonoSession (un expediente, tres casas) + Find My Level → expediente 4 canales.
