@@ -94,7 +94,7 @@ function playModel(){
   haptic(15);
   const C=DECKS[st.deck].cards[st.i];
   const base=st.step===1?C.k+"-sk":C.k;
-  const urls=[AUD+base+".mp3?v=R2",CDN+base+".mp3?v=R2"];let i=0;
+  const urls=[AUD+base+".mp3?v=R3",CDN+base+".mp3?v=R3"];let i=0;
   const next=()=>{if(i<urls.length){au.onended=null;au.onerror=next;au.src=urls[i++];au.playbackRate=st.spd;au.play().catch(()=>{})}else{
     if(!("speechSynthesis" in window))return;
     speechSynthesis.cancel();const plainTxt=(st.step===1?C.sk:C.p.map(x=>x[0]).join(" ")).replace(/-/g,"").replace(/[A-Z]{2,}/g,m=>m.toLowerCase());const u=new SpeechSynthesisUtterance(plainTxt);u.lang="en-US";u.rate=.8;speechSynthesis.speak(u)}};
