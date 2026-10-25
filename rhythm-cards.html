@@ -59,23 +59,23 @@ const API="https://valerie.base44.app/functions/logMorfofonoSession";
 const KEY="ABVC-PILOTO-2026";
 const DECKS={
  vida:{name:"Su vida ❤️",cards:[
-  {k:"have-a-baby",sk:"Have. Baby.",p:[["I",0],["have",1],["a",0],["BA-by",1]],brk:"have a → ha-va",cue:"Tengo una bebé.",mel:"La voz baja al final ↘"},
-  {k:"name-aline",sk:"Name. Aline.",p:[["Her",0],["NAME",1],["is",0],["A-line",1]],brk:"name is → na-mis",cue:"Se llama Aline.",mel:"La voz baja al final ↘"},
-  {k:"love-my-baby",sk:"Love. Baby.",p:[["I",0],["LOVE",1],["my",0],["BA-by",1]],brk:"love my → lav-mai",cue:"Amo a mi bebé.",mel:"La voz baja al final ↘"},
-  {k:"feed-daughter",sk:"Going. Feed. Daughter.",p:[["I'm",0],["GO-ing",1],["to",0],["FEED",1],["my",0],["DAUGH-ter",1]],brk:"going to → gunna · feed my → fee-mai",cue:"Voy a alimentar a mi hija.",mel:"Tres golpes: GO · FEED · DAUGH ↘"}]},
+  {k:"have-a-baby",g:["have","baby"],sk:"Have. Baby.",p:[["I",0],["have",1],["a",0],["BA-by",1]],brk:"have a → ha-va",cue:"Tengo una bebé.",mel:"La voz baja al final ↘"},
+  {k:"name-aline",g:["name","aline"],sk:"Name. Aline.",p:[["Her",0],["NAME",1],["is",0],["A-line",1]],brk:"name is → na-mis",cue:"Se llama Aline.",mel:"La voz baja al final ↘"},
+  {k:"love-my-baby",g:["love","baby"],sk:"Love. Baby.",p:[["I",0],["LOVE",1],["my",0],["BA-by",1]],brk:"love my → lav-mai",cue:"Amo a mi bebé.",mel:"La voz baja al final ↘"},
+  {k:"feed-daughter",g:["going","feed","daughter"],sk:"Going. Feed. Daughter.",p:[["I'm",0],["GO-ing",1],["to",0],["FEED",1],["my",0],["DAUGH-ter",1]],brk:"going to → gunna · feed my → fee-mai",cue:"Voy a alimentar a mi hija.",mel:"Tres golpes: GO · FEED · DAUGH ↘"}]},
  bebe:{name:"Baby Words 💜",cards:[
-  {k:"i-love-you",sk:"Love.",p:[["I",0],["LOVE",1],["you",0]],brk:"love you → lav-yu",cue:"Te amo.",mel:"La voz baja, suave ↘"},
-  {k:"good-morning-baby",sk:"Good. Morning. Baby.",p:[["GOOD",1],["MOR-ning",1],["my",0],["BA-by",1]],brk:"morning my → mor-ning-mai",cue:"Buenos días, mi bebé.",mel:"Dulce y despierto ↘"},
-  {k:"good-night-baby",sk:"Good. Night. Baby.",p:[["GOOD",1],["NIGHT",1],["my",0],["BA-by",1]],brk:"night my → nai-mai",cue:"Buenas noches, mi bebé.",mel:"Baja como arrullo ↘"},
-  {k:"big-girl",sk:"Big. Girl.",p:[["You're",0],["my",0],["BIG",1],["GIRL",1]],brk:"You're my → yer-mai",cue:"Eres mi niña grande.",mel:"Orgullo: la voz baja firme ↘"},
-  {k:"are-you-hungry",sk:"Hungry.",p:[["Are",0],["you",0],["HUN-gry",1]],brk:"Are you → ar-ya",cue:"¿Tienes hambre?",mel:"Pregunta: la voz SUBE ↗"},
-  {k:"want-water",sk:"Want. Water.",p:[["Do",0],["you",0],["want",1],["WA-ter",1]],brk:"Do you → di-ya · want water → wan-wa-der",cue:"¿Quieres agua? (water suena wa-der)",mel:"Pregunta: la voz SUBE ↗"},
-  {k:"come-to-mommy",sk:"Come. Mommy.",p:[["COME",1],["to",0],["MOM-my",1]],brk:"come to → cum-tuh",cue:"Ven con mami.",mel:"Dos golpes: COME · MOM ↘"},
-  {k:"so-pretty",sk:"So. Pretty.",p:[["You're",0],["so",1],["PRET-ty",1]],brk:"You're so → yer-so",cue:"Estás muy bonita.",mel:"La voz baja al final ↘"},
-  {k:"i-missed-you",sk:"Missed.",p:[["I",0],["MISSED",1],["you",0]],brk:"missed you → mist-ya",cue:"Te extrañé. (la -ed suena /t/)",mel:"La voz baja al final ↘"},
-  {k:"time-to-eat",sk:"Time. Eat.",p:[["TIME",1],["to",0],["EAT",1]],brk:"time to → tai-tuh",cue:"Hora de comer.",mel:"Dos golpes: TIME · EAT ↘"},
-  {k:"lets-go-outside",sk:"Let's. Go. Outside.",p:[["Let's",1],["GO",1],["out-SIDE",1]],brk:"go outside → go-(w)-outside",cue:"Vamos afuera. (aparece una w entre las vocales)",mel:"Tres golpes: LET'S · GO · -SIDE ↘"},
-  {k:"daddy-loves-you",sk:"Daddy. Loves.",p:[["DAD-dy",1],["LOVES",1],["you",0]],brk:"loves you → lavz-ya",cue:"Papá te ama. (la -s suena /z/)",mel:"La voz baja al final ↘"}]}
+  {k:"i-love-you",g:["love"],sk:"Love.",p:[["I",0],["LOVE",1],["you",0]],brk:"love you → lav-yu",cue:"Te amo.",mel:"La voz baja, suave ↘"},
+  {k:"good-morning-baby",g:["good","morning","baby"],sk:"Good. Morning. Baby.",p:[["GOOD",1],["MOR-ning",1],["my",0],["BA-by",1]],brk:"morning my → mor-ning-mai",cue:"Buenos días, mi bebé.",mel:"Dulce y despierto ↘"},
+  {k:"good-night-baby",g:["good","night","baby"],sk:"Good. Night. Baby.",p:[["GOOD",1],["NIGHT",1],["my",0],["BA-by",1]],brk:"night my → nai-mai",cue:"Buenas noches, mi bebé.",mel:"Baja como arrullo ↘"},
+  {k:"big-girl",g:["big","girl"],sk:"Big. Girl.",p:[["You're",0],["my",0],["BIG",1],["GIRL",1]],brk:"You're my → yer-mai",cue:"Eres mi niña grande.",mel:"Orgullo: la voz baja firme ↘"},
+  {k:"are-you-hungry",g:["hungry"],sk:"Hungry.",p:[["Are",0],["you",0],["HUN-gry",1]],brk:"Are you → ar-ya",cue:"¿Tienes hambre?",mel:"Pregunta: la voz SUBE ↗"},
+  {k:"want-water",g:["want","water"],sk:"Want. Water.",p:[["Do",0],["you",0],["want",1],["WA-ter",1]],brk:"Do you → di-ya · want water → wan-wa-der",cue:"¿Quieres agua? (water suena wa-der)",mel:"Pregunta: la voz SUBE ↗"},
+  {k:"come-to-mommy",g:["come","mommy"],sk:"Come. Mommy.",p:[["COME",1],["to",0],["MOM-my",1]],brk:"come to → cum-tuh",cue:"Ven con mami.",mel:"Dos golpes: COME · MOM ↘"},
+  {k:"so-pretty",g:["so","pretty"],sk:"So. Pretty.",p:[["You're",0],["so",1],["PRET-ty",1]],brk:"You're so → yer-so",cue:"Estás muy bonita.",mel:"La voz baja al final ↘"},
+  {k:"i-missed-you",g:["missed"],sk:"Missed.",p:[["I",0],["MISSED",1],["you",0]],brk:"missed you → mist-ya",cue:"Te extrañé. (la -ed suena /t/)",mel:"La voz baja al final ↘"},
+  {k:"time-to-eat",g:["time","eat"],sk:"Time. Eat.",p:[["TIME",1],["to",0],["EAT",1]],brk:"time to → tai-tuh",cue:"Hora de comer.",mel:"Dos golpes: TIME · EAT ↘"},
+  {k:"lets-go-outside",g:["lets","go","outside"],sk:"Let's. Go. Outside.",p:[["Let's",1],["GO",1],["out-SIDE",1]],brk:"go outside → go-(w)-outside",cue:"Vamos afuera. (aparece una w entre las vocales)",mel:"Tres golpes: LET'S · GO · -SIDE ↘"},
+  {k:"daddy-loves-you",g:["daddy","loves"],sk:"Daddy. Loves.",p:[["DAD-dy",1],["LOVES",1],["you",0]],brk:"loves you → lavz-ya",cue:"Papá te ama. (la -s suena /z/)",mel:"La voz baja al final ↘"}]}
 };
 const STEPDEF=[
  {n:"1️⃣ Esqueleto",bpm:45,tag:"Los golpes solos"},
@@ -83,11 +83,13 @@ const STEPDEF=[
  {n:"3️⃣ La cantada",bpm:95,tag:"Frase completa"}
 ];
 const $=id=>document.getElementById(id);
-const st={deck:"vida",i:0,step:1,beat:false,bpm:45,spd:.72,clickTimer:null,ctx:null,dichas:0};
+const st={deck:"vida",i:0,step:1,beat:false,bpm:45,spd:.72,clickTimer:null,ctx:null,dichas:0,gi:0,bw:false};const au2=new Audio();
 const haptic=ms=>{if("vibrate" in navigator)navigator.vibrate(ms)};
 const TALLY="ritmo_dichas_"+new Date().toISOString().slice(0,10);
 function stu(){return (localStorage.getItem("morfofono_student")||localStorage.getItem("abvc_student")||"Estudiante").trim()}
 const au=new Audio();
+function playWord(w){au2.src=AUD+"words/"+w+".mp3?v=1";au2.onerror=()=>{if("speechSynthesis" in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(w==="lets"?"let's":w);u.lang="en-US";u.rate=.8;speechSynthesis.speak(u)}};au2.play().catch(()=>{});}
+function playGolpesBeat(){haptic(20);st.bw=true;st.gi=0;if(!st.beat){st.beat=true;click();st.clickTimer=setInterval(click,60000/st.bpm)}else{st.gi=0}}
 function playModel(){
   haptic(15);
   const C=DECKS[st.deck].cards[st.i];
@@ -106,18 +108,20 @@ function click(){
     g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.06);
     o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.07);
   }catch(e){}
+  if(st.bw&&st.step===1){const C=DECKS[st.deck].cards[st.i];if(C.g&&C.g.length){playWord(C.g[st.gi%C.g.length]);st.gi++}}
   document.querySelectorAll(".phrase b").forEach(b=>{b.classList.add("beat");setTimeout(()=>b.classList.remove("beat"),120)});
 }
 function beatToggle(on){
   st.beat=on;
+  if(!on)st.bw=false;
   if(st.clickTimer){clearInterval(st.clickTimer);st.clickTimer=null}
   if(on){click();st.clickTimer=setInterval(click,60000/st.bpm)}
 }
 function toggleSpd(){st.spd=st.spd<1?1:.72;haptic(20);draw()}
 function setBpm(v){st.bpm=v;if(st.beat){beatToggle(false);beatToggle(true)}draw()}
-function setStep(n){st.step=n;st.bpm=STEPDEF[n-1].bpm;st.spd=n<3?.72:1;if(st.beat){beatToggle(false);beatToggle(true)}haptic(20);draw()}
-function setDeck(d){st.deck=d;st.i=0;st.step=1;st.bpm=45;beatToggle(false);haptic(20);draw()}
-function nav(n){const L=DECKS[st.deck].cards.length;st.i=(st.i+n+L)%L;st.step=1;st.bpm=45;beatToggle(false);haptic(20);draw()}
+function setStep(n){st.bw=false;st.step=n;st.bpm=STEPDEF[n-1].bpm;st.spd=n<3?.72:1;if(st.beat){beatToggle(false);beatToggle(true)}haptic(20);draw()}
+function setDeck(d){st.bw=false;st.deck=d;st.i=0;st.step=1;st.bpm=45;beatToggle(false);haptic(20);draw()}
+function nav(n){st.bw=false;const L=DECKS[st.deck].cards.length;st.i=(st.i+n+L)%L;st.step=1;st.bpm=45;beatToggle(false);haptic(20);draw()}
 function laDije(){
   haptic([20,40,20]);
   st.dichas=parseInt(localStorage.getItem(TALLY)||"0")+1;
@@ -156,14 +160,15 @@ function draw(){
   const cueHtml=S===3?`<div class="cue">${C.cue}</div>`:"";
   const mainBtn=S<3?`<button class="btn gold" onclick="setStep(${S+1})">${S===1?"→ Llega el pegamento (el beat se acelera)":"→ La cantada (frase completa)"}</button>`
                     :`<button class="btn good" onclick="laDije()">💜 La dije — siguiente carta</button>`;
-  const hint=S===1?"Paso 1: el golpe NO cae en la palabra entera: cae en la <b style='color:var(--gold)'>SÍLABA FUERTE</b> (dorado brillante). Las sílabas suaves van pegaditas y quietas. Prende el 🥁 Beat lento y di SOLO las sílabas fuertes cayendo en cada click."
+  const hint=S===1?"Paso 1: el golpe NO cae en la palabra entera: cae en la <b style='color:var(--gold)'>SÍLABA FUERTE</b> (dorado brillante). Las sílabas suaves van pegaditas y quietas. Toca 🥁🔊 Golpes AL BEAT: cada click del metrónomo DISPARA la palabra fuerte — Sarah canta al compás contigo, a la velocidad que elijas. Luego apágalo y dilo tú cabalgando los clicks."
    :S===2?"Paso 2: ¡llegó el pegamento! Las palabras <b style='color:var(--mut)'>grises</b> cabalgan ENTRE los golpes: rápidas, pegadas, casi susurradas. La sílaba fuerte golpea; todo lo demás se comprime a su alrededor."
    :"Paso 3: la frase completa, cantada. Golpes firmes, grises suaves, melodía al final. Primero 🐢, luego sube la velocidad. Tu boca, tu cerebro y tu oído entrenando juntos.";
   $("card").innerHTML=`
    <span class="counter">Carta ${st.i+1} de ${D.cards.length}</span>
    <div class="heart">❤️</div>
    ${phraseHtml}${brkHtml}${melHtml}${cueHtml}
-   <button class="btn" onclick="playModel()">🔊 ${S===1?"Golpes solos":"Modelo"} ${st.spd<1?"🐢":"🏃"}</button>
+   ${S===1?'<button class="btn gold" onclick="playGolpesBeat()">🥁🔊 Golpes AL BEAT — cada click dispara su palabra</button>':''}
+   ${S===1?'':'<button class="btn" onclick="playModel()">🔊 Modelo ${st.spd<1?"🐢":"🏃"}</button>'}
    <button class="btn" style="border-style:dashed;font-size:.8rem" onclick="toggleSpd()">Cambiar audio a ${st.spd<1?"🏃 velocidad normal":"🐢 lento"}</button>
    <div class="tempo">
      <button class="${st.beat?'on':''}" onclick="beatToggle(${!st.beat})">🥁 Beat ${st.beat?'ON':'OFF'}</button>
