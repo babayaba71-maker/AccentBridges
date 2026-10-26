@@ -1,0 +1,1476 @@
+{
+ "banco": "digrafos-1",
+ "version": 1,
+ "fecha": "2026-10-25",
+ "estudiante": "Josephine (y todo el ecosistema ABVC)",
+ "tipo": "banco de sonidos — dígrafos consonánticos y vocálicos del inglés americano",
+ "doctrine": "Dígrafo = dos letras que hacen UN sonido que NO es la suma de las dos. La cura doctrinal: aprender cada dígrafo como ANCLA (sonido+imagen+palabra), jamás deletreado. Las letras son jeroglíficos: el oído va primero (etapa 1), las letras son la etapa 3 (comprensión del código). pron_es es SOLO una brújula de confesión — la verdad vive en el IPA y en el audio horneado.",
+ "regla_de_capas": "Banco para la etapa de LETRAS (A0-medio+) y el Coach (A2+). En el Kinder se enseñan los mismos SONIDOS sin nombrar letras.",
+ "fuente_de_audio": "por hornear: MP3s ElevenLabs/Sarah en assets/digrafo-audio/ (regla de oro: nunca letra suelta al TTS — siempre palabra completa con su ancla)",
+ "consonanticos": [
+  {
+   "digrafo": "th",
+   "ipas": [
+    "/θ/",
+    "/ð/"
+   ],
+   "vidas": "DOS: sorda /θ/ (aire, sin voz) y sonora /ð/ (con voz en la garganta)",
+   "palabras": [
+    {
+     "en": "think",
+     "ipa": "/θɪŋk/",
+     "es": "pensar"
+    },
+    {
+     "en": "bath",
+     "ipa": "/bæθ/",
+     "es": "baño"
+    },
+    {
+     "en": "mouth",
+     "ipa": "/maʊθ/",
+     "es": "boca"
+    },
+    {
+     "en": "this",
+     "ipa": "/ðɪs/",
+     "es": "esto"
+    },
+    {
+     "en": "mother",
+     "ipa": "/ˈmʌðɚ/",
+     "es": "mamá"
+    },
+    {
+     "en": "smooth",
+     "ipa": "/smuð/",
+     "es": "suave"
+    }
+   ],
+   "pron_es": "la lengua ENTRE los dientes — no existe en español, ni 't' ni 's'",
+   "confesion": "El jeroglífico #1 del hispanohablante: dos letras, dos sonidos hermanos, y NINGUNO existe en español. tink/sink → think.",
+   "trampa": "si la lengua no se ve entre los dientes, no es TH",
+   "oracion_control": "The thoughtful mother takes a bath."
+  },
+  {
+   "digrafo": "ch",
+   "ipas": [
+    "/tʃ/"
+   ],
+   "vidas": "principal /tʃ/; variante /k/ en palabras griegas (chorus, architect)",
+   "palabras": [
+    {
+     "en": "chair",
+     "ipa": "/tʃɛɚ/",
+     "es": "silla"
+    },
+    {
+     "en": "teacher",
+     "ipa": "/ˈtitʃɚ/",
+     "es": "maestra"
+    },
+    {
+     "en": "much",
+     "ipa": "/mʌtʃ/",
+     "es": "mucho"
+    }
+   ],
+   "pron_es": "como la CH española pero más golpeada: t+sh fusionadas",
+   "confesion": "La CH española es suave; la inglesa sale con un golpe de aire. Chair, teacher.",
+   "trampa": "no es 'che-air': es UN golpe",
+   "oracion_control": "The teacher checks the chair."
+  },
+  {
+   "digrafo": "sh",
+   "ipas": [
+    "/ʃ/"
+   ],
+   "vidas": "estable: siempre /ʃ/",
+   "palabras": [
+    {
+     "en": "she",
+     "ipa": "/ʃi/",
+     "es": "ella"
+    },
+    {
+     "en": "fish",
+     "ipa": "/fɪʃ/",
+     "es": "pez"
+    },
+    {
+     "en": "wish",
+     "ipa": "/wɪʃ/",
+     "es": "deseo"
+    }
+   ],
+   "pron_es": "como la SH que los mexicanos usan para pedir silencio: ¡shhh!",
+   "confesion": "El dígrafo más amable: siempre suena igual. She, fish, wish.",
+   "oracion_control": "She washes the dishes with a wish."
+  },
+  {
+   "digrafo": "ph",
+   "ipas": [
+    "/f/"
+   ],
+   "vidas": "estable: siempre /f/",
+   "palabras": [
+    {
+     "en": "phone",
+     "ipa": "/foʊn/",
+     "es": "teléfono"
+    },
+    {
+     "en": "photo",
+     "ipa": "/ˈfoʊtoʊ/",
+     "es": "foto"
+    },
+    {
+     "en": "elephant",
+     "ipa": "/ˈɛləfənt/",
+     "es": "elefante"
+    }
+   ],
+   "pron_es": "es una F vestida de gala griega — suena 'f' y ya",
+   "confesion": "PH no es 'pf': es F pura. Phone = foʊn.",
+   "trampa": "jamás 'pe-hache'",
+   "oracion_control": "Philip takes a photo of the elephant."
+  },
+  {
+   "digrafo": "wh",
+   "ipas": [
+    "/w/",
+    "/h/"
+   ],
+   "vidas": "principal /w/ (white, why); excepción /h/ en who, whole, whose",
+   "palabras": [
+    {
+     "en": "white",
+     "ipa": "/waɪt/",
+     "es": "blanco"
+    },
+    {
+     "en": "why",
+     "ipa": "/waɪ/",
+     "es": "por qué"
+    },
+    {
+     "en": "who",
+     "ipa": "/hu/",
+     "es": "quién"
+    }
+   ],
+   "pron_es": "'u' de 'agua' en casi todo; pero en la familia who- suena 'ju'... digo, /h/ pura",
+   "confesion": "La W casi siempre suena; solo en who/whole/whose se calla y deja hablar a la H.",
+   "oracion_control": "Why is the white whale so big?"
+  },
+  {
+   "digrafo": "ng",
+   "ipas": [
+    "/ŋ/"
+   ],
+   "vidas": "final /ŋ/ puro (sing); en medio de palabra /ŋg/ (finger)",
+   "palabras": [
+    {
+     "en": "sing",
+     "ipa": "/sɪŋ/",
+     "es": "cantar"
+    },
+    {
+     "en": "king",
+     "ipa": "/kɪŋ/",
+     "es": "rey"
+    },
+    {
+     "en": "morning",
+     "ipa": "/ˈmɔɚnɪŋ/",
+     "es": "mañana"
+    }
+   ],
+   "pron_es": "la N de 'bingo' o 'tango': nariz, sin golpe de g",
+   "confesion": "La G final NO explota: 'sing' no es 'sing-ue' — la garganta se queda abierta.",
+   "trampa": "no cerrar la palabra con 'g' audible",
+   "oracion_control": "The king sings in the morning."
+  },
+  {
+   "digrafo": "ck",
+   "ipas": [
+    "/k/"
+   ],
+   "vidas": "estable: una sola /k/",
+   "palabras": [
+    {
+     "en": "back",
+     "ipa": "/bæk/",
+     "es": "atrás"
+    },
+    {
+     "en": "clock",
+     "ipa": "/klɑk/",
+     "es": "reloj"
+    },
+    {
+     "en": "duck",
+     "ipa": "/dʌk/",
+     "es": "pato"
+    }
+   ],
+   "pron_es": "una K sola: C y K juntas se fusionan en un golpe",
+   "confesion": "CK = una sola K, nunca 'ke-ke'. Back, clock, duck.",
+   "oracion_control": "The black duck checks the clock."
+  },
+  {
+   "digrafo": "qu",
+   "ipas": [
+    "/kw/"
+   ],
+   "vidas": "estable: siempre /kw/",
+   "palabras": [
+    {
+     "en": "queen",
+     "ipa": "/kwin/",
+     "es": "reina"
+    },
+    {
+     "en": "quick",
+     "ipa": "/kwɪk/",
+     "es": "rápido"
+    },
+    {
+     "en": "question",
+     "ipa": "/ˈkwɛstʃən/",
+     "es": "pregunta"
+    }
+   ],
+   "pron_es": "'cu' de 'cuando': k + u pegadas",
+   "confesion": "La Q inglesa NUNCA anda sola: siempre trae a su U de la mano. Queen = kwin.",
+   "trampa": "no decir 'ke-u-een'",
+   "oracion_control": "The queen asks a quick question."
+  },
+  {
+   "digrafo": "gh",
+   "ipas": [
+    "(muda)",
+    "/f/"
+   ],
+   "vidas": "muda (light, night, high) o /f/ (laugh, enough, cough); JAMÁS /g/",
+   "palabras": [
+    {
+     "en": "light",
+     "ipa": "/laɪt/",
+     "es": "luz"
+    },
+    {
+     "en": "night",
+     "ipa": "/naɪt/",
+     "es": "noche"
+    },
+    {
+     "en": "laugh",
+     "ipa": "/læf/",
+     "es": "reír"
+    },
+    {
+     "en": "enough",
+     "ipa": "/ɪˈnʌf/",
+     "es": "suficiente"
+    }
+   ],
+   "pron_es": "callada casi siempre; cuando trabaja, es una F",
+   "confesion": "El fantasma del alfabeto: o se calla por completo o disfraza una F. Jamás suena a G.",
+   "trampa": "el GH no existe para el oído",
+   "oracion_control": "We laugh in the light of night."
+  },
+  {
+   "digrafo": "kn",
+   "ipas": [
+    "/n/"
+   ],
+   "vidas": "estable: K callada al inicio",
+   "palabras": [
+    {
+     "en": "know",
+     "ipa": "/noʊ/",
+     "es": "saber"
+    },
+    {
+     "en": "knee",
+     "ipa": "/ni/",
+     "es": "rodilla"
+    },
+    {
+     "en": "knife",
+     "ipa": "/naɪf/",
+     "es": "cuchillo"
+    }
+   ],
+   "pron_es": "la K muda: se dice solo 'n'",
+   "confesion": "En inglés antiguo la K sí sonaba; hoy es decoración. Know = noʊ.",
+   "oracion_control": "I know the knife is new."
+  },
+  {
+   "digrafo": "wr",
+   "ipas": [
+    "/r/"
+   ],
+   "vidas": "estable: W callada al inicio",
+   "palabras": [
+    {
+     "en": "write",
+     "ipa": "/raɪt/",
+     "es": "escribir"
+    },
+    {
+     "en": "wrong",
+     "ipa": "/rɔŋ/",
+     "es": "equivocado"
+    },
+    {
+     "en": "wrist",
+     "ipa": "/rɪst/",
+     "es": "muñeca"
+    }
+   ],
+   "pron_es": "la W muda: solo suena la R",
+   "confesion": "Escribir en inglés es 'write' pero se dice 'rait' — la W ni se asoma. Par de gemelas: write/right suenan IGUAL.",
+   "oracion_control": "I write it right, not wrong."
+  },
+  {
+   "digrafo": "gn",
+   "ipas": [
+    "/n/"
+   ],
+   "vidas": "estable: G callada",
+   "palabras": [
+    {
+     "en": "sign",
+     "ipa": "/saɪn/",
+     "es": "señal / firmar"
+    },
+    {
+     "en": "design",
+     "ipa": "/dɪˈzaɪn/",
+     "es": "diseño"
+    }
+   ],
+   "pron_es": "la G se calla: 'sain', 'disáin'",
+   "confesion": "Sign suena EXACTAMENTE como sine. La G es recuerdo del latín (signum), no sonido.",
+   "oracion_control": "Please sign the design."
+  },
+  {
+   "digrafo": "mb (final)",
+   "ipas": [
+    "/m/"
+   ],
+   "vidas": "B callada SOLO al final de palabra",
+   "palabras": [
+    {
+     "en": "climb",
+     "ipa": "/klaɪm/",
+     "es": "subir"
+    },
+    {
+     "en": "comb",
+     "ipa": "/koʊm/",
+     "es": "peine"
+    },
+    {
+     "en": "thumb",
+     "ipa": "/θʌm/",
+     "es": "pulgar"
+    },
+    {
+     "en": "lamb",
+     "ipa": "/læm/",
+     "es": "cordero"
+    }
+   ],
+   "pron_es": "la B final muerde su lengua: solo suena M",
+   "confesion": "Climb = 'kláim' — la B del final es mudita. Pero OJO: en 'number' la B SÍ suena (no es final de la sílaba muda).",
+   "oracion_control": "The lamb climbs the hill."
+  },
+  {
+   "digrafo": "sc",
+   "ipas": [
+    "/s/",
+    "/sk/"
+   ],
+   "vidas": "DOS: /s/ antes de e/i (science, scent) o /sk/ antes de otras (scan, school)",
+   "palabras": [
+    {
+     "en": "science",
+     "ipa": "/ˈsaɪəns/",
+     "es": "ciencia"
+    },
+    {
+     "en": "scent",
+     "ipa": "/sɛnt/",
+     "es": "aroma"
+    },
+    {
+     "en": "scan",
+     "ipa": "/skæn/",
+     "es": "escanear"
+    },
+    {
+     "en": "school",
+     "ipa": "/skuːl/",
+     "es": "escuela"
+    }
+   ],
+   "pron_es": "frente a e/i la C se rinde y queda solo 's'; en el resto, 'esk'",
+   "confesion": "Science = 'saiens' (la C callada), pero school = 'eskuul' (la C grita). Mismo par, dos humores.",
+   "oracion_control": "The scientist scans the scene."
+  },
+  {
+   "digrafo": "tt",
+   "ipas": [
+    "/t/",
+    "/ɾ/ (flap)"
+   ],
+   "vidas": "T simple escrita; entre vocales suena FLAP T americana (bedder)",
+   "palabras": [
+    {
+     "en": "little",
+     "ipa": "/ˈlɪɾəl/",
+     "es": "pequeño"
+    },
+    {
+     "en": "better",
+     "ipa": "/ˈbɛɾɚ/",
+     "es": "mejor"
+    },
+    {
+     "en": "letter",
+     "ipa": "/ˈlɛɾɚ/",
+     "es": "carta"
+    }
+   ],
+   "pron_es": "la T doble entre vocales = golpe suave, como la R de 'pero'",
+   "confesion": "El dígrafo con doble vida secreta: escrito 'tt', suena 'd' suave americana. Little = 'lídol'. EL pariente del Flap T.",
+   "trampa": "better NO es 'be-ter' — es 'bedder'",
+   "oracion_control": "The little letter is better."
+  },
+  {
+   "digrafo": "ss",
+   "ipas": [
+    "/s/",
+    "/z/ (raro)"
+   ],
+   "vidas": "principal /s/; rara /z/ (scissors, dessert)",
+   "palabras": [
+    {
+     "en": "less",
+     "ipa": "/lɛs/",
+     "es": "menos"
+    },
+    {
+     "en": "class",
+     "ipa": "/klæs/",
+     "es": "clase"
+    },
+    {
+     "en": "kiss",
+     "ipa": "/kɪs/",
+     "es": "beso"
+    }
+   ],
+   "pron_es": "una S larga: dos eses = un solo silbido",
+   "confesion": "La S doble es una S disfrazada de dos. Menos es menos: 'less'.",
+   "oracion_control": "I miss my class in the morning."
+  },
+  {
+   "digrafo": "ll",
+   "ipas": [
+    "/l/"
+   ],
+   "vidas": "estable: una sola L (oscura al final)",
+   "palabras": [
+    {
+     "en": "bell",
+     "ipa": "/bɛl/",
+     "es": "campana"
+    },
+    {
+     "en": "ball",
+     "ipa": "/bɔl/",
+     "es": "bola"
+    },
+    {
+     "en": "small",
+     "ipa": "/smɔl/",
+     "es": "pequeño"
+    }
+   ],
+   "pron_es": "una L sola, pero al final es la L 'oscura' americana (la lengua atrás)",
+   "confesion": "No es 'be-le-le': la L doble es una L que estira el eco. Bell, ball, small.",
+   "oracion_control": "The small bell calls the ball game."
+  },
+  {
+   "digrafo": "ff",
+   "ipas": [
+    "/f/"
+   ],
+   "vidas": "estable: una sola F",
+   "palabras": [
+    {
+     "en": "off",
+     "ipa": "/ɔf/",
+     "es": "apagado / fuera"
+    },
+    {
+     "en": "coffee",
+     "ipa": "/ˈkɔfi/",
+     "es": "café"
+    },
+    {
+     "en": "office",
+     "ipa": "/ˈɔfɪs/",
+     "es": "oficina"
+    }
+   ],
+   "pron_es": "una F sola: las dos F se funden",
+   "confesion": "Coffee = 'kofi'. La F doble es una F con eco, no dos. ES la F de PH.",
+   "oracion_control": "The office coffee is off."
+  },
+  {
+   "digrafo": "cc",
+   "ipas": [
+    "/k/",
+    "/ks/"
+   ],
+   "vidas": "DOS: /k/ (soccer, account) o /ks/ (accept, success)",
+   "palabras": [
+    {
+     "en": "soccer",
+     "ipa": "/ˈsɑkɚ/",
+     "es": "fútbol americano"
+    },
+    {
+     "en": "accept",
+     "ipa": "/əkˈsɛpt/",
+     "es": "aceptar"
+    },
+    {
+     "en": "success",
+     "ipa": "/səkˈsɛs/",
+     "es": "éxito"
+    }
+   ],
+   "pron_es": "'k' o 'ks' según la vocal que siga: e/i = ks",
+   "confesion": "Acc: accept = 'aksépt' (la segunda C se vuelve S). Ante e/i, la doble C se parte en k+s.",
+   "oracion_control": "I accept the soccer success."
+  },
+  {
+   "digrafo": "zz",
+   "ipas": [
+    "/z/"
+   ],
+   "vidas": "estable: /z/ vibrante",
+   "palabras": [
+    {
+     "en": "buzz",
+     "ipa": "/bʌz/",
+     "es": "zumbido"
+    },
+    {
+     "en": "pizza",
+     "ipa": "/ˈpitsə/",
+     "es": "pizza"
+    },
+    {
+     "en": "fuzzy",
+     "ipa": "/ˈfʌzi/",
+     "es": "velludito"
+    }
+   ],
+   "pron_es": "la Z americana NO es la zeta española: es una 's' con voz (bzzz de abeja)",
+   "confesion": "La Z inglesa es 's con garganta'. Buzz = 'boz', NO 'boTH'. Trampa clásica del hispanohablante.",
+   "oracion_control": "The fuzzy bee buzzes on the pizza."
+  },
+  {
+   "digrafo": "rh",
+   "ipas": [
+    "/r/"
+   ],
+   "vidas": "estable: H callada",
+   "palabras": [
+    {
+     "en": "rhino",
+     "ipa": "/ˈraɪnoʊ/",
+     "es": "rinoceronte"
+    },
+    {
+     "en": "rhythm",
+     "ipa": "/ˈrɪðəm/",
+     "es": "ritmo"
+    }
+   ],
+   "pron_es": "la H muda: solo R — 'ráino', 'rídem'",
+   "confesion": "Griego otra vez: rh suena solo 'r'. Y rhythm es el monstruo: ni una sola letra que suene como se escribe (la Y = vocal, la TH = /ð/).",
+   "oracion_control": "The rhino has rhythm."
+  },
+  {
+   "digrafo": "raras",
+   "ipas": [
+    "/n/",
+    "/m/",
+    "/s/"
+   ],
+   "vidas": "iniciales mudas de palabras cultas",
+   "palabras": [
+    {
+     "en": "pneumonia",
+     "ipa": "/nuˈmoʊnjə/",
+     "es": "pulmonía",
+     "nota": "pn: P muda"
+    },
+    {
+     "en": "psychology",
+     "ipa": "/saɪˈkɑlədʒi/",
+     "es": "psicología",
+     "nota": "ps: P muda"
+    },
+    {
+     "en": "autumn",
+     "ipa": "/ˈɔtəm/",
+     "es": "otoño",
+     "nota": "mn final: N muda"
+    },
+    {
+     "en": "island",
+     "ipa": "/ˈaɪlənd/",
+     "es": "isla",
+     "nota": "s muda — la S de island no existe para el oído"
+    }
+   ],
+   "pron_es": "palabras cultas: la primera letra se calla",
+   "confesion": "Island es la trampa estrella: se escribe 'is-land' pero se dice 'áiland' — la S es invisible. Como la S de 'isla' en español: ¡el inglés también tiene letras de adorno!",
+   "oracion_control": "Psychology in the autumn island."
+  }
+ ],
+ "vocalicos": [
+  {
+   "digrafo": "ee",
+   "ipas": [
+    "/iː/"
+   ],
+   "vidas": "estable: la i larga",
+   "palabras": [
+    {
+     "en": "see",
+     "ipa": "/siː/",
+     "es": "ver"
+    },
+    {
+     "en": "tree",
+     "ipa": "/triː/",
+     "es": "árbol"
+    },
+    {
+     "en": "coffee",
+     "ipa": "/ˈkɔfi/",
+     "es": "café"
+    }
+   ],
+   "pron_es": "la I larga: 'sii', como pedir silencio cantando",
+   "confesion": "La E doble = I larga. See, tree, coffee. El dígrafo vocalico más confiable.",
+   "oracion_control": "I see three green trees."
+  },
+  {
+   "digrafo": "ea",
+   "ipas": [
+    "/iː/",
+    "/ɛ/",
+    "/eɪ/"
+   ],
+   "vidas": "TRES: /iː/ (eat), /ɛ/ (bread), /eɪ/ (great) — el más traicionero",
+   "palabras": [
+    {
+     "en": "eat",
+     "ipa": "/iːt/",
+     "es": "comer"
+    },
+    {
+     "en": "teacher",
+     "ipa": "/ˈtitʃɚ/",
+     "es": "maestra"
+    },
+    {
+     "en": "bread",
+     "ipa": "/brɛd/",
+     "es": "pan"
+    },
+    {
+     "en": "head",
+     "ipa": "/hɛd/",
+     "es": "cabeza"
+    },
+    {
+     "en": "great",
+     "ipa": "/ɡreɪt/",
+     "es": "genial"
+    },
+    {
+     "en": "break",
+     "ipa": "/breɪk/",
+     "es": "romper"
+    }
+   ],
+   "pron_es": "tres humores: 'iiit', 'bred', 'gréit' — el contexto manda",
+   "confesion": "EA es el dígrafo con más personalidades: eat ≠ bread ≠ great. Solo el oído entrenado sabe cuál toca. En contacto con D suele ser /ɛ/ (head, bread, ready).",
+   "trampa": "la más traicionera de las vocales: adivinar no sirve, hay que oír",
+   "oracion_control": "I eat bread and read about a great beach."
+  },
+  {
+   "digrafo": "oo",
+   "ipas": [
+    "/uː/",
+    "/ʊ/",
+    "/ʌ/"
+   ],
+   "vidas": "TRES: /uː/ (moon), /ʊ/ (book), /ʌ/ rara (blood)",
+   "palabras": [
+    {
+     "en": "moon",
+     "ipa": "/muːn/",
+     "es": "luna"
+    },
+    {
+     "en": "food",
+     "ipa": "/fuːd/",
+     "es": "comida"
+    },
+    {
+     "en": "book",
+     "ipa": "/bʊk/",
+     "es": "libro"
+    },
+    {
+     "en": "good",
+     "ipa": "/ɡʊd/",
+     "es": "bueno"
+    },
+    {
+     "en": "blood",
+     "ipa": "/blʌd/",
+     "es": "sangre"
+    }
+   ],
+   "pron_es": "'muun' larga o 'buk' corta; la K y la D inclinan la balanza a /ʊ/",
+   "confesion": "La doble vida más famosa: moon (larga) vs book (cortita). Good, look, cook, book = corta. Food, moon, zoo = larga. Blood es el rebelde: /ʌ/.",
+   "trampa": "decir 'buk' largo o 'muun' corto: la duración es EL sonido",
+   "oracion_control": "I look at the moon and read a good book about food."
+  },
+  {
+   "digrafo": "ou",
+   "ipas": [
+    "/aʊ/",
+    "/uː/",
+    "/ʊ/",
+    "/oʊ/",
+    "/ʌ/"
+   ],
+   "vidas": "CUATRO+: /aʊ/ (out), /uː/ (soup), /ʊ/ (could), /oʊ/ (though), /ʌ/ (touch)",
+   "palabras": [
+    {
+     "en": "out",
+     "ipa": "/aʊt/",
+     "es": "fuera"
+    },
+    {
+     "en": "house",
+     "ipa": "/haʊs/",
+     "es": "casa"
+    },
+    {
+     "en": "soup",
+     "ipa": "/suːp/",
+     "es": "sopa"
+    },
+    {
+     "en": "could",
+     "ipa": "/kʊd/",
+     "es": "podría"
+    },
+    {
+     "en": "though",
+     "ipa": "/ðoʊ/",
+     "es": "aunque"
+    },
+    {
+     "en": "touch",
+     "ipa": "/tʌtʃ/",
+     "es": "tocar"
+    }
+   ],
+   "pron_es": "el camaleón: 'aut', 'suup', 'kud', 'dóu', 'toch'",
+   "confesion": "OU tiene más vidas que un gato. El truco: el trio could-should-would siempre /ʊ/; soup-group-you siempre /uː/; out-house-about siempre /aʊ/.",
+   "trampa": "memorizar en FAMILIAS, no regla general",
+   "oracion_control": "How about some soup? Though I could go out."
+  },
+  {
+   "digrafo": "ow",
+   "ipas": [
+    "/aʊ/",
+    "/oʊ/"
+   ],
+   "vidas": "DOS: /aʊ/ (now, cow) o /oʊ/ (snow, know)",
+   "palabras": [
+    {
+     "en": "now",
+     "ipa": "/naʊ/",
+     "es": "ahora"
+    },
+    {
+     "en": "cow",
+     "ipa": "/kaʊ/",
+     "es": "vaca"
+    },
+    {
+     "en": "down",
+     "ipa": "/daʊn/",
+     "es": "abajo"
+    },
+    {
+     "en": "snow",
+     "ipa": "/snoʊ/",
+     "es": "nieve"
+    },
+    {
+     "en": "know",
+     "ipa": "/noʊ/",
+     "es": "saber"
+    },
+    {
+     "en": "yellow",
+     "ipa": "/ˈjɛloʊ/",
+     "es": "amarillo"
+    }
+   ],
+   "pron_es": "dos caras: 'náu' o 'snóu'",
+   "confesion": "El mismo par, dos mundos: now suena español 'nau', snow suena 'snou'. Solo el oído decide. AYUDA: casi siempre /oʊ/ antes de N final muda (snow, know, grow) y /aʊ/ en now-cow-how.",
+   "oracion_control": "Now I know: the cow says no to snow."
+  },
+  {
+   "digrafo": "oi",
+   "ipas": [
+    "/ɔɪ/"
+   ],
+   "vidas": "estable: siempre /ɔɪ/",
+   "palabras": [
+    {
+     "en": "coin",
+     "ipa": "/kɔɪn/",
+     "es": "moneda"
+    },
+    {
+     "en": "point",
+     "ipa": "/pɔɪnt/",
+     "es": "punto"
+    },
+    {
+     "en": "noise",
+     "ipa": "/nɔɪz/",
+     "es": "ruido"
+    }
+   ],
+   "pron_es": "el diptongo 'oi' tal cual: cóin, póint",
+   "confesion": "El más honesto: OI siempre suena 'oi'. Coin, point, noise.",
+   "oracion_control": "The coin makes noise at one point."
+  },
+  {
+   "digrafo": "oy",
+   "ipas": [
+    "/ɔɪ/"
+   ],
+   "vidas": "estable: mismo sonido que OI (regla: oy al final de sílaba)",
+   "palabras": [
+    {
+     "en": "boy",
+     "ipa": "/bɔɪ/",
+     "es": "niño"
+    },
+    {
+     "en": "toy",
+     "ipa": "/tɔɪ/",
+     "es": "juguete"
+    },
+    {
+     "en": "enjoy",
+     "ipa": "/ɪnˈdʒɔɪ/",
+     "es": "disfrutar"
+    }
+   ],
+   "pron_es": "mismo 'oi': boi, toi",
+   "confesion": "OI y OY son el MISMO sonido con direcciones distintas: OI dentro de la palabra, OY al final. Boy = boi.",
+   "oracion_control": "The boy enjoys the toy."
+  },
+  {
+   "digrafo": "ai",
+   "ipas": [
+    "/eɪ/"
+   ],
+   "vidas": "estable: /eɪ/",
+   "palabras": [
+    {
+     "en": "rain",
+     "ipa": "/reɪn/",
+     "es": "lluvia"
+    },
+    {
+     "en": "train",
+     "ipa": "/treɪn/",
+     "es": "tren"
+    },
+    {
+     "en": "wait",
+     "ipa": "/weɪt/",
+     "es": "esperar"
+    }
+   ],
+   "pron_es": "'ei' de 'rey': réin, tréin",
+   "confesion": "AI = el 'ei' largo: rain, train, wait. Par de gemelas con AY.",
+   "oracion_control": "I wait for the train in the rain."
+  },
+  {
+   "digrafo": "ay",
+   "ipas": [
+    "/eɪ/"
+   ],
+   "vidas": "estable: /eɪ/ (ay al final de sílaba)",
+   "palabras": [
+    {
+     "en": "day",
+     "ipa": "/deɪ/",
+     "es": "día"
+    },
+    {
+     "en": "play",
+     "ipa": "/pleɪ/",
+     "es": "jugar"
+    },
+    {
+     "en": "say",
+     "ipa": "/seɪ/",
+     "es": "decir"
+    }
+   ],
+   "pron_es": "mismo 'ei': déi, pléi, séi",
+   "confesion": "AI y AY son gemelas: AI dentro, AY al final. Day, play, say. La Y final trabaja como I.",
+   "oracion_control": "I say: play every day."
+  },
+  {
+   "digrafo": "au",
+   "ipas": [
+    "/ɔː/",
+    "/ɑː/"
+   ],
+   "vidas": "principal /ɔː/ (cause); variante /ɑː/ (aunt)",
+   "palabras": [
+    {
+     "en": "cause",
+     "ipa": "/kɔːz/",
+     "es": "causar"
+    },
+    {
+     "en": "August",
+     "ipa": "/ˈɔːɡəst/",
+     "es": "agosto"
+    },
+    {
+     "en": "laundry",
+     "ipa": "/ˈlɔːndri/",
+     "es": "lavandería"
+    },
+    {
+     "en": "aunt",
+     "ipa": "/ɑːnt/",
+     "es": "tía",
+     "nota": "variante regional"
+    }
+   ],
+   "pron_es": "la O abierta larga: 'kos', 'ógost' — boca bien redonda",
+   "confesion": "AU = O larga: cause, August. La misma O de LAWN. Pariente de AW.",
+   "oracion_control": "In August, the laundry causes work."
+  },
+  {
+   "digrafo": "aw",
+   "ipas": [
+    "/ɔː/"
+   ],
+   "vidas": "estable: /ɔː/ (hermana de AU)",
+   "palabras": [
+    {
+     "en": "law",
+     "ipa": "/lɔː/",
+     "es": "ley"
+    },
+    {
+     "en": "saw",
+     "ipa": "/sɔː/",
+     "es": "vio (serrar)"
+    },
+    {
+     "en": "draw",
+     "ipa": "/drɔː/",
+     "es": "dibujar"
+    },
+    {
+     "en": "paw",
+     "ipa": "/pɔː/",
+     "es": "patita"
+    }
+   ],
+   "pron_es": "O larga redonda: 'lo', 'so', 'dro'",
+   "confesion": "AW y AU son la misma O vestida distinto. Law = la O de dog estirada y redonda.",
+   "oracion_control": "I saw the dog draw a paw in the sand."
+  },
+  {
+   "digrafo": "ei",
+   "ipas": [
+    "/eɪ/",
+    "/iː/"
+   ],
+   "vidas": "DOS: /eɪ/ (vein, eight) o /iː/ (receive, ceiling)",
+   "palabras": [
+    {
+     "en": "eight",
+     "ipa": "/eɪt/",
+     "es": "ocho"
+    },
+    {
+     "en": "vein",
+     "ipa": "/veɪn/",
+     "es": "vena"
+    },
+    {
+     "en": "receive",
+     "ipa": "/rɪˈsiːv/",
+     "es": "recibir"
+    },
+    {
+     "en": "ceiling",
+     "ipa": "/ˈsiːlɪŋ/",
+     "es": "techo"
+    }
+   ],
+   "pron_es": "'éit' o 'risíiv'",
+   "confesion": "El famoso 'i antes de e excepto después de c': receive/ceiling son /iː/; eight/vein son /eɪ/. Regla con excepciones de sobremesa.",
+   "oracion_control": "I weigh eight boxes to receive the ceiling."
+  },
+  {
+   "digrafo": "ie",
+   "ipas": [
+    "/aɪ/",
+    "/iː/"
+   ],
+   "vidas": "DOS: /aɪ/ (pie, lie) o /iː/ (field, piece)",
+   "palabras": [
+    {
+     "en": "pie",
+     "ipa": "/paɪ/",
+     "es": "pastel"
+    },
+    {
+     "en": "tie",
+     "ipa": "/taɪ/",
+     "es": "corbata"
+    },
+    {
+     "en": "field",
+     "ipa": "/fiːld/",
+     "es": "campo"
+    },
+    {
+     "en": "piece",
+     "ipa": "/piːs/",
+     "es": "pedazo"
+    }
+   ],
+   "pron_es": "'pai' o 'fiild'",
+   "confesion": "IE es la hermana con dos humores: al final de palabra suele ser /aɪ/ (pie), dentro suele ser /iː/ (piece). Believe = bilíiv.",
+   "oracion_control": "I believe this pie is a piece of art."
+  },
+  {
+   "digrafo": "oa",
+   "ipas": [
+    "/oʊ/"
+   ],
+   "vidas": "estable: /oʊ/",
+   "palabras": [
+    {
+     "en": "boat",
+     "ipa": "/boʊt/",
+     "es": "bote"
+    },
+    {
+     "en": "road",
+     "ipa": "/roʊd/",
+     "es": "camino"
+    },
+    {
+     "en": "coat",
+     "ipa": "/koʊt/",
+     "es": "abrigo"
+    },
+    {
+     "en": "soap",
+     "ipa": "/soʊp/",
+     "es": "jabón"
+    }
+   ],
+   "pron_es": "'ou' suave: bóut, róud",
+   "confesion": "OA = la O deslizándose a U: boat, road, coat. Gemela de OE.",
+   "oracion_control": "The boat goes down the road with my coat."
+  },
+  {
+   "digrafo": "oe",
+   "ipas": [
+    "/oʊ/"
+   ],
+   "vidas": "estable al final: /oʊ/",
+   "palabras": [
+    {
+     "en": "toe",
+     "ipa": "/toʊ/",
+     "es": "dedo del pie"
+    },
+    {
+     "en": "goes",
+     "ipa": "/ɡoʊz/",
+     "es": "va"
+    },
+    {
+     "en": "hoe",
+     "ipa": "/hoʊ/",
+     "es": "azadón"
+    }
+   ],
+   "pron_es": "mismo 'ou' de OA: tóu, góus",
+   "confesion": "OA y OE son el mismo sonido: OA dentro, OE al final (familia de ai/ay). Toe = tóu.",
+   "oracion_control": "My toe goes to the garden."
+  },
+  {
+   "digrafo": "ue",
+   "ipas": [
+    "/uː/",
+    "/juː/"
+   ],
+   "vidas": "principal /uː/ (blue); a veces /juː/ (cue)",
+   "palabras": [
+    {
+     "en": "blue",
+     "ipa": "/bluː/",
+     "es": "azul"
+    },
+    {
+     "en": "true",
+     "ipa": "/truː/",
+     "es": "verdadero"
+    },
+    {
+     "en": "glue",
+     "ipa": "/ɡluː/",
+     "es": "pegamento"
+    }
+   ],
+   "pron_es": "'u' larga: bluu, truu",
+   "confesion": "UE al final = U larga: blue, true, glue. La E final trabaja como eco de la U.",
+   "oracion_control": "The sky is blue and that is true."
+  },
+  {
+   "digrafo": "ui",
+   "ipas": [
+    "/uː/",
+    "/juː/"
+   ],
+   "vidas": "principal /uː/ (fruit); a veces /juː/ (suit)",
+   "palabras": [
+    {
+     "en": "fruit",
+     "ipa": "/fruːt/",
+     "es": "fruta"
+    },
+    {
+     "en": "juice",
+     "ipa": "/dʒuːs/",
+     "es": "jugo"
+    },
+    {
+     "en": "suit",
+     "ipa": "/suːt/",
+     "es": "traje"
+    }
+   ],
+   "pron_es": "'frut', 'yús' — la I es muda de eco",
+   "confesion": "En UI la I casi ni trabaja: fruit = frut. Juice = yus (con la J inglesa).",
+   "oracion_control": "The fruit juice is fresh."
+  },
+  {
+   "digrafo": "ew",
+   "ipas": [
+    "/uː/",
+    "/juː/"
+   ],
+   "vidas": "DOS: /uː/ (grew, chew) o /juː/ (few, new, news)",
+   "palabras": [
+    {
+     "en": "grew",
+     "ipa": "/ɡruː/",
+     "es": "creció"
+    },
+    {
+     "en": "flew",
+     "ipa": "/fluː/",
+     "es": "voló"
+    },
+    {
+     "en": "new",
+     "ipa": "/njuː/",
+     "es": "nuevo"
+    },
+    {
+     "en": "few",
+     "ipa": "/fjuː/",
+     "es": "pocos"
+    }
+   ],
+   "pron_es": "'gruu' o 'niú' (con deslizador de yod)",
+   "confesion": "EW es el mismo sonido de UE: grew/flew largos, new/few con la 'yu'. News = niúz.",
+   "oracion_control": "I chew the food I grew and read the news."
+  },
+  {
+   "digrafo": "ey",
+   "ipas": [
+    "/eɪ/",
+    "/i/"
+   ],
+   "vidas": "DOS: /eɪ/ (they, grey) o /i/ corta (money, honey, monkey)",
+   "palabras": [
+    {
+     "en": "they",
+     "ipa": "/ðeɪ/",
+     "es": "ellos"
+    },
+    {
+     "en": "grey",
+     "ipa": "/ɡreɪ/",
+     "es": "gris"
+    },
+    {
+     "en": "money",
+     "ipa": "/ˈmʌni/",
+     "es": "dinero"
+    },
+    {
+     "en": "honey",
+     "ipa": "/ˈhʌni/",
+     "es": "miel / cariño"
+    },
+    {
+     "en": "monkey",
+     "ipa": "/ˈmʌŋki/",
+     "es": "mono"
+    }
+   ],
+   "pron_es": "'déi' en they, pero 'máni' en money — trampa de dos caras",
+   "confesion": "LA TRAMPA DEL DINERO: they suena 'ei' pero money suena 'i' cortita. Mismo dígrafo, dos mundos — memoriza la familia: -ney/-ley/-key final = /i/.",
+   "trampa": "money NO es 'móunei': es 'máni'",
+   "oracion_control": "They give money and honey to the monkey."
+  },
+  {
+   "digrafo": "eo",
+   "ipas": [
+    "/iː/",
+    "/ɛ/"
+   ],
+   "vidas": "irregular: people /iː/, leopard /ɛ/",
+   "palabras": [
+    {
+     "en": "people",
+     "ipa": "/ˈpiːpəl/",
+     "es": "gente"
+    },
+    {
+     "en": "leopard",
+     "ipa": "/ˈlɛpɚd/",
+     "es": "leopardo"
+    }
+   ],
+   "pron_es": "'pípol' y 'lépard'",
+   "confesion": "EO es salvaje: people = pípol (ni la O existe), leopard = lépard. Palabras que se aprenden como LÁMINA ENTERA, no por regla.",
+   "oracion_control": "The people see the leopard."
+  }
+ ],
+ "extensiones_trampa": [
+  {
+   "digrafo": "tch (trígrafo)",
+   "ipas": [
+    "/tʃ/"
+   ],
+   "palabras": [
+    {
+     "en": "watch",
+     "ipa": "/wɑtʃ/",
+     "es": "reloj / ver"
+    },
+    {
+     "en": "catch",
+     "ipa": "/kætʃ/",
+     "es": "atrapar"
+    },
+    {
+     "en": "kitchen",
+     "ipa": "/ˈkɪtʃən/",
+     "es": "cocina"
+    }
+   ],
+   "confesion": "Después de vocal corta, la CH se escribe TCH: catch, kitchen, watch. La T es parte del disfraz.",
+   "oracion_control": "I watch and catch the ball in the kitchen."
+  },
+  {
+   "digrafo": "dge (trígrafo)",
+   "ipas": [
+    "/dʒ/"
+   ],
+   "palabras": [
+    {
+     "en": "edge",
+     "ipa": "/ɛdʒ/",
+     "es": "borde"
+    },
+    {
+     "en": "bridge",
+     "ipa": "/brɪdʒ/",
+     "es": "puente"
+    },
+    {
+     "en": "judge",
+     "ipa": "/dʒʌdʒ/",
+     "es": "juez"
+    }
+   ],
+   "confesion": "La J inglesa con disfraz triple: edge, bridge, judge. Misma regla que TCH: vocal corta + dge final.",
+   "oracion_control": "The judge crosses the bridge to the edge."
+  },
+  {
+   "digrafo": "igh (trígrafo)",
+   "ipas": [
+    "/aɪ/"
+   ],
+   "palabras": [
+    {
+     "en": "light",
+     "ipa": "/laɪt/",
+     "es": "luz"
+    },
+    {
+     "en": "night",
+     "ipa": "/naɪt/",
+     "es": "noche"
+    },
+    {
+     "en": "high",
+     "ipa": "/haɪ/",
+     "es": "alto"
+    }
+   ],
+   "confesion": "IGH = el 'ai' largo con GH fantasma: light = láit. Tres letras para un solo sonido. Par de gemelas: night/nite suenan IGUAL.",
+   "oracion_control": "The light at night is high."
+  },
+  {
+   "digrafo": "augh (cuatrígrafo)",
+   "ipas": [
+    "/ɔː/"
+   ],
+   "palabras": [
+    {
+     "en": "daughter",
+     "ipa": "/ˈdɔːtɚ/",
+     "es": "hija"
+    },
+    {
+     "en": "caught",
+     "ipa": "/kɔːt/",
+     "es": "atrapó"
+    },
+    {
+     "en": "taught",
+     "ipa": "/tɔːt/",
+     "es": "enseñó"
+    }
+   ],
+   "confesion": "AUGH = la O larga de LAW: daughter = dóter. Cuatro letras, un sonido. La palabra más importante del mundo de Josephine (daughter) vive aquí.",
+   "oracion_control": "The daughter caught what they taught her."
+  },
+  {
+   "digrafo": "ough (el monstruo)",
+   "ipas": [
+    "/oʊ/",
+    "/uː/",
+    "/ɔː/",
+    "/ʌ/",
+    "/ʌf/",
+    "/ɔːf/"
+   ],
+   "vidas": "SEIS vidas documentadas: though /oʊ/, through /uː/, thought /ɔː/, tough /ʌ/, cough /ɒf/, bough /aʊ/",
+   "palabras": [
+    {
+     "en": "though",
+     "ipa": "/ðoʊ/",
+     "es": "aunque"
+    },
+    {
+     "en": "through",
+     "ipa": "/θruː/",
+     "es": "a través"
+    },
+    {
+     "en": "thought",
+     "ipa": "/θɔːt/",
+     "es": "pensó"
+    },
+    {
+     "en": "tough",
+     "ipa": "/tʌf/",
+     "es": "duro"
+    },
+    {
+     "en": "cough",
+     "ipa": "/kɔf/",
+     "es": "tos"
+    },
+    {
+     "en": "bough",
+     "ipa": "/baʊ/",
+     "es": "rama"
+    }
+   ],
+   "confesion": "EL MONSTRUO FINAL: seis pronunciaciones para las mismas cuatro letras. La única cura es la lámina memorizada: though-dough /oʊ/ · through /uː/ · thought-bought /ɔː/ · tough-rough /ʌf/ · cough /ɔf/. Esta es la prueba viviente de que el inglés NO se lee letra por letra.",
+   "trampa": "aquí NO hay regla — solo oído y memoria",
+   "oracion_control": "Though it's tough, I thought through the cough."
+  },
+  {
+   "digrafo": "igh magic E family",
+   "ipas": [
+    "código de capas"
+   ],
+   "palabras": [
+    {
+     "en": "magic E",
+     "ipa": "(regla, no dígrafo)",
+     "es": "take, make, love, time: la E final callada que estira la vocal anterior",
+     "nota": "mismo principio jeroglífico: letras que trabajan sin sonar"
+    }
+   ],
+   "confesion": "El Magic E pertenece a la misma familia de jeroglíficos (la E avisa, no suena) pero NO es dígrafo: es una letra con chamba de mensajera. Se enseña en la misma semana de capas de resolución."
+  }
+ ],
+ "resumen": {
+  "consonanticos": 22,
+  "vocalicos": 20,
+  "extensiones": 6,
+  "total_entradas": 48,
+  "siguiente_paso": "hornear MP3s por dígrafo (palabras + oración control) y construir la página 'Cirugía de Letras: Dígrafos' que consuma este banco"
+ }
+}
