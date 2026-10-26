@@ -87,7 +87,7 @@ const LESSONS={
   trials:[["hot","A"],["cat","B"],["stop","A"],["hat","B"],["father","A"],["man","B"],["lot","A"],["black","B"]],
   hints:["Vuelve a escuchar el ancla de cada grupo y compara.","El sonido naranja es más abierto y tenso; el azul es tu A relajada.","Pon la mano bajo la barbilla: en el naranja la mandíbula baja más."],
   mouth:"Para el sonido naranja: baja la mandíbula, estira un poco los labios hacia los lados y deja la lengua plana. Escucha el modelo, grábate tres segundos y compara.",mouthModel:snd("cat")},
-2:{title:"Con motor y sin motor",hook:"Tu garganta es un motor que se enciende y se apaga.",
+2:{video:"assets/videos/motor-aire.mp4",title:"Con motor y sin motor",hook:"Tu garganta es un motor que se enciende y se apaga.",
   goal:"Hoy sentirás cuándo tu garganta vibra y cuándo solo sale aire.",
   A:{i:"📳",n:"Con motor: vibra",anchor:es("mmm","mmm"),words:W("zoo","zip","zone")},
   B:{i:"🔇",n:"Sin motor: solo aire",anchor:snd("sss"),words:W("sue","sip","sun")},
@@ -150,7 +150,7 @@ const LESSONS={
   trials:[["bat","A"],["very","B"],["cab","A"],["love","B"],["berry","A"],["view","B"],["very","B"],["cab","A"]],
   hints:["En el primer grupo los dos labios se estrellan y se sueltan; en el segundo el diente muerde el labio suave.","Los dos grupos tienen motor: la diferencia vive en los labios, no en la garganta.","Di berry y very seguidas: misma garganta, boca distinta."],
   mouth:"Prueba en el espejo: en el primer grupo los dos labios se estrellan y se sueltan; en el segundo, el diente de arriba descansa suave en el labio de abajo. Escucha el modelo, grábate y compara.",mouthModel:snd("berry")},
-11:{title:"La ese que sopla más ancho",hook:"Hay dos eses en inglés: la tuya y una más ancha, con aire de besito.",
+11:{video:"assets/videos/la-ese-ancha.mp4",title:"La ese que sopla más ancho",hook:"Hay dos eses en inglés: la tuya y una más ancha, con aire de besito.",
   goal:"Hoy oirás cuándo la ese se hace ancha y redonda.",
   A:{i:"🐍",n:"Tu ese",anchor:snd("sit"),words:W("sip","sit","seal")},
   B:{i:"💨",n:"Ese ancha",anchor:snd("ship"),words:W("ship","shape","shop")},
@@ -184,7 +184,49 @@ const LESSONS={
   B:{i:"🐍",n:"Ese de siempre",anchor:snd("sink"),words:W("sink","sip","seal")},
   trials:[["think","A"],["sink","B"],["three","A"],["sip","B"],["thanks","A"],["seal","B"],["think","A"],["sink","B"]],
   hints:["La lengua asomada no silba: el aire pasa suave entre lengua y dientes.","Si suena a serpiente, es el grupo de la ese.","Mira el modelo: en el primer grupo la punta se ve apenas entre los dientes."],
-  mouth:"Saca apenas la punta de la lengua entre los dientes en el primer grupo; métela y silba en el segundo. Escucha el modelo, grábate y compara.",mouthModel:snd("think")}
+  mouth:"Saca apenas la punta de la lengua entre los dientes en el primer grupo; métela y silba en el segundo. Escucha el modelo, grábate y compara.",mouthModel:snd("think")},
+16:{title:"El labio redondo",hook:"La doble u se hace solo con labios; la v muerde el labio.",
+  goal:"Hoy separarás la w redonda de la v que muerde.",
+  A:{i:"⭕",n:"Labios redondos",anchor:snd("whale"),words:W("whale","wine","west")},
+  B:{i:"😁",n:"Dientes y labio",anchor:snd("veil"),words:W("veil","vine","vest")},
+  trials:[["whale","A"],["veil","B"],["wine","A"],["vine","B"],["west","A"],["vest","B"],["whale","A"],["veil","B"]],
+  hints:["El grupo redondo no toca dientes: es puro labio, como un besito.","En el otro grupo los dientes muerden suavecito el labio de abajo.","Si la boca se redondea sola, es el grupo de la doble u."],
+  mouth:"Para la doble u, redondea los labios como para decir u, sin abrir la boca. Para la v, los dientes muerden apenas el labio de abajo. Escucha el modelo, grábate y compara.",mouthModel:snd("whale")},
+17:{title:"Lengua al frente, lengua atrás",hook:"La ele toca al frente; la erre americana se jala.",
+  goal:"Hoy separarás la ele que toca de la erre que flota.",
+  A:{i:"➡️",n:"Punta al frente",anchor:snd("light"),words:W("light","lock","low")},
+  B:{i:"⬅️",n:"Lengua atrás",anchor:snd("right"),words:W("right","rock","row")},
+  trials:[["light","A"],["right","B"],["lock","A"],["rock","B"],["low","A"],["row","B"],["light","A"],["right","B"]],
+  hints:["En el grupo del frente, la punta de la lengua toca el paladar.","En el otro grupo la lengua se jala hacia atrás sin tocar nada, y los labios se redondean un poquito.","Si el sonido es hueco, es el grupo de la lengua atrás."],
+  mouth:"Para la ele, la punta toca arriba, al frente. Para la erre americana, la lengua se jala hacia atrás sin tocar el techo de la boca. Escucha el modelo, grábate y compara.",mouthModel:snd("right")},
+18:{title:"La jota que sí suena",hook:"En inglés la hache respira; en español duerme.",
+  goal:"Hoy separarás el soplido de la hache del arranque directo de la vocal.",
+  A:{i:"💨",n:"Con soplido",anchor:snd("hate"),words:W("hate","hair","hear")},
+  B:{i:"🚪",n:"Arranque directo",anchor:snd("ate"),words:W("ate","air","ear")},
+  trials:[["hate","A"],["ate","B"],["hair","A"],["air","B"],["hear","A"],["ear","B"],["hate","A"],["ate","B"]],
+  hints:["Un grupo empieza con un soplo de aire, como empañar un espejo.","El otro arranca directo con la vocal, sin aviso.","Si oyes el soplido al inicio, es el grupo de la jota."],
+  mouth:"La hache inglesa sí suena: es un soplo suave de aire, como cuando empañas un espejo con el aliento. Escucha el modelo, grábate y compara.",mouthModel:snd("hate")},
+19:{title:"El final del pasado",hook:"La terminación del verbo termina con aire o con motor.",
+  goal:"Hoy oirás el final del pasado: sordo o sonoro.",
+  A:{i:"📳",n:"Con motor",anchor:snd("loved"),words:W("loved","played","closed")},
+  B:{i:"🌬️",n:"Con aire",anchor:snd("walked"),words:W("walked","asked","stopped")},
+  trials:[["loved","A"],["walked","B"],["played","A"],["asked","B"],["closed","A"],["stopped","B"],["loved","A"],["walked","B"]],
+  hints:["El grupo con motor termina zumbando: la garganta sigue vibrando.","El otro termina en aire puro: la garganta se queda quieta.","Es el motor del día dos, ahora al final del verbo."],
+  mouth:"En el pasado con motor, la garganta sigue vibrando hasta el final; en el de aire, termina suavecito. Y hay una tercera vida: cuando el verbo termina en te o de, el final dice su nombre: wanted. Escucha el modelo, grábate y compara.",mouthModel:snd("loved")},
+20:{title:"La T que golpea",hook:"Entre vocales, la te americana da un golpecito.",
+  goal:"Hoy separarás la te golpeada de la te crispada.",
+  A:{i:"🥁",n:"Golpeada",anchor:snd("water"),words:W("water","better","city")},
+  B:{i:"🌬️",n:"Crispada",anchor:snd("top"),words:W("top","tea","tree")},
+  trials:[["water","A"],["top","B"],["better","A"],["tea","B"],["city","A"],["tree","B"],["water","A"],["top","B"]],
+  hints:["El grupo golpeado suena como una de suavecita: la lengua toca y ya.","El otro sopla con un golpecito de aire, sobre todo al inicio.","Es la erre suave del español pero con ropa de letra te."],
+  mouth:"En el grupo golpeado, la lengua da un toquecito rápido al techo, como la erre de la palabra pero. En el crispado, la te sopla con fuerza. Escucha el modelo, grábate y compara.",mouthModel:snd("water")},
+21:{title:"Tu frase completa",hook:"Will abre el futuro, y ya lo oyes.",
+  goal:"Hoy distinguirás tu frase con will de la frase sin will.",
+  A:{i:"🚀",n:"Con will",anchor:snd("i-will-try-again"),words:W("i-will-try-again","and-then-i-will-rest")},
+  B:{i:"🔁",n:"Sin will",anchor:snd("i-try-again"),words:W("i-try-again","and-then-i-rest")},
+  trials:[["i-will-try-again","A"],["i-try-again","B"],["and-then-i-will-rest","A"],["and-then-i-rest","B"],["i-will-try-again","A"],["i-try-again","B"],["and-then-i-will-rest","A"],["and-then-i-rest","B"]],
+  hints:["Un grupo abre el futuro con la palabrita will.","El otro cuenta lo que pasa siempre, sin will.","Will nunca cambia de forma y siempre va seguido del verbo en su forma base."],
+  mouth:"Di tu frase completa con will: I will try again. Will abre el futuro y el verbo se queda en su forma base. Es la frase de tu semana, entera. Escucha el modelo, grábate y compara.",mouthModel:snd("i-will-try-again")}
 };
 const MAXD=Math.max(...Object.keys(LESSONS).map(Number));
 const TITLES=["Meta del día","Escucha y ancla","Discriminación","Boca: graba y compara","Cierre"];
@@ -287,7 +329,7 @@ function draw(){
   }).join("");
 }
 function body(n,L){
-  if(n===1)return `<div class="box"><button class="btn good" onclick="goStep(2)">Empezar ▶</button></div>`;
+  if(n===1)return `${L.video?`<video controls playsinline preload="metadata" style="width:100%;border-radius:12px;margin-bottom:10px;background:#000" src="${L.video}"></video><p class="mut" style="margin-bottom:8px">🎬 Tu clase explicada en video</p>`:""}<div class="box"><button class="btn good" onclick="goStep(2)">Empezar ▶</button></div>`;
   if(n===2){
     const g=x=>`<div class="grp"><b>${L[x].i} ${L[x].n}</b><button class="snd anc" onclick="hear('${x}',-1)">⚓ Ancla</button>${L[x].words.map((w,j)=>`<button class="snd" onclick="hear('${x}',${j})">🔊 ${j+1}</button>`).join("")}</div>`;
     const ready=st.heard.has("A")&&st.heard.has("B");
