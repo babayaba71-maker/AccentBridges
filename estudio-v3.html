@@ -220,7 +220,7 @@ const LESSONS={
   trials:[["water","A"],["top","B"],["better","A"],["tea","B"],["city","A"],["tree","B"],["water","A"],["top","B"]],
   hints:["El grupo golpeado suena como una de suavecita: la lengua toca y ya.","El otro sopla con un golpecito de aire, sobre todo al inicio.","Es la erre suave del español pero con ropa de letra te."],
   mouth:"En el grupo golpeado, la lengua da un toquecito rápido al techo, como la erre de la palabra pero. En el crispado, la te sopla con fuerza. Escucha el modelo, grábate y compara.",mouthModel:snd("water")},
-21:{title:"La che y la ese ancha",hook:"Una golpea, la otra sopla.",
+21:{ctx:[["im-gonna-share-my-thoughts","Share con la ese ancha",snd("im-gonna-share-my-thoughts")],["im-going-to-grab-a-chair","Chair con la che",snd("im-going-to-grab-a-chair")]],title:"La che y la ese ancha",hook:"Una golpea, la otra sopla.",
   goal:"Hoy separarás la che de la ese ancha: golpe y silbido.",
   A:{i:"🔨",n:"Golpe de che",anchor:snd("chip"),words:W("chip","chair","cheap")},
   B:{i:"💨",n:"Silbido ancho",anchor:snd("ship"),words:W("ship","share","sheep")},
@@ -334,7 +334,8 @@ function body(n,L){
   if(n===2){
     const g=x=>`<div class="grp"><b>${L[x].i} ${L[x].n}</b><button class="snd anc" onclick="hear('${x}',-1)">⚓ Ancla</button>${L[x].words.map((w,j)=>`<button class="snd" onclick="hear('${x}',${j})">🔊 ${j+1}</button>`).join("")}</div>`;
     const ready=st.heard.has("A")&&st.heard.has("B");
-    return g("A")+g("B")+(ready?"":`<p class="mut">Escucha al menos un sonido de cada grupo para continuar.</p>`)+`<button class="btn good" ${ready?"":"disabled"} onclick="goStep(3)">Continuar</button>`;
+    const ctb=L.ctx?`<div class="grp"><b>🗺️ En contexto</b>${L.ctx.map((c,i)=>`<button class="snd" onclick="play(LESSONS[st.day].ctx[${i}][2])">🔊 ${c[1]}</button>`).join("")}</div>`:"";
+    return g("A")+g("B")+ctb+(ready?"":`<p class="mut">Escucha al menos un sonido de cada grupo para continuar.</p>`)+`<button class="btn good" ${ready?"":"disabled"} onclick="goStep(3)">Continuar</button>`;
   }
   if(n===3){
     const T=TR.main;
