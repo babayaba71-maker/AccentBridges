@@ -220,13 +220,14 @@ const LESSONS={
   trials:[["water","A"],["top","B"],["better","A"],["tea","B"],["city","A"],["tree","B"],["water","A"],["top","B"]],
   hints:["El grupo golpeado suena como una de suavecita: la lengua toca y ya.","El otro sopla con un golpecito de aire, sobre todo al inicio.","Es la erre suave del español pero con ropa de letra te."],
   mouth:"En el grupo golpeado, la lengua da un toquecito rápido al techo, como la erre de la palabra pero. En el crispado, la te sopla con fuerza. Escucha el modelo, grábate y compara.",mouthModel:snd("water")},
-21:{title:"Tu frase completa",hook:"Will abre el futuro, y ya lo oyes.",
-  goal:"Hoy distinguirás tu frase con will de la frase sin will.",
-  A:{i:"🚀",n:"Con will",anchor:snd("i-will-try-again"),words:W("i-will-try-again","and-then-i-will-rest")},
-  B:{i:"🔁",n:"Sin will",anchor:snd("i-try-again"),words:W("i-try-again","and-then-i-rest")},
-  trials:[["i-will-try-again","A"],["i-try-again","B"],["and-then-i-will-rest","A"],["and-then-i-rest","B"],["i-will-try-again","A"],["i-try-again","B"],["and-then-i-will-rest","A"],["and-then-i-rest","B"]],
-  hints:["Un grupo abre el futuro con la palabrita will.","El otro cuenta lo que pasa siempre, sin will.","Will nunca cambia de forma y siempre va seguido del verbo en su forma base."],
-  mouth:"Di tu frase completa con will: I will try again. Will abre el futuro y el verbo se queda en su forma base. Es la frase de tu semana, entera. Escucha el modelo, grábate y compara.",mouthModel:snd("i-will-try-again")}
+21:{title:"La che y la ese ancha",hook:"Una golpea, la otra sopla.",
+  goal:"Hoy separarás la che de la ese ancha: golpe y silbido.",
+  A:{i:"🔨",n:"Golpe de che",anchor:snd("chip"),words:W("chip","chair","cheap")},
+  B:{i:"💨",n:"Silbido ancho",anchor:snd("ship"),words:W("ship","share","sheep")},
+  trials:[["chip","A"],["ship","B"],["chair","A"],["share","B"],["cheap","A"],["sheep","B"],["chip","A"],["ship","B"]],
+  hints:["La che es un golpe: la lengua toca el techo y suelta.","La ese ancha no toca nada: solo aire abanicado entre labios redondos.","Si oyes un golpe seco, es la che."],
+  mouth:"Para la che, la punta de la lengua toca el techo y suelta el golpe, como una te y una ese fusionadas. Para la ese ancha, los labios se redondean y el aire sale abanicado. Escucha el modelo, grábate y compara.",mouthModel:snd("chip")}
+
 };
 const MAXD=Math.max(...Object.keys(LESSONS).map(Number));
 const TITLES=["Meta del día","Escucha y ancla","Discriminación","Boca: graba y compara","Cierre"];
