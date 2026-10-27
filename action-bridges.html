@@ -40,7 +40,7 @@ h1{font-size:1.3rem;line-height:1.3}
 <main>
 <div class="card" id="intro">
 <h1>El Palacio de las Frases 👑</h1>
-<p class="mut" style="margin-top:8px">Tu gimnasio de frases: aquí se entrena que tu frase salga COMPLETA, sin que se caiga el pegamento (will, to, and). La calidad fina de cada sonido la escucha tu maestro contigo.</p>
+<p class="mut" style="margin-top:8px">Aquí NADA se repite en vano: cada nivel abre con su <b>lección</b> (qué es cada ladrillo y cómo se conectan: pronombres, verbos ayudantes, el puente to, conectores) y luego viene la práctica. La calidad fina de cada sonido la escucha tu maestro contigo.</p>
 <p class="mut" style="margin:6px 0 0 8px">1. 🎧 Escucha el modelo<br>2. 🎤 Dila en voz alta<br>3. 🔍 Te mostramos qué palabras salieron completas</p>
 <p class="mut" style="margin-top:8px">La que sale <b style="color:var(--gd)">verde</b> ya salió de tu boca. La <b style="color:var(--rj)">rojita</b> se repite despacito. No hay calificación: es tu palacio.</p>
 <p class="mut" style="margin-top:8px;font-size:.78rem">Necesita Chrome en Android y permiso de micrófono. Cada frase queda en tu expediente.</p>
@@ -65,24 +65,32 @@ Modelos = Sarah horneada (MP3-first). Telemetría = logMorfofonoSession (canal B
 const CDN="https://babayaba71-maker.github.io/AccentBridges/assets/action-bridges/";
 const API="https://valerie.base44.app/functions/logMorfofonoSession";
 const KEY="ABVC-PILOTO-2026";
+const LESSONS=[
+ {img:"lesson-1-lam.png",aud:"lesson-1",t:"Lección 1: Los Ladrillos",d:"Pronombres y el verbo to be"},
+ {img:"lesson-2-lam.png",aud:"lesson-2",t:"Lección 2: Lo Que Tengo",d:"El verbo have"},
+ {img:"lesson-3-lam.png",aud:"lesson-3",t:"Lección 3: El Puente TO",d:"La preposición que une palabras"},
+ {img:"lesson-4-lam.png",aud:"lesson-4",t:"Lección 4: Todo Se Conecta",d:"Cómo se construye la frase"},
+ {img:"lesson-5-lam.png",aud:"lesson-5",t:"Lección 5: Los Puentes entre Ideas",d:"Conectores: and, then, because"}
+];
+const TYPES={p:{c:"#ffc14d",n:"pronombre"},h:{c:"#7bb1ff",n:"verbo ayudante"},t:{c:"#6fce8f",n:"el puente to"},c:{c:"#e589c9",n:"conector"},x:{c:"#f5edd8",n:"acción"}};
 const NIVELES=[
  {tag:"NIVEL 1 · EL PUNTO DE PARTIDA", items:[
-  {k:"ab-01",en:"I am ready.",es:"Estoy lista."},
-  {k:"ab-02",en:"She is my baby.",es:"Ella es mi bebé."},
-  {k:"ab-03",en:"You are so pretty.",es:"Eres tan bonita."}]},
+  {k:"ab-01",en:"I am ready.",es:"Estoy lista.",wt:[["I","p"],["am","h"],["ready","x"]]},
+  {k:"ab-02",en:"She is my baby.",es:"Ella es mi bebé.",wt:[["She","p"],["is","h"],["my","x"],["baby","x"]]},
+  {k:"ab-03",en:"You are so pretty.",es:"Eres tan bonita.",wt:[["You","p"],["are","h"],["so","x"],["pretty","x"]]}]},
  {tag:"NIVEL 2 · LO QUE TENGO", items:[
-  {k:"ab-04",en:"I have a baby.",es:"Tengo una bebé."}]},
+  {k:"ab-04",en:"I have a baby.",es:"Tengo una bebé.",wt:[["I","p"],["have","h"],["a","x"],["baby","x"]]}]},
  {tag:"NIVEL 3 · LO QUE QUIERO", items:[
-  {k:"ab-05",en:"I want to go.",es:"Quiero ir."},
-  {k:"ab-06",en:"I need to work.",es:"Necesito trabajar."}]},
+  {k:"ab-05",en:"I want to go.",es:"Quiero ir.",wt:[["I","p"],["want","x"],["to","t"],["go","x"]]},
+  {k:"ab-06",en:"I need to work.",es:"Necesito trabajar.",wt:[["I","p"],["need","x"],["to","t"],["work","x"]]}]},
  {tag:"NIVEL 4 · LA CONEXIÓN 💛", items:[
-  {k:"ab-07",en:"I have to go.",es:"Tengo que ir."},
-  {k:"ab-08",en:"I have to work today.",es:"Tengo que trabajar hoy."}]},
+  {k:"ab-07",en:"I have to go.",es:"Tengo que ir.",wt:[["I","p"],["have","h"],["to","t"],["go","x"]]},
+  {k:"ab-08",en:"I have to work today.",es:"Tengo que trabajar hoy.",wt:[["I","p"],["have","h"],["to","t"],["work","x"],["today","x"]]}]},
  {tag:"NIVEL 5 · LA CADENA", items:[
-  {k:"ab-09",en:"I want to stay and play.",es:"Quiero quedarme a jugar."},
-  {k:"ab-10",en:"I have to go and do something.",es:"Tengo que ir a hacer algo."}]},
+  {k:"ab-09",en:"I want to stay and play.",es:"Quiero quedarme a jugar.",wt:[["I","p"],["want","x"],["to","t"],["stay","x"],["and","c"],["play","x"]]},
+  {k:"ab-10",en:"I have to go and do something.",es:"Tengo que ir a hacer algo.",wt:[["I","p"],["have","h"],["to","t"],["go","x"],["and","c"],["do","x"],["something","x"]]}]},
  {tag:"TU FRASE DE LA SEMANA ❤️", items:[
-  {k:"ab-11",en:"I will try again.",es:"Lo intentaré de nuevo."}]}
+  {k:"ab-11",en:"I will try again.",es:"Lo intentaré de nuevo.",wt:[["I","p"],["will","h"],["try","x"],["again","x"]]}]}
 ];
 const $=id=>document.getElementById(id);
 const st={noMic:false,cur:null,rec:null,listening:false,best:{}};
@@ -97,13 +105,22 @@ function startPalace(noMic){
   (SR&&!noMic?$("intro"):$("warn")).classList.add("hidden");
   if(!SR&&!noMic){$("warn").classList.remove("hidden");return}
   $("menu").classList.remove("hidden");
-  $("menu").innerHTML=NIVELES.map(nv=>`
+  $("menu").innerHTML=NIVELES.map((nv,ni)=>{
+    const L=LESSONS[ni];
+    const lessonBlock=L?`<div class="card" style="margin-top:14px;padding:0;overflow:hidden;border-color:var(--gold)">
+      <img src="${CDN}${L.img}?v=A1" style="width:100%;display:block" alt="">
+      <div style="padding:12px 14px">
+        <b style="color:var(--gold)">📖 ${L.t}</b>
+        <div class="mut" style="margin-top:4px">${L.d}</div>
+        <button class="play" onclick="playLesson('${L.aud}')">🎧 Escuchar la lección</button>
+      </div></div>`:"";
+    return lessonBlock+`
     <div style="margin-top:14px"><span class="tag">${nv.tag}</span></div>
     ${nv.items.map((it,i)=>`<button class="btn" onclick="openEx('${it.k}')">
       <div class="ex"><div style="flex:1"><div class="en">${it.en}</div><div class="es">${it.es}</div></div>
       <div style="text-align:right">${st.best[it.k]!=null?`<b style="color:var(--gd)">${st.best[it.k]}</b>`:"🔊"}</div></div>
     </button>`).join("")}
-  `).join("");
+  `;}).join("");
 }
 function openEx(k){
   const it=NIVELES.flatMap(n=>n.items).find(x=>x.k===k);
@@ -112,7 +129,8 @@ function openEx(k){
   const R=$("room");R.classList.remove("hidden");
   R.innerHTML=`
     <button class="btn" onclick="backMenu()">← Todas las frases</button>
-    <div class="sent" id="sentence">${it.en}</div>
+    <div class="sent" id="sentence">${it.wt.map(w=>`<span style="border-bottom:3px solid ${TYPES[w[1]].c}">${w[0]}</span>`).join(" ")}</div>
+    <div style="text-align:center;margin-top:2px">${Object.values(TYPES).map(t=>`<span style="display:inline-block;margin:2px 6px;font-size:.68rem;color:${t.c}">● ${t.n}</span>`).join("")}</div>
     <div class="mut" style="text-align:center">${it.es}</div>
     <button class="play" onclick="playModel()">🎧 Escuchar el modelo</button>
     ${st.noMic?`<p class="mut" style="margin-top:10px;text-align:center">Modo práctica: dila en voz alta siguiendo el modelo y el texto.</p>`
@@ -123,6 +141,7 @@ function openEx(k){
 }
 function backMenu(){stopRec();$("room").classList.add("hidden");$("menu").classList.remove("hidden");startPalace(st.noMic)}
 function playModel(){haptic(15);au.src=CDN+st.cur.k+".mp3?v=A1";au.play().catch(()=>{})}
+function playLesson(a){haptic(15);au.src=CDN+a+".mp3?v=A1";au.play().catch(()=>{})}
 function stopRec(){if(st.rec){try{st.rec.stop()}catch(e){}st.rec=null;st.listening=false}}
 function toggleRec(){
   if(st.listening){stopRec();drawRecBtn(false);return}
