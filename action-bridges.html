@@ -1,0 +1,175 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Action Bridges · El Palacio de Pronunciación</title>
+<style>
+:root{--bg:#241d10;--cd:#2e2517;--cd2:#38301f;--tx:#f5edd8;--mut:#b3a582;--gold:#ffc14d;--gd:#6fce8f;--rj:#e98989;--line:#4a3f28}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;min-height:100vh}
+header{background:#f7f1e2;color:#24303a;padding:12px 16px;display:flex;justify-content:space-between;align-items:baseline}
+header b{color:#d35400;font-size:1.02rem;letter-spacing:.4px}
+header span{font-size:.72rem;color:#7a6a55}
+main{max-width:480px;margin:0 auto;padding:12px}
+.card{background:var(--cd);border:1px solid var(--line);border-radius:16px;padding:18px 16px;margin-top:12px}
+h1{font-size:1.3rem;line-height:1.3}
+.mut{color:var(--mut);font-size:.85rem;line-height:1.55}
+.btn{display:block;width:100%;background:var(--cd2);border:1px solid var(--line);color:var(--tx);border-radius:12px;padding:14px;font-size:.95rem;cursor:pointer;margin-top:10px;text-align:left}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#241f0d;font-weight:700;text-align:center}
+.btn.gd{background:var(--gd);border-color:var(--gd);color:#06220f;font-weight:700;text-align:center}
+.ex{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.ex .n{font-size:.68rem;color:var(--mut);letter-spacing:.5px}
+.ex .en{font-family:Georgia,serif;font-size:1.02rem;margin-top:2px}
+.ex .es{font-size:.78rem;color:var(--mut);margin-top:2px}
+.tag{display:inline-block;font-size:.68rem;color:var(--gold);border:1px solid var(--line);border-radius:99px;padding:3px 10px}
+.sent{font-family:Georgia,serif;font-size:1.5rem;line-height:1.35;text-align:center;margin:10px 0}
+.words{text-align:center;line-height:2.1;margin:8px 0}
+.words span{display:inline-block;margin:2px 3px;padding:4px 10px;border-radius:10px;font-family:Georgia,serif;font-size:1.05rem}
+.w-ok{background:rgba(111,206,143,.14);color:var(--gd);border-bottom:2px solid var(--gd)}
+.w-no{background:rgba(233,137,137,.12);color:var(--rj);border-bottom:2px solid var(--rj)}
+.play{width:100%;background:rgba(255,193,77,.08);border:1px solid var(--gold);color:var(--gold);border-radius:12px;padding:14px;font-size:1rem;cursor:pointer;margin-top:8px}
+.rec{width:100%;background:var(--cd2);border:2px solid var(--tx);color:var(--tx);border-radius:14px;padding:18px;font-size:1.05rem;cursor:pointer;margin-top:10px;font-weight:700}
+.rec.on{border-color:var(--rj);color:var(--rj);animation:pulse 1.2s infinite}
+@keyframes pulse{50%{background:rgba(233,137,137,.12)}}
+.score{text-align:center;font-size:2rem;font-weight:800;margin-top:8px}
+.fb{text-align:center;font-size:.88rem;line-height:1.5;margin-top:4px}
+.hidden{display:none}
+.row2{display:flex;gap:10px;margin-top:12px}
+.row2 .btn{margin-top:0}
+.best{font-size:.72rem;color:var(--mut);text-align:right;margin-top:6px}
+</style></head><body>
+<header><b>🔧🔧 ACTION BRIDGES</b><span> El Palacio de Pronunciación</span></header>
+<main>
+<div class="card" id="intro">
+<h1>El Palacio de Pronunciación 👑</h1>
+<p class="mut" style="margin-top:8px">Tu gimnasio de boca. Tres pasitos por frase:</p>
+<p class="mut" style="margin:6px 0 0 8px">1. 🎧 Escucha el modelo<br>2. 🎤 Dila en voz alta<br>3. 🔍 Te mostramos palabra por palabra cómo sonó</p>
+<p class="mut" style="margin-top:8px">La que sale <b style="color:var(--gd)">verde</b> ya es tuya. La <b style="color:var(--rj)">rojita</b> se repite despacito. No hay calificación: es tu palacio.</p>
+<p class="mut" style="margin-top:8px;font-size:.78rem">Necesita Chrome en Android y permiso de micrófono. Cada frase queda en tu expediente.</p>
+<button class="btn gold" onclick="startPalace()">Entrar al palacio ▶</button>
+</div>
+<div class="card hidden" id="warn">
+<h1>Un momentito 🎤</h1>
+<p class="mut" style="margin-top:8px">Tu navegador no trae el oído de la máquina (funciona en Chrome, en Android o compu). Puedes escuchar los modelos y practicar en voz alta siguiendo el texto — la medición automática llega con Chrome.</p>
+<button class="btn gold" onclick="startPalace(true)">Entrar en modo práctica ▶</button>
+</div>
+<div class="card hidden" id="menu"></div>
+<div class="card hidden" id="room"></div>
+</main>
+<script>
+/* ===== ACTION BRIDGES — EL PALACIO DE PRONUNCIACIÓN =====
+Clon nuestro del sistema del sobrino (PronunLab/Pronunciation Palace), escaneado 27-oct:
+motor = Web Speech API del navegador (GRATIS): transcribe lo dicho y compara
+palabra por palabra contra la frase objetivo. Score = aciertos/total x 100.
+Verde = dicha, roja = repítela. Adaptado a A2 + español + currículo de conexión
+(directriz JJ 27-oct: pronombres → to be → have → infinitivos → I have to go → and).
+Modelos = Sarah horneada (MP3-first). Telemetría = logMorfofonoSession (canal BOCA). */
+const CDN="https://babayaba71-maker.github.io/AccentBridges/assets/action-bridges/";
+const API="https://valerie.base44.app/functions/logMorfofonoSession";
+const KEY="ABVC-PILOTO-2026";
+const NIVELES=[
+ {tag:"NIVEL 1 · EL PUNTO DE PARTIDA", items:[
+  {k:"ab-01",en:"I am ready.",es:"Estoy lista."},
+  {k:"ab-02",en:"She is my baby.",es:"Ella es mi bebé."},
+  {k:"ab-03",en:"You are so pretty.",es:"Eres tan bonita."}]},
+ {tag:"NIVEL 2 · LO QUE TENGO", items:[
+  {k:"ab-04",en:"I have a baby.",es:"Tengo una bebé."}]},
+ {tag:"NIVEL 3 · LO QUE QUIERO", items:[
+  {k:"ab-05",en:"I want to go.",es:"Quiero ir."},
+  {k:"ab-06",en:"I need to work.",es:"Necesito trabajar."}]},
+ {tag:"NIVEL 4 · LA CONEXIÓN 💛", items:[
+  {k:"ab-07",en:"I have to go.",es:"Tengo que ir."},
+  {k:"ab-08",en:"I have to work today.",es:"Tengo que trabajar hoy."}]},
+ {tag:"NIVEL 5 · LA CADENA", items:[
+  {k:"ab-09",en:"I want to stay and play.",es:"Quiero quedarme a jugar."},
+  {k:"ab-10",en:"I have to go and do something.",es:"Tengo que ir a hacer algo."}]},
+ {tag:"TU FRASE DE LA SEMANA ❤️", items:[
+  {k:"ab-11",en:"I will try again.",es:"Lo intentaré de nuevo."}]}
+];
+const $=id=>document.getElementById(id);
+const st={noMic:false,cur:null,rec:null,listening:false,best:{}};
+const haptic=p=>{if("vibrate" in navigator)navigator.vibrate(p)};
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const au=new Audio();
+const stu=()=>(localStorage.getItem("morfofono_student")||localStorage.getItem("abvc_student")||"Estudiante").trim();
+try{st.best=JSON.parse(localStorage.getItem("ab_best")||"{}")}catch(e){st.best={}}
+const norm=s=>s.toLowerCase().replace(/[^a-z'\s]/g,"").split(/\s+/).filter(Boolean);
+function startPalace(noMic){
+  st.noMic=noMic;
+  (SR&&!noMic?$("intro"):$("warn")).classList.add("hidden");
+  if(!SR&&!noMic){$("warn").classList.remove("hidden");return}
+  $("menu").classList.remove("hidden");
+  $("menu").innerHTML=NIVELES.map(nv=>`
+    <div style="margin-top:14px"><span class="tag">${nv.tag}</span></div>
+    ${nv.items.map((it,i)=>`<button class="btn" onclick="openEx('${it.k}')">
+      <div class="ex"><div style="flex:1"><div class="en">${it.en}</div><div class="es">${it.es}</div></div>
+      <div style="text-align:right">${st.best[it.k]!=null?`<b style="color:var(--gd)">${st.best[it.k]}</b>`:"🔊"}</div></div>
+    </button>`).join("")}
+  `).join("");
+}
+function openEx(k){
+  const it=NIVELES.flatMap(n=>n.items).find(x=>x.k===k);
+  st.cur=it;
+  $("menu").classList.add("hidden");
+  const R=$("room");R.classList.remove("hidden");
+  R.innerHTML=`
+    <button class="btn" onclick="backMenu()">← Todas las frases</button>
+    <div class="sent" id="sentence">${it.en}</div>
+    <div class="mut" style="text-align:center">${it.es}</div>
+    <button class="play" onclick="playModel()">🎧 Escuchar el modelo</button>
+    ${st.noMic?`<p class="mut" style="margin-top:10px;text-align:center">Modo práctica: dila en voz alta siguiendo el modelo y el texto.</p>`
+    :`<button class="rec" id="recbtn" onclick="toggleRec()">🎤 Tócala (habla claro)</button>
+    <div id="out"></div>`}
+    <div class="best" id="best">${st.best[k]!=null?"Tu mejor: "+st.best[k]:""}</div>`;
+  playModel();
+}
+function backMenu(){stopRec();$("room").classList.add("hidden");$("menu").classList.remove("hidden");startPalace(st.noMic)}
+function playModel(){haptic(15);au.src=CDN+st.cur.k+".mp3?v=A1";au.play().catch(()=>{})}
+function stopRec(){if(st.rec){try{st.rec.stop()}catch(e){}st.rec=null;st.listening=false}}
+function toggleRec(){
+  if(st.listening){stopRec();drawRecBtn(false);return}
+  const r=new SR();st.rec=r;st.listening=true;
+  r.lang="en-US";r.interimResults=false;r.maxAlternatives=4;r.continuous=false;
+  const alts=[];
+  r.onresult=e=>{
+    for(let i=0;i<e.results[0].length;i++)alts.push(e.results[0][i].transcript);
+    judge(alts);
+  };
+  r.onerror=()=>{st.listening=false;drawRecBtn(false);
+    $("out").innerHTML=`<div class="fb mut">No te escuché bien — dale otra vez, un poquito más cerca del mic. 🎤</div>`};
+  r.onend=()=>{if(st.listening){st.listening=false;drawRecBtn(false)}};
+  try{r.start()}catch(e){st.listening=false}
+  drawRecBtn(true);$("out").innerHTML=`<div class="fb mut">Escuchando… dila natural, sin prisa 🌱</div>`;
+  haptic(25);
+}
+function drawRecBtn(on){const b=$("recbtn");if(!b)return;b.className=on?"rec on":"rec";b.textContent=on?"🔴 Escuchando… (toca para parar)":"🎤 Tócala (habla claro)"}
+function judge(alts){
+  if(!alts.length){$("out").innerHTML=`<div class="fb mut">No te escuché bien — dale otra vez 🎤</div>`;return}
+  const target=norm(st.cur.en);
+  const heard=[].concat(...alts.map(norm));
+  const words=target.map(w=>({w,ok:heard.includes(w)}));
+  const got=words.filter(x=>x.ok).length;
+  const score=target.length?Math.round(got/target.length*100):0;
+  if(st.best[st.cur.k]==null||score>st.best[st.cur.k]){
+    st.best[st.cur.k]=score;
+    try{localStorage.setItem("ab_best",JSON.stringify(st.best))}catch(e){}
+    if($("best"))$("best").textContent="Tu mejor: "+score;
+  }
+  const fb=score>=100?"¡Tu frase completa salió entera! 🎉 Así se construye un puente."
+    :score>=70?"¡Muy bien! Las rojitas se repiten despacito y la vuelves a tocar."
+    :score>=40?"¡Vas llegando! Escucha el modelo otra vez y dila despacio, pieza por pieza."
+    :"Tranquila: escucha el modelo, dila despacito y la vuelves a tocar. Aquí no hay prisa.";
+  $("out").innerHTML=`
+    <div class="words">${words.map(x=>`<span class="${x.ok?"w-ok":"w-no"}">${x.w}</span>`).join("")}</div>
+    <div class="score" style="color:${score>=70?"var(--gd)":"var(--rj)"}">${score}</div>
+    <div class="fb">${fb}</div>
+    <div class="row2">
+      <button class="btn" onclick="playModel()">🎧 Modelo</button>
+      <button class="btn gd" onclick="toggleRec()">🎤 Otra vez</button>
+    </div>`;
+  haptic(score>=70?[20,40,20]:[30,60,30]);
+  fetch(API,{method:"POST",headers:{"Content-Type":"application/json",api_key:KEY},body:JSON.stringify({
+    topic:"Action Bridges — "+st.cur.en,
+    userId:stu(),passed:score>=70,accuracy:score,
+    challengeSentence:st.cur.en,spokenText:alts[0]||"",
+    location:"Action Bridges",sessionId:"ab-"+Date.now()})}).catch(()=>{});
+}
+</script></body></html>
