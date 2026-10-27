@@ -31,6 +31,12 @@ canvas{width:100%;height:auto}
 .ev .u{flex:0 0 90px;color:var(--gold);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ev .t{flex:1}
 .ev .s{flex:0 0 44px;text-align:right;font-weight:700}
+.cam{display:flex;gap:8px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--line);font-size:.85rem}
+.cam:last-child{border:0}
+.cam .p{flex:0 0 32%;font-weight:700}
+.cam .u{flex:1;color:var(--mut)}
+.cam .sig{flex:0 0 auto;background:rgba(255,193,77,.12);border:1px solid var(--gold);color:var(--gold);border-radius:99px;padding:3px 10px;font-size:.78rem}
+.cam .ok{color:var(--good)} .cam .bad{color:var(--red)} .cam .nunca{color:var(--mut)}
 .interp{background:linear-gradient(135deg,#1c2836,#182430);border:1px solid var(--gold);border-radius:14px;padding:14px;font-size:.92rem;line-height:1.6}
 .interp b{color:var(--gold)}
 .pie{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px}
@@ -49,6 +55,17 @@ canvas{width:100%;height:auto}
 <div class="tile"><span class="mut">Prácticas 14 días</span><b id="t14">—</b></div>
 <div class="tile"><span class="mut">Promedio</span><b id="tprom">—</b></div>
 </div>
+<div class="card" id="camino" style="border-color:var(--gold)">
+<h2 style="color:#c99c3a">🗺️ EL CAMINO DE LA ALUMNA UNO · Josephine</h2>
+<div id="caminoBody">Cargando…</div>
+<div style="margin-top:12px;border-top:1px dashed var(--line);padding-top:10px">
+<h2 style="color:#c99c3a">🧑‍🏫 LO QUE NECESITA DE TI (presencial)</h2>
+<div style="font-size:.88rem;line-height:1.9">
+1. 🎬 <b>El reto Betty Bought ×3</b> (lo pidió ella) — boca con rúbrica de golpecitos<br>
+2. 🔗 <b>Cadenas en voz alta</b>: "I have to go and do something" + "I will try again" completa (que no se caiga el will)<br>
+3. 👂 <b>live vs life en contexto</b>: "I live here" / "My life is good" — el hueco del driveway<br>
+4. 💬 <b>Su salón privado</b>: que le mande "Hi" a @Valerie3bot (tareas si-o-si por su canal)
+</div></div></div>
 <div class="card"><h2>ACTIVIDAD POR DÍA (14 DÍAS) · barras = prácticas · línea = aciertos %</h2><canvas id="c1" width="860" height="240"></canvas></div>
 <div class="card"><h2>PUERTAS DEL ECOSISTEMA (14 DÍAS)</h2><div id="canales"></div></div>
 <div class="card interp"><h2 style="color:#c99c3a">🔍 INTERPRETACIÓN</h2><p id="interp">Cargando…</p></div>
@@ -69,7 +86,7 @@ async function carga(){
   document.getElementById("t7").textContent=D.totales.sesiones_7d;
   document.getElementById("t14").textContent=D.totales.sesiones_14d;
   document.getElementById("tprom").textContent=(D.totales.promedio===null?"—":D.totales.promedio+"%");
-  barras();canales();feed();
+  barras();canales();camino();feed();
   const p=document.getElementById("interp");
   p.innerHTML=(D.interpretacion||"Sin actividad en la ventana.")+" <span class='mut'>Actualizado: "+new Date(D.generado).toLocaleTimeString("es-MX")+".</span>";
 }
@@ -98,6 +115,35 @@ function barras(){
 function canales(){
   const el=document.getElementById("canales");const max=Math.max(1,...D.canales.map(c=>c.n));
   el.innerHTML=D.canales.map(c=>`<div class="ch"><span class="lbl">${c.canal}</span><span class="bar"><i style="width:${(100*c.n/max)}%"></i></span><span class="n">${c.n}${c.avg!==null?" · "+c.avg+"%":""}</span></div>`).join("")||"<p class='mut'>Sin datos.</p>";
+}
+function camino(){
+  const ev=(D.eventos||[]).filter(e=>["Josefina","Estudiante v3"].includes(e.usuario));
+  const lastOf=sub=>ev.filter(e=>(e.canal+" "+(e.topic||"")).includes(sub)).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha))[0];
+  const fmt=e=>{const f=new Date(new Date(e.fecha).getTime()-7*3600000);return f.toLocaleDateString("es-MX",{day:"2-digit",month:"short"})+" · "+(e.score===null?"—":e.score+"%")};
+  const EST={1:"El sonido no es la letra",2:"Con motor y sin motor",3:"Larga y corta",4:"El final también tiene motor",5:"Aire y motor en los labios",6:"La boca abre más",7:"Estirada y corta",8:"La lengua entre los dientes",9:"Grande y rendida",10:"Los gemelos falsos",11:"La ese que sopla más ancho",12:"El zumbido de la ese",13:"El desliz",14:"Estirada o corta",15:"La lengua asoma",16:"El labio redondo",17:"Lengua al frente, lengua atrás",18:"La jota que sí suena",19:"El final del pasado",20:"La T que golpea",21:"La che y la ese ancha"};
+  const PEG={1:"WILL",2:"LINKING",3:"CONECTORES",4:"EL TO Y SUS TRES VIDAS",5:"LA FRASE COMPLETA"};
+  const m=e=>(e.topic||"").match(/Día (\d+)/);
+  const rows=[];
+  const eEst=lastOf("Estudio v3");
+  if(eEst){const d=+m(eEst)[1];const nx=d<21?("Día "+(d+1)+(EST[d+1]?": "+EST[d+1]:"")):"¡Currículo 1-21 completo!";
+    rows.push(["Estudio v3 (Cloud)",fmt(eEst),(eEst.passed?"<span class='ok'>avanzando</span>":"<span class='bad'>atascada</span>"),nx])}
+  else rows.push(["Estudio v3 (Cloud)","<span class='nunca'>sin práctica</span>","","Día 1: El sonido no es la letra"]);
+  const eOid=lastOf("Oído");
+  if(eOid){const d=m(eOid)?+m(eOid)[1]:null;
+    rows.push(["Oído Inglés",fmt(eOid),eOid.passed?"<span class='ok'>avanzando</span>":"<span class='bad'>reprobada "+(eOid.score?eOid.score+"%":"")+" — su hueso</span>",d?("repetir Día "+d+" / subir"):"repetir"])}
+  else rows.push(["Oído Inglés","<span class='nunca'>sin práctica</span>","","Día 1"]);
+  const ePeg=lastOf("Pegamento");
+  if(ePeg){const d=+m(ePeg)[1];const nx=d<5?("Día "+(d+1)+": "+PEG[d+1]):"semana completa ✓ — nueva semana";
+    rows.push(["El Pegamento (su semana)",fmt(ePeg),(ePeg.passed?"<span class='ok'>avanzando</span>":"<span class='bad'>atascada</span>"),nx])}
+  else rows.push(["El Pegamento (su semana)","<span class='nunca'>aún sin abrir</span>","","Día 1: WILL — le llega por campana"]);
+  const eMap=lastOf("Mapa de Sonidos");
+  rows.push(["Mapa de Sonidos (diagnóstico)",eMap?fmt(eMap):"<span class='nunca'>pendiente</span>",eMap?(eMap.accuracy>=70?"<span class='ok'>mapeado</span>":"<span class='bad'>huecos marcados</span>"):"","le llega hoy tras su clase"]);
+  const eAB=lastOf("Action Bridges");
+  rows.push(["Action Bridges (frases)",eAB?fmt(eAB):"<span class='nunca'>nueva</span>",eAB?"<span class='ok'>practicando</span>":"","Nivel 1: I am ready"]);
+  const eOjo=lastOf("Prueba del Ojo"),eCer=lastOf("Prueba de Comprensión");
+  rows.push(["Pruebas (ojo y cerebro)",(eOjo?"Ojo "+fmt(eOjo):"")+(eCer?" · Cerebro "+fmt(eCer):"")||"—",eOjo?"<span class='ok'>fortaleza medida</span>":"","sin repetir"]);
+  document.getElementById("caminoBody").innerHTML=rows.map(r=>
+    `<div class="cam"><span class="p">${r[0]}</span><span class="u">${r[1]} ${r[2]}</span><span class="sig">SIGUE: ${r[3]}</span></div>`).join("");
 }
 function feed(){
   const el=document.getElementById("feed");
