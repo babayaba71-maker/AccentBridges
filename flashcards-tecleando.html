@@ -207,7 +207,7 @@ function finish(){
   document.getElementById("endTitle").textContent="⭐ "+ok+" de "+base+" ("+acc+"%)";
   document.getElementById("endMsg").innerHTML=acc>=80?"¡Ya tecleas lo que oyes! Las palabras clave son de casa. 🎉<br>Ahora arma los chunks: te espera el Ensamblador.":"¡Bien! Vuelve a teclearlas para que se vuelvan de casa 💪";
   const sid="tec-"+Date.now();
-  const rec={topic:"Flashcards Tecleando — Números+Colores+Pronombres+To be ("+base+" palabras)",location:"Culiacán",accuracy:acc,passed:acc>=70,
+  const rec={topic:"Flashcards Tecleando — Números+Colores+Pronombres+To be ("+base+" palabras)",location:"Flashcards",accuracy:acc,passed:acc>=70,
     spokenText:"tecleando · "+ok+"/"+base+" · señales: "+logS.join(", ")+((repeats.length)?" · repite:"+repeats.join(","):" · sin repetidos"),
     challengeSentence:repeats.join(",")||"—",userId:NAME,sessionId:sid};
   let intento=0;

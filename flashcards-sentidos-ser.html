@@ -157,7 +157,7 @@ function finish(){
   document.getElementById("endMsg").innerHTML=acc>=80?"¡Los sentidos y el ser ya son de casa! 🎉":acc>=50?"¡Bien! Repite para que se vuelvan de casa 💪":"Mira y escucha otra vez — el ojo se afina con cada vuelta 👀";
   // sesión → PracticeSession (resumen para la Maestra)
   const sid="fc-"+Date.now();
-  const rec={topic:"Flashcards Sentidos+Ser — Mazo 1 ("+queue.length+" tarjetas)",location:"Culiacán",accuracy:acc,passed:acc>=70,
+  const rec={topic:"Flashcards Sentidos+Ser — Mazo 1 ("+queue.length+" tarjetas)",location:"Flashcards",accuracy:acc,passed:acc>=70,
     spokenText:"flashcards · "+ok+"/"+queue.length+" · señales: "+logS.join(", ")+((repeats.length)?" · repite:"+repeats.join(","):" · sin repetidos"),
     challengeSentence:repeats.join(",")||"—",userId:NAME,sessionId:sid};
   let intento=0;

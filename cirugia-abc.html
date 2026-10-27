@@ -271,7 +271,7 @@ function actualizarWho(){const b=document.getElementById("who");if(b)b.textConte
 const wb=document.getElementById("who");if(wb)wb.onclick=()=>{const n=prompt("¿Cómo te llamas? (para tu expediente de aprendizaje)");if(n){localStorage.setItem("armadorName",n);actualizarWho()}};
 actualizarWho();
 function final(acc){
-  const rec={topic:"Cirugía del Abecedario — Quiz Transición (13 preguntas)",location:"Culiacán",accuracy:acc,passed:acc>=70,
+  const rec={topic:"Cirugía del Abecedario — Quiz Transición (13 preguntas)",location:"Cirugía del Abecedario",accuracy:acc,passed:acc>=70,
     spokenText:"cirugia · "+ok+"/"+n+" · transicion L1-L2 · sid:abc-"+Date.now(),challengeSentence:"—",userId:NAME(),sessionId:"abc-"+Date.now()};
   fetch(BQ_SES,{method:"POST",headers:{"Content-Type":"application/json","api_key":KEY},body:JSON.stringify(rec)}).catch(()=>{});
 }

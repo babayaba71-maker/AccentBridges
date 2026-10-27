@@ -171,7 +171,7 @@ function finish(){
   document.getElementById("endTitle").textContent="⭐ "+ok+" de "+queue.length+" ("+acc+"%)";
   document.getElementById("endMsg").innerHTML=acc>=80?"¡Los colores y números ya son de casa! 🎉":acc>=50?"¡Bien! Repite para que se vuelvan de casa 💪":"Mira y escucha otra vez — el ojo se afina con cada vuelta 👀";
   const sid="fc0-"+Date.now();
-  const rec={topic:"Flashcards Mazo 0 — Alfabetización Cero ("+queue.length+" tarjetas)",location:"Culiacán",accuracy:acc,passed:acc>=70,
+  const rec={topic:"Flashcards Mazo 0 — Alfabetización Cero ("+queue.length+" tarjetas)",location:"Flashcards",accuracy:acc,passed:acc>=70,
     spokenText:"mazo0 · "+ok+"/"+queue.length+" · señales: "+logS.join(", ")+((repeats.length)?" · repite:"+repeats.join(","):" · sin repetidos"),
     challengeSentence:repeats.join(",")||"—",userId:NAME,sessionId:sid};
   let intento=0;
