@@ -116,9 +116,21 @@ function canales(){
   const el=document.getElementById("canales");const max=Math.max(1,...D.canales.map(c=>c.n));
   el.innerHTML=D.canales.map(c=>`<div class="ch"><span class="lbl">${c.canal}</span><span class="bar"><i style="width:${(100*c.n/max)}%"></i></span><span class="n">${c.n}${c.avg!==null?" · "+c.avg+"%":""}</span></div>`).join("")||"<p class='mut'>Sin datos.</p>";
 }
-function camino(){
-  const ev=(D.eventos||[]).filter(e=>["Josefina","Estudiante v3"].includes(e.usuario));
+async function caminoData(){
+  const out=[];
+  for(const u of ["Josefina","Estudiante v3"]){
+    try{
+      const r=await fetch(API+"?usuario="+encodeURIComponent(u),{headers:{api_key:"ABVC-PILOTO-2026"}});
+      const d=await r.json();
+      if(d.ok) out.push(...(d.eventos||[]));
+    }catch(e){}
+  }
+  return out;
+}
+async function camino(){
+  const ev=await caminoData();
   const lastOf=sub=>ev.filter(e=>(e.canal+" "+(e.topic||"")).includes(sub)).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha))[0];
+  const okP=e=>e.passed!=null?e.passed:(e.score!=null&&e.score>=70);
   const fmt=e=>{const f=new Date(new Date(e.fecha).getTime()-7*3600000);return f.toLocaleDateString("es-MX",{day:"2-digit",month:"short"})+" · "+(e.score===null?"—":e.score+"%")};
   const EST={1:"El sonido no es la letra",2:"Con motor y sin motor",3:"Larga y corta",4:"El final también tiene motor",5:"Aire y motor en los labios",6:"La boca abre más",7:"Estirada y corta",8:"La lengua entre los dientes",9:"Grande y rendida",10:"Los gemelos falsos",11:"La ese que sopla más ancho",12:"El zumbido de la ese",13:"El desliz",14:"Estirada o corta",15:"La lengua asoma",16:"El labio redondo",17:"Lengua al frente, lengua atrás",18:"La jota que sí suena",19:"El final del pasado",20:"La T que golpea",21:"La che y la ese ancha"};
   const PEG={1:"WILL",2:"LINKING",3:"CONECTORES",4:"EL TO Y SUS TRES VIDAS",5:"LA FRASE COMPLETA"};
@@ -126,15 +138,15 @@ function camino(){
   const rows=[];
   const eEst=lastOf("Estudio v3");
   if(eEst){const d=+m(eEst)[1];const nx=d<21?("Día "+(d+1)+(EST[d+1]?": "+EST[d+1]:"")):"¡Currículo 1-21 completo!";
-    rows.push(["Estudio v3 (Cloud)",fmt(eEst),(eEst.passed?"<span class='ok'>avanzando</span>":"<span class='bad'>atascada</span>"),nx])}
+    rows.push(["Estudio v3 (Cloud)",fmt(eEst),(okP(eEst)?"<span class='ok'>avanzando</span>":"<span class='bad'>atascada</span>"),nx])}
   else rows.push(["Estudio v3 (Cloud)","<span class='nunca'>sin práctica</span>","","Día 1: El sonido no es la letra"]);
   const eOid=lastOf("Oído");
   if(eOid){const d=m(eOid)?+m(eOid)[1]:null;
-    rows.push(["Oído Inglés",fmt(eOid),eOid.passed?"<span class='ok'>avanzando</span>":"<span class='bad'>reprobada "+(eOid.score?eOid.score+"%":"")+" — su hueso</span>",d?("repetir Día "+d+" / subir"):"repetir"])}
+    rows.push(["Oído Inglés",fmt(eOid),okP(eOid)?"<span class='ok'>avanzando</span>":"<span class='bad'>reprobada "+(eOid.score?eOid.score+"%":"")+" — su hueso</span>",d?("repetir Día "+d+" / subir"):"repetir"])}
   else rows.push(["Oído Inglés","<span class='nunca'>sin práctica</span>","","Día 1"]);
   const ePeg=lastOf("Pegamento");
   if(ePeg){const d=+m(ePeg)[1];const nx=d<5?("Día "+(d+1)+": "+PEG[d+1]):"semana completa ✓ — nueva semana";
-    rows.push(["El Pegamento (su semana)",fmt(ePeg),(ePeg.passed?"<span class='ok'>avanzando</span>":"<span class='bad'>atascada</span>"),nx])}
+    rows.push(["El Pegamento (su semana)",fmt(ePeg),(okP(ePeg)?"<span class='ok'>avanzando</span>":"<span class='bad'>atascada</span>"),nx])}
   else rows.push(["El Pegamento (su semana)","<span class='nunca'>aún sin abrir</span>","","Día 1: WILL — le llega por campana"]);
   const eMap=lastOf("Mapa de Sonidos");
   rows.push(["Mapa de Sonidos (diagnóstico)",eMap?fmt(eMap):"<span class='nunca'>pendiente</span>",eMap?(eMap.accuracy>=70?"<span class='ok'>mapeado</span>":"<span class='bad'>huecos marcados</span>"):"","le llega hoy tras su clase"]);
