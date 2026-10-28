@@ -43,12 +43,11 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="placa">Fondo de Alma · v6 · APK propio</div>
+  <div class="placa">Fondo de Alma · v7 · el vivo ya es tuyo</div>
   <div class="vivo">
-    <div class="vivo-tit">🎥 El fondo VIVO, hecho por nosotros</div>
-    <p>El orb animado de verdad, como app propia de fondo de pantalla: aparece en la lista de <b>Live wallpapers</b> del teléfono, sin internet, sin sensores y se detiene solo cuando no lo miras.</p>
-    <button class="btn primario" id="btn-apk">⬇️ Instalar el fondo vivo (345 KB)</button>
-    <p class="chico">Después: Ajustes → Fondo de pantalla y estilo → Live wallpapers → <b>Alma · el orb de AccentBridges</b> → Aplicar. Tiene su botón <b>Configurar</b> para velocidad, brillo y tamaño.</p>
+    <div class="vivo-tit">✅ El fondo vivo ya existe y es TUYO: se llama Alma</div>
+    <p>Ese "Alma" de la lista de Live wallpapers <b>es el nuestro</b>: la app <b>com.myl.alma v0.1.3</b> que construí antes, con tu idea de "que respire tranquila". No hace falta otra app ni otro APK.</p>
+    <p class="chico">Para activarlo: Ajustes → Fondo de pantalla y estilo → <b>Live wallpapers</b> → <b>Alma</b> → Aplicar en inicio y bloqueo. Trae fps adaptativo, menos partículas con batería baja y se detiene cuando no lo miras.</p>
   </div>
 
 
@@ -118,9 +117,6 @@ async function bajar(ruta,nombre,boton){
     avance(0);
   }finally{ todos.forEach(b=>b.disabled=false) }
 }
-document.getElementById('btn-apk').addEventListener('click',function(){
-  bajar('apk/alma-orb.apk','alma-orb.apk',this);
-});
 document.querySelectorAll('button[data-ruta]').forEach(b=>{
   b.addEventListener('click',()=>bajar(b.dataset.ruta,b.dataset.nombre,b));
 });
