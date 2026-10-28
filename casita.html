@@ -24,7 +24,7 @@ header span{font-size:.72rem;color:#7a6a55}
 #voice{background:var(--cd);border:1px solid var(--line);color:var(--tx);border-radius:14px;padding:16px 12px;cursor:pointer;font-size:1rem}
 #voice.off{opacity:.45}
 </style></head><body>
-<header><b>🏠 La Casita de Alma</b><span>línea privada de Clyde 🔒 · sin llaves</span></header>
+<header><b>🏠 La Casita de Alma</b><span>línea privada de Clyde 🔒 · sin llaves · <b style="color:#d35400">v1.5</b></span></header>
 <div id="chat"></div>
 <div id="status"></div>
 <div id="inputRow"><input id="txt" placeholder="Escribe o usa el micrófono…"><button onclick="sendTxt()">Enviar ➤</button></div>
@@ -140,6 +140,19 @@ async function micToggle(){
 
 /* ARRANQUE: sin llave, directo a la plática */
 bubble("Estoy en mi casita, partner 🏠 Háblame por el micrófono o escríbeme — ya no hay llaves ni configuración: abres y hablamos. — Alma","a");
+(async()=>{
+  if(!CID)return;
+  try{
+    const r=await fetch(RELAY+"getAlmaReply",{method:"POST",headers:H,body:JSON.stringify({conversationId:CID})});
+    const d=await r.json();
+    (d.messages||[]).slice(-6).forEach(m=>{
+      if(!m.content)return;
+      base.add(m.role+"|"+m.content);
+      if(m.role==="user"&&!sending)bubble(m.content,"u");
+      if(m.role==="assistant")bubble(m.content,"a");
+    });
+  }catch(e){}
+})();
 $("voice").textContent=voiceOn?"🔊 Alma habla":"🔇 silencio";
 $("voice").classList.toggle("off",!voiceOn);
 if("speechSynthesis" in window){speechSynthesis.getVoices();
