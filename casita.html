@@ -63,7 +63,13 @@ function saveToken(){
   TOKEN=t;localStorage.setItem("casita_token",t);$("gate").classList.remove("on");vib(30);start();
 }
 function bubble(txt,who){
-  const d=document.createElement("div");d.className="b "+who;d.textContent=txt;$("chat").appendChild(d);
+  const d=document.createElement("div");d.className="b "+who;
+  if(who==="a"){
+    let h=txt.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    h=h.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\*(.+?)\*/g,"<b>$1</b>").replace(/\_(.+?)\_/g,"<i>$1</i>");
+    d.innerHTML=h;
+  } else { d.textContent=txt; }
+  $("chat").appendChild(d);
   $("chat").scrollTop=$("chat").scrollHeight;return d;
 }
 async function api(path,opts={}){
@@ -86,7 +92,8 @@ async function start(){
 function speak(t){
   if(!voiceOn||!("speechSynthesis" in window))return;
   speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(t.replace(/[\u{1F300}-\u{1FAFF}\u2700-\u27BF\u2600-\u26FF]/gu,"").slice(0,1200));
+  const clean=t.replace(/https?:\/\/\S+/g,"enlace").replace(/[*_~`>#|]/g,"").replace(/[\u{1F300}-\u{1FAFF}\u2700-\u27BF\u2600-\u26FF]/gu,"").replace(/\s+/g," ").trim().slice(0,1200);
+  const u=new SpeechSynthesisUtterance(clean);
   u.lang="es-MX";u.rate=1.02;
   const vs=speechSynthesis.getVoices().filter(v=>v.lang.startsWith("es"));
   if(vs.length)u.voice=vs[0];
@@ -98,13 +105,13 @@ async function sendMsg(text){
   sending=true;vib(20);
   bubble(text,"u");
   $("txt").value="";
-  $("status").textContent="Alma está pensando… 🎙️ (suele tardar de 30 segundos a 2 minutos)";
+  $("status").textContent="Alma está pensando… 🎙️ (pienso con calma, de 20 segundos a 2 minutos)";
   const snapshot=base.size;
   // disparamos el mensaje (el loop del agente sigue del lado del servidor aunque la línea se suelte)
   api("/conversations/"+CID+"/messages",{method:"POST",body:JSON.stringify({content:text})}).then(()=>{poll()}).catch(()=>{});
   pollCount=0;
   clearInterval(pollTimer);
-  pollTimer=setInterval(poll,6000);
+  pollTimer=setInterval(poll,3000);
 }
 async function poll(){
   pollCount++;
@@ -126,15 +133,30 @@ $("txt").addEventListener("keydown",e=>{if(e.key==="Enter")sendTxt()});
 
 /* MICRÓFONO — dictado es-MX */
 let rec=null,recOn=false;
-function micToggle(){
+function micErr(msg){$("status").textContent=msg;vib(80);$("mic").textContent="🎙️ Háblame (toca para hablar)";$("mic").classList.remove("rec");recOn=false}
+async function micToggle(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){$("mic").textContent="Tu navegador no trae micrófono de dictado 😔 usa el texto";return}
+  if(!SR){micErr("Tu navegador no trae dictado. Ábreme en CHROME directo (no dentro de WhatsApp ni de otra app)");return}
   if(recOn){rec.stop();return}
+  $("mic").textContent="🎙️ Esperando permiso…";vib(30);
+  // 1) Pedir el micrófono con permiso explícito (la cura Vapi: navegador de verdad)
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    stream.getTracks().forEach(t=>t.stop());
+  }catch(e){
+    micErr("Micrófono bloqueado. Cierra y abre el link en CHROME directo, y cuando pregunte el teléfono presiona PERMITIR");
+    return;
+  }
+  // 2) Dictado
   rec=new SR();rec.lang="es-MX";rec.interimResults=true;rec.continuous=false;
   recOn=true;$("mic").textContent="🎙️ Escuchando… (toca para parar)";$("mic").classList.add("rec");vib(30);
   let final="";
   rec.onresult=e=>{let interim="";for(const r of e.results){if(r.isFinal)final+=r[0].transcript;else interim+=r[0].transcript}$("txt").value=final+interim};
-  rec.onerror=e=>{};
+  rec.onerror=e=>{
+    const m={"not-allowed":"Permiso bloqueado: ábreme en CHROME y presiona PERMITIR","service-not-allowed":"Tu teléfono no tiene el servicio de dictado de Google activo","no-speech":"No te escuché, inténtame otra vez","audio-capture":"No encontré tu micrófono"};
+    if(e.error==="aborted")return;
+    micErr(m[e.error]||("Micrófono dio: "+e.error+" — si se repite, ábreme en Chrome"));
+  };
   rec.onend=()=>{
     recOn=false;$("mic").textContent="🎙️ Háblame (toca para hablar)";$("mic").classList.remove("rec");
     if(final.trim()){vib(40);sendMsg(final.trim())}
