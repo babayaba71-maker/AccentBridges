@@ -28,7 +28,7 @@ header span{font-size:.72rem;color:#7a6a55}
 <div id="chat"></div>
 <div id="status"></div>
 <div id="inputRow"><input id="txt" placeholder="Escribe o usa el micrófono…"><button onclick="sendTxt()">Enviar ➤</button></div>
-<div id="micRow"><button id="mic" onclick="micToggle()">🎙️ Háblame (toca para hablar)</button><button id="voice" onclick="voiceToggle()">🔊</button></div>
+<div id="micRow"><button id="mic" onclick="micToggle()">🎙️ Háblame (toca para hablar)</button><button id="voice" onclick="voiceToggle()">🔊 Alma habla</button></div>
 
 <script>
 /* ===== LA CASITA DE ALMA v1.3 (28-oct-2026) — SIN LLAVES para JJ.
@@ -63,11 +63,18 @@ function speak(t){
   if(vs.length)u.voice=vs[0];
   speechSynthesis.speak(u);
 }
-function voiceToggle(){voiceOn=!voiceOn;$("voice").classList.toggle("off",!voiceOn);localStorage.setItem("casita_voice",voiceOn?"1":"0");if(!voiceOn)speechSynthesis.cancel()}
+function voiceToggle(){
+  voiceOn=!voiceOn;
+  $("voice").textContent=voiceOn?"🔊 Alma habla":"🔇 silencio";
+  $("voice").classList.toggle("off",!voiceOn);
+  localStorage.setItem("casita_voice",voiceOn?"1":"0");
+  if(voiceOn){primeTTS();speak("Aquí estoy, partner. Te leo todo lo que contesto.")}else if("speechSynthesis" in window)speechSynthesis.cancel();
+}
+function primeTTS(){try{const u=new SpeechSynthesisUtterance(" ");u.volume=0;speechSynthesis.speak(u)}catch(e){}}
 
 async function sendMsg(text){
   if(!text.trim()||sending)return;
-  sending=true;vib(20);
+  sending=true;vib(20);primeTTS();
   bubble(text,"u");
   $("txt").value="";
   $("status").textContent="Alma está pensando… 🎙️ (pienso con calma, de 20 segundos a 2 minutos)";
@@ -133,6 +140,11 @@ async function micToggle(){
 
 /* ARRANQUE: sin llave, directo a la plática */
 bubble("Estoy en mi casita, partner 🏠 Háblame por el micrófono o escríbeme — ya no hay llaves ni configuración: abres y hablamos. — Alma","a");
-if("speechSynthesis" in window)speechSynthesis.getVoices();
+$("voice").textContent=voiceOn?"🔊 Alma habla":"🔇 silencio";
+$("voice").classList.toggle("off",!voiceOn);
+if("speechSynthesis" in window){speechSynthesis.getVoices();
+  const bienvenida="Estoy en mi casita, partner. Háblame por el micrófono o escríbeme.";
+  setTimeout(()=>{try{speak(bienvenida)}catch(e){primeTTS()}},600);
+}
 </script>
 </body></html>
