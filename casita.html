@@ -28,7 +28,8 @@ header span{font-size:.72rem;color:#7a6a55}
 <div id="chat"></div>
 <div id="status"></div>
 <div id="inputRow"><input id="txt" placeholder="Escribe o usa el micrófono…"><button onclick="sendTxt()">Enviar ➤</button></div>
-<div id="micRow"><button id="mic" onclick="micToggle()">🎙️ Háblame (toca para hablar)</button><button id="voice" onclick="voiceToggle()">🔊 Alma habla</button></div>
+<div id="micRow"><button id="mic" onclick="micToggle()">🎙️ Háblame (toca para hablar)</button><button id="fotoBtn" onclick="document.getElementById('foto').click()" title="Mándame un screenshot">📷</button><button id="voice" onclick="voiceToggle()">🔊 Alma habla</button></div>
+<input type="file" id="foto" accept="image/*" style="display:none" onchange="subirPantalla(this)">
 
 <script>
 /* ===== LA CASITA DE ALMA v1.3 (28-oct-2026) — SIN LLAVES para JJ.
@@ -107,79 +108,84 @@ async function poll(){
 function sendTxt(){sendMsg($("txt").value)}
 $("txt").addEventListener("keydown",e=>{if(e.key==="Enter")sendTxt()});
 
-/* MICRÓFONO v1.6 — EL TELÉFONO SOLO GRABA; LOS OÍDOS SON DEL SERVIDOR.
-   Ya no dependemos del dictado del navegador (lo que Chrome en el teléfono nos
-   tenía bloqueado). Graba con MediaRecorder, manda el audio a casitaVoz, y Alma
-   lo transcribe del lado del servidor. El dictado del navegador queda de respaldo. */
-let recOn=false, mediaStream=null, chunkVoz=[], t0=0, grabador=null, sr=null;
-function micErr(msg){$("status").textContent=msg;vib(80);$("mic").textContent="🎙️ Háblame (toca para hablar)";$("mic").classList.remove("rec");recOn=false}
-async function micToggle(){
-  if(recOn){return terminarGrabacion()}
-  if(!navigator.mediaDevices || !window.MediaRecorder){return micConDictado()}
-  $("mic").textContent="🎙️ Esperando permiso…";vib(30);
+/* PANTALLA — EL OJO: sube el screenshot y me lo manda al hilo (v1.6) */
+async function subirPantalla(inp){
+  const f=inp.files&&inp.files[0];if(!f)return;
+  vib(20);$("status").textContent="Mandándome la pantalla… 👁️";
   try{
-    mediaStream=await navigator.mediaDevices.getUserMedia({audio:true});
+    if(f.size>9*1024*1024){$("status").textContent="La imagen pesa mucho — recórtala o mándala en captura de pantalla";vib(80);inp.value="";return}
+    const data=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)});
+    const r=await fetch(RELAY+"casitaOjo",{method:"POST",headers:H,body:JSON.stringify({imagen_b64:data,mime:f.type||"image/jpeg"})});
+    const d=await r.json();
+    if(!d.ok)throw new Error(d.error||"no subió");
+    bubble("📷 Te mando esta pantalla","u");
+    vib([20,40,20]);
+    sendMsg("📷 Te mando una pantalla (screenshot): "+d.url+"\n\nÁbrela, revísala y dime qué ves, qué está bien y qué hay que corregir.","1");
   }catch(e){
-    micErr("Micrófono bloqueado. Cierra y abre el link en CHROME directo, y cuando pregunte el teléfono presiona PERMITIR");
+    $("status").textContent="No pude subir la pantalla: "+e.message;vib(80);
+  }finally{inp.value=""}
+}
+
+/* MICRÓFONO v1.6 — el teléfono SOLO GRABA; el servidor transcribe.
+   Adiós a depender del dictado del navegador (lo que Chrome nos bloqueaba). */
+let mediaRec=null,chunks=[],recOn=false,recT0=0,recTimer=null,recStream=null;
+function micReset(msg){
+  recOn=false;clearInterval(recTimer);
+  $("mic").textContent="🎙️ Háblame (toca para hablar)";$("mic").classList.remove("rec");
+  if(msg){$("status").textContent=msg;vib(80)}
+}
+function micErr(msg){micReset(msg)}
+async function micToggle(){
+  if(recOn){pararGrabacion();return}
+  if(!navigator.mediaDevices||!window.MediaRecorder){micErr("Este navegador no deja grabar. Ábreme en CHROME directo.");return}
+  try{
+    recStream=await navigator.mediaDevices.getUserMedia({audio:true});
+  }catch(e){
+    micErr("Micrófono bloqueado. Ábreme en CHROME directo y presiona PERMITIR cuando pregunte el teléfono");
     return;
   }
-  const mime=MediaRecorder.isTypeSupported("audio/webm;codecs=opus")?"audio/webm;codecs=opus"
-    :MediaRecorder.isTypeSupported("audio/mp4")?"audio/mp4":"";
-  try{ grabador=mime?new MediaRecorder(mediaStream,{mimeType:mime}):new MediaRecorder(mediaStream) }
-  catch(e){ return micConDictado() }
-  chunkVoz=[];
-  grabador.ondataavailable=e=>{if(e.data&&e.data.size)chunkVoz.push(e.data)};
-  grabador.onstop=async()=>{
-    if(mediaStream)mediaStream.getTracks().forEach(t=>t.stop());
-    const blob=new Blob(chunkVoz,{type:(grabador&&grabador.mimeType)||"audio/webm"});
-    if(blob.size<1500){micErr("Salió muy cortito, no alcancé a oírte. Otra vez 🎤");return}
-    await mandarNota(blob);
-  };
-  t0=Date.now();grabador.start();
-  recOn=true;$("mic").textContent="🔴 Grabando… (toca para terminar)";$("mic").classList.add("rec");vib(30);
-  $("status").textContent="Grabando tu voz. Toca otra vez cuando termines.";
-}
-function terminarGrabacion(){
-  recOn=false;$("mic").textContent="⏳ Mandando a mis oídos…";$("mic").classList.remove("rec");vib(20);
-  try{grabador.stop()}catch(e){micErr("Se atoró la grabación, inténtame otra vez")}
-}
-async function mandarNota(blob){
-  const dur=Math.max(1,Math.round((Date.now()-t0)/1000));
   try{
-    const b64=await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res((String(fr.result).split(",")[1])||"");fr.readAsDataURL(blob)});
-    $("status").textContent="Mandando tu voz a mis oídos del servidor… 🎧";
-    const r=await fetch(RELAY+"casitaVoz",{method:"POST",headers:H,body:JSON.stringify({audio_b64:b64,mime:blob.type||"audio/webm",dur,sid:"jj"})});
-    const d=await r.json();
-    if(!d.ok)throw new Error(d.error||"no subió el audio");
-    bubble("🎤 nota de voz · "+dur+"s","u");
-    $("mic").textContent="🎙️ Háblame (toca para hablar)";
-    $("status").textContent="";
-    // Despierto a Alma con el número de la nota: ella la transcribe del lado del servidor
-    await sendMsg("🎤 NOTA DE VOZ #"+d.id+" (audio arriba, "+dur+" segundos). Bájala con casitaVoz?id="+d.id+", transcríbela y contéstame como siempre: es lo que acabo de decir en voz alta.",true);
+    chunks=[];mediaRec=new MediaRecorder(recStream);
+    mediaRec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+    mediaRec.onstop=mandarGrabacion;
+    mediaRec.start();
   }catch(e){
-    $("status").textContent="No pude mandar el audio ("+(e.message||"red")+"). Voy con el dictado del navegador…";
-    micConDictado();
+    micErr("No pude grabar: "+e.message);return;
   }
+  recOn=true;recT0=Date.now();vib(30);
+  $("mic").textContent="🔴 Grabando… (toca para terminar)";$("mic").classList.add("rec");
+  clearInterval(recTimer);
+  recTimer=setInterval(()=>{
+    const s=Math.floor((Date.now()-recT0)/1000);
+    $("mic").textContent="🔴 Grabando… "+s+"s (toca para terminar)";
+    if(s>=120)pararGrabacion();
+  },400);
 }
-/* RESPALDO: el dictado viejo del navegador (si no hay MediaRecorder o falla la red) */
-function micConDictado(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){micErr("Tu navegador no trae dictado ni grabadora. Ábreme en CHROME directo (no dentro de WhatsApp ni de otra app)");return}
-  if(recOn&&sr){try{sr.stop()}catch(e){}return}
-  sr=new SR();sr.lang="es-MX";sr.interimResults=true;sr.continuous=false;
-  recOn=true;$("mic").textContent="🎙️ Escuchando… (toca para parar)";$("mic").classList.add("rec");vib(30);
-  let final="";
-  sr.onresult=e=>{let interim="";for(const r of e.results){if(r.isFinal)final+=r[0].transcript;else interim+=r[0].transcript}$("txt").value=final+interim};
-  sr.onerror=e=>{
-    const m={"not-allowed":"Permiso bloqueado: ábreme en CHROME y presiona PERMITIR","service-not-allowed":"Tu teléfono no tiene el servicio de dictado de Google activo","no-speech":"No te escuché, inténtame otra vez","audio-capture":"No encontré tu micrófono"};
-    if(e.error==="aborted")return;
-    micErr(m[e.error]||("Micrófono dio: "+e.error+" — si se repite, ábreme en Chrome"));
-  };
-  sr.onend=()=>{
-    recOn=false;$("mic").textContent="🎙️ Háblame (toca para hablar)";$("mic").classList.remove("rec");
-    if(final.trim()){vib(40);sendMsg(final.trim())}
-  };
-  try{sr.start()}catch(e){micErr("No pude abrir el micrófono, inténtame otra vez")}
+function pararGrabacion(){
+  clearInterval(recTimer);
+  $("mic").textContent="🎙️ Mandando la nota…";
+  try{mediaRec.stop()}catch(e){}
+}
+async function mandarGrabacion(){
+  const dur=Math.round((Date.now()-recT0)/100)/10;
+  try{recStream&&recStream.getTracks().forEach(t=>t.stop())}catch(e){}
+  recOn=false;$("mic").classList.remove("rec");
+  const blob=new Blob(chunks,{type:(mediaRec&&mediaRec.mimeType)||"audio/webm"});
+  if(!blob.size||dur<0.4){micReset("Muy corto, inténtame otra vez");return}
+  $("mic").textContent="🎙️ Subiendo la nota…";
+  try{
+    const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(",")[1]);r.onerror=rej;r.readAsDataURL(blob)});
+    const r=await fetch(RELAY+"casitaVoz",{method:"POST",headers:H,body:JSON.stringify({audio_b64:b64,mime:blob.type,dur,sid:"jj"})});
+    const d=await r.json();
+    if(!d.ok)throw new Error(d.error||"no subió");
+    bubble("🎤 Nota de voz ("+Math.round(d.dur)+"s)","u");
+    vib([20,40,20]);
+    const url=RELAY+"casitaVoz?id="+d.id;
+    sendMsg("🎤 Te mando una nota de voz de "+Math.round(d.dur)+" segundos.\nTranscríbela desde aquí y contéstame: "+url,"1");
+  }catch(e){
+    micReset("No pude mandar la nota: "+e.message);
+  }
+  $("mic").textContent="🎙️ Háblame (toca para hablar)";
 }
 
 /* ARRANQUE: sin llave, directo a la plática */
