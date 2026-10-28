@@ -147,7 +147,8 @@ const au=new Audio();
 const stu=()=>(localStorage.getItem("morfofono_student")||localStorage.getItem("abvc_student")||"Estudiante").trim();
 let P={done:{},best:{},log:{},attempts:{}};
 try{P=Object.assign(P,JSON.parse(localStorage.getItem("ab_camino")||"{}"))}catch(e){}
-const save=()=>{try{localStorage.setItem("ab_camino",JSON.stringify(P))}catch(e){}};
+const save=()=>{try{localStorage.setItem("ab_camino",JSON.stringify(P))}catch(e){}
+  const hp=document.getElementById("hp");if(hp)hp.textContent=STEPS.filter((s,i)=>isDone(i)).length+" / "+STEPS.length;};
 const stepId=s=>s.kind==="video"?VIDEO.id:(s.kind==="lesson"?s.L.aud:s.it.k);
 const isDone=i=>!!P.done[stepId(STEPS[i])];
 const firstOpen=()=>{for(let i=0;i<STEPS.length;i++)if(!isDone(i))return i;return STEPS.length};
@@ -166,7 +167,8 @@ function showJourney(){
   let html=`<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline">
     <b style="color:var(--gold)">Tu camino</b><span class="mut" style="font-size:.75rem">${done} de ${tot} recuadros</span></div>
     <div class="bar"><b style="width:${Math.round(done/tot*100)}%"></b></div>
-    <p class="mut" style="margin-top:8px;font-size:.8rem">${n<tot?("Te espera: "+STEPS[n].t):"¡Camino completo! Eres la dueña del puente 🏆"}</p></div>`;
+    <p class="mut" style="margin-top:8px;font-size:.8rem">${n<tot?("Te espera: "+STEPS[n].t):"¡Camino completo! Eres la dueña del puente 🏆"}</p>
+    <button class="btn ghost" style="margin-top:6px" onclick="showReport()">📋 Mi reporte de hoy</button></div>`;
   let lastNv=null;
   STEPS.forEach((s,i)=>{
     if(s.nv!==lastNv&&s.nv>=0){lastNv=s.nv;html+=`<div style="margin-top:14px"><span class="tag">${NIVELES[s.nv].tag}</span></div>`}
