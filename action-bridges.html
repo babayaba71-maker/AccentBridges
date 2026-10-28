@@ -1,26 +1,26 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>Action Bridges · El Palacio de Pronunciación</title>
+<title>Action Bridges · Tu Camino</title>
 <style>
 :root{--bg:#241d10;--cd:#2e2517;--cd2:#38301f;--tx:#f5edd8;--mut:#b3a582;--gold:#ffc14d;--gd:#6fce8f;--rj:#e98989;--line:#4a3f28}
 *{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;min-height:100vh}
-header{background:#f7f1e2;color:#24303a;padding:12px 16px;display:flex;justify-content:space-between;align-items:baseline}
-header b{color:#d35400;font-size:1.02rem;letter-spacing:.4px}
-header span{font-size:.72rem;color:#7a6a55}
-main{max-width:480px;margin:0 auto;padding:12px}
-.card{background:var(--cd);border:1px solid var(--line);border-radius:16px;padding:18px 16px;margin-top:12px}
-h1{font-size:1.3rem;line-height:1.3}
+header{background:#f7f1e2;color:#24303a;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:8px;position:sticky;top:0;z-index:5}
+header b{color:#d35400;font-size:.98rem;letter-spacing:.4px}
+.pill{font-size:.7rem;background:#24303a;color:#f7f1e2;border-radius:99px;padding:4px 10px;white-space:nowrap}
+main{max-width:480px;margin:0 auto;padding:12px 12px 40px}
+.card{background:var(--cd);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:12px}
+h1{font-size:1.25rem;line-height:1.3}
 .mut{color:var(--mut);font-size:.85rem;line-height:1.55}
 .btn{display:block;width:100%;background:var(--cd2);border:1px solid var(--line);color:var(--tx);border-radius:12px;padding:14px;font-size:.95rem;cursor:pointer;margin-top:10px;text-align:left}
 .btn.gold{background:var(--gold);border-color:var(--gold);color:#241f0d;font-weight:700;text-align:center}
 .btn.gd{background:var(--gd);border-color:var(--gd);color:#06220f;font-weight:700;text-align:center}
+.btn.ghost{background:transparent;text-align:center;font-size:.82rem;color:var(--mut)}
 .ex{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.ex .n{font-size:.68rem;color:var(--mut);letter-spacing:.5px}
-.ex .en{font-family:Georgia,serif;font-size:1.02rem;margin-top:2px}
-.ex .es{font-size:.78rem;color:var(--mut);margin-top:2px}
+.ex .en{font-family:Georgia,serif;font-size:1rem}
+.ex .es{font-size:.76rem;color:var(--mut);margin-top:2px}
 .tag{display:inline-block;font-size:.68rem;color:var(--gold);border:1px solid var(--line);border-radius:99px;padding:3px 10px}
-.sent{font-family:Georgia,serif;font-size:1.5rem;line-height:1.35;text-align:center;margin:10px 0}
+.sent{font-family:Georgia,serif;font-size:1.5rem;line-height:1.4;text-align:center;margin:12px 0}
 .words{text-align:center;line-height:2.1;margin:8px 0}
 .words span{display:inline-block;margin:2px 3px;padding:4px 10px;border-radius:10px;font-family:Georgia,serif;font-size:1.05rem}
 .w-ok{background:rgba(111,206,143,.14);color:var(--gd);border-bottom:2px solid var(--gd)}
@@ -32,45 +32,54 @@ h1{font-size:1.3rem;line-height:1.3}
 .score{text-align:center;font-size:2rem;font-weight:800;margin-top:8px}
 .fb{text-align:center;font-size:.88rem;line-height:1.5;margin-top:4px}
 .hidden{display:none}
-.row2{display:flex;gap:10px;margin-top:12px}
-.row2 .btn{margin-top:0}
-.best{font-size:.72rem;color:var(--mut);text-align:right;margin-top:6px}
+.row2{display:flex;gap:10px;margin-top:12px}.row2 .btn{margin-top:0}
+.step{display:flex;align-items:center;gap:12px;background:var(--cd);border:1px solid var(--line);border-radius:14px;padding:13px;margin-top:9px}
+.step .ico{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex:0 0 34px;background:var(--cd2);border:1px solid var(--line)}
+.step.done .ico{background:rgba(111,206,143,.16);border-color:var(--gd);color:var(--gd)}
+.step.now{border-color:var(--gold);background:rgba(255,193,77,.07)}
+.step.now .ico{background:var(--gold);color:#241f0d;border-color:var(--gold);font-weight:800}
+.step.lock{opacity:.45}
+.step .t{flex:1;font-size:.88rem;line-height:1.35}
+.step .t i{display:block;font-style:normal;font-size:.72rem;color:var(--mut);margin-top:2px}
+.step .s{font-size:.78rem;color:var(--gd);font-weight:700}
+.bar{height:9px;background:var(--cd2);border-radius:99px;overflow:hidden;margin-top:8px;border:1px solid var(--line)}
+.bar>b{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gd));width:0;transition:width .5s}
+.cele{position:fixed;inset:0;background:rgba(20,16,8,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;z-index:50;animation:fadein .25s}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.cele .big{font-size:3.2rem;animation:pop .6s}
+@keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+.cele h2{color:var(--gold);margin-top:10px;font-size:1.35rem}
+.cele p{color:var(--tx);margin-top:8px;font-size:.95rem;line-height:1.5}
+.spark{position:fixed;font-size:1.4rem;animation:fly 1.4s ease-out forwards;pointer-events:none;z-index:49}
+@keyframes fly{0%{opacity:1;transform:translateY(0) scale(.6)}100%{opacity:0;transform:translateY(-140px) scale(1.3) rotate(25deg)}}
+.stars{display:flex;justify-content:center;gap:10px;margin-top:8px}
+.stars button{background:none;border:none;font-size:1.7rem;cursor:pointer;opacity:.35}
+.stars button.on{opacity:1}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+td{padding:7px 2px;border-bottom:1px solid var(--line);font-size:.82rem;vertical-align:top}
+td.r{text-align:right;font-weight:700;white-space:nowrap}
+video{width:100%;border-radius:12px;border:1px solid var(--line);background:#000}
 </style></head><body>
-<header><b>🔧🔧 ACTION BRIDGES</b><span> El Palacio de Pronunciación</span></header>
+<header><b>🔧 ACTION BRIDGES</b><span class="pill" id="hp">Tu camino</span></header>
 <main>
-<div class="card" id="intro">
-<h1>El Palacio de las Frases 👑</h1>
-<p class="mut" style="margin-top:8px">Aquí NADA se repite en vano: cada nivel abre con su <b>lección</b> (qué es cada ladrillo y cómo se conectan: pronombres, verbos ayudantes, el puente to, conectores) y luego viene la práctica. La calidad fina de cada sonido la escucha tu maestro contigo.</p>
-<div class="card" style="border-color:#ffc14d;margin-top:10px">
-  <div style="font-weight:800;color:#ffc14d;margin-bottom:6px">🎬 Primero mira esto: El Principio de Todo</div>
-  <div class="mut" style="margin-bottom:8px">Los pronombres y el verbo TO BE, en 1 minuto. Después vienes a hablar.</div>
-  <video controls playsinline preload="none" style="width:100%;border-radius:12px" src="https://babayaba71-maker.github.io/AccentBridges/assets/videos/to-be-principio.mp4?v=1"></video>
+<div id="intro" class="card">
+<h1>Tu Camino 👑</h1>
+<p class="mut" style="margin-top:8px">Aquí <b>no se puede saltar al final</b>: cada recuadro se abre cuando ganas el anterior. Escuchas, hablas, te medimos, lo celebras — y avanzas.</p>
+<p class="mut" style="margin-top:8px">🎬 El video y la lección primero · 🎤 después la dices tú · ✅ 70 o más y se abre el siguiente</p>
+<p class="mut" style="margin-top:8px;font-size:.78rem">Chrome en Android con permiso de micrófono. Todo queda en tu expediente, y al final del día ves tu reporte.</p>
+<button class="btn gold" onclick="go()">Empezar mi camino ▶</button>
+<button class="btn ghost" onclick="showReport()">📋 Ver el reporte de mi día</button>
 </div>
-
-<p class="mut" style="margin:6px 0 0 8px">1. 🎧 Escucha el modelo<br>2. 🎤 Dila en voz alta<br>3. 🔍 Te mostramos qué palabras salieron completas</p>
-<p class="mut" style="margin-top:8px">La que sale <b style="color:var(--gd)">verde</b> ya salió de tu boca. La <b style="color:var(--rj)">rojita</b> se repite despacito. No hay calificación: es tu palacio.</p>
-<p class="mut" style="margin-top:8px;font-size:.78rem">Necesita Chrome en Android y permiso de micrófono. Cada frase queda en tu expediente.</p>
-<button class="btn gold" onclick="startPalace()">Entrar al palacio ▶</button>
-</div>
-<div class="card hidden" id="warn">
+<div id="warn" class="card hidden">
 <h1>Un momentito 🎤</h1>
-<p class="mut" style="margin-top:8px">Tu navegador no trae el oído de la máquina (funciona en Chrome, en Android o compu). Puedes escuchar los modelos y practicar en voz alta siguiendo el texto — la medición automática llega con Chrome.</p>
-<button class="btn gold" onclick="startPalace(true)">Entrar en modo práctica ▶</button>
+<p class="mut" style="margin-top:8px">Este navegador no trae el oído de la máquina (funciona en Chrome). Puedes escuchar los modelos y practicar en voz alta — tú misma marcas cada recuadro ganado.</p>
+<button class="btn gold" onclick="go(true)">Entrar en modo práctica ▶</button>
 </div>
-<div class="card hidden" id="menu"></div>
-<div class="card hidden" id="room"></div>
+<div id="journey" class="hidden"></div>
+<div id="cardbox" class="hidden"></div>
+<div id="report" class="hidden"></div>
 </main>
 <script>
-/* ===== ACTION BRIDGES — EL PALACIO DE PRONUNCIACIÓN =====
-Clon nuestro del sistema del sobrino (PronunLab/Pronunciation Palace), escaneado 27-oct:
-motor = Web Speech API del navegador (GRATIS): transcribe lo dicho y compara
-palabra por palabra contra la frase objetivo. Score = aciertos/total x 100.
-Verde = dicha, roja = repítela. Adaptado a A2 + español + currículo de conexión
-(directriz JJ 27-oct: pronombres → to be → have → infinitivos → I have to go → and).
-Modelos = Sarah horneada (MP3-first). Telemetría = logMorfofonoSession (canal BOCA). */
-const CDN="https://babayaba71-maker.github.io/AccentBridges/assets/action-bridges/";
-const API="https://valerie.base44.app/functions/logMorfofonoSession";
-const KEY="ABVC-PILOTO-2026";
 const LESSONS=[
  {img:"lesson-1-lam.png",aud:"lesson-1",t:"Lección 1: Los Ladrillos",d:"Pronombres y el verbo to be"},
  {img:"lesson-2-lam.png",aud:"lesson-2",t:"Lección 2: Lo Que Tengo",d:"El verbo have"},
@@ -110,134 +119,223 @@ const NIVELES=[
  {tag:"TU FRASE DE LA SEMANA ❤️", items:[
   {k:"ab-11",en:"I will try again.",es:"Lo intentaré de nuevo.",wt:[["I","p"],["will","h"],["try","x"],["again","x"]]}]}
 ];
+
+/* ===== ACTION BRIDGES v2 — TU CAMINO (28-oct-2026, directriz JJ) =====
+v1 dejaba ver TODAS las frases: ella scrolleaba hasta el final y se acababa la magia.
+v2 = secuencia obligatoria: VIDEO -> LECCION -> frases, un recuadro a la vez, candado
+real (se abre al sacar 70+; en modo práctica marca ella misma), celebracion con chispas
+e insignia por nivel, contador de progreso y REPORTE DE FIN DE DIA con autoevaluacion.
+Motor de medicion y telemetria: igual que v1 (Web Speech API + logMorfofonoSession). */
+const CDN="https://babayaba71-maker.github.io/AccentBridges/assets/action-bridges/";
+const API="https://valerie.base44.app/functions/logMorfofonoSession";
+const KEY="ABVC-PILOTO-2026";
+const VIDEO={id:"principio-de-todo",t:"🎬 El Principio de Todo",sub:"Los pronombres y el verbo TO BE en 1 minuto (Maestra Lee)",src:"https://babayaba71-maker.github.io/AccentBridges/assets/videos/to-be-principio.mp4?v=1"};
+/* leccion que abre cada nivel (por indice de nivel): 0->L1, 2->L2, 3->L3, 4->L4, 5->L5 */
+const LESSON_BY_LEVEL={0:0,2:1,3:2,4:3,5:4};
+const BADGES=["🎬 El Principio","🔑 Ladrillera","🔑 La Dueña","🔑 La Que Quiere","🔑 La Conectada","🔑 La Tejedora","🪜 La Escalera","🏆 La Voz Propia"];
+const STEPS=[{kind:"video",nv:-1,t:VIDEO.t,sub:VIDEO.sub}];
+NIVELES.forEach((nv,ni)=>{
+  const li=LESSON_BY_LEVEL[ni];
+  if(li!=null&&LESSONS[li])STEPS.push({kind:"lesson",nv:ni,L:LESSONS[li],t:LESSONS[li].t,sub:LESSONS[li].d});
+  nv.items.forEach(it=>STEPS.push({kind:"item",nv:ni,it,key:it.k,t:it.en,sub:it.es}));
+});
 const $=id=>document.getElementById(id);
-const st={noMic:false,cur:null,rec:null,listening:false,best:{}};
-const haptic=p=>{if("vibrate" in navigator)navigator.vibrate(p)};
+const today=()=>new Date().toISOString().slice(0,10);
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const haptic=p=>{if("vibrate" in navigator)navigator.vibrate(p)};
 const au=new Audio();
 const stu=()=>(localStorage.getItem("morfofono_student")||localStorage.getItem("abvc_student")||"Estudiante").trim();
-try{st.best=JSON.parse(localStorage.getItem("ab_best")||"{}")}catch(e){st.best={}}
-const norm=s=>s.toLowerCase().replace(/[^a-z'\s]/g,"").split(/\s+/).filter(Boolean);
-function startPalace(noMic){
-  st.noMic=noMic;
-  (SR&&!noMic?$("intro"):$("warn")).classList.add("hidden");
-  if(!SR&&!noMic){$("warn").classList.remove("hidden");return}
-  $("menu").classList.remove("hidden");
-  $("menu").innerHTML=NIVELES.map((nv,ni)=>{
-    const L=LESSONS[ni];
-    const lessonBlock=L?`<div class="card" style="margin-top:14px;padding:0;overflow:hidden;border-color:var(--gold)">
-      <img src="${CDN}${L.img}?v=A1" style="width:100%;display:block" alt="">
-      <div style="padding:12px 14px">
-        <b style="color:var(--gold)">📖 ${L.t}</b>
-        <div class="mut" style="margin-top:4px">${L.d}</div>
-        <button class="play" onclick="playLesson('${L.aud}')">🎧 Escuchar la lección</button>
-      </div></div>`:"";
-    return lessonBlock+`
-    <div style="margin-top:14px"><span class="tag">${nv.tag}</span></div>
-    ${nv.items.map((it,i)=>`<button class="btn" onclick="openEx('${it.k}')">
-      <div class="ex"><div style="flex:1"><div class="en">${it.en}</div><div class="es">${it.es}</div></div>
-      <div style="text-align:right">${st.best[it.k]!=null?`<b style="color:var(--gd)">${st.best[it.k]}</b>`:"🔊"}</div></div>
-    </button>`).join("")}
-  `;}).join("");
+let P={done:{},best:{},log:{},attempts:{}};
+try{P=Object.assign(P,JSON.parse(localStorage.getItem("ab_camino")||"{}"))}catch(e){}
+const save=()=>{try{localStorage.setItem("ab_camino",JSON.stringify(P))}catch(e){}};
+const stepId=s=>s.kind==="video"?VIDEO.id:(s.kind==="lesson"?s.L.aud:s.it.k);
+const isDone=i=>!!P.done[stepId(STEPS[i])];
+const firstOpen=()=>{for(let i=0;i<STEPS.length;i++)if(!isDone(i))return i;return STEPS.length};
+const unlocked=i=>i<=firstOpen();
+let st={noMic:false,i:0,rec:null,listening:false,cur:null};
+function go(noMic){
+  st.noMic=!!noMic;
+  if(!SR&&!noMic){$("intro").classList.add("hidden");$("warn").classList.remove("hidden");return}
+  $("intro").classList.add("hidden");$("warn").classList.add("hidden");$("report").classList.add("hidden");
+  showJourney();
 }
-function openEx(k){
-  const it=NIVELES.flatMap(n=>n.items).find(x=>x.k===k);
-  st.cur=it;
-  $("menu").classList.add("hidden");
-  const R=$("room");R.classList.remove("hidden");
-  R.innerHTML=`
-    <button class="btn" onclick="backMenu()">← Todas las frases</button>
+function showJourney(){
+  stopRec();
+  const n=firstOpen(),tot=STEPS.length,done=STEPS.filter((s,i)=>isDone(i)).length;
+  $("hp").textContent=done+" / "+tot;
+  let html=`<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline">
+    <b style="color:var(--gold)">Tu camino</b><span class="mut" style="font-size:.75rem">${done} de ${tot} recuadros</span></div>
+    <div class="bar"><b style="width:${Math.round(done/tot*100)}%"></b></div>
+    <p class="mut" style="margin-top:8px;font-size:.8rem">${n<tot?("Te espera: "+STEPS[n].t):"¡Camino completo! Eres la dueña del puente 🏆"}</p></div>`;
+  let lastNv=null;
+  STEPS.forEach((s,i)=>{
+    if(s.nv!==lastNv&&s.nv>=0){lastNv=s.nv;html+=`<div style="margin-top:14px"><span class="tag">${NIVELES[s.nv].tag}</span></div>`}
+    if(s.nv===-1)html+=`<div style="margin-top:14px"><span class="tag">EMPIEZA AQUÍ 🎬</span></div>`;
+    const ok=isDone(i),now=(i===n),op=unlocked(i);
+    const ico=ok?"✓":(op?"▶":"🔒");
+    const cls="step"+(ok?" done":(now?" now":(op?"":" lock")));
+    const sc=s.kind==="item"&&P.best[s.it.k]!=null?`<div class="s">${P.best[s.it.k]}</div>`:"";
+    html+=`<div class="${cls}"><div class="ico">${ico}</div>
+      <div class="t">${s.kind==="video"?"🎬 ":s.kind==="lesson"?"📖 ":""}${s.t}<i>${s.kind==="video"?"Míralo antes de hablar":s.kind==="lesson"?"Lección antes de practicar":s.sub}</i></div>${sc}
+      ${(now||ok)?`<button class="btn gold" style="width:auto;margin:0;padding:9px 14px;font-size:.8rem" onclick="openStep(${i})">${ok?"Repasar":"Abrir"}</button>`:""}</div>`;
+  });
+  $("journey").innerHTML=html;$("journey").classList.remove("hidden");$("cardbox").classList.add("hidden");$("report").classList.add("hidden");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function openStep(i){
+  st.i=i;const s=STEPS[i];stopRec();
+  const box=$("cardbox");$("journey").classList.add("hidden");box.classList.remove("hidden");
+  if(s.kind==="video"){
+    box.innerHTML=`<div class="card"><span class="tag">RECUADRO ${i+1} DE ${STEPS.length} · VIDEO</span>
+      <h1 style="margin-top:10px">${s.t}</h1>
+      <p class="mut" style="margin-top:6px">${s.sub}</p>
+      <div style="margin-top:12px"><video controls playsinline preload="none" src="${VIDEO.src}"></video></div>
+      <button class="btn gold" onclick="winStep('${VIDEO.id}')">Ya lo vi, a la lección ▶</button>
+      <button class="btn ghost" onclick="showJourney()">← Volver al camino</button></div>`;
+    return;
+  }
+  if(s.kind==="lesson"){
+    box.innerHTML=`<div class="card"><span class="tag">RECUADRO ${i+1} DE ${STEPS.length} · LECCIÓN</span>
+      <h1 style="margin-top:10px">${s.t}</h1>
+      <p class="mut" style="margin-top:6px">${s.sub}</p>
+      <img src="${CDN}${s.L.img}?v=AB2" style="width:100%;border-radius:12px;margin-top:12px;border:1px solid var(--line)" alt="">
+      <button class="play" onclick="playAud('${s.L.aud}')">🎧 Escuchar la lección</button>
+      <button class="btn gold" onclick="winStep('${s.L.aud}')">Ya la escuché, a practicar ▶</button>
+      <button class="btn ghost" onclick="showJourney()">← Volver al camino</button></div>`;
+    playAud(s.L.aud);return;
+  }
+  const it=s.it;st.cur=it;
+  box.innerHTML=`<div class="card"><span class="tag">RECUADRO ${i+1} DE ${STEPS.length}</span>
     <div class="sent" id="sentence">${it.wt.map(w=>`<span style="border-bottom:3px solid ${TYPES[w[1]].c}">${w[0]}</span>`).join(" ")}</div>
-    <div style="text-align:center;margin-top:2px">${Object.values(TYPES).map(t=>`<span style="display:inline-block;margin:2px 6px;font-size:.68rem;color:${t.c}">● ${t.n}</span>`).join("")}</div>
+    <div style="text-align:center;margin-top:2px">${Object.values(TYPES).map(t=>`<span style="display:inline-block;margin:2px 6px;font-size:.66rem;color:${t.c}">● ${t.n}</span>`).join("")}</div>
     <div class="mut" style="text-align:center">${it.es}</div>
-    <button class="play" onclick="playModel()">🎧 Escuchar el modelo</button>
-    ${st.noMic?`<p class="mut" style="margin-top:10px;text-align:center">Modo práctica: dila en voz alta siguiendo el modelo y el texto.</p>`
-    :`<button class="rec" id="recbtn" onclick="toggleRec()">🎤 Tócala (habla claro)</button>
-    <div id="out"></div>`}
-    <div class="best" id="best">${st.best[k]!=null?"Tu mejor: "+st.best[k]:""}</div>`;
-  playModel();
+    <button class="play" onclick="playAud('${it.k}')">🎧 Escuchar el modelo</button>
+    ${st.noMic?`<p class="mut" style="margin-top:10px;text-align:center">Modo práctica: dila en voz alta siguiendo el modelo y marca tú misma.</p>
+      <button class="btn gd" onclick="passManual()">✅ La dije completa — siguiente</button>`
+    :`<button class="rec" id="recbtn" onclick="toggleRec()">🎤 Tócala (habla claro)</button><div id="out"></div>`}
+    <div class="mut" style="text-align:right;margin-top:6px;font-size:.72rem">${P.best[it.k]!=null?"Tu mejor: "+P.best[it.k]+" · ":""}Intentos: ${(P.attempts[it.k]||0)}</div>
+    <button class="btn ghost" onclick="showJourney()">← Volver al camino</button></div>`;
+  playAud(it.k);
 }
-function backMenu(){stopRec();$("room").classList.add("hidden");$("menu").classList.remove("hidden");startPalace(st.noMic)}
-function playModel(){haptic(15);au.src=CDN+st.cur.k+".mp3?v=A1";au.play().catch(()=>{})}
-function playLesson(a){haptic(15);au.src=CDN+a+".mp3?v=A1";au.play().catch(()=>{})}
+function playAud(a){haptic(15);au.src=CDN+a+".mp3?v=AB2";au.play().catch(()=>{})}
+function winStep(id){haptic([20,40,20]);P.done[id]=true;save();celebrate(id===VIDEO.id?"¡Viste el Principio! 🎬":"¡Lección ganada! 📖","Ya sabes qué piezas tiene este nivel. Ahora las dices tú.");}
 function stopRec(){if(st.rec){try{st.rec.stop()}catch(e){}st.rec=null;st.listening=false}}
 function toggleRec(){
   if(st.listening){stopRec();drawRecBtn(false);return}
   const r=new SR();st.rec=r;st.listening=true;
   r.lang="en-US";r.interimResults=false;r.maxAlternatives=4;r.continuous=false;
   const alts=[];
-  r.onresult=e=>{
-    for(let i=0;i<e.results[0].length;i++)alts.push(e.results[0][i].transcript);
-    judge(alts);
-  };
-  r.onerror=()=>{st.listening=false;drawRecBtn(false);
-    $("out").innerHTML=`<div class="fb mut">No te escuché bien — dale otra vez, un poquito más cerca del mic. 🎤</div>`};
+  r.onresult=e=>{for(let i=0;i<e.results[0].length;i++)alts.push(e.results[0][i].transcript);judge(alts)};
+  r.onerror=()=>{st.listening=false;drawRecBtn(false);$("out").innerHTML=`<div class="fb mut">No te escuché bien — otra vez, cerquita del mic 🎤</div>`};
   r.onend=()=>{if(st.listening){st.listening=false;drawRecBtn(false)}};
   try{r.start()}catch(e){st.listening=false}
-  drawRecBtn(true);$("out").innerHTML=`<div class="fb mut">Escuchando… dila natural, sin prisa 🌱</div>`;
-  haptic(25);
+  drawRecBtn(true);$("out").innerHTML=`<div class="fb mut">Escuchando… dila natural, sin prisa 🌱</div>`;haptic(25);
 }
 function drawRecBtn(on){const b=$("recbtn");if(!b)return;b.className=on?"rec on":"rec";b.textContent=on?"🔴 Escuchando… (toca para parar)":"🎤 Tócala (habla claro)"}
+const norm=s=>s.toLowerCase().replace(/[^a-z'\s]/g,"").split(/\s+/).filter(Boolean);
 function judge(alts){
   if(!alts.length){$("out").innerHTML=`<div class="fb mut">No te escuché bien — dale otra vez 🎤</div>`;return}
-  const target=norm(st.cur.en);
-  const heard=[].concat(...alts.map(norm));
+  const it=st.cur,target=norm(it.en),heard=[].concat(...alts.map(norm));
   const words=target.map(w=>({w,ok:heard.includes(w)}));
   const got=words.filter(x=>x.ok).length;
   const score=target.length?Math.round(got/target.length*100):0;
-  if(st.best[st.cur.k]==null||score>st.best[st.cur.k]){
-    st.best[st.cur.k]=score;
-    try{localStorage.setItem("ab_best",JSON.stringify(st.best))}catch(e){}
-    if($("best"))$("best").textContent="Tu mejor: "+score;
-  }
-  const fb=score>=100?"¡Tu frase completa salió entera! 🎉 Así se construye un puente."
-    :score>=70?"¡Muy bien! Las rojitas se repiten despacito y la vuelves a tocar."
-    :score>=40?"¡Vas llegando! Escucha el modelo otra vez y dila despacio, pieza por pieza."
+  const k=it.k;P.attempts[k]=(P.attempts[k]||0)+1;
+  if(P.best[k]==null||score>P.best[k])P.best[k]=score;
+  logRun(k,it.en,score,alts[0]||"");sendTel(k,it.en,score,alts[0]||"",score>=70);
+  const pass=score>=70;
+  const fb=score>=100?"¡Frase completa, entera! 🎉 Así se construye un puente."
+    :pass?"¡Muy bien! Ya cruzaste. Sigue el siguiente recuadro 💪"
+    :score>=40?"¡Vas llegando! Escucha el modelo y dila despacio, pieza por pieza."
     :"Tranquila: escucha el modelo, dila despacito y la vuelves a tocar. Aquí no hay prisa.";
   $("out").innerHTML=`
     <div class="words">${words.map(x=>`<span class="${x.ok?"w-ok":"w-no"}">${x.w}</span>`).join("")}</div>
-    <div class="score" style="color:${score>=70?"var(--gd)":"var(--rj)"}">${score}</div>
+    <div class="score" style="color:${pass?"var(--gd)":"var(--rj)"}">${score}</div>
     <div class="fb">${fb}</div>
-    <div class="row2">
-      <button class="btn" onclick="playModel()">🎧 Modelo</button>
-      <button class="btn gd" onclick="toggleRec()">🎤 Otra vez</button>
-    </div>`;
-  haptic(score>=70?[20,40,20]:[30,60,30]);
-  // ==== EVALUACIÓN DOBLE: el micrófono ya dio SU nota; ahora el oído de ella ====
-  window.__abScore=score; window.__abAlts=alts[0]||"";
-  setTimeout(()=>{
-    if(!$("out"))return;
-    $("out").insertAdjacentHTML("beforeend", `
-      <div class="fb" style="margin-top:10px"><b>Y ahora tu oído:</b> ¿cómo te salió a ti?</div>
-      <div class="row2">
-        <button class="btn" onclick="autoeval('logre')">😎 Lo logré</button>
-        <button class="btn" onclick="autoeval('casi')">🤏 Casi</button>
-        <button class="btn" onclick="autoeval('todavia')">😅 Todavía no</button>
-      </div>`);
-  },250);
-  fetch(API,{method:"POST",headers:{"Content-Type":"application/json",api_key:KEY},body:JSON.stringify({
-    topic:"Action Bridges — "+st.cur.en,
-    userId:stu(),passed:score>=70,accuracy:score,
-    challengeSentence:st.cur.en,spokenText:alts[0]||"",
-    location:"Action Bridges",sessionId:"ab-"+Date.now()})}).catch(()=>{});
+    <div class="row2"><button class="btn" onclick="playAud('${k}')">🎧 Modelo</button>
+    <button class="btn ${pass?"gd":"gold"}" onclick="${pass?`winItem('${k}')`:"toggleRec()"}">${pass?"Siguiente recuadro ➜":"🎤 Otra vez"}</button></div>
+    ${!pass&&P.attempts[k]>=4?`<button class="btn ghost" onclick="passManual(true)">Seguir de todos modos (lo revisa tu maestro) →</button>`:""}`;
+  haptic(pass?[20,40,20]:[30,60,30]);
 }
-
-function autoeval(r){
-  const map={logre:100,casi:75,todavia:50};
-  const suya=map[r];
-  const mia=window.__abScore||0;
-  // promesa cumplida: la evaluación es DOBLE — la de ella pesa igual que la del micrófono
-  const final=Math.round((suya+mia)/2);
-  if($("out")){
-    $("out").insertAdjacentHTML("beforeend",`<div class="score" style="color:${final>=70?"var(--gd)":"var(--rj)"}">${final}</div>
-      <div class="fb">Tu nota con tu oído (${suya}) + la máquina (${mia}) = <b>${final}</b>. Las dos cuentan.</div>
-      <div class="row2"><button class="btn gd" onclick="toggleRec()">🎤 Una más</button></div>`);
-  }
-  fetch(API,{method:"POST",headers:{"Content-Type":"application/json",api_key:KEY},body:JSON.stringify({
-    topic:"Action Bridges — "+st.cur.en+" · autoeval:"+r,
-    userId:stu(),passed:final>=70,accuracy:final,
-    challengeSentence:st.cur.en,spokenText:(window.__abAlts||"")+" | mic:"+mia+" · ella:"+r,
-    location:"Action Bridges",sessionId:"ab-"+Date.now()})}).catch(()=>{});
+function winItem(k){haptic([25,60,25]);P.done[k]=true;save();
+  const sc=P.best[k]!=null?P.best[k]:0;
+  celebrate("¡Recuadro ganado! ✨","Lo dijiste completo — "+sc+" de 100. Así se abre el siguiente.");}
+function passManual(skip){
+  const it=st.cur,k=it.k;P.done[k]=true;if(skip)P.attempts[k]=(P.attempts[k]||0)+1;save();
+  logRun(k,it.en,P.best[k]!=null?P.best[k]:0,skip?"(seguí sin pasar)":"(marcado por ella)");
+  celebrate(skip?"Seguimos, sin miedo 🤝":"¡Recuadro ganado! ✨","Todo cuenta y tu maestro lo revisa contigo.");
 }
-window.autoeval=autoeval;
+function celebrate(title,msg){
+  const cur=STEPS[st.i],nv=cur?cur.nv:-1;
+  const nvItems=nv>=0?NIVELES[nv].items:[];
+  const nvDone=nv>=0&&nvItems.every(it=>P.done[it.k])&&(LESSON_BY_LEVEL[nv]==null||P.done[LESSONS[LESSON_BY_LEVEL[nv]].aud]);
+  const nxt=firstOpen(),all=nxt>=STEPS.length;
+  const h=`<div class="cele" id="cele"><div class="big">${all?"🏆":nvDone?"🔑":"🎉"}</div>
+    <h2>${all?"¡CAMINO COMPLETO!":nvDone?("¡Nivel conquistado! "+BADGES[nv]):title}</h2>
+    <p>${all?"Terminaste los "+STEPS.length+" recuadros. Eres la dueña del puente 💛":nvDone?"Todas las frases de este nivel son tuyas. Se abrió el siguiente nivel.":msg}</p>
+    <div style="margin-top:18px;width:100%;max-width:320px">
+    <button class="btn gold" onclick="closeCele()">${all?"Ver mi reporte 📋":"Siguiente recuadro ➜"}</button>
+    <button class="btn ghost" onclick="closeCele(true)">Ver mi camino</button></div></div>`;
+  const d=document.createElement("div");d.innerHTML=h;document.body.appendChild(d.firstChild);
+  if("vibrate" in navigator)navigator.vibrate([30,60,30,60,30]);
+  for(let i=0;i<14;i++){const s=document.createElement("div");s.className="spark";
+    s.textContent=["✨","🎉","⭐","💛","🌟"][i%5];s.style.left=(10+Math.random()*80)+"%";s.style.top=(40+Math.random()*40)+"%";
+    s.style.animationDelay=(i*0.05)+"s";document.body.appendChild(s);setTimeout(()=>s.remove(),1900);}
+}
+function closeCele(viaPath){
+  const c=$("cele");if(c)c.remove();
+  if(viaPath){showJourney();return}
+  const n=firstOpen();if(n>=STEPS.length){$("cardbox").classList.add("hidden");showReport();return}
+  openStep(n);
+}
+function logRun(k,en,score,heard){
+  const d=today();P.log[d]=P.log[d]||[];
+  const e=P.log[d].find(x=>x.k===k);
+  if(e){e.score=Math.max(e.score,score);e.tries=(e.tries||1)+1;e.heard=heard||e.heard}
+  else P.log[d].push({k,en,score,tries:1,heard:heard||"",ts:Date.now()});
+  save();
+}
+function sendTel(k,en,score,heard,pass){
+  fetch(API,{method:"POST",headers:{"Content-Type":"application/json",api_key:KEY},body:JSON.stringify({
+    topic:"Action Bridges — "+en,userId:stu(),passed:pass,accuracy:score,challengeSentence:en,
+    spokenText:heard,location:"Action Bridges",sessionId:"ab-"+Date.now()})}).catch(()=>{});
+}
+function showReport(){
+  stopRec();$("journey").classList.add("hidden");$("cardbox").classList.add("hidden");$("intro").classList.add("hidden");$("warn").classList.add("hidden");
+  const d=today(),rows=(P.log[d]||[]).slice().sort((a,b)=>b.ts-a.ts);
+  const tot=rows.length,hits=rows.filter(r=>r.score>=70).length;
+  const avg=tot?Math.round(rows.reduce((s,r)=>s+r.score,0)/tot):0;
+  const doneTotal=STEPS.filter((s,i)=>isDone(i)).length;
+  const pend=rows.filter(r=>r.score<70);
+  let h=`<div class="card"><span class="tag">REPORTE DE TU DÍA · ${new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long"})}</span>
+    <h1 style="margin-top:10px">Lo que hiciste hoy, ${stu()}</h1>
+    <div style="display:flex;gap:10px;margin-top:12px">
+      <div style="flex:1;background:var(--cd2);border-radius:12px;padding:12px;text-align:center"><div style="font-size:1.5rem;font-weight:800;color:var(--gold)">${tot}</div><div class="mut" style="font-size:.7rem">recuadros tocados</div></div>
+      <div style="flex:1;background:var(--cd2);border-radius:12px;padding:12px;text-align:center"><div style="font-size:1.5rem;font-weight:800;color:var(--gd)">${hits}</div><div class="mut" style="font-size:.7rem">ganados hoy</div></div>
+      <div style="flex:1;background:var(--cd2);border-radius:12px;padding:12px;text-align:center"><div style="font-size:1.5rem;font-weight:800;color:var(--tx)">${avg}</div><div class="mut" style="font-size:.7rem">promedio</div></div>
+    </div>
+    <p class="mut" style="margin-top:10px">Camino completo: <b style="color:var(--gd)">${doneTotal} de ${STEPS.length}</b> recuadros.</p>`;
+  if(rows.length){
+    h+=`<table>${rows.map(r=>`<tr><td>${r.score>=70?"✅":"🔁"} ${r.en}<br><span class="mut" style="font-size:.7rem">${r.heard||"—"}</span></td><td class="r" style="color:${r.score>=70?"var(--gd)":"var(--rj)"}">${r.score}</td></tr>`).join("")}</table>`;
+  }else{h+=`<p class="mut" style="margin-top:12px">Todavía no tocas ningún recuadro hoy. Tu primer ladrillo te espera 💛</p>`}
+  if(pend.length)h+=`<p class="mut" style="margin-top:12px">🎯 <b>Para mañana:</b> ${pend.slice(0,3).map(r=>r.en).join(" · ")}</p>`;
+  h+=`<div class="stars" id="stars">${[1,2,3,4,5].map(n=>`<button onclick="rate(${n})" data-n="${n}">⭐</button>`).join("")}</div>
+    <p class="mut" style="text-align:center;font-size:.78rem;margin-top:2px">¿Cómo te sentiste hoy con tu inglés?</p>
+    <button class="btn gold" onclick="sendReport(${tot},${hits},${avg},${doneTotal})">Enviar mi reporte a mi maestra 📤</button>
+    <button class="btn ghost" onclick="go(${st.noMic})">← Volver a mi camino</button></div>`;
+  $("report").innerHTML=h;$("report").classList.remove("hidden");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+let mood=0;function rate(n){mood=n;document.querySelectorAll("#stars button").forEach(b=>b.classList.toggle("on",+b.dataset.n<=n))}
+function sendReport(tot,hits,avg,doneTotal){
+  const d=today();
+  fetch(API,{method:"POST",headers:{"Content-Type":"application/json",api_key:KEY},body:JSON.stringify({
+    topic:"Action Bridges — REPORTE DEL DÍA",userId:stu(),passed:avg>=70,accuracy:avg,
+    challengeSentence:"Reporte "+d+": "+tot+" recuadros, "+hits+" ganados, promedio "+avg+", camino "+doneTotal+"/"+STEPS.length+", ánimo "+mood+"/5",
+    spokenText:"",location:"Action Bridges — reporte diario",sessionId:"abrep-"+d})}).catch(()=>{});
+  $("report").innerHTML=`<div class="card" style="text-align:center"><div class="big" style="font-size:2.6rem">📤</div>
+    <h1 style="margin-top:8px">¡Reporte enviado!</h1>
+    <p class="mut" style="margin-top:8px">Tu maestra lo lee hoy mismo. Mañana seguimos desde el recuadro ${firstOpen()+1}.</p>
+    <button class="btn gold" onclick="go(${st.noMic})">← Mi camino</button></div>`;
+  haptic([20,50,20]);
+}
 </script></body></html>
