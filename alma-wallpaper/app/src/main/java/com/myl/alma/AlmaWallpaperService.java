@@ -1,34 +1,33 @@
 package com.myl.alma;
 
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RadialGradient;
+import android.graphics.RectF;
 import android.graphics.Shader;
-import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.service.wallpaper.WallpaperService;
 import android.view.SurfaceHolder;
 
+import java.util.Random;
+
 /**
- * Alma — Hologram Live Wallpaper v0.1.3
- * Myl AccentBridges — orbe respirando + partículas + materialización cíclica.
+ * Alma — Live Wallpaper v0.1.5 "CASITA"
  *
- * OPTIMIZACIONES DE BATERÍA v0.1.3 (idea de JJ "que respire tranquila"):
- *  1. FPS ADAPTATIVO por nivel de batería / modo ahorro:
- *     - Normal:  30 fps en materialización/activo, 15 fps en pasivo (75% del ciclo)
- *     - Batería <40% o ahorro: 20 fps activo, 10 fps pasivo
- *  2. PARTÍCULAS ADAPTATIVAS: 110 normal → 70 en ahorro (solo las N primeras)
- *  3. CICLO ADAPTATIVO: 60s normal → 90s en ahorro (menos materializaciones/hora)
- *  4. MOVIMIENTO POR TIEMPO (dt), no por frame — la velocidad visual no cambia
- *     aunque bajen los fps (antes 30fps asumidos).
- *  5. CACHE DEL GRADIENTE: el RadialGradient ya NO se crea cada frame (churn GC);
- *     se re-crea solo si el radio cambia >2%.
- *  6. Consulta de batería BARATA: sticky broadcast sin receptor cada ~4s.
+ * Ahora dibuja EXACTAMENTE el orb de la Casita de Alma v2.3, no la silueta vieja:
+ *  - halo azul grande (120,200,255 / 43,123,255 / 0,242,254) que late
+ *  - 3 anillos girando, cada uno con su arco azul, su arco CIAN y su arco VERDE
+ *  - nucleo con bloom pre-renderizado (sin shadowBlur) + degradado blanco->azul
+ *  - 70 particulas con sprite de luz propio y puntico blanco al centro
+ *  - fondo marino #071026
+ *
+ * Misma receta que casita.html (R = min(w,h)*0.42, cy = h*0.47, elipse 0.62).
+ * Bateria: 30 fps, todo cacheado (shader y sprites se crean UNA vez por tamano),
+ * sin sensores, sin internet, se detiene cuando el fondo no se ve.
  */
 public class AlmaWallpaperService extends WallpaperService {
 
@@ -39,266 +38,230 @@ public class AlmaWallpaperService extends WallpaperService {
 
     private class AlmaEngine extends Engine {
 
-        private static final int N = 110;              // partículas totales
-        private static final int N_SAVER = 70;          // partículas en modo ahorro
-        private static final long CYCLE_MS   = 60000L; // ciclo normal 60s
-        private static final long CYCLE_SAVE = 90000L; // ciclo ahorro 90s
-        private static final long MAT_AT     = 45000L; // materializa a los 45s
-        private static final long MAT_DUR    = 3000L;  // materialización 3s
-        private static final long DEMAT_DUR  = 3000L;  // desvanecimiento 3s
+        private static final int NP = 70;
 
-        private final Handler handler = new Handler(Looper.getMainLooper());
-        private final Runnable drawRunner = new Runnable() {
-            @Override public void run() { draw(); }
+        private final Handler h = new Handler(Looper.getMainLooper());
+        private final Paint fondoP = new Paint();
+        private final Paint haloP = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint anilloP = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint bmpP = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+        private final Paint puntoP = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final RectF ovalo = new RectF();
+        private final RectF dst = new RectF();
+
+        private final float[] pa = new float[NP];
+        private final float[] pr = new float[NP];
+        private final float[] pv = new float[NP];
+        private final float[] psz = new float[NP];
+        private final float[] pph = new float[NP];
+
+        private Bitmap spriteLuz, nucleoIco;
+        private Shader haloShader;
+        private float t = 0f;
+        private boolean visible = false;
+        private int W = 0, H = 0;
+        private int fps = 30;
+
+        private final Runnable dibujo = new Runnable() {
+            @Override public void run() { pintar(); }
         };
 
-        private final Paint orbPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private final Paint pPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-
-        private final float[] ang = new float[N];
-        private final float[] spd = new float[N];
-        private final float[] rad = new float[N];
-        private final float[] siz = new float[N];
-        private final float[] ph = new float[N];
-        private final boolean[] gold = new boolean[N];
-        private final float[] tu = new float[N];
-        private final float[] tv = new float[N];
-        private final float[] px = new float[N];
-        private final float[] py = new float[N];
-
-        private long start = System.currentTimeMillis();
-        private boolean visible = false;
-        private int w = 0, h = 0;
-
-        // --- estado de energía (v0.1.3) ---
-        private boolean saverMode = false;   // batería <40% o modo ahorro del sistema
-        private int activeN = N;             // partículas activas este frame
-        private long cycleMs = CYCLE_MS;      // duración del ciclo según energía
-        private long matAt = MAT_AT;         // momento de materializar (75% del ciclo)
-        private long lastPowerCheck = 0L;     // throttle de la consulta de batería
-        private long lastFrameTime = 0L;     // para dt
-        private float lastShaderR = -1f;      // cache del gradiente del orbe
-
-        private void init() {
-            for (int i = 0; i < N; i++) {
-                ang[i] = (float) (Math.random() * Math.PI * 2);
-                spd[i] = (float) (0.04 + Math.random() * 0.14) * (Math.random() < .5 ? 1 : -1);
-                rad[i] = (float) (0.18 + Math.random() * 0.45);
-                siz[i] = (float) (0.8 + Math.random() * 1.8);
-                ph[i] = (float) (Math.random() * Math.PI * 2);
-                gold[i] = Math.random() < 0.12;
-                // objetivos de silueta: cabello largo lacio (raya al medio)
-                // cayendo sobre los hombros + óvalo de cara + cuello alto recto
-                // (turtleneck). Referencia: foto enviada por JJ 10-sep-2026.
-                float bucket = (float) Math.random();
-                if (bucket < 0.35f) {
-                    // óvalo de cara/cabello (volumen principal)
-                    float a = (float) (Math.random() * Math.PI * 2);
-                    float rr2 = (float) Math.sqrt(Math.random());
-                    tu[i] = 0.5f + 0.16f * rr2 * (float) Math.cos(a);
-                    tv[i] = 0.27f + 0.20f * rr2 * (float) Math.sin(a);
-                } else if (bucket < 0.65f) {
-                    // mechones largos cayendo sobre los hombros (izq/der)
-                    boolean left = Math.random() < .5;
-                    float a = (float) (Math.random() * Math.PI * 2);
-                    float rr2 = (float) Math.sqrt(Math.random());
-                    float cu = left ? 0.30f : 0.70f;
-                    tu[i] = cu + 0.075f * rr2 * (float) Math.cos(a);
-                    tv[i] = 0.45f + 0.30f * rr2 * (float) Math.sin(a);
-                } else {
-                    // hombros / cuello de tortuga — poco ensanche, líneas rectas
-                    float yy = 0.55f + (float) Math.random() * 0.40f;
-                    float half = 0.16f + (yy - 0.55f) * 0.28f;
-                    boolean left = Math.random() < .5;
-                    tu[i] = 0.5f + (left ? -half : half);
-                    tv[i] = yy;
-                }
-                px[i] = -1f;
+        AlmaEngine() {
+            Random r = new Random(24102026L);
+            for (int i = 0; i < NP; i++) {
+                pa[i] = (float) (r.nextDouble() * Math.PI * 2);
+                pr[i] = 0.32f + r.nextFloat() * 0.78f;
+                pv[i] = 0.0005f + r.nextFloat() * 0.0015f;
+                psz[i] = 1.5f + r.nextFloat() * 2.6f;
+                pph[i] = r.nextFloat() * 6.28f;
             }
         }
 
-        /**
-         * Consulta el estado de energía (cada ~4s, sticky broadcast sin receptor).
-         * Decide nº de partículas y duración del ciclo.
-         */
-        private void updatePowerProfile() {
-            long now = System.currentTimeMillis();
-            if (now - lastPowerCheck < 4000L) return;
-            lastPowerCheck = now;
-
-            boolean low = false;
-            try {
-                Intent b = getApplicationContext().registerReceiver(null,
-                        new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-                int level = b.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-                int scale = b.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-                if (level >= 0 && scale > 0 && (level * 100 / scale) < 40) low = true;
-
-                PowerManager pm = (PowerManager) getApplicationContext()
-                        .getSystemService(POWER_SERVICE);
-                if (pm != null && pm.isPowerSaveMode()) low = true;
-            } catch (Exception ignored) { }
-
-            if (low != saverMode) {
-                saverMode = low;
-                activeN = saverMode ? N_SAVER : N;
-                cycleMs = saverMode ? CYCLE_SAVE : CYCLE_MS;
-                // ventana activa proporcional (9s normal -> 13.5s ahorro);
-                // matAt = ciclo - (mat 3s + activa + demat 3s): 45s normal, 70.5s ahorro
-                long activeDur = 9000L * cycleMs / CYCLE_MS;
-                matAt = cycleMs - MAT_DUR - activeDur - DEMAT_DUR;
-            }
+        private void leerAjustes() {
+            SharedPreferences sp = getSharedPreferences("orb", MODE_PRIVATE);
+            fps = sp.getInt("fps", 30);
+            if (fps < 12 || fps > 60) fps = 30;
         }
 
-        /** FPS objetivo según modo energía + fase del ciclo. */
-        private long frameDelayMs(int mode) {
-            // fases interesantes (materializando/activo) a full; pasivo a la mitad
-            boolean action = (mode == 1 || mode == 2 || mode == 3);
-            if (saverMode) return action ? 50L : 100L;   // 20 / 10 fps
-            return action ? 33L : 66L;                   // 30 / 15 fps
+        @Override public void onCreate(SurfaceHolder holder) {
+            super.onCreate(holder);
+            leerAjustes();
         }
 
-        @Override
-        public void onVisibilityChanged(boolean v) {
+        @Override public void onVisibilityChanged(boolean v) {
             visible = v;
-            handler.removeCallbacks(drawRunner);
-            if (v) handler.post(drawRunner);
+            h.removeCallbacks(dibujo);
+            if (v) h.post(dibujo);
         }
 
-        @Override
-        public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        @Override public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             super.onSurfaceChanged(holder, format, width, height);
-            w = width;
-            h = height;
-            lastShaderR = -1f;
-            init();
+            W = width; H = height;
+            construir();
+            h.removeCallbacks(dibujo);
+            if (visible) h.post(dibujo);
         }
 
-        @Override
-        public void onSurfaceDestroyed(SurfaceHolder holder) {
+        @Override public void onSurfaceDestroyed(SurfaceHolder holder) {
             super.onSurfaceDestroyed(holder);
             visible = false;
-            handler.removeCallbacks(drawRunner);
+            h.removeCallbacks(dibujo);
+            if (spriteLuz != null) { spriteLuz.recycle(); spriteLuz = null; }
+            if (nucleoIco != null) { nucleoIco.recycle(); nucleoIco = null; }
+            haloShader = null;
         }
 
-        private void draw() {
-            updatePowerProfile();
+        private float R() { return Math.min(W, H) * 0.42f; }
+        private float Cy() { return H * 0.47f; }
 
+        private void construir() {
+            if (W <= 0 || H <= 0) return;
+            leerAjustes();
+
+            float cx = W / 2f, cy = Cy(), R = R();
+
+            // halo: un solo shader por tamano; el latido se hace con paint alpha
+            haloShader = new RadialGradient(cx, cy, R * 2.1f,
+                    new int[]{
+                            Color.argb(255, 120, 200, 255),
+                            Color.argb(238, 43, 123, 255),
+                            Color.argb(150, 0, 242, 254),
+                            Color.argb(0, 43, 123, 255)
+                    }, new float[]{0f, 0.32f, 0.66f, 1f}, Shader.TileMode.CLAMP);
+
+            spriteLuz = Bitmap.createBitmap(72, 72, Bitmap.Config.ARGB_8888);
+            Canvas s1 = new Canvas(spriteLuz);
+            Paint p1 = new Paint(Paint.ANTI_ALIAS_FLAG);
+            p1.setShader(new RadialGradient(36, 36, 36,
+                    new int[]{
+                            Color.argb(255, 255, 255, 255),
+                            Color.argb(235, 190, 235, 255),
+                            Color.argb(140, 0, 242, 254),
+                            Color.argb(82, 43, 123, 255),
+                            Color.argb(0, 43, 123, 255)
+                    }, new float[]{0f, 0.18f, 0.40f, 0.68f, 1f}, Shader.TileMode.CLAMP));
+            s1.drawCircle(36, 36, 36, p1);
+
+            nucleoIco = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_8888);
+            Canvas s2 = new Canvas(nucleoIco);
+            Paint p2 = new Paint(Paint.ANTI_ALIAS_FLAG);
+            p2.setShader(new RadialGradient(128, 128, 128,
+                    new int[]{
+                            Color.argb(255, 255, 255, 255),
+                            Color.argb(242, 180, 240, 255),
+                            Color.argb(170, 43, 123, 255),
+                            Color.argb(60, 0, 242, 254),
+                            Color.argb(0, 0, 242, 254)
+                    }, new float[]{0f, 0.42f, 0.80f, 0.94f, 1f}, Shader.TileMode.CLAMP));
+            s2.drawCircle(128, 128, 128, p2);
+        }
+
+        private void pintar() {
             SurfaceHolder holder = getSurfaceHolder();
             Canvas c = null;
-            int mode = 0;
             try {
                 c = holder.lockCanvas();
-                if (c != null && w > 0 && h > 0) {
-                    mode = drawFrame(c);
+                if (c != null) {
+                    if (c.getWidth() != W || c.getHeight() != H || haloShader == null) {
+                        W = c.getWidth(); H = c.getHeight(); construir();
+                    }
+                    dibujar(c);
                 }
+            } catch (Exception e) {
+                // un frame perdido nunca tumba el fondo
             } finally {
-                if (c != null) holder.unlockCanvasAndPost(c);
+                if (c != null) { try { holder.unlockCanvasAndPost(c); } catch (Exception ignored) { } }
             }
-            handler.removeCallbacks(drawRunner);
-            if (visible) handler.postDelayed(drawRunner, frameDelayMs(mode));
+            h.removeCallbacks(dibujo);
+            if (visible) h.postDelayed(dibujo, 1000 / Math.max(12, Math.min(60, fps)));
         }
 
-        /** Dibuja un frame y devuelve la fase (0 pasivo, 1 mat, 2 activo, 3 demat). */
-        private int drawFrame(Canvas c) {
-            long nowMs = System.currentTimeMillis();
-            float t = (nowMs - start) / 1000f;
-            // dt relativo a 30fps — el movimiento no cambia aunque bajen los fps
-            float dt = 1f;
-            if (lastFrameTime > 0L) {
-                dt = (nowMs - lastFrameTime) / 33.3f;
-                if (dt > 4f) dt = 4f;   // clamp tras pausa larga
+        private void dibujar(Canvas c) {
+            float dt = 60f / Math.max(12, Math.min(60, fps));   // frames equivalentes a 60fps
+            t += dt;
+
+            float cx = W / 2f, cy = Cy(), R = R();
+
+            // fondo marino de la casita
+            fondoP.setStyle(Paint.Style.FILL);
+            fondoP.setShader(null);
+            fondoP.setColor(Color.rgb(7, 16, 38));
+            c.drawRect(0, 0, W, H, fondoP);
+
+            // latido en reposo: .30 + .18*sin(t*.03)  (t en "frames" de 60)
+            float pulso = (float) (0.30 + 0.18 * Math.sin(t * 0.03));
+
+            // 1. halo azul grande
+            haloP.setStyle(Paint.Style.FILL);
+            haloP.setShader(haloShader);
+            haloP.setAlpha((int) Math.min(255, (0.10f + pulso * 0.16f) / 0.26f * 255f));
+            c.drawCircle(cx, cy, R * 2.1f, haloP);
+            haloP.setAlpha(255);
+
+            // 2. tres anillos girando: arco azul largo, arco cian corto, arco verde
+            anilloP.setStyle(Paint.Style.STROKE);
+            anilloP.setShader(null);
+            for (int i = 0; i < 3; i++) {
+                float rr = R * (0.55f + i * 0.22f);
+                float rot = (float) Math.toDegrees(t * (0.0022f + i * 0.0011f) * ((i % 2 == 0) ? 1 : -1));
+
+                c.save();
+                c.rotate(rot, cx, cy);
+
+                anilloP.setStyle(Paint.Style.STROKE);
+                anilloP.setColor(Color.argb((int) Math.min(255, (0.22f + pulso * 0.30f) * 255f), 90, 180, 255));
+                anilloP.setStrokeWidth(1.4f);
+                ovalo.set(cx - rr, cy - rr, cx + rr, cy + rr);
+                c.drawArc(ovalo, 0f, (float) (Math.PI * 1.55 * 180 / Math.PI), false, anilloP);
+
+                anilloP.setColor(Color.argb((int) Math.min(255, (0.20f + pulso * 0.35f) * 255f), 0, 242, 254));
+                anilloP.setStrokeWidth(2.4f);
+                float r2 = rr * 1.02f;
+                ovalo.set(cx - r2, cy - r2, cx + r2, cy + r2);
+                c.drawArc(ovalo, 27f, 52.2f, false, anilloP);
+
+                anilloP.setColor(Color.argb((int) Math.min(255, (0.10f + pulso * 0.18f) * 255f), 0, 230, 118));
+                anilloP.setStrokeWidth(1.6f);
+                float r3 = rr * 0.99f;
+                ovalo.set(cx - r3, cy - r3, cx + r3, cy + r3);
+                c.drawArc(ovalo, 189f, 23.4f, false, anilloP);
+
+                c.restore();
             }
-            lastFrameTime = nowMs;
+            anilloP.setStyle(Paint.Style.FILL);
 
-            float cx = w / 2f, cy = h / 2f;
-            float m = Math.min(w, h);
+            // 3. nucleo con bloom (bitmaps cacheados, nada de gradientes por frame)
+            float coreR = R * 0.24f * (1f + pulso * 0.26f);
+            float bloom = coreR * 4.6f;
+            bmpP.setAlpha(242);
+            dst.set(cx - bloom, cy - bloom, cx + bloom, cy + bloom);
+            c.drawBitmap(spriteLuz, null, dst, bmpP);
 
-            // fondo espacio profundo (negro casi puro = barato en AMOLED)
-            c.drawColor(Color.rgb(2, 6, 23));
+            bmpP.setAlpha((int) Math.min(255, (0.92f + pulso * 0.08f) * 255f));
+            float dor = coreR * 1.02f;
+            dst.set(cx - dor, cy - dor, cx + dor, cy + dor);
+            c.drawBitmap(nucleoIco, null, dst, bmpP);
+            bmpP.setAlpha(255);
 
-            long phase = (nowMs - start) % cycleMs;
-            int mode;             // 0 pasivo, 1 materializando, 2 activo, 3 desvaneciendo
-            float k = 0f;
-            long activeDur = cycleMs - matAt - MAT_DUR - DEMAT_DUR;
-            if (phase < matAt) {
-                mode = 0;
-            } else if (phase < matAt + MAT_DUR) {
-                mode = 1;
-                k = (phase - matAt) / (float) MAT_DUR;
-                k = k < .5f ? 2 * k * k : 1f - (float) Math.pow(-2 * k + 2, 2) / 2f;
-            } else if (phase < matAt + MAT_DUR + activeDur) {
-                mode = 2;
-            } else {
-                mode = 3;
-                k = (phase - (matAt + MAT_DUR + activeDur)) / (float) DEMAT_DUR;
-                k = k < .5f ? 2 * k * k : 1f - (float) Math.pow(-2 * k + 2, 2) / 2f;
+            // 4. particulas: 70, cada una con su sprite y su puntico blanco
+            puntoP.setStyle(Paint.Style.FILL);
+            for (int i = 0; i < NP; i++) {
+                pa[i] += pv[i] * dt;
+                float rr = R * (0.44f + pr[i] * 1.42f);
+                float x = cx + (float) Math.cos(pa[i]) * rr;
+                float y = cy + (float) Math.sin(pa[i]) * rr * 0.62f;
+                float tw = (float) (0.6 + 0.4 * Math.sin(t * 0.05 + pph[i]));
+                float al = (0.35f + pulso * 0.55f) * tw;
+                float rad = psz[i] * 2.2f * (1f + pulso * 0.55f);
+
+                bmpP.setAlpha((int) Math.min(242, al * 255f));
+                dst.set(x - rad, y - rad, x + rad, y + rad);
+                c.drawBitmap(spriteLuz, null, dst, bmpP);
+
+                bmpP.setAlpha(255);
+                puntoP.setColor(Color.argb((int) Math.min(255, al * 1.6f * 255f), 235, 252, 255));
+                c.drawCircle(x, y, Math.max(0.9f, rad * 0.13f), puntoP);
             }
-
-            float breath = 1f + 0.06f * (float) Math.sin(t * 1.05f);
-            float boost = (mode == 1) ? 1f + k * 0.4f : 1f;
-            float orbR = m * 0.085f * breath * boost;
-
-            // orbe respirando — gradiente CACHEADO (solo re-crear si cambia >2%)
-            float shaderR = orbR * 2.2f;
-            if (lastShaderR < 0f || Math.abs(shaderR - lastShaderR) > lastShaderR * 0.02f) {
-                orbPaint.setShader(new RadialGradient(cx, cy, shaderR,
-                        new int[]{Color.argb(242, 204, 251, 241), Color.argb(140, 45, 212, 191),
-                                  Color.argb(56, 14, 116, 144), Color.argb(0, 2, 6, 23)},
-                        new float[]{0f, 0.25f, 0.60f, 1f}, Shader.TileMode.CLAMP));
-                lastShaderR = shaderR;
-            }
-            c.drawCircle(cx, cy, shaderR, orbPaint);
-
-            // partículas (solo las activeN primeras en modo ahorro)
-            for (int i = 0; i < activeN; i++) {
-                float x, y;
-                // punto de órbita pasiva — movimiento POR TIEMPO (dt)
-                ang[i] += spd[i] * 0.066f * dt;
-                float rr = rad[i] * m * (0.92f + 0.08f * (float) Math.sin(t * 0.4f + ph[i]));
-                float ox = cx + (float) Math.cos(ang[i]) * rr;
-                float oy = cy + (float) Math.sin(ang[i]) * rr * 0.92f;
-
-                if (mode == 0) {
-                    x = ox;
-                    y = oy;
-                } else {
-                    float gx = cx + (tu[i] - 0.5f) * m * 0.85f;
-                    float gy = cy + (tv[i] - 0.5f) * m * 1.15f;
-                    if (mode == 1) {
-                        float jig = (1f - k) * 26f;
-                        float tx = gx + (float) Math.sin(t * 3f + ph[i]) * jig;
-                        float ty = gy + (float) Math.cos(t * 3f + ph[i]) * jig;
-                        if (px[i] < 0f) { px[i] = ox; py[i] = oy; }
-                        px[i] += (tx - px[i]) * (0.15f * dt);
-                        py[i] += (ty - py[i]) * (0.15f * dt);
-                    } else if (mode == 2) {
-                        float tx = gx + (float) Math.sin(t * 1.4f + ph[i]) * 2.2f;
-                        float ty = gy + (float) Math.cos(t * 1.1f + ph[i]) * 2.2f;
-                        if (px[i] < 0f) { px[i] = gx; py[i] = gy; }
-                        px[i] += (tx - px[i]) * (0.2f * dt);
-                        py[i] += (ty - py[i]) * (0.2f * dt);
-                    } else {
-                        // desvaneciendo: regreso suave a la órbita
-                        float tx = ox;
-                        float ty = oy;
-                        if (px[i] < 0f) { px[i] = gx; py[i] = gy; }
-                        px[i] += (tx - px[i]) * (0.06f + 0.1f * k) * dt;
-                        py[i] += (ty - py[i]) * (0.06f + 0.1f * k) * dt;
-                    }
-                    x = px[i];
-                    y = py[i];
-                }
-
-                float tw = 0.55f + 0.45f * (float) Math.sin(t * 2.2f + ph[i]);
-                int a = (int) (160 * tw);
-                pPaint.setColor(gold[i]
-                        ? Color.argb(a, 255, 215, 0)
-                        : Color.argb(a, 103, 232, 249));
-                float size = siz[i] * ((mode == 2) ? 1.15f : 1f);
-                c.drawCircle(x, y, size, pPaint);
-            }
-            return mode;
         }
     }
 }
