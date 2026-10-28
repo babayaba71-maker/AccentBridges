@@ -118,7 +118,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">v2.2 · VOZ · respira contigo</div>
+        <div class="badge" id="placa">v2.3 · VOZ · respira contigo</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -424,8 +424,8 @@ function medir(){
   const rms=Math.sqrt(suma/dataBuf.length);
   // GANANCIA AUTOMÁTICA: se calibra sola al micrófono de cada teléfono
   if(rms>picoVoz)picoVoz=picoVoz*.7+rms*.3;else picoVoz*=.9993;
-  const ref=Math.max(.03,picoVoz*.75);
-  const n=rms<.012?0:Math.min(1,Math.pow(rms/ref,.80));   // compuerta de ruido + curva suave
+  const ref=Math.max(.03,picoVoz*1.15);          // deja aire arriba: la voz normal NO satura
+  const n=rms<.012?0:Math.min(1,Math.pow(rms/ref,.85));   // compuerta de ruido + curva suave
   ESTADO.nivel=ESTADO.nivel*.40+n*.60;
   nivelLoop=requestAnimationFrame(medir);
 }
