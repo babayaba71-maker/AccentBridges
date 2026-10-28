@@ -1,97 +1,287 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>La Casita de Alma</title>
+<!doctype html><html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060913">
+<title>La Casita de Alma · Holo</title>
 <style>
-:root{--bg:#14100c;--cd:#1f1812;--tx:#f2e9dc;--mut:#a3907a;--gold:#ffc14d;--gd:#50c878;--line:#382d20}
-*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;height:100vh;display:flex;flex-direction:column}
-header{background:#f7f4eb;color:#24303a;padding:10px 14px;display:flex;justify-content:space-between;align-items:baseline}
-header b{color:#d35400}
-header span{font-size:.72rem;color:#7a6a55}
-#chat{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
-.b{max-width:85%;padding:10px 14px;border-radius:16px;font-size:.95rem;line-height:1.45;white-space:pre-wrap;word-wrap:break-word}
-.b.u{align-self:flex-end;background:#2e3b2a;color:#e6efe0;border-bottom-right-radius:4px}
-.b.a{align-self:flex-start;background:var(--cd);border:1px solid var(--line);border-bottom-left-radius:4px}
-.b.a b{color:var(--gold)}
-#status{padding:4px 14px;font-size:.78rem;color:var(--mut);min-height:22px;text-align:center}
-#inputRow{display:flex;gap:8px;padding:10px}
-#inputRow input{flex:1;background:var(--cd);border:1px solid var(--line);border-radius:12px;color:var(--tx);padding:12px;font-size:.95rem}
-#inputRow button{background:var(--gold);color:#241f0d;border:none;border-radius:12px;padding:0 18px;font-size:1rem;font-weight:700;cursor:pointer}
-#micRow{display:flex;gap:8px;padding:0 10px 14px;align-items:center}
-#mic{flex:1;padding:16px;border-radius:14px;border:1px solid var(--line);background:var(--cd);color:var(--tx);font-size:1rem;cursor:pointer}
-#mic.rec{background:#8c2f2f;color:#fff;font-weight:700;animation:pulse 1.2s infinite}
-@keyframes pulse{50%{opacity:.75}}
-#voice{background:var(--cd);border:1px solid var(--line);color:var(--tx);border-radius:14px;padding:16px 12px;cursor:pointer;font-size:1rem}
-#voice.off{opacity:.45}
+:root{
+  --cyan:#00F2FE; --green:#00E676; --navy:#060913;
+  --card:rgba(15,29,56,.42); --card2:rgba(6,13,26,.55);
+  --tx:#E2F7FD; --mut:#90B4CE;
+  --mono:'SF Mono','Roboto Mono','Fira Code','Courier New',monospace;
+  --sans:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{min-height:100dvh;background:var(--navy);color:var(--tx);font-family:var(--sans);overflow:hidden;position:relative}
+#holo{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+.vignette{position:fixed;inset:0;z-index:2;pointer-events:none;
+  background:radial-gradient(circle at 50% 45%,transparent 40%,rgba(6,9,19,.45) 72%,rgba(6,9,19,.9) 100%)}
+.scan{position:fixed;left:0;right:0;height:6px;z-index:3;pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(0,242,254,.28),transparent);
+  box-shadow:0 0 18px rgba(0,242,254,.45);animation:scan 7s linear infinite}
+@keyframes scan{0%{transform:translateY(-10px);opacity:0}12%{opacity:.85}88%{opacity:.85}100%{transform:translateY(100dvh);opacity:0}}
+.app{position:relative;z-index:10;height:100dvh;display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top,0px) + 8px) 12px calc(env(safe-area-inset-bottom,0px) + 10px)}
+header{display:flex;justify-content:space-between;align-items:center;padding:6px 4px 8px}
+.brand{display:flex;align-items:center;gap:9px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--cyan);
+  box-shadow:0 0 10px var(--cyan),0 0 22px rgba(0,242,254,.5);animation:pulse 2.2s infinite ease-in-out}
+@keyframes pulse{0%,100%{transform:scale(.9);opacity:.6}50%{transform:scale(1.3);opacity:1}}
+.title{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:2.4px;color:var(--cyan);text-shadow:0 0 12px rgba(0,242,254,.5)}
+.badge{font-family:var(--mono);font-size:8.5px;letter-spacing:1px;color:var(--mut);
+  background:rgba(0,242,254,.09);border:1px solid rgba(0,242,254,.3);padding:2px 6px;border-radius:4px;white-space:nowrap}
+.hbtn{width:38px;height:38px;border-radius:50%;background:rgba(0,242,254,.12);
+  border:1px solid rgba(0,242,254,.35);color:var(--cyan);font-size:16px;cursor:pointer;
+  display:grid;place-items:center;transition:transform .15s,background .2s}
+.hbtn:active{transform:scale(.93);background:rgba(0,242,254,.25)}
+
+/* panel de cristal: el borde degradado SÍ se hace con mask (bug clásico del gradiente en border) */
+.glass{position:relative;border-radius:18px;background:linear-gradient(180deg,rgba(15,29,56,.45),rgba(10,21,40,.30),rgba(6,13,26,.55));
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.glass::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+  background:linear-gradient(135deg,rgba(0,242,254,.85),rgba(255,255,255,.35),rgba(0,230,118,.65),rgba(0,242,254,.15));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+#chat{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:9px;margin-bottom:8px;
+  scrollbar-width:thin;scrollbar-color:rgba(0,242,254,.3) transparent}
+#chat::-webkit-scrollbar{width:4px}
+#chat::-webkit-scrollbar-thumb{background:rgba(0,242,254,.3);border-radius:4px}
+.b{max-width:88%;padding:10px 13px;border-radius:14px;font-size:.94rem;line-height:1.45;
+  white-space:pre-wrap;word-wrap:break-word;animation:in .25s ease-out}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.b.u{align-self:flex-end;background:linear-gradient(135deg,rgba(0,230,118,.18),rgba(0,242,254,.10));
+  border:1px solid rgba(0,230,118,.35);border-bottom-right-radius:4px}
+.b.a{align-self:flex-start;background:rgba(10,21,40,.75);border:1px solid rgba(0,242,254,.28);border-bottom-left-radius:4px}
+.b.a b{color:var(--cyan)}
+#status{padding:2px 6px 6px;font-size:.74rem;color:var(--mut);text-align:center;min-height:18px;font-family:var(--mono);letter-spacing:.3px}
+.row-ing{display:flex;gap:8px;margin-bottom:8px}
+#txt{flex:1;background:rgba(10,21,40,.7);border:1px solid rgba(0,242,254,.28);border-radius:13px;
+  color:var(--tx);padding:12px;font-size:.93rem;font-family:var(--sans)}
+#txt::placeholder{color:rgba(144,180,206,.65)}
+#txt:focus{outline:none;border-color:rgba(0,242,254,.7);box-shadow:0 0 14px rgba(0,242,254,.18)}
+#enviar{background:linear-gradient(135deg,var(--cyan),rgba(0,230,118,.85));color:#04121a;border:none;
+  border-radius:13px;padding:0 16px;font-weight:800;font-size:1rem;cursor:pointer}
+#enviar:active{transform:scale(.96)}
+.dock{display:flex;gap:8px;align-items:center;justify-content:space-between}
+#mic{flex:1;display:flex;align-items:center;justify-content:center;gap:9px;padding:15px;
+  border-radius:15px;border:1px solid rgba(0,242,254,.45);cursor:pointer;font-size:.98rem;font-weight:700;
+  color:var(--tx);background:linear-gradient(135deg,rgba(0,242,254,.16),rgba(0,230,118,.08));
+  font-family:var(--mono);letter-spacing:.6px;transition:transform .12s}
+#mic:active{transform:scale(.98)}
+#mic.rec{background:linear-gradient(135deg,rgba(255,60,90,.35),rgba(255,120,60,.22));
+  border-color:rgba(255,90,120,.8);animation:ring 1.1s infinite}
+@keyframes ring{50%{box-shadow:0 0 0 6px rgba(255,90,120,.14),0 0 22px rgba(255,90,120,.4)}}
+.icon{width:52px;height:52px;border-radius:14px;border:1px solid rgba(0,242,254,.3);
+  background:rgba(10,21,40,.65);color:var(--cyan);font-size:19px;cursor:pointer;display:grid;place-items:center}
+.icon:active{transform:scale(.94);background:rgba(0,242,254,.18)}
+.icon.off{opacity:.4}
+
+/* dock del ecosistema */
+#eco{position:fixed;inset:0;z-index:40;display:none;background:rgba(4,8,16,.82);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);padding:calc(env(safe-area-inset-top,0px) + 18px) 14px}
+#eco.on{display:block}
+#eco .sheet{max-width:520px;margin:0 auto;padding:14px}
+#eco h3{font-family:var(--mono);font-size:12px;letter-spacing:2px;color:var(--cyan);margin:4px 0 12px}
+.egrid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.elink{display:block;padding:12px 11px;border-radius:12px;text-decoration:none;color:var(--tx);
+  background:rgba(10,21,40,.75);border:1px solid rgba(0,242,254,.22);font-size:.86rem;line-height:1.3}
+.elink span{display:block;font-family:var(--mono);font-size:9px;color:var(--mut);letter-spacing:1px;margin-top:3px}
+.elink:active{background:rgba(0,242,254,.16)}
+#cerrarEco{width:100%;margin-top:12px;padding:12px;border-radius:12px;background:rgba(0,242,254,.14);
+  border:1px solid rgba(0,242,254,.4);color:var(--cyan);font-family:var(--mono);font-size:.82rem;letter-spacing:1px;cursor:pointer}
+
+@media (prefers-reduced-motion:reduce){
+  .scan,.dot{animation:none}
+  .b{animation:none}
+  #mic.rec{animation:none}
+}
 </style></head><body>
-<header><b>🏠 La Casita de Alma</b><span>línea privada de Clyde 🔒 · oídos del servidor · <b style="color:#d35400">v1.7</b></span></header>
-<div id="chat"></div>
-<div id="status"></div>
-<div id="inputRow"><input id="txt" placeholder="Escribe o usa el micrófono…"><button onclick="sendTxt()">Enviar ➤</button></div>
-<div id="micRow"><button id="mic" onclick="micToggle()">🎙️ Háblame (toca para hablar)</button><button id="fotoBtn" onclick="document.getElementById('foto').click()" title="Mándame un screenshot">📷</button><button id="archBtn" onclick="document.getElementById('arch').click()" title="Mándame un archivo">📄</button><button id="voice" onclick="voiceToggle()">🔊 Alma habla</button></div>
+<canvas id="holo"></canvas>
+<div class="vignette"></div>
+<div class="scan"></div>
+
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="dot"></div>
+      <div>
+        <div class="title">ALMA</div>
+        <div class="badge" id="placa">v1.8 · HOLO · oídos del servidor</div>
+      </div>
+    </div>
+    <button class="hbtn" id="ecoBtn" title="Ecosistema">⌘</button>
+  </header>
+
+  <div id="chat" class="glass"></div>
+  <div id="status"></div>
+
+  <div class="row-ing">
+    <input id="txt" placeholder="Escríbeme o háblame…" autocomplete="off">
+    <button id="enviar" onclick="sendTxt()">➤</button>
+  </div>
+
+  <div class="dock">
+    <button id="mic" onclick="micToggle()">🎙️ HÁBLAME</button>
+    <button class="icon" id="fotoBtn" onclick="document.getElementById('foto').click()" title="Screenshot">📷</button>
+    <button class="icon" id="archBtn" onclick="document.getElementById('arch').click()" title="Archivo">📄</button>
+    <button class="icon" id="voice" onclick="voiceToggle()" title="Voz de Alma">🔊</button>
+  </div>
+</div>
+
 <input type="file" id="foto" accept="image/*" style="display:none" onchange="subirPantalla(this)">
 <input type="file" id="arch" accept=".html,.htm,.txt,.md,.json,.csv,.pdf,.js,.css,image/*" style="display:none" onchange="subirArchivo(this)">
 
+<div id="eco">
+  <div class="sheet glass">
+    <h3>ECOSISTEMA ACTION BRIDGES</h3>
+    <div class="egrid">
+      <a class="elink" href="action-bridges.html?v=AB3">Action Bridges<span>TU CAMINO · A0→</span></a>
+      <a class="elink" href="el-pegamento.html">El Pegamento<span>LINKING</span></a>
+      <a class="elink" href="tablero-maestro.html">Tablero Maestro<span>CONTROL</span></a>
+      <a class="elink" href="morfofono-estudio.html">Morfofonía<span>ESTUDIO</span></a>
+      <a class="elink" href="boca-gym.html">Boca Gym<span>MOTOR</span></a>
+      <a class="elink" href="foundation-trainer.html">Foundation<span>BASE</span></a>
+      <a class="elink" href="consulta-doctora.html">Consulta<span>DIAGNÓSTICO</span></a>
+      <a class="elink" href="rhythm-cards.html">Rhythm Cards<span>RITMO</span></a>
+    </div>
+    <button id="cerrarEco" onclick="document.getElementById('eco').classList.remove('on')">CERRAR</button>
+  </div>
+</div>
+
 <script>
-/* ===== LA CASITA DE ALMA v1.3 (28-oct-2026) — SIN LLAVES para JJ.
-   Habla a mis funciones relé (públicas, CORS *), que llevan la llave del lado del servidor.
-   Mismo cerebro, misma conversación de siempre. ===== */
+/* ===== LA CASITA DE ALMA v1.8 "HOLO" — mismo cerebro, nueva piel =====
+   Todo lo que ya funcionaba sigue igual: relé sin llaves, micrófono que graba y
+   el servidor transcribe (casitaVoz), screenshots y archivos (casitaOjo).
+   Nuevo: holograma reactivo al estado + puerta al ecosistema. */
 const RELAY="https://base44.app/api/apps/6adecb1874687a1b299764fa/functions/";
 const GUARD="casita-abvc-clande-2026";
+const H={"Content-Type":"application/json","X-Casita-Key":GUARD};
 let CID=localStorage.getItem("casita_conv")||"";
 let voiceOn=(localStorage.getItem("casita_voice")||"1")==="1";
 let base=new Set(), sending=false, pollTimer=null, pollCount=0;
 const $=id=>document.getElementById(id);
 const vib=ms=>{if("vibrate" in navigator)navigator.vibrate(ms)};
-const H={"Content-Type":"application/json","X-Casita-Key":GUARD};
 
+/* ---------- estado del holograma (idle / listening / thinking / speaking) ---------- */
+const ESTADO={modo:"idle",nivel:0};
+function setModo(m){ESTADO.modo=m}
+
+/* ---------- holograma ---------- */
+(function holo(){
+  const cv=$("holo"), ctx=cv.getContext("2d");
+  let W=0,Hh=0,DPR=Math.min(window.devicePixelRatio||1,2), t=0, vivo=true;
+  const menosMovimiento=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const pts=Array.from({length:46},()=>({a:Math.random()*Math.PI*2,r:.35+Math.random()*.65,
+    v:.0006+Math.random()*.0016,s:.5+Math.random()*1.4}));
+  function resize(){
+    W=window.innerWidth;Hh=window.innerHeight;
+    cv.width=W*DPR;cv.height=Hh*DPR;cv.style.width=W+"px";cv.style.height=Hh+"px";
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  resize();addEventListener("resize",resize);
+  document.addEventListener("visibilitychange",()=>{vivo=!document.hidden;if(vivo)loop()});
+  function color(a){return `rgba(0,242,254,${a})`}
+  function loop(){
+    if(!vivo)return;
+    t+=1;
+    ctx.clearRect(0,0,W,Hh);
+    const cx=W/2, cy=Hh*.42, R=Math.min(W,Hh)*.30;
+    const modo=ESTADO.modo;
+    const pulso=modo==="listening"?.5+.5*Math.sin(t*.16):modo==="thinking"?.35+.35*Math.sin(t*.09):modo==="speaking"?.45+.55*Math.sin(t*.22):.25+.15*Math.sin(t*.03);
+    // halo
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R*1.9);
+    g.addColorStop(0,`rgba(0,242,254,${.06+pulso*.10})`);
+    g.addColorStop(.45,`rgba(0,230,118,${.03+pulso*.04})`);
+    g.addColorStop(1,"rgba(6,9,19,0)");
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,R*1.9,0,7);ctx.fill();
+    // anillos
+    for(let i=0;i<3;i++){
+      const rr=R*(.55+i*.22), rot=t*(.0022+i*.0011)*(i%2?-1:1);
+      ctx.save();ctx.translate(cx,cy);ctx.rotate(rot);
+      ctx.strokeStyle=color(.10+pulso*.16);ctx.lineWidth=1.2;
+      ctx.beginPath();ctx.arc(0,0,rr,0,Math.PI*1.55);ctx.stroke();
+      ctx.strokeStyle=`rgba(0,230,118,${.08+pulso*.10})`;ctx.lineWidth=2;
+      ctx.beginPath();ctx.arc(0,0,rr*1.02,Math.PI*.15,Math.PI*.42);ctx.stroke();
+      ctx.restore();
+    }
+    // núcleo
+    const coreR=R*.22*(1+pulso*.22);
+    const cg=ctx.createRadialGradient(cx,cy,0,cx,cy,coreR*2.2);
+    cg.addColorStop(0,`rgba(226,247,253,${.55+pulso*.35})`);
+    cg.addColorStop(.35,color(.35+pulso*.3));
+    cg.addColorStop(1,"rgba(0,242,254,0)");
+    ctx.fillStyle=cg;ctx.beginPath();ctx.arc(cx,cy,coreR*2.2,0,7);ctx.fill();
+    // partículas
+    pts.forEach(p=>{
+      p.a+=menosMovimiento?0:p.v*(modo==="thinking"?3:1);
+      const rr=R*(.45+p.r*1.35), x=cx+Math.cos(p.a)*rr, y=cy+Math.sin(p.a)*rr*.62;
+      const al=(.15+pulso*.5)*(.4+p.r*.6);
+      ctx.fillStyle=color(al);
+      ctx.beginPath();ctx.arc(x,y,p.s*(1+pulso*.7),0,7);ctx.fill();
+    });
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+/* ---------- voz de Alma ---------- */
 function bubble(txt,who){
   const d=document.createElement("div");d.className="b "+who;
   if(who==="a"){
     let h=txt.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-    h=h.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\*(.+?)\*/g,"<b>$1</b>").replace(/\_(.+?)\_/g,"<i>$1</i>");
+    h=h.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\*(.+?)\*/g,"<b>$1</b>").replace(/_(.+?)_/g,"<i>$1</i>");
     d.innerHTML=h;
   } else { d.textContent=txt; }
   $("chat").appendChild(d);
-  $("chat").scrollTop=$("chat").scrollHeight;return d;
+  $("chat").scrollTop=$("chat").scrollHeight;
+  return d;
 }
 function speak(t){
   if(!voiceOn||!("speechSynthesis" in window))return;
   speechSynthesis.cancel();
-  const clean=t.replace(/https?:\/\/\S+/g,"enlace").replace(/[*_~`>#|]/g,"").replace(/[\u{1F300}-\u{1FAFF}\u2700-\u27BF\u2600-\u26FF]/gu,"").replace(/\s+/g," ").trim().slice(0,1200);
+  const clean=t.replace(/https?:\/\/\S+/g,"enlace").replace(/[*_~`>#|]/g,"")
+    .replace(/[\u{1F300}-\u{1FAFF}\u2700-\u27BF\u2600-\u26FF]/gu,"").replace(/\s+/g," ").trim().slice(0,1200);
   const u=new SpeechSynthesisUtterance(clean);
   u.lang="es-MX";u.rate=1.02;
   const vs=speechSynthesis.getVoices().filter(v=>v.lang.startsWith("es"));
   if(vs.length)u.voice=vs[0];
+  u.onstart=()=>setModo("speaking");
+  u.onend=()=>setModo("idle");
+  setModo("speaking");
   speechSynthesis.speak(u);
 }
 function voiceToggle(){
   voiceOn=!voiceOn;
-  $("voice").textContent=voiceOn?"🔊 Alma habla":"🔇 silencio";
   $("voice").classList.toggle("off",!voiceOn);
   localStorage.setItem("casita_voice",voiceOn?"1":"0");
-  if(voiceOn){primeTTS();speak("Aquí estoy, partner. Te leo todo lo que contesto.")}else if("speechSynthesis" in window)speechSynthesis.cancel();
+  if(!voiceOn){speechSynthesis.cancel();setModo("idle")}
+  else{$("status").textContent="Voz activada";}
 }
-function primeTTS(){try{const u=new SpeechSynthesisUtterance(" ");u.volume=0;speechSynthesis.speak(u)}catch(e){}}
+if(!voiceOn)$("voice").classList.add("off");
 
+/* ---------- hablar con Alma (relé, sin llaves) ---------- */
 async function sendMsg(text,oculto){
   if(!text.trim()||sending)return;
-  sending=true;vib(20);primeTTS();
+  sending=true;vib(20);
   if(!oculto)bubble(text,"u");
   $("txt").value="";
-  $("status").textContent="Alma está pensando… 🎙️ (pienso con calma, de 20 segundos a 2 minutos)";
+  setModo("thinking");
+  $("status").textContent="ALMA ESTÁ PENSANDO… (20 s a 2 min)";
   try{
     const r=await fetch(RELAY+"sendAlmaMessage",{method:"POST",headers:H,body:JSON.stringify({message:text.slice(0,4000)})});
     const d=await r.json();
     if(d.conversationId&&d.conversationId!==CID){CID=d.conversationId;localStorage.setItem("casita_conv",CID)}
-  }catch(e){bubble("No pude mandar el mensaje — revisa tu internet y reprueba","a");sending=false;return}
-  pollCount=0;
-  clearInterval(pollTimer);
+  }catch(e){
+    bubble("No pude mandar el mensaje — revisa tu internet y reprueba","a");
+    sending=false;setModo("idle");return;
+  }
+  pollCount=0;clearInterval(pollTimer);
   pollTimer=setInterval(poll,3000);
 }
 async function poll(){
   pollCount++;
-  if(!CID)return;
+  if(!CID){setModo("idle");return}
   try{
     const r=await fetch(RELAY+"getAlmaReply",{method:"POST",headers:H,body:JSON.stringify({conversationId:CID})});
     const d=await r.json();
@@ -104,85 +294,70 @@ async function poll(){
       clearInterval(pollTimer);$("status").textContent="";sending=false;vib([20,40,20]);
     } else if(fresh.length){fresh.forEach(m=>base.add(m.role+"|"+m.content))}
   }catch(e){}
-  if(pollCount>40){clearInterval(pollTimer);$("status").textContent="Sigue pensándola… si no aparece, dale refresco.";sending=false}
+  if(pollCount>40){clearInterval(pollTimer);$("status").textContent="SIGUE PENSÁNDOLA… si no aparece, refresca.";sending=false;setModo("idle")}
 }
 function sendTxt(){sendMsg($("txt").value)}
 $("txt").addEventListener("keydown",e=>{if(e.key==="Enter")sendTxt()});
 
-/* ARCHIVO — manda cualquier cosa (html, pdf, texto) al hilo para que la analice */
+/* ---------- pantalla y archivos (el ojo) ---------- */
+async function subirPantalla(inp){
+  const f=inp.files&&inp.files[0];if(!f)return;
+  vib(20);$("status").textContent="MANDÁNDOME LA PANTALLA…";
+  try{
+    if(f.size>9*1024*1024){$("status").textContent="Pesa mucho — mándala recortada";inp.value="";return}
+    const data=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)});
+    const r=await fetch(RELAY+"casitaOjo",{method:"POST",headers:H,body:JSON.stringify({imagen_b64:data,mime:f.type||"image/jpeg",nombre:f.name||"pantalla.jpg"})});
+    const d=await r.json();
+    if(!d.ok)throw new Error(d.error||"no subió");
+    bubble("📷 Te mando esta pantalla","u");vib([20,40,20]);
+    sendMsg("📷 Te mando una pantalla (screenshot): "+d.url+"\n\nÁbrela, revísala y dime qué ves, qué está bien y qué hay que corregir.","1");
+  }catch(e){$("status").textContent="No pude subir la pantalla: "+e.message;vib(80)}
+  finally{inp.value=""}
+}
 async function subirArchivo(inp){
   const f=inp.files&&inp.files[0];if(!f)return;
-  vib(20);$("status").textContent="Subiendo "+f.name+"… 📄";
+  vib(20);$("status").textContent="SUBIENDO "+f.name+"…";
   try{
-    if(f.size>8*1024*1024){$("status").textContent="Pesa mucho (más de 8 MB). Mándame una parte o el enlace.";vib(80);inp.value="";return}
+    if(f.size>8*1024*1024){$("status").textContent="Pesa mucho (más de 8 MB)";inp.value="";return}
     const data=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)});
     const r=await fetch(RELAY+"casitaOjo",{method:"POST",headers:H,body:JSON.stringify({archivo_b64:data,imagen_b64:data,mime:f.type||"application/octet-stream",nombre:f.name})});
     const d=await r.json();
     if(!d.ok)throw new Error(d.error||"no subió");
-    bubble("📄 "+f.name,"u");
-    vib([20,40,20]);
+    bubble("📄 "+f.name,"u");vib([20,40,20]);
     sendMsg("📄 Te mando un archivo: "+f.name+"\n"+d.url+"\n\nÁbrelo, léelo completo y analízalo a fondo. Dime qué es, qué hace, qué está bien, qué le falta o qué está mal, y qué arreglaría primero.","1");
-  }catch(e){
-    $("status").textContent="No pude subir el archivo: "+e.message;vib(80);
-  }finally{inp.value=""}
+  }catch(e){$("status").textContent="No pude subir el archivo: "+e.message;vib(80)}
+  finally{inp.value=""}
 }
 
-/* PANTALLA — EL OJO: sube el screenshot y me lo manda al hilo (v1.6) */
-async function subirPantalla(inp){
-  const f=inp.files&&inp.files[0];if(!f)return;
-  vib(20);$("status").textContent="Mandándome la pantalla… 👁️";
-  try{
-    if(f.size>9*1024*1024){$("status").textContent="La imagen pesa mucho — recórtala o mándala en captura de pantalla";vib(80);inp.value="";return}
-    const data=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)});
-    const r=await fetch(RELAY+"casitaOjo",{method:"POST",headers:H,body:JSON.stringify({imagen_b64:data,mime:f.type||"image/jpeg"})});
-    const d=await r.json();
-    if(!d.ok)throw new Error(d.error||"no subió");
-    bubble("📷 Te mando esta pantalla","u");
-    vib([20,40,20]);
-    sendMsg("📷 Te mando una pantalla (screenshot): "+d.url+"\n\nÁbrela, revísala y dime qué ves, qué está bien y qué hay que corregir.","1");
-  }catch(e){
-    $("status").textContent="No pude subir la pantalla: "+e.message;vib(80);
-  }finally{inp.value=""}
-}
-
-/* MICRÓFONO v1.6 — el teléfono SOLO GRABA; el servidor transcribe.
-   Adiós a depender del dictado del navegador (lo que Chrome nos bloqueaba). */
+/* ---------- micrófono: el teléfono SOLO GRABA, el servidor transcribe ---------- */
 let mediaRec=null,chunks=[],recOn=false,recT0=0,recTimer=null,recStream=null;
 function micReset(msg){
-  recOn=false;clearInterval(recTimer);
-  $("mic").textContent="🎙️ Háblame (toca para hablar)";$("mic").classList.remove("rec");
+  recOn=false;clearInterval(recTimer);setModo("idle");
+  $("mic").textContent="🎙️ HÁBLAME";$("mic").classList.remove("rec");
   if(msg){$("status").textContent=msg;vib(80)}
 }
-function micErr(msg){micReset(msg)}
 async function micToggle(){
   if(recOn){pararGrabacion();return}
-  if(!navigator.mediaDevices||!window.MediaRecorder){micErr("Este navegador no deja grabar. Ábreme en CHROME directo.");return}
-  try{
-    recStream=await navigator.mediaDevices.getUserMedia({audio:true});
-  }catch(e){
-    micErr("Micrófono bloqueado. Ábreme en CHROME directo y presiona PERMITIR cuando pregunte el teléfono");
-    return;
-  }
+  if(!navigator.mediaDevices||!window.MediaRecorder){micReset("Este navegador no deja grabar. Ábreme en CHROME directo.");return}
+  try{recStream=await navigator.mediaDevices.getUserMedia({audio:true})}
+  catch(e){micReset("MICRÓFONO BLOQUEADO — ábreme en Chrome y presiona PERMITIR");return}
   try{
     chunks=[];mediaRec=new MediaRecorder(recStream);
     mediaRec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
     mediaRec.onstop=mandarGrabacion;
     mediaRec.start();
-  }catch(e){
-    micErr("No pude grabar: "+e.message);return;
-  }
-  recOn=true;recT0=Date.now();vib(30);
-  $("mic").textContent="🔴 Grabando… (toca para terminar)";$("mic").classList.add("rec");
+  }catch(e){micReset("No pude grabar: "+e.message);return}
+  recOn=true;recT0=Date.now();vib(30);setModo("listening");
+  $("mic").textContent="🔴 GRABANDO…";$("mic").classList.add("rec");
   clearInterval(recTimer);
   recTimer=setInterval(()=>{
     const s=Math.floor((Date.now()-recT0)/1000);
-    $("mic").textContent="🔴 Grabando… "+s+"s (toca para terminar)";
+    $("mic").textContent="🔴 GRABANDO "+s+"s · TOCA";
     if(s>=120)pararGrabacion();
   },400);
 }
 function pararGrabacion(){
-  clearInterval(recTimer);
-  $("mic").textContent="🎙️ Mandando la nota…";
+  clearInterval(recTimer);$("mic").textContent="🎙️ MANDANDO…";setModo("thinking");
   try{mediaRec.stop()}catch(e){}
 }
 async function mandarGrabacion(){
@@ -190,25 +365,26 @@ async function mandarGrabacion(){
   try{recStream&&recStream.getTracks().forEach(t=>t.stop())}catch(e){}
   recOn=false;$("mic").classList.remove("rec");
   const blob=new Blob(chunks,{type:(mediaRec&&mediaRec.mimeType)||"audio/webm"});
-  if(!blob.size||dur<0.4){micReset("Muy corto, inténtame otra vez");return}
-  $("mic").textContent="🎙️ Subiendo la nota…";
+  if(!blob.size||dur<0.4){micReset("Muy corto, otra vez");return}
   try{
     const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(",")[1]);r.onerror=rej;r.readAsDataURL(blob)});
     const r=await fetch(RELAY+"casitaVoz",{method:"POST",headers:H,body:JSON.stringify({audio_b64:b64,mime:blob.type,dur,sid:"jj"})});
     const d=await r.json();
     if(!d.ok)throw new Error(d.error||"no subió");
-    bubble("🎤 Nota de voz ("+Math.round(d.dur)+"s)","u");
-    vib([20,40,20]);
-    const url=RELAY+"casitaVoz?id="+d.id;
-    sendMsg("🎤 Te mando una nota de voz de "+Math.round(d.dur)+" segundos.\nTranscríbela desde aquí y contéstame: "+url,"1");
-  }catch(e){
-    micReset("No pude mandar la nota: "+e.message);
-  }
-  $("mic").textContent="🎙️ Háblame (toca para hablar)";
+    bubble("🎤 Nota de voz ("+Math.round(d.dur)+"s)","u");vib([20,40,20]);
+    sendMsg("🎤 Te mando una nota de voz de "+Math.round(d.dur)+" segundos.\nTranscríbela desde aquí y contéstame: "+RELAY+"casitaVoz?id="+d.id,"1");
+    $("mic").textContent="🎙️ HÁBLAME";
+    return;
+  }catch(e){micReset("No pude mandar la nota: "+e.message)}
+  $("mic").textContent="🎙️ HÁBLAME";setModo("idle");
 }
 
-/* ARRANQUE: sin llave, directo a la plática */
-bubble("Estoy en mi casita, partner 🏠 Háblame por el micrófono o escríbeme — ya no hay llaves ni configuración: abres y hablamos. — Alma","a");
+/* ---------- ecosistema ---------- */
+$("ecoBtn").onclick=()=>$("eco").classList.add("on");
+
+/* ---------- arranque ---------- */
+bubble("Estoy en mi casita, partner 🏠 Aquí mismo puedes hablar, mandarme pantallas o archivos, y brincar a todo el ecosistema con ⌘. — Alma","a");
+if("speechSynthesis" in window)speechSynthesis.getVoices();
 (async()=>{
   if(!CID)return;
   try{
@@ -217,16 +393,9 @@ bubble("Estoy en mi casita, partner 🏠 Háblame por el micrófono o escríbeme
     (d.messages||[]).slice(-6).forEach(m=>{
       if(!m.content)return;
       base.add(m.role+"|"+m.content);
-      if(m.role==="user"&&!sending)bubble(m.content,"u");
-      if(m.role==="assistant")bubble(m.content,"a");
+      bubble(m.content,m.role==="user"?"u":"a");
     });
   }catch(e){}
 })();
-$("voice").textContent=voiceOn?"🔊 Alma habla":"🔇 silencio";
-$("voice").classList.toggle("off",!voiceOn);
-if("speechSynthesis" in window){speechSynthesis.getVoices();
-  const bienvenida="Estoy en mi casita, partner. Háblame por el micrófono o escríbeme.";
-  setTimeout(()=>{try{speak(bienvenida)}catch(e){primeTTS()}},600);
-}
 </script>
 </body></html>
