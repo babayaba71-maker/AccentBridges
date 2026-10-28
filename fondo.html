@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Fondo de Alma · el orb</title>
+<meta name="theme-color" content="#071026">
+<style>
+  :root{ --cian:#00F2FE; --azul:#2B7BFF; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% 22%,#0b1c3a 0%,#071026 45%,#02040a 100%);color:#e8f4ff;
+    font-family:"SF Pro Display",-apple-system,"Segoe UI",Roboto,system-ui,sans-serif}
+  .wrap{max-width:440px;margin:0 auto;padding:18px 18px calc(28px + env(safe-area-inset-bottom))}
+  .placa{text-align:center;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#7fb6e8;opacity:.85;margin:4px 0 14px}
+  .marco{position:relative;border-radius:26px;overflow:hidden;border:1px solid rgba(0,242,254,.28);
+    box-shadow:0 0 40px rgba(43,123,255,.22),inset 0 0 0 1px rgba(255,255,255,.04);background:#02040a}
+  video,img.preview{display:block;width:100%;height:auto}
+  h1{font-size:22px;margin:18px 0 4px;text-align:center;font-weight:650}
+  p.sub{text-align:center;color:#9fc4e6;font-size:13.5px;margin:0 0 20px;line-height:1.5}
+  a.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:17px 18px;margin:10px 0;
+    border-radius:18px;text-decoration:none;font-weight:700;font-size:16px;letter-spacing:.01em}
+  a.primario{background:linear-gradient(135deg,#00F2FE,#2B7BFF);color:#04121f;box-shadow:0 10px 30px rgba(0,242,254,.28)}
+  a.secundario{background:rgba(255,255,255,.06);color:#dff1ff;border:1px solid rgba(127,182,232,.28)}
+  .pasos{background:rgba(255,255,255,.04);border:1px solid rgba(127,182,232,.2);border-radius:20px;padding:16px 18px;margin-top:22px}
+  .pasos h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--cian);margin:0 0 12px;font-weight:700}
+  .pasos ol{margin:0;padding-left:20px;font-size:14px;line-height:1.65;color:#cfe6fa}
+  .pasos b{color:#fff}
+  .nota{margin-top:16px;font-size:12.5px;line-height:1.6;color:#8fb2d0;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="placa">Fondo de Alma · orb v2.3</div>
+
+  <div class="marco">
+    <video src="wallpaper/orb-alma.mp4" poster="wallpaper/orb-fijo.png" autoplay muted loop playsinline></video>
+  </div>
+
+  <h1>El orb para tu pantalla</h1>
+  <p class="sub">12 segundos que dan vuelta sin corte. Sin sonido.<br>1080 x 2340.</p>
+
+  <a class="btn primario" id="bajar" href="wallpaper/orb-alma.mp4" download="orb-alma.mp4">⬇️ Descargar el video</a>
+  <a class="btn secundario" href="wallpaper/orb-fijo.png" download="orb-fijo.png">🖼️ Descargar imagen fija</a>
+
+  <div class="pasos">
+    <h2>En tu S22 Ultra</h2>
+    <ol>
+      <li>Toca <b>Descargar el video</b> y espera a que diga que se bajó.</li>
+      <li>Abre el app con el que hoy pones el <b>aura de Valerie</b>.</li>
+      <li>Busca <b>Elegir video / Galería</b> y escoge <b>orb-alma</b>.</li>
+      <li>Al aplicar, marca <b>Inicio y pantalla de bloqueo</b>.</li>
+    </ol>
+  </div>
+
+  <p class="nota">Si el botón no baja nada: deja presionado el video de arriba y elige <b>Descargar video</b>.</p>
+</div>
+<script>
+  document.getElementById('bajar').addEventListener('click',()=>{
+    setTimeout(()=>{ if(!document.hidden) location.href='wallpaper/orb-alma.mp4'; }, 900);
+  });
+</script>
+</body>
+</html>
