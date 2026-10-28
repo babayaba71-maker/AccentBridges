@@ -172,14 +172,14 @@ function showJourney(){
   const vidBlock=(ni===0)?`<div class="card" style="border-color:var(--gold)">
       <div style="font-weight:800;color:var(--gold)">🎬 Para empezar: El Principio de Todo</div>
       <div class="mut" style="margin:4px 0 8px">Los pronombres y el verbo TO BE, en 1 minuto.</div>
-      <video controls playsinline preload="none" src="${VIDEO.src}"></video>
+      <video controls playsinline preload="none" onplay="markVideo()" src="${VIDEO.src}"></video>
     </div>`:"";
   const lessonBlock=L?`<div class="card">
       <span class="tag">LECCIÓN</span>
       <h1 style="margin-top:8px">${L.t}</h1>
       <p class="mut" style="margin-top:4px">${L.d}</p>
       <img src="${CDN}${L.img}?v=AB3" style="width:100%;border-radius:12px;margin-top:10px;border:1px solid var(--line)" alt="">
-      <button class="play" onclick="playAud('${L.aud}')">🎧 Escuchar la lección</button>
+      <button class="play" onclick="playLessonMark('${L.aud}')">🎧 Escuchar la lección</button>
     </div>`:"";
   const frases=nv.items.map(it=>{
     const b=P.best[it.k];
@@ -190,6 +190,18 @@ function showJourney(){
     </button>`;
   }).join("");
   const ultima=ni>=NIVELES.length-1;
+  // ===== LA COMPUERTA DE LA PÁGINA (JJ 28-oct): el botón se activa
+  // cuando ella TERMINA — video visto, lección escuchada y TODAS las frases practicadas.
+  const faltaVideo = (ni===0 && !P.done[VIDEO.id]);
+  const faltaLeccion = !!(L && !P.done[L.aud]);
+  const sinPracticar = nv.items.filter(it=>!((P.attempts&&P.attempts[it.k])>0));
+  const practicadas = nv.items.length - sinPracticar.length;
+  const listo = !faltaVideo && !faltaLeccion && sinPracticar.length===0;
+  const faltasTxt=[];
+  if(faltaVideo)faltasTxt.push("mira el video");
+  if(faltaLeccion)faltasTxt.push("escucha la lección");
+  if(sinPracticar.length)faltasTxt.push("practica "+(sinPracticar.length===1?"la frase que falta":sinPracticar.length+" frases"));
+  const notaFalta = listo?"":"Para continuar: "+faltasTxt.join(" · ");
   $("journey").innerHTML=`
     <div class="card" style="border-color:var(--gold)">
       <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap">
@@ -207,9 +219,13 @@ function showJourney(){
     </div>
     <div style="display:flex;gap:8px;margin-top:12px">
       ${ni>0?`<button class="btn ghost" style="flex:1;margin:0" onclick="prevPage()">← Página ${ni}</button>`:""}
-      ${ultima?`<button class="btn gd" style="flex:2;margin:0" onclick="showReport()">📋 Ver el reporte de mi día</button>`
-        :`<button class="btn gold" style="flex:2;margin:0" onclick="nextPage()">Continuar a la página ${ni+2} →</button>`}
+      ${listo
+        ? (ultima?`<button class="btn gd" style="flex:2;margin:0" onclick="showReport()">Todo hecho · Ver el reporte de mi día 📋</button>`
+          :`<button class="btn gold" style="flex:2;margin:0" onclick="nextPage()">Todo hecho · Continuar a la página ${ni+2} →</button>`)
+        : `<button class="btn" id="btnCont" disabled style="flex:2;margin:0;opacity:.4;cursor:not-allowed">Continuar a la página ${ni+2} →</button>`}
     </div>
+    <div id="gateNote" class="mut" style="text-align:center;margin-top:8px;${listo?"color:var(--gd)":""}">${listo?"Página terminada. Se abrió tu siguiente paso ✅":notaFalta}</div>
+    <div class="mut" style="text-align:center;margin-top:4px;font-size:.72rem">${practicadas} de ${nv.items.length} frases practicadas en esta página</div>
     <div class="mut" style="text-align:center;margin:16px 0 40px">Una página completa a la vez. Sin candados, sin carreras.</div>`;
   $("journey").classList.remove("hidden");$("cardbox").classList.add("hidden");$("report").classList.add("hidden");
   window.scrollTo({top:0,behavior:"smooth"});
@@ -377,5 +393,25 @@ function sendReport(tot,hits,avg,doneTotal){
     <p class="mut" style="margin-top:8px">Tu maestra lo lee hoy mismo. Mañana seguimos desde el recuadro ${firstOpen()+1}.</p>
     <button class="btn gold" onclick="go(${st.noMic})">← Mi camino</button></div>`;
   haptic([20,50,20]);
+}
+
+// ===== marcado de la compuerta (video / lección) sin re-render =====
+function markVideo(){ if(!P.done[VIDEO.id]){P.done[VIDEO.id]=true;save();refreshGate()} }
+function playLessonMark(a){ playAud(a); if(!P.done[a]){P.done[a]=true;save();refreshGate()} }
+function refreshGate(){
+  // recalcula el estado de la compuerta en vivo (mismo criterio que showJourney)
+  const nv=NIVELES[PG], L=LESSONS[LESSON_BY_LEVEL[PG]];
+  const faltaVideo=(PG===0&&!P.done[VIDEO.id]);
+  const faltaLeccion=!!(L&&!P.done[L.aud]);
+  const sinPracticar=nv.items.filter(it=>!((P.attempts&&P.attempts[it.k])>0));
+  const listo=!faltaVideo&&!faltaLeccion&&sinPracticar.length===0;
+  const b=$("btnCont");
+  const aviso=$("gateNote");
+  if(b&&listo){
+    b.disabled=false; b.style.opacity=1; b.style.cursor="pointer";
+    b.className="btn gold"; b.textContent=(PG>=NIVELES.length-1)?"Todo hecho · Ver el reporte de mi día 📋":("Todo hecho · Continuar a la página "+(PG+2)+" →");
+    b.onclick=(PG>=NIVELES.length-1)?showReport:nextPage;
+    if(aviso){aviso.textContent="Página terminada. Se abrió tu siguiente paso ✅";aviso.style.color="var(--gd)"}
+  }
 }
 </script></body></html>
