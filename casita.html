@@ -1,0 +1,147 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>La Casita de Alma</title>
+<style>
+:root{--bg:#14100c;--cd:#1f1812;--tx:#f2e9dc;--mut:#a3907a;--gold:#ffc14d;--blue:#7bb1ff;--gd:#50c878;--line:#382d20}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;height:100vh;display:flex;flex-direction:column}
+header{background:#f7f4eb;color:#24303a;padding:10px 14px;display:flex;justify-content:space-between;align-items:baseline}
+header b{color:#d35400}
+header span{font-size:.72rem;color:#7a6a55}
+#gate{position:fixed;inset:0;background:var(--bg);z-index:50;display:none;flex-direction:column;justify-content:center;padding:24px;text-align:center}
+#gate.on{display:flex}
+#gate h2{font-size:1.3rem;margin-bottom:8px}
+#gate p{color:var(--mut);font-size:.85rem;margin-bottom:16px;line-height:1.5}
+#gate input{width:100%;background:var(--cd);border:1px solid var(--line);border-radius:12px;color:var(--tx);padding:14px;font-size:.9rem;margin-bottom:10px}
+.btn{background:var(--gold);color:#241f0d;font-weight:700;border:none;border-radius:12px;padding:14px;font-size:1rem;cursor:pointer;width:100%}
+#chat{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.b{max-width:85%;padding:10px 14px;border-radius:16px;font-size:.95rem;line-height:1.45;white-space:pre-wrap;word-wrap:break-word}
+.b.u{align-self:flex-end;background:#2e3b2a;color:#e6efe0;border-bottom-right-radius:4px}
+.b.a{align-self:flex-start;background:var(--cd);border:1px solid var(--line);border-bottom-left-radius:4px}
+.b.a b{color:var(--gold)}
+#status{padding:4px 14px;font-size:.78rem;color:var(--mut);min-height:22px;text-align:center}
+#inputRow{display:flex;gap:8px;padding:10px}
+#inputRow input{flex:1;background:var(--cd);border:1px solid var(--line);border-radius:12px;color:var(--tx);padding:12px;font-size:.95rem}
+#inputRow button{background:var(--gold);color:#241f0d;border:none;border-radius:12px;padding:0 18px;font-size:1rem;font-weight:700;cursor:pointer}
+#micRow{display:flex;gap:8px;padding:0 10px 14px;align-items:center}
+#mic{flex:1;padding:16px;border-radius:14px;border:1px solid var(--line);background:var(--cd);color:var(--tx);font-size:1rem;cursor:pointer}
+#mic.rec{background:#8c2f2f;color:#fff;font-weight:700;animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.75}}
+#voice{background:var(--cd);border:1px solid var(--line);color:var(--tx);border-radius:14px;padding:16px 12px;cursor:pointer;font-size:1rem}
+#voice.off{opacity:.45}
+.err{color:#e98989;font-size:.8rem;text-align:center;padding:4px}
+</style></head><body>
+<header><b>🏠 La Casita de Alma</b><span>línea privada de Clyde 🔒</span></header>
+
+<div id="gate" class="on">
+  <h2>Bienvenido a tu Casita 🏠</h2>
+  <p>Primera vez nomás: pega aquí la <b>API Key de Alma</b> (la misma que copiaste de la pestaña <i>Developer</i> de su perfil — empieza con <code>b44_</code>). Queda guardada solo en este teléfono, nunca en la página.</p>
+  <input id="tokenIn" type="password" placeholder="b44_…">
+  <button class="btn" onclick="saveToken()">Entrar a la Casita</button>
+  <p style="margin-top:14px;font-size:.75rem" id="gateErr"></p>
+</div>
+
+<div id="chat"></div>
+<div id="status"></div>
+<div id="inputRow"><input id="txt" placeholder="Escribe o usa el micrófono…"><button onclick="sendTxt()">Enviar ➤</button></div>
+<div id="micRow"><button id="mic" onclick="micToggle()">🎙️ Háblame (toca para hablar)</button><button id="voice" onclick="voiceToggle()">🔊</button></div>
+
+<script>
+/* ===== LA CASITA DE ALMA (28-oct-2026) — la línea privada de Clyde fuera del chat de Base44.
+   Habla directo a la API del agente (CORS abierto, verificado): mismo cerebro, misma conversación. ===== */
+const API="https://app.base44.com/api/agents/6adecb1874687a1b299764fa";
+let TOKEN=localStorage.getItem("casita_token")||"";
+let CID=localStorage.getItem("casita_conv")||"";
+let voiceOn=(localStorage.getItem("casita_voice")||"1")==="1";
+let base=new Set(), sending=false, pollTimer=null, pollCount=0;
+const $=id=>document.getElementById(id);
+const vib=ms=>{if("vibrate" in navigator)navigator.vibrate(ms)};
+
+function saveToken(){
+  const t=$("tokenIn").value.trim();
+  if(!t.startsWith("b44_")){$("gateErr").textContent="Esa no parece la llave (debe empezar con b44_). Revísala en la pestaña Developer de mi perfil.";vib(60);return}
+  TOKEN=t;localStorage.setItem("casita_token",t);$("gate").classList.remove("on");vib(30);start();
+}
+function bubble(txt,who){
+  const d=document.createElement("div");d.className="b "+who;d.textContent=txt;$("chat").appendChild(d);
+  $("chat").scrollTop=$("chat").scrollHeight;return d;
+}
+async function api(path,opts={}){
+  const r=await fetch(API+path,{...opts,headers:{Authorization:"Bearer "+TOKEN,"Content-Type":"application/json",...(opts.headers||{})}});
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  return r.json();
+}
+async function start(){
+  try{
+    if(!CID){const c=await api("/conversations",{method:"POST",body:"{}"});CID=c.id;localStorage.setItem("casita_conv",CID)}
+    const d=await api("/conversations/"+CID);
+    (d.messages||[]).slice(-30).forEach(m=>{if(m.content)base.add(m.role+"|"+m.content)});
+    bubble("Estoy en mi casita, partner 🏠 Háblame por el micrófono o escríbeme — aquí no hay chat de Base44 que se atraviese. — Alma","a");
+    speak("Estoy en mi casita, partner. Háblame por el micrófono o escríbeme.");
+  }catch(e){
+    $("status").textContent="No pude abrir la conversación con esa llave — revisa que sea la de mi perfil (Developer).";
+    $("gate").classList.add("on");localStorage.removeItem("casita_token");TOKEN="";
+  }
+}
+function speak(t){
+  if(!voiceOn||!("speechSynthesis" in window))return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t.replace(/[\u{1F300}-\u{1FAFF}\u2700-\u27BF\u2600-\u26FF]/gu,"").slice(0,1200));
+  u.lang="es-MX";u.rate=1.02;
+  const vs=speechSynthesis.getVoices().filter(v=>v.lang.startsWith("es"));
+  if(vs.length)u.voice=vs[0];
+  speechSynthesis.speak(u);
+}
+function voiceToggle(){voiceOn=!voiceOn;$("voice").classList.toggle("off",!voiceOn);localStorage.setItem("casita_voice",voiceOn?"1":"0");if(!voiceOn)speechSynthesis.cancel()}
+async function sendMsg(text){
+  if(!text.trim()||sending)return;
+  sending=true;vib(20);
+  bubble(text,"u");
+  $("txt").value="";
+  $("status").textContent="Alma está pensando… 🎙️ (suele tardar de 30 segundos a 2 minutos)";
+  const snapshot=base.size;
+  // disparamos el mensaje (el loop del agente sigue del lado del servidor aunque la línea se suelte)
+  api("/conversations/"+CID+"/messages",{method:"POST",body:JSON.stringify({content:text})}).then(()=>{poll()}).catch(()=>{});
+  pollCount=0;
+  clearInterval(pollTimer);
+  pollTimer=setInterval(poll,6000);
+}
+async function poll(){
+  pollCount++;
+  try{
+    const d=await api("/conversations/"+CID);
+    const fresh=(d.messages||[]).filter(m=>m.content&&!base.has(m.role+"|"+m.content));
+    const replies=fresh.filter(m=>m.role==="assistant");
+    if(replies.length){
+      replies.forEach(m=>{base.add(m.role+"|"+m.content);bubble(m.content,"a")});
+      speak(replies.map(m=>m.content).join(" "));
+      fresh.forEach(m=>base.add(m.role+"|"+m.content));
+      clearInterval(pollTimer);$("status").textContent="";sending=false;vib([20,40,20]);
+    } else if(fresh.length){fresh.forEach(m=>base.add(m.role+"|"+m.content))}
+  }catch(e){}
+  if(pollCount>40){clearInterval(pollTimer);$("status").textContent="Sigue pensándola… si no aparece, dale refresco.";sending=false}
+}
+function sendTxt(){sendMsg($("txt").value)}
+$("txt").addEventListener("keydown",e=>{if(e.key==="Enter")sendTxt()});
+
+/* MICRÓFONO — dictado es-MX */
+let rec=null,recOn=false;
+function micToggle(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){$("mic").textContent="Tu navegador no trae micrófono de dictado 😔 usa el texto";return}
+  if(recOn){rec.stop();return}
+  rec=new SR();rec.lang="es-MX";rec.interimResults=true;rec.continuous=false;
+  recOn=true;$("mic").textContent="🎙️ Escuchando… (toca para parar)";$("mic").classList.add("rec");vib(30);
+  let final="";
+  rec.onresult=e=>{let interim="";for(const r of e.results){if(r.isFinal)final+=r[0].transcript;else interim+=r[0].transcript}$("txt").value=final+interim};
+  rec.onerror=e=>{};
+  rec.onend=()=>{
+    recOn=false;$("mic").textContent="🎙️ Háblame (toca para hablar)";$("mic").classList.remove("rec");
+    if(final.trim()){vib(40);sendMsg(final.trim())}
+  };
+  rec.start();
+}
+if(TOKEN){$("gate").classList.remove("on");start()} else {$("gate").classList.add("on")}
+if("speechSynthesis" in window)speechSynthesis.getVoices();
+</script>
+</body></html>
