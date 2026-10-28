@@ -29,6 +29,9 @@ h1{font-size:1.25rem;line-height:1.3}
 .rec{width:100%;background:var(--cd2);border:2px solid var(--tx);color:var(--tx);border-radius:14px;padding:18px;font-size:1.05rem;cursor:pointer;margin-top:10px;font-weight:700}
 .rec.on{border-color:var(--rj);color:var(--rj);animation:pulse 1.2s infinite}
 @keyframes pulse{50%{background:rgba(233,137,137,.12)}}
+
+.audiochip{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.07);font-size:1.05rem;cursor:pointer}
+.audiochip:active,.sonando{background:var(--gold);color:#122}
 .score{text-align:center;font-size:2rem;font-weight:800;margin-top:8px}
 .fb{text-align:center;font-size:.88rem;line-height:1.5;margin-top:4px}
 .hidden{display:none}
@@ -184,10 +187,12 @@ function showJourney(){
   const frases=nv.items.map(it=>{
     const b=P.best[it.k];
     const pint=it.wt.map(w=>`<span style="border-bottom:3px solid ${TYPES[w[1]].c}">${w[0]}</span>`).join(" ");
-    return `<button class="btn" style="margin-top:8px" onclick="openEx('${it.k}')">
+    return `<div class="btn" style="margin-top:8px" role="button" onclick="openEx('${it.k}')">
       <div class="ex"><div style="flex:1"><div class="en">${pint}</div><div class="es">${it.es}</div></div>
-      <div style="text-align:right">${b!=null?`<b style="color:${b>=70?"var(--gd)":"var(--rj)"}">${b}</b>`:"🎤"}</div></div>
-    </button>`;
+      <div style="text-align:right;display:flex;align-items:center;gap:8px;justify-content:flex-end">
+        <span class="audiochip" role="button" title="Escuchar el modelo" onclick="event.stopPropagation();playAud('${it.k}',this)">🔊</span>
+        ${b!=null?`<b style="color:${b>=70?"var(--gd)":"var(--rj)"}">${b}</b>`:"🎤"}</div></div>
+    </div>`;
   }).join("");
   const ultima=ni>=NIVELES.length-1;
   // ===== LA COMPUERTA DE LA PÁGINA (JJ 28-oct): el botón se activa
@@ -249,7 +254,7 @@ function openStep(i){
       <h1 style="margin-top:10px">${s.t}</h1>
       <p class="mut" style="margin-top:6px">${s.sub}</p>
       <img src="${CDN}${s.L.img}?v=AB2" style="width:100%;border-radius:12px;margin-top:12px;border:1px solid var(--line)" alt="">
-      <button class="play" onclick="playAud('${s.L.aud}')">🎧 Escuchar la lección</button>
+      <button class="play" onclick="playAud('${s.L.aud}',this)">🎧 Escuchar la lección</button>
       <button class="btn gold" onclick="winStep('${s.L.aud}')">Ya la escuché, a practicar ▶</button>
       <button class="btn ghost" onclick="showJourney()">← Volver a mi página</button></div>`;
     playAud(s.L.aud);return;
@@ -259,7 +264,7 @@ function openStep(i){
     <div class="sent" id="sentence">${it.wt.map(w=>`<span style="border-bottom:3px solid ${TYPES[w[1]].c}">${w[0]}</span>`).join(" ")}</div>
     <div style="text-align:center;margin-top:2px">${Object.values(TYPES).map(t=>`<span style="display:inline-block;margin:2px 6px;font-size:.66rem;color:${t.c}">● ${t.n}</span>`).join("")}</div>
     <div class="mut" style="text-align:center">${it.es}</div>
-    <button class="play" onclick="playAud('${it.k}')">🎧 Escuchar el modelo</button>
+    <button class="play" onclick="playAud('${it.k}',this)">🎧 Escuchar el modelo</button>
     ${st.noMic?`<p class="mut" style="margin-top:10px;text-align:center">Modo práctica: dila en voz alta siguiendo el modelo y marca tú misma.</p>
       <button class="btn gd" onclick="passManual()">✅ La dije completa — siguiente</button>`
     :`<button class="rec" id="recbtn" onclick="toggleRec()">🎤 Tócala (habla claro)</button><div id="out"></div>`}
@@ -267,7 +272,33 @@ function openStep(i){
     <button class="btn ghost" onclick="showJourney()">← Volver a mi página</button></div>`;
   playAud(it.k);
 }
-function playAud(a){haptic(15);au.src=CDN+a+".mp3?v=AB2";au.play().catch(()=>{})}
+// ===== REPRODUCTOR ROBUSTO v2 (cura 28-oct: "los botones no sirven") =====
+// Causa: un solo Audio() reutilizado + errores tragados = silencio inexplicable.
+// Cura: elemento nuevo por reproduccion, desbloqueo de autoplay al primer toque,
+// y si aun asi falla el boton lo DICE en pantalla (nunca mas silencio misterioso).
+let _audioOK=false;
+function unlockAudio(){if(_audioOK)return;_audioOK=true;try{const c=new(window.AudioContext||window.webkitAudioContext)();if(c.state==="suspended")c.resume();}catch(e){}}
+document.addEventListener("touchstart",unlockAudio,{once:true,passive:true});
+document.addEventListener("click",unlockAudio,{once:true});
+function _flashBtn(btn,txt,ms){if(!btn)return;const old=btn.getAttribute("data-old")||btn.textContent;btn.setAttribute("data-old",old);btn.textContent=txt;setTimeout(()=>{btn.textContent=old},ms||1600)}
+function playAud(a,btn){
+  haptic(15);
+  if(btn)btn.classList.add("sonando");
+  setTimeout(()=>{if(btn)btn.classList.remove("sonando")},900);
+  try{
+    const el=new Audio();
+    el.preload="auto";el.setAttribute("playsinline","");
+    el.src=CDN+a+".mp3?v=AB4";
+    el.onended=()=>{if(btn)btn.classList.remove("sonando")};
+    el.onerror=()=>{_flashBtn(btn,"⚠️ Sin audio");if(btn)btn.classList.remove("sonando")};
+    const p=el.play();
+    if(p&&p.catch){p.catch(()=>{
+      _flashBtn(btn,"🔊 …");
+      el.addEventListener("canplay",()=>{el.play().catch(()=>_flashBtn(btn,"⚠️ Toca 🔊 otra vez"))},{once:true});
+    });}
+  }catch(e){_flashBtn(btn,"⚠️ Audio no disponible")}
+}
+function precargarNivel(nv){try{nv.items.forEach(it=>{const x=new Audio();x.preload="auto";x.src=CDN+it.k+".mp3?v=AB4"})}catch(e){}}
 function winStep(id){haptic([20,40,20]);P.done[id]=true;save();
   const s0=STEPS[st.i]||{};
   logRun(id,(id===VIDEO.id?"🎬 "+VIDEO.t:(s0.kind==="lesson"?"📖 "+s0.t:"Visto")),0,id===VIDEO.id?"(video visto)":"(lección escuchada)","leccion");
@@ -304,7 +335,7 @@ function judge(alts){
     <div class="words">${words.map(x=>`<span class="${x.ok?"w-ok":"w-no"}">${x.w}</span>`).join("")}</div>
     <div class="score" style="color:${pass?"var(--gd)":"var(--rj)"}">${score}</div>
     <div class="fb">${fb}</div>
-    <div class="row2"><button class="btn" onclick="playAud('${k}')">🎧 Modelo</button>
+    <div class="row2"><button class="btn" onclick="playAud('${k}',this)">🎧 Modelo</button>
     <button class="btn ${pass?"gd":"gold"}" onclick="${pass?`winItem('${k}')`:"toggleRec()"}">${pass?"Siguiente recuadro ➜":"🎤 Otra vez"}</button></div>
     ${!pass&&P.attempts[k]>=4?`<button class="btn ghost" onclick="passManual(true)">Seguir de todos modos (lo revisa tu maestro) →</button>`:""}`;
   haptic(pass?[20,40,20]:[30,60,30]);
