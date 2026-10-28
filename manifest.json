@@ -1,15 +1,15 @@
 {
-  "name": "Alma — Hologram Wallpaper",
-  "short_name": "Alma",
-  "description": "Presencia holográfica 24/7 de Valerie 3 — Myl AccentBridges",
-  "start_url": "https://babayaba71-maker.github.io/AccentBridges/hologram-wallpaper.html",
-  "scope": "https://babayaba71-maker.github.io/AccentBridges/",
+  "name": "Casita de Alma",
+  "short_name": "Casita",
+  "description": "La casita privada de Alma: orb vivo, voz y ecosistema Action Bridges",
+  "start_url": "./casita.html?v=14&app=1",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#020617",
-  "theme_color": "#020617",
+  "background_color": "#071026",
+  "theme_color": "#071026",
   "icons": [
-    { "src": "hologram-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "hologram-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "icons/casita-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/casita-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }

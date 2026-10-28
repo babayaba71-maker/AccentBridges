@@ -107,7 +107,12 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
   .b{animation:none}
   #mic.rec{animation:none}
 }
-</style></head><body>
+</style><link rel="manifest" href="./manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icons/casita-192.png">
+</head><body>
 <canvas id="holo"></canvas>
 <div class="vignette"></div>
 <div class="scan"></div>
@@ -118,7 +123,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">v2.3 · VOZ · respira contigo</div>
+        <div class="badge" id="placa">v2.4 · WALLPAPER · ícono en tu teléfono</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -182,6 +187,14 @@ const vib=ms=>{if("vibrate" in navigator)navigator.vibrate(ms)};
 const ESTADO={modo:"idle",nivel:0};
 function setModo(m){ESTADO.modo=m}
 window.ALMA=ESTADO;   // visible para diagnóstico
+/* pantalla siempre encendida: para que el orb se quede vivo como wallpaper */
+let sentinela=null;
+async function mantenerPantalla(){
+  try{ if("wakeLock" in navigator && !sentinela){ sentinela=await navigator.wakeLock.request("screen");
+    sentinela.addEventListener("release",()=>{sentinela=null}); } }catch(e){}
+}
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible") mantenerPantalla(); });
+document.addEventListener("pointerdown",()=>{ mantenerPantalla() },{once:false,passive:true});
 
 /* ---------- holograma v2.0 AZUL: bloom real con sprite (barato para el teléfono) ---------- */
 (function holo(){
@@ -449,6 +462,7 @@ async function micToggle(){
     mediaRec.onstop=mandarGrabacion;
     mediaRec.start();
     empezarNivel(recStream);
+    mantenerPantalla();
   }catch(e){micReset("No pude grabar: "+e.message);return}
   recOn=true;recT0=Date.now();vib(30);setModo("listening");
   $("mic").textContent="🔴 GRABANDO…";$("mic").classList.add("rec");
