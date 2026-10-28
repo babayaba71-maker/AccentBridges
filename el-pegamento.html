@@ -220,8 +220,7 @@ function seal(){
   localStorage.setItem(PROG_KEY,JSON.stringify([...prog].sort((a,b)=>a-b)));
   syncSave();
   if(nx<=MAXD&&nx>unlocked)unlocked=nx;
-  const sent=JSON.parse(localStorage.getItem("peg_sent")||"[]");
-  if(!sent.includes(d)){
+  {
     const map={logre:100,casi:75,todavia:50};
     const rec={topic:"El Pegamento — Día "+d+": "+DAYS[d].title,
       userId:stu()||"Estudiante",
@@ -229,7 +228,7 @@ function seal(){
       challengeSentence:DAYS[d].hook,
       spokenText:"pegamento · frases:"+Object.keys(st.evals).length+" · eval:"+(st.evalG||"-")+" · t:"+Math.round((Date.now()-T0)/1000)+"s",
       location:"El Pegamento",sessionId:"peg-d"+d+"-"+Date.now()};
-    expSend(rec).then(ok=>{if(ok)localStorage.setItem("peg_sent",JSON.stringify([...sent,d]))});
+    expSend(rec);
   }
   st.evalG=null;st.evals={};
   st.day=(nx<=MAXD)?nx:MAXD;st.step=1;
