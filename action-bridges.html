@@ -89,6 +89,11 @@ const NIVELES=[
  {tag:"NIVEL 5 · LA CADENA", items:[
   {k:"ab-09",en:"I want to stay and play.",es:"Quiero quedarme a jugar.",wt:[["I","p"],["want","x"],["to","t"],["stay","x"],["and","c"],["play","x"]]},
   {k:"ab-10",en:"I have to go and do something.",es:"Tengo que ir a hacer algo.",wt:[["I","p"],["have","h"],["to","t"],["go","x"],["and","c"],["do","x"],["something","x"]]}]},
+ {tag:"NIVEL 6 · LA ESCALERA DE TU FRASE 🪜", items:[
+  {k:"ab-12",en:"I am Josefina.",es:"Yo soy Josefina.",wt:[["I","p"],["am","h"],["Josefina","x"]]},
+  {k:"ab-13",en:"I am Josefina and I have a baby.",es:"Soy Josefina y tengo una bebé.",wt:[["I","p"],["am","h"],["Josefina","x"],["and","c"],["I","p"],["have","h"],["a","x"],["baby","x"]]},
+  {k:"ab-14",en:"I am Josefina and I live in Culiacan.",es:"Soy Josefina y vivo en Culiacán.",wt:[["I","p"],["am","h"],["Josefina","x"],["and","c"],["I","p"],["live","x"],["in","c"],["Culiacan","x"]]},
+  {k:"ab-15",en:"I am Josefina and I love to live in Culiacan because it's nice out here.",es:"Soy Josefina y me encanta vivir en Culiacán porque está lindo aquí afuera.",wt:[["I","p"],["am","h"],["Josefina","x"],["and","c"],["I","p"],["love","x"],["to","t"],["live","x"],["in","c"],["Culiacan","x"],["because","c"],["it's","x"],["nice","x"],["out","x"],["here","x"]]}]},
  {tag:"TU FRASE DE LA SEMANA ❤️", items:[
   {k:"ab-11",en:"I will try again.",es:"Lo intentaré de nuevo.",wt:[["I","p"],["will","h"],["try","x"],["again","x"]]}]}
 ];
@@ -185,10 +190,41 @@ function judge(alts){
       <button class="btn gd" onclick="toggleRec()">🎤 Otra vez</button>
     </div>`;
   haptic(score>=70?[20,40,20]:[30,60,30]);
+  // ==== EVALUACIÓN DOBLE: el micrófono ya dio SU nota; ahora el oído de ella ====
+  window.__abScore=score; window.__abAlts=alts[0]||"";
+  setTimeout(()=>{
+    if(!$("out"))return;
+    $("out").insertAdjacentHTML("beforeend", `
+      <div class="fb" style="margin-top:10px"><b>Y ahora tu oído:</b> ¿cómo te salió a ti?</div>
+      <div class="row2">
+        <button class="btn" onclick="autoeval('logre')">😎 Lo logré</button>
+        <button class="btn" onclick="autoeval('casi')">🤏 Casi</button>
+        <button class="btn" onclick="autoeval('todavia')">😅 Todavía no</button>
+      </div>`);
+  },250);
   fetch(API,{method:"POST",headers:{"Content-Type":"application/json",api_key:KEY},body:JSON.stringify({
     topic:"Action Bridges — "+st.cur.en,
     userId:stu(),passed:score>=70,accuracy:score,
     challengeSentence:st.cur.en,spokenText:alts[0]||"",
     location:"Action Bridges",sessionId:"ab-"+Date.now()})}).catch(()=>{});
 }
+
+function autoeval(r){
+  const map={logre:100,casi:75,todavia:50};
+  const suya=map[r];
+  const mia=window.__abScore||0;
+  // promesa cumplida: la evaluación es DOBLE — la de ella pesa igual que la del micrófono
+  const final=Math.round((suya+mia)/2);
+  if($("out")){
+    $("out").insertAdjacentHTML("beforeend",`<div class="score" style="color:${final>=70?"var(--gd)":"var(--rj)"}">${final}</div>
+      <div class="fb">Tu nota con tu oído (${suya}) + la máquina (${mia}) = <b>${final}</b>. Las dos cuentan.</div>
+      <div class="row2"><button class="btn gd" onclick="toggleRec()">🎤 Una más</button></div>`);
+  }
+  fetch(API,{method:"POST",headers:{"Content-Type":"application/json",api_key:KEY},body:JSON.stringify({
+    topic:"Action Bridges — "+st.cur.en+" · autoeval:"+r,
+    userId:stu(),passed:final>=70,accuracy:final,
+    challengeSentence:st.cur.en,spokenText:(window.__abAlts||"")+" | mic:"+mia+" · ella:"+r,
+    location:"Action Bridges",sessionId:"ab-"+Date.now()})}).catch(()=>{});
+}
+window.autoeval=autoeval;
 </script></body></html>

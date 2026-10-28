@@ -222,11 +222,15 @@ function seal(){
   if(nx<=MAXD&&nx>unlocked)unlocked=nx;
   {
     const map={logre:100,casi:75,todavia:50};
+    // SCORE POR FRASES (lección JJ 28-oct): si UNA frase fue "casi", el score NO puede ser 100.
+    // Promedio de las autoevals POR FRASE; la eval de cierre solo desempata si no hay frases.
+    const vals=Object.values(st.evals||{}).map(r=>map[r]).filter(v=>typeof v==="number");
+    const scoreFrases=vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):(map[st.evalG]||75);
     const rec={topic:"El Pegamento — Día "+d+": "+DAYS[d].title,
       userId:stu()||"Estudiante",
-      passed:true,accuracy:map[st.evalG]||75,
+      passed:scoreFrases>=70,accuracy:scoreFrases,
       challengeSentence:DAYS[d].hook,
-      spokenText:"pegamento · frases:"+Object.keys(st.evals).length+" · eval:"+(st.evalG||"-")+" · t:"+Math.round((Date.now()-T0)/1000)+"s",
+      spokenText:"pegamento · frases:"+Object.keys(st.evals).length+" · xfrase:"+JSON.stringify(st.evals)+" · eval:"+(st.evalG||"-")+" · t:"+Math.round((Date.now()-T0)/1000)+"s",
       location:"El Pegamento",sessionId:"peg-d"+d+"-"+Date.now()};
     expSend(rec);
   }
