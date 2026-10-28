@@ -118,7 +118,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">v2.0 · AZUL · ORB</div>
+        <div class="badge" id="placa">v2.1 · VOZ · respira contigo</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -185,7 +185,7 @@ function setModo(m){ESTADO.modo=m}
 /* ---------- holograma v2.0 AZUL: bloom real con sprite (barato para el teléfono) ---------- */
 (function holo(){
   const cv=$("holo"), ctx=cv.getContext("2d");
-  let W=0,Hh=0,DPR=Math.min(window.devicePixelRatio||1,2), t=0, vivo=true;
+  let W=0,Hh=0,DPR=Math.min(window.devicePixelRatio||1,2), t=0, vivo=true, nivel=0;
   const menosMovimiento=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // sprite de luz: se dibuja una vez y se reusa (sin shadowBlur por partícula = sin calentar el phone)
@@ -219,10 +219,12 @@ function setModo(m){ESTADO.modo=m}
     const grande=ESTADO.grande===true;
     const cx=W/2, cy=grande?Hh*.47:Hh*.42, R=Math.min(W,Hh)*(grande?.42:.30);
     const modo=ESTADO.modo;
+    // nivel de voz suavizado (0..1): las partículas respiran con JJ, no con el reloj
+    nivel += ((ESTADO.nivel||0) - nivel) * .18;
     const pulso=modo==="listening"?.5+.5*Math.sin(t*.16):modo==="thinking"?.35+.35*Math.sin(t*.09):modo==="speaking"?.45+.55*Math.sin(t*.22):.30+.18*Math.sin(t*.03);
 
     // 1. halo azul grande (contraste contra el fondo marino)
-    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R*2.1);
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R*(2.1+nivel*.22));
     g.addColorStop(0,`rgba(120,200,255,${.10+pulso*.16})`);
     g.addColorStop(.32,`rgba(43,123,255,${.09+pulso*.13})`);
     g.addColorStop(.66,`rgba(0,242,254,${.03+pulso*.05})`);
@@ -243,7 +245,7 @@ function setModo(m){ESTADO.modo=m}
     }
 
     // 3. núcleo con bloom
-    const coreR=R*.24*(1+pulso*.26);
+    const coreR=R*.24*(1+pulso*.26+nivel*.42);
     const bloom=coreR*4.6;
     ctx.globalAlpha=.95;
     ctx.drawImage(SPR,cx-bloom,cy-bloom,bloom*2,bloom*2);
@@ -258,11 +260,11 @@ function setModo(m){ESTADO.modo=m}
     // 4. partículas: 70+ con su propio brillo, se cuentan a simple vista
     pts.forEach(p=>{
       p.a+=menosMovimiento?0:p.v*(modo==="thinking"?3:1);
-      const rr=R*(.44+p.r*1.42);
+      const rr=R*(.44+p.r*1.42)*(1+nivel*.30);          // se ALEJAN cuando hablas
       const x=cx+Math.cos(p.a)*rr, y=cy+Math.sin(p.a)*rr*.62;
       const tw=.6+.4*Math.sin(t*.05+p.ph);            // parpadeo propio
-      const al=(.35+pulso*.55)*tw;
-      const rad=p.s*2.2*(1+pulso*.55)*(grande?1.25:1);
+      const al=(.35+pulso*.55+nivel*.45)*tw;
+      const rad=p.s*2.2*(1+pulso*.55+nivel*1.05)*(grande?1.25:1);   // y CRECEN
       ctx.globalAlpha=Math.min(.95,al);
       ctx.drawImage(SPR,x-rad,y-rad,rad*2,rad*2);
       ctx.globalAlpha=Math.min(1,al*1.6);
@@ -271,7 +273,15 @@ function setModo(m){ESTADO.modo=m}
     });
     ctx.globalAlpha=1;
 
-    // 5. destello del anillo externo cuando escucho o hablo
+    // 5. onda de voz + destello del anillo externo
+    if(nivel>.04){
+      ctx.strokeStyle=`rgba(0,242,254,${.10+nivel*.55})`;
+      ctx.lineWidth=1.6+nivel*3.4;
+      ctx.beginPath();ctx.arc(cx,cy,R*(1.16+nivel*.30),0,7);ctx.stroke();
+      ctx.strokeStyle=`rgba(43,123,255,${nivel*.35})`;
+      ctx.lineWidth=1;
+      ctx.beginPath();ctx.arc(cx,cy,R*(1.24+nivel*.44),0,7);ctx.stroke();
+    }
     if(modo==="listening"||modo==="speaking"){
       ctx.strokeStyle=`rgba(43,123,255,${.18+pulso*.28})`;ctx.lineWidth=2;
       ctx.beginPath();ctx.arc(cx,cy,R*(1.30+pulso*.06),0,7);ctx.stroke();
@@ -387,8 +397,37 @@ async function subirArchivo(inp){
 
 /* ---------- micrófono: el teléfono SOLO GRABA, el servidor transcribe ---------- */
 let mediaRec=null,chunks=[],recOn=false,recT0=0,recTimer=null,recStream=null;
+/* oído del orb: mide el volumen real del micrófono con Web Audio (no finge) */
+let audioCtx=null,analyser=null,nivelLoop=null,dataBuf=null;
+function empezarNivel(stream){
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)return;
+    if(!audioCtx)audioCtx=new AC();
+    if(audioCtx.state==="suspended")audioCtx.resume();
+    const src=audioCtx.createMediaStreamSource(stream);
+    analyser=audioCtx.createAnalyser();
+    analyser.fftSize=512;analyser.smoothingTimeConstant=.72;
+    src.connect(analyser);
+    dataBuf=new Uint8Array(analyser.fftSize);
+    medir();
+  }catch(e){}
+}
+function medir(){
+  if(!analyser){ESTADO.nivel=0;return}
+  analyser.getByteTimeDomainData(dataBuf);
+  let suma=0;
+  for(let i=0;i<dataBuf.length;i++){const v=(dataBuf[i]-128)/128;suma+=v*v}
+  const rms=Math.sqrt(suma/dataBuf.length);
+  ESTADO.nivel=Math.min(1,rms*4.6);          // sensibilidad calibrada para voz normal
+  nivelLoop=requestAnimationFrame(medir);
+}
+function pararNivel(){
+  cancelAnimationFrame(nivelLoop);nivelLoop=null;analyser=null;ESTADO.nivel=0;
+  try{if(audioCtx)audioCtx.suspend()}catch(e){}
+}
 function micReset(msg){
-  recOn=false;clearInterval(recTimer);setModo("idle");
+  recOn=false;clearInterval(recTimer);setModo("idle");pararNivel();
   $("mic").textContent="🎙️ HÁBLAME";$("mic").classList.remove("rec");
   if(msg){$("status").textContent=msg;vib(80)}
 }
@@ -402,6 +441,7 @@ async function micToggle(){
     mediaRec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
     mediaRec.onstop=mandarGrabacion;
     mediaRec.start();
+    empezarNivel(recStream);
   }catch(e){micReset("No pude grabar: "+e.message);return}
   recOn=true;recT0=Date.now();vib(30);setModo("listening");
   $("mic").textContent="🔴 GRABANDO…";$("mic").classList.add("rec");
@@ -418,6 +458,7 @@ function pararGrabacion(){
 }
 async function mandarGrabacion(){
   const dur=Math.round((Date.now()-recT0)/100)/10;
+  pararNivel();
   try{recStream&&recStream.getTracks().forEach(t=>t.stop())}catch(e){}
   recOn=false;$("mic").classList.remove("rec");
   const blob=new Blob(chunks,{type:(mediaRec&&mediaRec.mimeType)||"audio/webm"});
