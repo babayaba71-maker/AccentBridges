@@ -159,29 +159,62 @@ function go(noMic){
   $("intro").classList.add("hidden");$("warn").classList.add("hidden");$("report").classList.add("hidden");
   showJourney();
 }
+// ===== PÁGINA COMPLETA (rediseño JJ 28-oct: "no candados, no Duolingo.
+// Como el morfofónico: enseñas UNA página, toda completa, y pasas a la siguiente") =====
+let PG = Math.max(0, Math.min(Number(P.page||0), NIVELES.length-1));
 function showJourney(){
   stopRec();
-  const n=firstOpen(),tot=STEPS.length,done=STEPS.filter((s,i)=>isDone(i)).length;
-  $("hp").textContent=done+" / "+tot;
-  let html=`<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline">
-    <b style="color:var(--gold)">Tu camino</b><span class="mut" style="font-size:.75rem">${done} de ${tot} recuadros</span></div>
-    <div class="bar"><b style="width:${Math.round(done/tot*100)}%"></b></div>
-    <p class="mut" style="margin-top:8px;font-size:.8rem">${n<tot?("Te espera: "+STEPS[n].t):"¡Camino completo! Eres la dueña del puente 🏆"}</p></div>`;
-  let lastNv=null;
-  STEPS.forEach((s,i)=>{
-    if(s.nv!==lastNv&&s.nv>=0){lastNv=s.nv;html+=`<div style="margin-top:14px"><span class="tag">${NIVELES[s.nv].tag}</span></div>`}
-    if(s.nv===-1)html+=`<div style="margin-top:14px"><span class="tag">EMPIEZA AQUÍ 🎬</span></div>`;
-    const ok=isDone(i),now=(i===n),op=unlocked(i);
-    const ico=ok?"✓":(op?"▶":"🔒");
-    const cls="step"+(ok?" done":(now?" now":(op?"":" lock")));
-    const sc=s.kind==="item"&&P.best[s.it.k]!=null?`<div class="s">${P.best[s.it.k]}</div>`:"";
-    html+=`<div class="${cls}"><div class="ico">${ico}</div>
-      <div class="t">${s.kind==="video"?"🎬 ":s.kind==="lesson"?"📖 ":""}${s.t}<i>${s.kind==="video"?"Míralo antes de hablar":s.kind==="lesson"?"Lección antes de practicar":s.sub}</i></div>${sc}
-      ${(now||ok)?`<button class="btn gold" style="width:auto;margin:0;padding:9px 14px;font-size:.8rem" onclick="openStep(${i})">${ok?"Repasar":"Abrir"}</button>`:""}</div>`;
-  });
-  $("journey").innerHTML=html;$("journey").classList.remove("hidden");$("cardbox").classList.add("hidden");$("report").classList.add("hidden");
+  const ni=PG, nv=NIVELES[ni], pre=NIVELES.reduce((a,n,k)=>a+(k<ni?n.items.length:0),0);
+  const domTodas=NIVELES.flatMap(n=>n.items).filter(x=>P.best[x.k]!=null&&P.best[x.k]>=70).length;
+  const totTodas=NIVELES.flatMap(n=>n.items).length;
+  const L=LESSONS[LESSON_BY_LEVEL[ni]];
+  const vidBlock=(ni===0)?`<div class="card" style="border-color:var(--gold)">
+      <div style="font-weight:800;color:var(--gold)">🎬 Para empezar: El Principio de Todo</div>
+      <div class="mut" style="margin:4px 0 8px">Los pronombres y el verbo TO BE, en 1 minuto.</div>
+      <video controls playsinline preload="none" src="${VIDEO.src}"></video>
+    </div>`:"";
+  const lessonBlock=L?`<div class="card">
+      <span class="tag">LECCIÓN</span>
+      <h1 style="margin-top:8px">${L.t}</h1>
+      <p class="mut" style="margin-top:4px">${L.d}</p>
+      <img src="${CDN}${L.img}?v=AB3" style="width:100%;border-radius:12px;margin-top:10px;border:1px solid var(--line)" alt="">
+      <button class="play" onclick="playAud('${L.aud}')">🎧 Escuchar la lección</button>
+    </div>`:"";
+  const frases=nv.items.map(it=>{
+    const b=P.best[it.k];
+    const pint=it.wt.map(w=>`<span style="border-bottom:3px solid ${TYPES[w[1]].c}">${w[0]}</span>`).join(" ");
+    return `<button class="btn" style="margin-top:8px" onclick="openEx('${it.k}')">
+      <div class="ex"><div style="flex:1"><div class="en">${pint}</div><div class="es">${it.es}</div></div>
+      <div style="text-align:right">${b!=null?`<b style="color:${b>=70?"var(--gd)":"var(--rj)"}">${b}</b>`:"🎤"}</div></div>
+    </button>`;
+  }).join("");
+  const ultima=ni>=NIVELES.length-1;
+  $("journey").innerHTML=`
+    <div class="card" style="border-color:var(--gold)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap">
+        <b style="color:var(--gold)">PÁGINA ${ni+1} DE ${NIVELES.length}</b>
+        <span class="mut" style="font-size:.75rem">${domTodas} de ${totTodas} frases dominadas</span>
+      </div>
+      <h1 style="margin-top:8px;font-size:1.15rem">${nv.tag.replace(/^NIVEL \d+ · /,"")}</h1>
+      <div class="bar" style="margin-top:8px"><b style="width:${Math.round(domTodas/totTodas*100)}%"></b></div>
+    </div>
+    ${vidBlock}
+    ${lessonBlock}
+    <div class="card"><span class="tag">PRACTICA · esta página completa</span>
+      <p class="mut" style="margin-top:6px;font-size:.8rem">Dilas todas, en el orden que quieras. Cada frase te dice su modelo y te mide palabra por palabra.</p>
+      ${frases}
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      ${ni>0?`<button class="btn ghost" style="flex:1;margin:0" onclick="prevPage()">← Página ${ni}</button>`:""}
+      ${ultima?`<button class="btn gd" style="flex:2;margin:0" onclick="showReport()">📋 Ver el reporte de mi día</button>`
+        :`<button class="btn gold" style="flex:2;margin:0" onclick="nextPage()">Continuar a la página ${ni+2} →</button>`}
+    </div>
+    <div class="mut" style="text-align:center;margin:16px 0 40px">Una página completa a la vez. Sin candados, sin carreras.</div>`;
+  $("journey").classList.remove("hidden");$("cardbox").classList.add("hidden");$("report").classList.add("hidden");
   window.scrollTo({top:0,behavior:"smooth"});
 }
+function nextPage(){PG=Math.min(PG+1,NIVELES.length-1);P.page=PG;save();showJourney()}
+function prevPage(){PG=Math.max(PG-1,0);P.page=PG;save();showJourney()}
 function openStep(i){
   st.i=i;const s=STEPS[i];stopRec();
   const box=$("cardbox");$("journey").classList.add("hidden");box.classList.remove("hidden");
@@ -191,7 +224,7 @@ function openStep(i){
       <p class="mut" style="margin-top:6px">${s.sub}</p>
       <div style="margin-top:12px"><video controls playsinline preload="none" src="${VIDEO.src}"></video></div>
       <button class="btn gold" onclick="winStep('${VIDEO.id}')">Ya lo vi, a la lección ▶</button>
-      <button class="btn ghost" onclick="showJourney()">← Volver al camino</button></div>`;
+      <button class="btn ghost" onclick="showJourney()">← Volver a mi página</button></div>`;
     return;
   }
   if(s.kind==="lesson"){
@@ -201,7 +234,7 @@ function openStep(i){
       <img src="${CDN}${s.L.img}?v=AB2" style="width:100%;border-radius:12px;margin-top:12px;border:1px solid var(--line)" alt="">
       <button class="play" onclick="playAud('${s.L.aud}')">🎧 Escuchar la lección</button>
       <button class="btn gold" onclick="winStep('${s.L.aud}')">Ya la escuché, a practicar ▶</button>
-      <button class="btn ghost" onclick="showJourney()">← Volver al camino</button></div>`;
+      <button class="btn ghost" onclick="showJourney()">← Volver a mi página</button></div>`;
     playAud(s.L.aud);return;
   }
   const it=s.it;st.cur=it;
@@ -214,7 +247,7 @@ function openStep(i){
       <button class="btn gd" onclick="passManual()">✅ La dije completa — siguiente</button>`
     :`<button class="rec" id="recbtn" onclick="toggleRec()">🎤 Tócala (habla claro)</button><div id="out"></div>`}
     <div class="mut" style="text-align:right;margin-top:6px;font-size:.72rem">${P.best[it.k]!=null?"Tu mejor: "+P.best[it.k]+" · ":""}Intentos: ${(P.attempts[it.k]||0)}</div>
-    <button class="btn ghost" onclick="showJourney()">← Volver al camino</button></div>`;
+    <button class="btn ghost" onclick="showJourney()">← Volver a mi página</button></div>`;
   playAud(it.k);
 }
 function playAud(a){haptic(15);au.src=CDN+a+".mp3?v=AB2";au.play().catch(()=>{})}
