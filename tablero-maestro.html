@@ -66,6 +66,19 @@ canvas{width:100%;height:auto}
 3. 👂 <b>live vs life en contexto</b>: "I live here" / "My life is good" — el hueco del driveway<br>
 4. 💬 <b>Su salón privado</b>: que le mande "Hi" a @Valerie3bot (tareas si-o-si por su canal)
 </div></div></div>
+<div class="card" id="cerebroCard" style="border-color:#7bb1ff">
+<h2 style="color:#7bb1ff">🧠 EL CEREBRO DE LA ESCUELA · la tarea que la matemática propone</h2>
+<div id="cerebroBody">Cargando…</div>
+<div style="margin-top:10px;border-top:1px dashed var(--line);padding-top:10px">
+<h2>El maestro manda:</h2>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+<button id="btnPalomita" onclick="palomita()" style="background:#14361f;border-color:var(--good);color:var(--good);font-weight:700">✅ Palomita — que la campana obedezca</button>
+<select id="pisaDia"><option value="1">Día 1: WILL</option><option value="2">Día 2: LINKING</option><option value="3">Día 3: CONECTORES</option><option value="4">Día 4: TO</option><option value="5">Día 5: FRASE COMPLETA</option></select>
+<input id="pisaTexto" placeholder="nota propia (opcional)" style="flex:1;min-width:140px;background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:.85rem">
+<button onclick="pisar()">✋ Pisar</button>
+</div>
+<p class="mut" style="margin-top:6px">Palomea o pisa antes de las 7:45 AM. Sin tu decisión, la campana corre el plan semanal.</p>
+</div></div>
 <div class="card"><h2>ACTIVIDAD POR DÍA (14 DÍAS) · barras = prácticas · línea = aciertos %</h2><canvas id="c1" width="860" height="240"></canvas></div>
 <div class="card"><h2>PUERTAS DEL ECOSISTEMA (14 DÍAS)</h2><div id="canales"></div></div>
 <div class="card interp"><h2 style="color:#c99c3a">🔍 INTERPRETACIÓN</h2><p id="interp">Cargando…</p></div>
@@ -167,6 +180,39 @@ function feed(){
   }).join("")||"<p class='mut'>Sin eventos.</p>";
 }
 carga();setInterval(carga,300000);
+
+// ===== EL CEREBRO =====
+const CEREBRO_API="https://valerie.base44.app/functions/routerBrain";
+async function cerebro(){
+  try{
+    const r=await fetch(CEREBRO_API+"?accion=estado",{headers:{api_key:"ABVC-PILOTO-2026"}});
+    const d=await r.json();
+    const el=document.getElementById("cerebroBody");
+    if(!d.ok||!d.decision){el.innerHTML="<p class='mut'>El cerebro aún no tiene propuesta. Corre a las 9:50 PM con la telemetría del día.</p>";return}
+    const c=d.decision;
+    const badge=c.status==="aprobada"?"<span class='sig' style='border-color:var(--good);color:var(--good)'>APROBADA POR EL MAESTRO</span>"
+      :c.status==="pisada"?"<span class='sig' style='border-color:var(--red);color:var(--red)'>PISADA POR EL MAESTRO</span>"
+      :"<span class='sig'>EN ESPERA DE TU PALOMITA</span>";
+    el.innerHTML=`<div style="font-size:.9rem;line-height:1.7">
+    <b style="color:var(--gold)">Para ${c.fecha}:</b> ${c.proposed_label} ${badge}<br>
+    <span class="mut">La matemática dice:</span> ${c.reason}<br>
+    <span class="mut">Evidencia:</span> ${c.evidence}
+    ${c.status==="pisada"?"<br><span style='color:var(--red)'>Tu decisión: ${c.final_label}</span>":""}
+    </div>`;
+  }catch(e){document.getElementById("cerebroBody").innerHTML="<p class='mut'>No pude hablar con el cerebro.</p>"}
+}
+async function cerebroAccion(accion,dia,texto){
+  const fecha=new Date(Date.now()-7*3600000).toISOString().slice(0,10);
+  const body={accion,fecha,key:"ABVC-PILOTO-2026"};
+  if(dia){body.dia=parseInt(dia,10);body.texto=texto||""}
+  const r=await fetch(CEREBRO_API,{method:"POST",headers:{"Content-Type":"application/json",api_key:"ABVC-PILOTO-2026"},body:JSON.stringify(body)});
+  const d=await r.json();
+  cerebro();
+  if(!d.ok) alert("El cerebro no obedeció: "+(d.error||"revisa"));
+}
+function palomita(){cerebroAccion("palomita")}
+function pisar(){cerebroAccion("pisar",document.getElementById("pisaDia").value,document.getElementById("pisaTexto").value)}
+cerebro();setInterval(cerebro,60000);
 </script>
 </body>
 </html>
