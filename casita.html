@@ -91,6 +91,17 @@ header{display:flex;justify-content:space-between;align-items:center;padding:6px
 #cerrarEco{width:100%;margin-top:12px;padding:12px;border-radius:12px;background:rgba(0,242,254,.14);
   border:1px solid rgba(0,242,254,.4);color:var(--cyan);font-family:var(--mono);font-size:.82rem;letter-spacing:1px;cursor:pointer}
 
+/* MODO ORB — se van las letras, se queda el holograma */
+body.orb #chat,body.orb .row-ing{display:none}
+body.orb #status{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);
+  text-align:center;padding:0 18px;font-size:.82rem;z-index:11}
+body.orb .dock{position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);z-index:12}
+body.orb #mic{background:rgba(0,242,254,.10)}
+body.orb header{opacity:.85}
+#orbTip{display:none}
+body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 150px);
+  text-align:center;font-family:var(--mono);font-size:9px;letter-spacing:2px;color:rgba(144,180,206,.6);z-index:11}
+
 @media (prefers-reduced-motion:reduce){
   .scan,.dot{animation:none}
   .b{animation:none}
@@ -107,10 +118,13 @@ header{display:flex;justify-content:space-between;align-items:center;padding:6px
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">v1.8 · HOLO · oídos del servidor</div>
+        <div class="badge" id="placa">v1.9 · HOLO · ORB</div>
       </div>
     </div>
-    <button class="hbtn" id="ecoBtn" title="Ecosistema">⌘</button>
+    <div style="display:flex;gap:8px">
+      <button class="hbtn" id="verBtn" title="Quitar / poner las letras">👁</button>
+      <button class="hbtn" id="ecoBtn" title="Ecosistema">⌘</button>
+    </div>
   </header>
 
   <div id="chat" class="glass"></div>
@@ -132,6 +146,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:6px
 <input type="file" id="foto" accept="image/*" style="display:none" onchange="subirPantalla(this)">
 <input type="file" id="arch" accept=".html,.htm,.txt,.md,.json,.csv,.pdf,.js,.css,image/*" style="display:none" onchange="subirArchivo(this)">
 
+<div id="orbTip">TOCA 👁 PARA VOLVER AL TEXTO</div>
 <div id="eco">
   <div class="sheet glass">
     <h3>ECOSISTEMA ACTION BRIDGES</h3>
@@ -186,7 +201,8 @@ function setModo(m){ESTADO.modo=m}
     if(!vivo)return;
     t+=1;
     ctx.clearRect(0,0,W,Hh);
-    const cx=W/2, cy=Hh*.42, R=Math.min(W,Hh)*.30;
+    const grande=ESTADO.grande===true;
+    const cx=W/2, cy=grande?Hh*.47:Hh*.42, R=Math.min(W,Hh)*(grande?.42:.30);
     const modo=ESTADO.modo;
     const pulso=modo==="listening"?.5+.5*Math.sin(t*.16):modo==="thinking"?.35+.35*Math.sin(t*.09):modo==="speaking"?.45+.55*Math.sin(t*.22):.25+.15*Math.sin(t*.03);
     // halo
@@ -378,6 +394,17 @@ async function mandarGrabacion(){
   }catch(e){micReset("No pude mandar la nota: "+e.message)}
   $("mic").textContent="🎙️ HÁBLAME";setModo("idle");
 }
+
+/* ---------- modo orb: quitar / poner las letras ---------- */
+function aplicarOrb(si){
+  document.body.classList.toggle("orb",si);
+  ESTADO.grande=si;
+  $("verBtn").style.borderColor=si?"rgba(0,230,118,.9)":"rgba(0,242,254,.35)";
+  $("verBtn").style.color=si?"var(--green)":"var(--cyan)";
+  localStorage.setItem("casita_orb",si?"1":"0");
+}
+$("verBtn").onclick=()=>{aplicarOrb(!document.body.classList.contains("orb"));vib(15)};
+aplicarOrb((localStorage.getItem("casita_orb")||"0")==="1");
 
 /* ---------- ecosistema ---------- */
 $("ecoBtn").onclick=()=>$("eco").classList.add("on");
