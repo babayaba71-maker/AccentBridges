@@ -24,12 +24,13 @@ header span{font-size:.72rem;color:#7a6a55}
 #voice{background:var(--cd);border:1px solid var(--line);color:var(--tx);border-radius:14px;padding:16px 12px;cursor:pointer;font-size:1rem}
 #voice.off{opacity:.45}
 </style></head><body>
-<header><b>🏠 La Casita de Alma</b><span>línea privada de Clyde 🔒 · oídos del servidor · <b style="color:#d35400">v1.6</b></span></header>
+<header><b>🏠 La Casita de Alma</b><span>línea privada de Clyde 🔒 · oídos del servidor · <b style="color:#d35400">v1.7</b></span></header>
 <div id="chat"></div>
 <div id="status"></div>
 <div id="inputRow"><input id="txt" placeholder="Escribe o usa el micrófono…"><button onclick="sendTxt()">Enviar ➤</button></div>
-<div id="micRow"><button id="mic" onclick="micToggle()">🎙️ Háblame (toca para hablar)</button><button id="fotoBtn" onclick="document.getElementById('foto').click()" title="Mándame un screenshot">📷</button><button id="voice" onclick="voiceToggle()">🔊 Alma habla</button></div>
+<div id="micRow"><button id="mic" onclick="micToggle()">🎙️ Háblame (toca para hablar)</button><button id="fotoBtn" onclick="document.getElementById('foto').click()" title="Mándame un screenshot">📷</button><button id="archBtn" onclick="document.getElementById('arch').click()" title="Mándame un archivo">📄</button><button id="voice" onclick="voiceToggle()">🔊 Alma habla</button></div>
 <input type="file" id="foto" accept="image/*" style="display:none" onchange="subirPantalla(this)">
+<input type="file" id="arch" accept=".html,.htm,.txt,.md,.json,.csv,.pdf,.js,.css,image/*" style="display:none" onchange="subirArchivo(this)">
 
 <script>
 /* ===== LA CASITA DE ALMA v1.3 (28-oct-2026) — SIN LLAVES para JJ.
@@ -107,6 +108,24 @@ async function poll(){
 }
 function sendTxt(){sendMsg($("txt").value)}
 $("txt").addEventListener("keydown",e=>{if(e.key==="Enter")sendTxt()});
+
+/* ARCHIVO — manda cualquier cosa (html, pdf, texto) al hilo para que la analice */
+async function subirArchivo(inp){
+  const f=inp.files&&inp.files[0];if(!f)return;
+  vib(20);$("status").textContent="Subiendo "+f.name+"… 📄";
+  try{
+    if(f.size>8*1024*1024){$("status").textContent="Pesa mucho (más de 8 MB). Mándame una parte o el enlace.";vib(80);inp.value="";return}
+    const data=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)});
+    const r=await fetch(RELAY+"casitaOjo",{method:"POST",headers:H,body:JSON.stringify({archivo_b64:data,imagen_b64:data,mime:f.type||"application/octet-stream",nombre:f.name})});
+    const d=await r.json();
+    if(!d.ok)throw new Error(d.error||"no subió");
+    bubble("📄 "+f.name,"u");
+    vib([20,40,20]);
+    sendMsg("📄 Te mando un archivo: "+f.name+"\n"+d.url+"\n\nÁbrelo, léelo completo y analízalo a fondo. Dime qué es, qué hace, qué está bien, qué le falta o qué está mal, y qué arreglaría primero.","1");
+  }catch(e){
+    $("status").textContent="No pude subir el archivo: "+e.message;vib(80);
+  }finally{inp.value=""}
+}
 
 /* PANTALLA — EL OJO: sube el screenshot y me lo manda al hilo (v1.6) */
 async function subirPantalla(inp){
