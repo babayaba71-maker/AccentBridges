@@ -12,141 +12,101 @@
     font-family:"SF Pro Display",-apple-system,"Segoe UI",Roboto,system-ui,sans-serif}
   .wrap{max-width:440px;margin:0 auto;padding:18px 18px calc(28px + env(safe-area-inset-bottom))}
   .placa{text-align:center;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#7fb6e8;opacity:.85;margin:4px 0 14px}
-  .marco{position:relative;border-radius:26px;overflow:hidden;border:1px solid rgba(0,242,254,.28);
+  h1{font-size:21px;margin:6px 0 4px;text-align:center;font-weight:650}
+  p.sub{text-align:center;color:#9fc4e6;font-size:13px;margin:0 0 14px;line-height:1.5}
+  .marco{position:relative;border-radius:24px;overflow:hidden;border:1px solid rgba(0,242,254,.28);
     box-shadow:0 0 40px rgba(43,123,255,.22);background:#02040a}
-  video{display:block;width:100%;height:auto}
-  h1{font-size:22px;margin:18px 0 4px;text-align:center;font-weight:650}
-  p.sub{text-align:center;color:#9fc4e6;font-size:13.5px;margin:0 0 16px;line-height:1.5}
-  .par{display:flex;gap:8px;margin:14px 0 6px}
-  .par button{flex:1;padding:12px 8px;border-radius:14px;font-size:14px;font-weight:700;border:1px solid rgba(127,182,232,.3);
-    background:rgba(255,255,255,.05);color:#dff1ff;font-family:inherit}
-  .par button.on{background:linear-gradient(135deg,#00F2FE,#2B7BFF);color:#04121f;border-color:transparent}
-  button.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:17px 18px;margin:10px 0;
-    border-radius:18px;font-weight:700;font-size:16px;border:0;font-family:inherit;cursor:pointer}
+  .marco img,.marco video{display:block;width:100%;height:auto}
+  .dos{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  button.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px 12px;margin:10px 0;
+    border-radius:16px;font-weight:700;font-size:15px;border:0;font-family:inherit;cursor:pointer}
   button.primario{background:linear-gradient(135deg,#00F2FE,#2B7BFF);color:#04121f;box-shadow:0 10px 30px rgba(0,242,254,.28)}
   button.secundario{background:rgba(255,255,255,.06);color:#dff1ff;border:1px solid rgba(127,182,232,.28)}
   button[disabled]{opacity:.55}
-  #estado{min-height:20px;text-align:center;font-size:13px;color:#8ee9ff;margin:6px 0 0;font-weight:600}
-  .pasos{background:rgba(255,255,255,.04);border:1px solid rgba(127,182,232,.2);border-radius:20px;padding:16px 18px;margin-top:20px}
-  .pasos h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--cian);margin:0 0 12px;font-weight:700}
-  .pasos ol{margin:0;padding-left:20px;font-size:14px;line-height:1.65;color:#cfe6fa}
-  .pasos b{color:#fff}
-  .nota{margin-top:16px;font-size:12.5px;line-height:1.6;color:#8fb2d0;text-align:center}
-  .barra{height:6px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin:10px 0 0;display:none}
+  .etiqueta{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--cian);font-weight:700;margin:16px 0 2px}
+  #estado{min-height:20px;text-align:center;font-size:13px;color:#8ee9ff;margin:8px 0 0;font-weight:600}
+  .barra{height:6px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin:8px 0 0;display:none}
   .barra i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#00F2FE,#2B7BFF);transition:width .2s}
+  .pasos{background:rgba(255,255,255,.04);border:1px solid rgba(127,182,232,.2);border-radius:18px;padding:14px 18px;margin-top:18px}
+  .pasos h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--cian);margin:0 0 10px;font-weight:700}
+  .pasos ol{margin:0;padding-left:20px;font-size:13.5px;line-height:1.6;color:#cfe6fa}
+  .pasos b{color:#fff}
+  .nota{margin-top:14px;font-size:12px;line-height:1.6;color:#8fb2d0;text-align:center}
+  .video-sec{opacity:.92}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="placa">Fondo de Alma · archivo v4</div>
+  <div class="placa">Fondo de Alma · v5 · sin batería</div>
 
-  <div class="marco">
-    <video id="vid" src="wallpaper/orb-alma-1080x2340.mp4" poster="wallpaper/orb-fijo.png" autoplay muted loop playsinline></video>
+  <h1>El orb quieto, en tu pantalla</h1>
+  <p class="sub">Imagen fija 1440 x 3088, el tamaño exacto de tu S22 Ultra. Cero gasto de batería y se pone sin instalar nada.</p>
+
+  <div class="dos">
+    <div>
+      <div class="marco"><img src="wallpaper/orb-fijo-mini.png" alt="Orb de día"></div>
+      <button class="btn primario" data-ruta="wallpaper/orb-fijo-1440x3088.png" data-nombre="orb-alma-fijo.png">⬇️ Día</button>
+    </div>
+    <div>
+      <div class="marco"><img src="wallpaper/orb-fijo-mini.png" style="filter:brightness(.74)" alt="Orb de noche"></div>
+      <button class="btn secundario" data-ruta="wallpaper/orb-noche-1440x3088.png" data-nombre="orb-alma-noche.png">⬇️ Noche</button>
+    </div>
   </div>
 
-  <div class="par">
-    <button id="tn" class="on">Del tamaño original</button>
-    <button id="tg">Orb ampliado +20%</button>
-  </div>
-
-  <h1>El orb para tu pantalla</h1>
-  <p class="sub" id="meta">12 segundos que dan vuelta sin corte. Sin sonido.<br>1080 x 2340 · 3.2 MB</p>
-
-  <button class="btn primario" id="bajar">⬇️ Descargar el video</button>
+  <p id="estado">Toca Día o Noche. Después lo pones desde Galería.</p>
   <div class="barra" id="barra"><i id="prog"></i></div>
-  <p id="estado">Toca el botón y espera. No cierres esta página.</p>
-  <button class="btn secundario" id="compartir">📤 Mandar a Archivos (por si no baja)</button>
 
   <div class="pasos">
-    <h2>Para que el selector lo vea</h2>
+    <h2>Cómo se pone, sin apps</h2>
     <ol>
-      <li>Baja el video y espera a que diga <b>✅ Listo</b>.</li>
-      <li>Abre <b>Mis archivos</b> → <b>Descargas</b>, deja presionado <b>orb-alma.mp4</b>.</li>
-      <li>Toca <b>Mover</b> → <b>Almacenamiento interno</b> → <b>DCIM</b> → <b>Camera</b> → <b>Mover aquí</b>.</li>
-      <li>Ahora sí aparece en <b>Galería</b>, y tu app del aura lo va a ver. Elige <b>Inicio y bloqueo</b>.</li>
+      <li>Toca <b>Día</b> o <b>Noche</b> y espera <b>✅ Listo</b>.</li>
+      <li>Ajustes → <b>Fondo de pantalla y estilo</b> → <b>Cambiar fondos</b>.</li>
+      <li><b>Galería</b> → busca <b>orb-alma-fijo</b> → <b>Establecer como fondo</b> → <b>Inicio y bloqueo</b>.</li>
     </ol>
   </div>
 
-  <p class="nota">Si el botón no baja nada: deja presionado el video de arriba → <b>Descargar video</b>.</p>
+  <div class="etiqueta video-sec">Si algún día lo quieres en movimiento</div>
+  <p class="sub" style="margin-bottom:10px">El video solo se puede poner animado en la <b>pantalla de bloqueo</b>, y ahí Samsung lo hace solo, también sin apps.</p>
+  <div class="marco video-sec"><img src="wallpaper/orb-fijo-mini.png" alt="Vista del orb animado" style="opacity:.75"></div>
+  <button class="btn secundario" data-ruta="wallpaper/orb-alma-1080x2340.mp4" data-nombre="orb-alma.mp4">⬇️ Video para el bloqueo (3.2 MB)</button>
+  <button class="btn secundario" data-ruta="wallpaper/orb-alma-grande.mp4" data-nombre="orb-alma-grande.mp4">⬇️ Video con el orb ampliado (2.7 MB)</button>
+
+  <p class="nota">Para el video: Galería → abre el archivo → menú ⋮ → <b>Establecer como fondo de pantalla</b> → Bloqueo.</p>
 </div>
 <script>
-const VERSIONES={
-  normal:{ruta:'wallpaper/orb-alma-1080x2340.mp4', nombre:'orb-alma.mp4', meta:'1080 x 2340 · 3.2 MB'},
-  grande:{ruta:'wallpaper/orb-alma-grande.mp4',  nombre:'orb-alma-grande.mp4', meta:'1080 x 2340 · 2.7 MB'}
-};
-let cual='normal', archivo=null, cacheRuta=null;
 const elEstado=document.getElementById('estado'), barra=document.getElementById('barra'), prog=document.getElementById('prog');
-const bBajar=document.getElementById('bajar'), bComp=document.getElementById('compartir');
-const tn=document.getElementById('tn'), tg=document.getElementById('tg'), vid=document.getElementById('vid'), meta=document.getElementById('meta');
 function decir(t){ elEstado.textContent=t }
 function avance(p){ barra.style.display='block'; prog.style.width=Math.max(0,Math.min(100,p))+'%' }
 
-function elegir(k){
-  cual=k; archivo=null; cacheRuta=null;
-  const v=VERSIONES[k];
-  vid.src=v.ruta; vid.load(); try{ vid.play() }catch(e){}
-  meta.innerHTML='12 segundos que dan vuelta sin corte. Sin sonido.<br>'+v.meta;
-  tn.className = k==='normal'?'on':''; tg.className = k==='grande'?'on':'';
-  avance(0); barra.style.display='none'; decir('Toca el botón y espera. No cierres esta página.');
-}
-tn.addEventListener('click',()=>elegir('normal'));
-tg.addEventListener('click',()=>elegir('grande'));
-
-async function traer(){
-  const v=VERSIONES[cual];
-  if(archivo && cacheRuta===v.ruta) return archivo;
-  const r=await fetch(v.ruta,{cache:'no-store'});
-  if(!r.ok) throw new Error('HTTP '+r.status);
-  const total=+(r.headers.get('content-length')||0);
-  const lector=r.body.getReader(); const partes=[]; let leido=0;
-  for(;;){
-    const {done,value}=await lector.read();
-    if(done) break;
-    partes.push(value); leido+=value.length;
-    if(total){ avance(leido/total*100); decir('Bajando… '+Math.round(leido/total*100)+'%  ('+(leido/1048576).toFixed(1)+' de '+(total/1048576).toFixed(1)+' MB)') }
-    else decir('Bajando… '+(leido/1048576).toFixed(1)+' MB');
-  }
-  archivo=new Blob(partes,{type:'video/mp4'}); cacheRuta=v.ruta;
-  return archivo;
-}
-
-bBajar.addEventListener('click',async ()=>{
-  const v=VERSIONES[cual];
-  bBajar.disabled=true; bComp.disabled=true;
+async function bajar(ruta,nombre,boton){
+  const todos=[...document.querySelectorAll('button[data-ruta]')];
+  todos.forEach(b=>b.disabled=true);
   try{
-    const blob=await traer();
-    avance(100);
+    const r=await fetch(ruta,{cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const total=+(r.headers.get('content-length')||0);
+    const lector=r.body.getReader(); const partes=[]; let leido=0;
+    for(;;){
+      const {done,value}=await lector.read(); if(done) break;
+      partes.push(value); leido+=value.length;
+      if(total){ avance(leido/total*100); decir('Bajando… '+Math.round(leido/total*100)+'%  ('+(leido/1048576).toFixed(1)+' de '+(total/1048576).toFixed(1)+' MB)') }
+      else decir('Bajando… '+(leido/1048576).toFixed(1)+' MB');
+    }
+    const tipo=r.headers.get('content-type')||(nombre.endsWith('.png')?'image/png':'video/mp4');
+    const blob=new Blob(partes,{type:tipo});
     const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url; a.download=v.nombre; a.rel='noopener';
+    const a=document.createElement('a'); a.href=url; a.download=nombre; a.rel='noopener';
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(url),20000);
-    decir('✅ Listo: '+v.nombre+' ya está en Descargas.');
+    avance(100);
+    decir('✅ Listo: '+nombre+' ya está en Descargas.');
   }catch(e){
-    decir('No pude prepararlo ('+e.message+'). Usa el botón de abajo o deja presionado el video.');
+    decir('No bajó ('+e.message+'). Mantén presionada la imagen de arriba y elige Guardar imagen.');
     avance(0);
-  }finally{ bBajar.disabled=false; bComp.disabled=false }
-});
-
-bComp.addEventListener('click',async ()=>{
-  const v=VERSIONES[cual];
-  bComp.disabled=true;
-  try{
-    const blob=await traer();
-    const f=new File([blob],v.nombre,{type:'video/mp4'});
-    if(navigator.canShare && navigator.canShare({files:[f]})){
-      await navigator.share({files:[f],title:'Fondo de Alma'});
-      decir('📤 Elige Guardar en Archivos o Descargas.');
-    }else{
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a'); a.href=url; a.download=v.nombre;
-      document.body.appendChild(a); a.click(); a.remove();
-      decir('Tu Chrome no comparte archivos, así que lo mandé a Descargas.');
-    }
-  }catch(e){
-    if(e && e.name==='AbortError'){ decir('Cancelaste. Toca otra vez cuando quieras.') }
-    else{ decir('No salió el compartir ('+e.message+'). Deja presionado el video de arriba.') }
-  }finally{ bComp.disabled=false }
+  }finally{ todos.forEach(b=>b.disabled=false) }
+}
+document.querySelectorAll('button[data-ruta]').forEach(b=>{
+  b.addEventListener('click',()=>bajar(b.dataset.ruta,b.dataset.nombre,b));
 });
 </script>
 </body>
