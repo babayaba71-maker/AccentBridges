@@ -291,12 +291,23 @@ function playAud(a,btn){
     el.src=CDN+a+".mp3?v=AB4";
     el.onended=()=>{if(btn)btn.classList.remove("sonando")};
     el.onerror=()=>{_flashBtn(btn,"⚠️ Sin audio");if(btn)btn.classList.remove("sonando")};
+    const url=CDN+a+".mp3?v=AB4";
     const p=el.play();
     if(p&&p.catch){p.catch(()=>{
       _flashBtn(btn,"🔊 …");
-      el.addEventListener("canplay",()=>{el.play().catch(()=>_flashBtn(btn,"⚠️ Toca 🔊 otra vez"))},{once:true});
+      el.addEventListener("canplay",()=>{el.play().catch(()=>{_flashBtn(btn,"👆 Dale play");_fallbackPlayer(url)})},{once:true});
     });}
-  }catch(e){_flashBtn(btn,"⚠️ Audio no disponible")}
+  }catch(e){_flashBtn(btn,"👆 Dale play")}
+}
+function _fallbackPlayer(url){
+  try{
+    let d=document.getElementById("fbAud");
+    if(!d){d=document.createElement("div");d.id="fbAud";
+      d.style.cssText="position:fixed;bottom:10px;left:10px;right:10px;z-index:120;background:#1a2430;border:1px solid #ffc14d;border-radius:14px;padding:8px 10px;box-shadow:0 8px 24px rgba(0,0,0,.45)";
+      document.body.appendChild(d);}
+    d.innerHTML='<div style="font-size:.72rem;color:#ffc14d;margin-bottom:4px">Tu teléfono pidió un toque más — dale play 👇</div><audio controls autoplay style="width:100%" src="'+url+'"></audio><div style="text-align:right;margin-top:4px"><button style="background:none;border:0;color:#8fa3b8;font-size:.7rem" onclick="document.getElementById(\'fbAud\').remove()">cerrar</button></div>';
+    const a=d.querySelector("audio");a.play().catch(()=>{});
+  }catch(e){}
 }
 function precargarNivel(nv){try{nv.items.forEach(it=>{const x=new Audio();x.preload="auto";x.src=CDN+it.k+".mp3?v=AB4"})}catch(e){}}
 function winStep(id){haptic([20,40,20]);P.done[id]=true;save();
