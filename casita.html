@@ -118,7 +118,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">v2.1 · VOZ · respira contigo</div>
+        <div class="badge" id="placa">v2.2 · VOZ · respira contigo</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -181,6 +181,7 @@ const vib=ms=>{if("vibrate" in navigator)navigator.vibrate(ms)};
 /* ---------- estado del holograma (idle / listening / thinking / speaking) ---------- */
 const ESTADO={modo:"idle",nivel:0};
 function setModo(m){ESTADO.modo=m}
+window.ALMA=ESTADO;   // visible para diagnóstico
 
 /* ---------- holograma v2.0 AZUL: bloom real con sprite (barato para el teléfono) ---------- */
 (function holo(){
@@ -220,7 +221,7 @@ function setModo(m){ESTADO.modo=m}
     const cx=W/2, cy=grande?Hh*.47:Hh*.42, R=Math.min(W,Hh)*(grande?.42:.30);
     const modo=ESTADO.modo;
     // nivel de voz suavizado (0..1): las partículas respiran con JJ, no con el reloj
-    nivel += ((ESTADO.nivel||0) - nivel) * .18;
+    nivel += ((ESTADO.nivel||0) - nivel) * .28;
     const pulso=modo==="listening"?.5+.5*Math.sin(t*.16):modo==="thinking"?.35+.35*Math.sin(t*.09):modo==="speaking"?.45+.55*Math.sin(t*.22):.30+.18*Math.sin(t*.03);
 
     // 1. halo azul grande (contraste contra el fondo marino)
@@ -410,16 +411,22 @@ function empezarNivel(stream){
     analyser.fftSize=512;analyser.smoothingTimeConstant=.72;
     src.connect(analyser);
     dataBuf=new Uint8Array(analyser.fftSize);
+    picoVoz=.05;
     medir();
   }catch(e){}
 }
+let picoVoz=.05;
 function medir(){
   if(!analyser){ESTADO.nivel=0;return}
   analyser.getByteTimeDomainData(dataBuf);
   let suma=0;
   for(let i=0;i<dataBuf.length;i++){const v=(dataBuf[i]-128)/128;suma+=v*v}
   const rms=Math.sqrt(suma/dataBuf.length);
-  ESTADO.nivel=Math.min(1,rms*4.6);          // sensibilidad calibrada para voz normal
+  // GANANCIA AUTOMÁTICA: se calibra sola al micrófono de cada teléfono
+  if(rms>picoVoz)picoVoz=picoVoz*.7+rms*.3;else picoVoz*=.9993;
+  const ref=Math.max(.03,picoVoz*.75);
+  const n=rms<.012?0:Math.min(1,Math.pow(rms/ref,.80));   // compuerta de ruido + curva suave
+  ESTADO.nivel=ESTADO.nivel*.40+n*.60;
   nivelLoop=requestAnimationFrame(medir);
 }
 function pararNivel(){
