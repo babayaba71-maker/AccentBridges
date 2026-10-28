@@ -147,7 +147,8 @@ const au=new Audio();
 const stu=()=>(localStorage.getItem("morfofono_student")||localStorage.getItem("abvc_student")||"Estudiante").trim();
 let P={done:{},best:{},log:{},attempts:{}};
 try{P=Object.assign(P,JSON.parse(localStorage.getItem("ab_camino")||"{}"))}catch(e){}
-const save=()=>{try{localStorage.setItem("ab_camino",JSON.stringify(P))}catch(e){}};
+const save=()=>{try{localStorage.setItem("ab_camino",JSON.stringify(P))}catch(e){}
+  const hp=document.getElementById("hp");if(hp)hp.textContent=STEPS.filter((s,i)=>isDone(i)).length+" / "+STEPS.length;};
 const stepId=s=>s.kind==="video"?VIDEO.id:(s.kind==="lesson"?s.L.aud:s.it.k);
 const isDone=i=>!!P.done[stepId(STEPS[i])];
 const firstOpen=()=>{for(let i=0;i<STEPS.length;i++)if(!isDone(i))return i;return STEPS.length};
@@ -251,7 +252,10 @@ function openStep(i){
   playAud(it.k);
 }
 function playAud(a){haptic(15);au.src=CDN+a+".mp3?v=AB2";au.play().catch(()=>{})}
-function winStep(id){haptic([20,40,20]);P.done[id]=true;save();celebrate(id===VIDEO.id?"¡Viste el Principio! 🎬":"¡Lección ganada! 📖","Ya sabes qué piezas tiene este nivel. Ahora las dices tú.");}
+function winStep(id){haptic([20,40,20]);P.done[id]=true;save();
+  const s0=STEPS[st.i]||{};
+  logRun(id,(id===VIDEO.id?"🎬 "+VIDEO.t:(s0.kind==="lesson"?"📖 "+s0.t:"Visto")),0,id===VIDEO.id?"(video visto)":"(lección escuchada)","leccion");
+  celebrate(id===VIDEO.id?"¡Viste el Principio! 🎬":"¡Lección ganada! 📖","Ya sabes qué piezas tiene este nivel. Ahora las dices tú.");}
 function stopRec(){if(st.rec){try{st.rec.stop()}catch(e){}st.rec=null;st.listening=false}}
 function toggleRec(){
   if(st.listening){stopRec();drawRecBtn(false);return}
@@ -320,11 +324,11 @@ function closeCele(viaPath){
   const n=firstOpen();if(n>=STEPS.length){$("cardbox").classList.add("hidden");showReport();return}
   openStep(n);
 }
-function logRun(k,en,score,heard){
+function logRun(k,en,score,heard,kind){
   const d=today();P.log[d]=P.log[d]||[];
   const e=P.log[d].find(x=>x.k===k);
-  if(e){e.score=Math.max(e.score,score);e.tries=(e.tries||1)+1;e.heard=heard||e.heard}
-  else P.log[d].push({k,en,score,tries:1,heard:heard||"",ts:Date.now()});
+  if(e){e.score=Math.max(e.score,score);e.tries=(e.tries||1)+1;e.heard=heard||e.heard;e.kind=e.kind||kind||"frase"}
+  else P.log[d].push({k,en,score,tries:1,heard:heard||"",ts:Date.now(),kind:kind||"frase"});
   save();
 }
 function sendTel(k,en,score,heard,pass){
@@ -335,10 +339,11 @@ function sendTel(k,en,score,heard,pass){
 function showReport(){
   stopRec();$("journey").classList.add("hidden");$("cardbox").classList.add("hidden");$("intro").classList.add("hidden");$("warn").classList.add("hidden");
   const d=today(),rows=(P.log[d]||[]).slice().sort((a,b)=>b.ts-a.ts);
-  const tot=rows.length,hits=rows.filter(r=>r.score>=70).length;
-  const avg=tot?Math.round(rows.reduce((s,r)=>s+r.score,0)/tot):0;
+  const frases=rows.filter(r=>r.kind!=="leccion"),lec=rows.filter(r=>r.kind==="leccion");
+  const tot=frases.length,hits=frases.filter(r=>r.score>=70).length;
+  const avg=tot?Math.round(frases.reduce((s,r)=>s+r.score,0)/tot):0;
   const doneTotal=STEPS.filter((s,i)=>isDone(i)).length;
-  const pend=rows.filter(r=>r.score<70);
+  const pend=frases.filter(r=>r.score<70);
   let h=`<div class="card"><span class="tag">REPORTE DE TU DÍA · ${new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long"})}</span>
     <h1 style="margin-top:10px">Lo que hiciste hoy, ${stu()}</h1>
     <div style="display:flex;gap:10px;margin-top:12px">
@@ -346,10 +351,12 @@ function showReport(){
       <div style="flex:1;background:var(--cd2);border-radius:12px;padding:12px;text-align:center"><div style="font-size:1.5rem;font-weight:800;color:var(--gd)">${hits}</div><div class="mut" style="font-size:.7rem">ganados hoy</div></div>
       <div style="flex:1;background:var(--cd2);border-radius:12px;padding:12px;text-align:center"><div style="font-size:1.5rem;font-weight:800;color:var(--tx)">${avg}</div><div class="mut" style="font-size:.7rem">promedio</div></div>
     </div>
-    <p class="mut" style="margin-top:10px">Camino completo: <b style="color:var(--gd)">${doneTotal} de ${STEPS.length}</b> recuadros.</p>`;
+    <p class="mut" style="margin-top:10px">Camino completo: <b style="color:var(--gd)">${doneTotal} de ${STEPS.length}</b> recuadros.${lec.length?" · Viste "+lec.length+" "+(lec.length===1?"lección":"lecciones")+" 📖":""}</p>`;
   if(rows.length){
-    h+=`<table>${rows.map(r=>`<tr><td>${r.score>=70?"✅":"🔁"} ${r.en}<br><span class="mut" style="font-size:.7rem">${r.heard||"—"}</span></td><td class="r" style="color:${r.score>=70?"var(--gd)":"var(--rj)"}">${r.score}</td></tr>`).join("")}</table>`;
-  }else{h+=`<p class="mut" style="margin-top:12px">Todavía no tocas ningún recuadro hoy. Tu primer ladrillo te espera 💛</p>`}
+    h+=`<table>${rows.map(r=>r.kind==="leccion"
+      ?`<tr><td>📖 ${r.en}<br><span class="mut" style="font-size:.7rem">${r.heard||""}</span></td><td class="r" style="color:var(--gold)">✓</td></tr>`
+      :`<tr><td>${r.score>=70?"✅":"🔁"} ${r.en}<br><span class="mut" style="font-size:.7rem">${r.heard||"—"}</span></td><td class="r" style="color:${r.score>=70?"var(--gd)":"var(--rj)"}">${r.score}</td></tr>`).join("")}</table>`;
+  }else if(!lec.length){h+=`<p class="mut" style="margin-top:12px">Todavía no tocas ningún recuadro hoy. Tu primer ladrillo te espera 💛</p>`}
   if(pend.length)h+=`<p class="mut" style="margin-top:12px">🎯 <b>Para mañana:</b> ${pend.slice(0,3).map(r=>r.en).join(" · ")}</p>`;
   h+=`<div class="stars" id="stars">${[1,2,3,4,5].map(n=>`<button onclick="rate(${n})" data-n="${n}">⭐</button>`).join("")}</div>
     <p class="mut" style="text-align:center;font-size:.78rem;margin-top:2px">¿Cómo te sentiste hoy con tu inglés?</p>
