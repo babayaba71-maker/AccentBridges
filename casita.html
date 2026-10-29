@@ -123,7 +123,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">v2.10 · voz a prueba de Chrome</div>
+        <div class="badge" id="placa">v2.11 · voz del servidor</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -318,14 +318,61 @@ function bubble(txt,who){
   $("chat").scrollTop=$("chat").scrollHeight;
   return d;
 }
-function speak(t){
-  if(!voiceOn||!("speechSynthesis" in window))return;
-  // Chrome Android: cancel() pegado a speak() se come la voz; y si el motor quedo
-  // atorado hay que despertarlo con resume(). Antes fallaba en silencio.
-  try{speechSynthesis.cancel();speechSynthesis.resume();}catch(e){}
-  const clean=t.replace(/https?:\/\/\S+/g,"enlace").replace(/[*_~`>#|]/g,"")
-    .replace(/[\u{1F300}-\u{1FAFF}\u2700-\u27BF\u2600-\u26FF]/gu,"").replace(/\s+/g," ").trim().slice(0,1200);
+// ---------- LA VOZ (servidor primero, telefono como respaldo) ----------
+// El S22 de JJ no trae voz en espanol instalada, asi que speechSynthesis daba
+// silencio puro. Ahora el MP3 lo genera el servidor (casitaHabla, voz Cindy) y
+// aqui solo se reproduce. La voz del navegador queda como plan B.
+const TTS="https://base44.app/api/apps/6adecb1874687a1b299764fa/functions/casitaHabla";
+const LLAVE="casita-abvc-clande-2026";
+let audioAlma=null, cacheVoz=new Map();
+
+function limpiarVoz(t){
+  return String(t||"").replace(/https?:\/\/\S+/g,"enlace").replace(/[*_~`>#|]/g,"")
+    .replace(/[\u{1F300}-\u{1FAFF}\u2700-\u27BF\u2600-\u26FF]/gu,"").replace(/\s+/g," ")
+    .trim().slice(0,700);
+}
+
+async function speak(t){
+  if(!voiceOn)return;
+  const clean=limpiarVoz(t);
   if(!clean)return;
+  const ok=await vozServidor(clean);
+  if(!ok)vozNavegador(clean);
+}
+
+async function vozServidor(txt){
+  try{
+    setModo("speaking");
+    let b64=cacheVoz.get(txt);
+    if(!b64){
+      const ctl=new AbortController();
+      const to=setTimeout(()=>ctl.abort(),9000);
+      const r=await fetch(TTS,{method:"POST",signal:ctl.signal,
+        headers:{"Content-Type":"application/json","X-Casita-Key":LLAVE},
+        body:JSON.stringify({text:txt})});
+      clearTimeout(to);
+      if(!r.ok)throw new Error("HTTP "+r.status);
+      const d=await r.json();
+      if(!d.audio)throw new Error(d.error||"sin audio");
+      b64=d.audio;
+      if(cacheVoz.size<20)cacheVoz.set(txt,b64);
+    }
+    if(audioAlma){try{audioAlma.pause()}catch(e){}}
+    audioAlma=new Audio("data:audio/mpeg;base64,"+b64);
+    audioAlma.onended=()=>setModo("idle");
+    audioAlma.onerror=()=>setModo("idle");
+    await audioAlma.play();
+    return true;
+  }catch(e){
+    setModo("idle");
+    $("status").textContent="No llego la voz del servidor ("+((e&&e.message)||e)+"): uso la del telefono";
+    return false;
+  }
+}
+
+function vozNavegador(clean){
+  if(!("speechSynthesis" in window))return;
+  try{speechSynthesis.cancel();speechSynthesis.resume();}catch(e){}
   const u=new SpeechSynthesisUtterance(clean);
   u.lang="es-MX";u.rate=1.02;u.volume=1;
   const vs=speechSynthesis.getVoices().filter(v=>v.lang&&v.lang.toLowerCase().startsWith("es"));
@@ -336,24 +383,17 @@ function speak(t){
     setModo("idle");
     const err=(e&&e.error)||"error";
     if(err!=="interrupted"&&err!=="canceled")
-      $("status").textContent="La voz falló ("+err+"). Toca 🔊 y otra vez.";
+      $("status").textContent="Sin voz en el telefono ("+err+"). Revisa el volumen del aparato.";
   };
   setModo("speaking");
-  setTimeout(function(){
-    try{speechSynthesis.speak(u);}catch(e){}
-    // si a los 1.6 s no arranco, un solo reintento limpio
-    setTimeout(function(){
-      if(!speechSynthesis.speaking&&!speechSynthesis.pending){
-        try{speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}
-      }
-    },1600);
-  },90);
+  setTimeout(function(){try{speechSynthesis.speak(u);}catch(e){}},90);
 }
+
 function voiceToggle(){
   voiceOn=!voiceOn;
   $("voice").classList.toggle("off",!voiceOn);
   localStorage.setItem("casita_voice",voiceOn?"1":"0");
-  if(!voiceOn){speechSynthesis.cancel();setModo("idle")}
+  if(!voiceOn){try{speechSynthesis.cancel();}catch(e){}if(audioAlma){try{audioAlma.pause();}catch(e){}setModo("idle")}}
   else{$("status").textContent="Voz activada";}
 }
 if(!voiceOn)$("voice").classList.add("off");
