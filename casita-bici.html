@@ -836,6 +836,13 @@ function bikeStop(){
   BIKE.vel=0;guardarPaseo();bikePaint();
 }
 function bikeTick(){if(!BIKE.on)return;bikePaint();setTimeout(bikeTick,1000)}
+function _pinta(k,val){
+  // pinta en los tres layouts (vertical, horizontal y mapa completo) sin depender del orden de los <script>
+  try{
+    if(typeof _setV==="function") _setV(k,val);
+    else document.querySelectorAll('[data-v="'+k+'"]').forEach(function(el){el.textContent=val});
+  }catch(e){}
+}
 function bikePaint(){
   const v=Math.round(BIKE.vel);
   const km=(BIKE.dist/1000);
