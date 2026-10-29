@@ -19,7 +19,8 @@ import android.os.Looper;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
+import android.speech.tts.TextToSpeech;
+import java.util.Locale;
 import android.media.MediaRecorder;
 import android.media.ToneGenerator;
 import android.util.Base64;
@@ -87,6 +88,11 @@ public class MainActivity extends Activity {
         @Override public void run() { pintar(); h.postDelayed(this, 700); }
     };
 
+    @Override protected void onDestroy() {
+        if (tts != null) { try { tts.stop(); tts.shutdown(); } catch (Throwable t) {} }
+        super.onDestroy();
+    }
+
     @Override protected void onCreate(Bundle b) {
         super.onCreate(b);
 
@@ -115,7 +121,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v3.1 · habla · mic limpio");
+        placa.setText("v3.2 · voz gratis");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -452,54 +458,41 @@ public class MainActivity extends Activity {
     // ---- LA VOZ DE ALMA, AQUI MISMO (JJ: "se suponia que iba a tener un telefono
     // donde iba a hablar contigo"). El MP3 lo hace el servidor con la voz de Cindy;
     // el telefono solo lo reproduce. Si no hay internet, cae al tono del sistema.
-    private static final String HABLA = "https://base44.app/api/apps/6adecb1874687a1b299764fa/functions/casitaHabla";
-    private MediaPlayer reproductor = null;
+    // ---- LA VOZ (gratis, la de Google del telefono) ----
+    // JJ (29-oct, noche): "la voz de Eleven Labs, quitala. No vamos a gastar
+    // dinero en esta estupidez. Google tiene una voz gratis, esa es la que vamos
+    // nativo, sin red y sin costo. Si el telefono no trae espanol, habla con el
+    // idioma que tenga. Los tonos y la vibracion siguen de respaldo.
+    private TextToSpeech tts = null;
+    private boolean ttsListo = false;
+
+    private void prepararVoz() {
+        if (tts != null) return;
+        try {
+            tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+                @Override public void onInit(int estado) {
+                    if (estado != TextToSpeech.SUCCESS || tts == null) return;
+                    try {
+                        int r = tts.setLanguage(new Locale("es", "MX"));
+                        if (r == TextToSpeech.LANG_MISSING_DATA || r == TextToSpeech.LANG_NOT_SUPPORTED) {
+                            tts.setLanguage(Locale.getDefault());
+                        }
+                        tts.setSpeechRate(1.02f);
+                        ttsListo = true;
+                    } catch (Throwable ignored) {}
+                }
+            });
+        } catch (Throwable ignored) {}
+    }
 
     private void decirAlma(final String frase) {
-        // 29-oct: su nota de 47 s salió con MI voz dentro ("Parte enviado..." y
-        // "En marcha...") porque el micro seguía abierto cuando yo hablaba.
-        // Si está grabando, no hablo.
+        // si estoy grabando no hablo: la nota salio con mi voz dentro (29-oct)
         if (grabando) return;
-        new Thread(new Runnable() { @Override public void run() {
-            HttpURLConnection c = null;
-            try {
-                URL u = new URL(HABLA);
-                c = (HttpURLConnection) u.openConnection();
-                c.setRequestMethod("POST");
-                c.setDoOutput(true);
-                c.setConnectTimeout(8000);
-                c.setReadTimeout(15000);
-                c.setRequestProperty("Content-Type", "application/json");
-                c.setRequestProperty("X-Casita-Key", "casita-abvc-clande-2026");
-                String cuerpo = "{\"text\":\"" + frase.replace("\"", "'") + "\"}";
-                OutputStream os = c.getOutputStream();
-                os.write(cuerpo.getBytes("UTF-8")); os.flush(); os.close();
-                if (c.getResponseCode() != 200) return;
-                BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream(), "UTF-8"));
-                StringBuilder sb = new StringBuilder(); String ln;
-                while ((ln = br.readLine()) != null) sb.append(ln);
-                br.close();
-                String json = sb.toString();
-                int i = json.indexOf("\"audio\":\"");
-                if (i < 0) return;
-                int f = json.indexOf('"', i + 9);
-                if (f < 0) return;
-                byte[] mp3 = Base64.decode(json.substring(i + 9, f), Base64.DEFAULT);
-                final File f2 = new File(getCacheDir(), "alma-voz.mp3");
-                FileOutputStream fo = new FileOutputStream(f2);
-                fo.write(mp3); fo.close();
-                runOnUiThread(new Runnable() { @Override public void run() {
-                    try {
-                        if (reproductor != null) { reproductor.release(); reproductor = null; }
-                        reproductor = new MediaPlayer();
-                        reproductor.setDataSource(f2.getAbsolutePath());
-                        reproductor.prepare();
-                        reproductor.start();
-                    } catch (Throwable ignored) {}
-                }});
-            } catch (Throwable ignored) {
-            } finally { if (c != null) c.disconnect(); }
-        }}).start();
+        prepararVoz();
+        if (ttsListo && tts != null) {
+            try { tts.speak(frase, TextToSpeech.QUEUE_FLUSH, null, "alma"); return; } catch (Throwable ignored) {}
+        }
+        sonar(0);
     }
 
     // ---- SONIDO (JJ, 29-oct: "no tiene un puto chingado sonido la chingadera esa").
@@ -556,7 +549,7 @@ public class MainActivity extends Activity {
         }
         try {
             // el altavoz se calla antes de abrir el micrófono (cero realimentación)
-            if (reproductor != null) { try { reproductor.stop(); } catch (Throwable t) {} try { reproductor.release(); } catch (Throwable t) {} reproductor = null; }
+            if (tts != null && !grabando) { try { tts.stop(); } catch (Throwable t) {} }
             archivoNota = new File(getFilesDir(), "nota-bici.m4a");
             rec = new MediaRecorder();
             rec.setAudioSource(MediaRecorder.AudioSource.MIC);
