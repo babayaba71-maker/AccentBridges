@@ -309,7 +309,7 @@ public class MainActivity extends Activity {
             String senal;
             if (acc < 0) senal = "buscando señal de GPS";
             else if (acc > 60) senal = "señal débil (±" + acc + " m) · sal a la calle";
-            else senal = "GPS ±" + acc + " m";
+            else senal = "GPS ±" + acc + " m" + (acc >= 90 ? " · permiso APROXIMADO: ponlo en exacta" : "");
             String dormido = (ult > 0 && System.currentTimeMillis() - ult > 60000)
                     ? " · sin lecturas hace " + ((System.currentTimeMillis() - ult) / 1000) + " s" : "";
             tvEstado.setText(senal + " · " + n + " lecturas" + dormido);
