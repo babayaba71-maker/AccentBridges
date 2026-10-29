@@ -123,7 +123,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">v3.1 · voz al abrir · línea directa</div>
+        <div class="badge" id="placa">v3.2 · voz gratis del teléfono</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -319,11 +319,12 @@ function bubble(txt,who){
   $("chat").scrollTop=$("chat").scrollHeight;
   return d;
 }
-// ---------- LA VOZ (servidor primero, telefono como respaldo) ----------
-// El S22 de JJ no trae voz en espanol instalada, asi que speechSynthesis daba
-// silencio puro. Ahora el MP3 lo genera el servidor (casitaHabla, voz Cindy) y
-// aqui solo se reproduce. La voz del navegador queda como plan B.
-const TTS="https://base44.app/api/apps/6adecb1874687a1b299764fa/functions/casitaHabla";
+// ---------- LA VOZ (gratis, la del telefono) ----------
+// Orden de JJ (29-oct, noche): "la voz de Eleven Labs, quitala. No vamos a
+// gastar dinero en esta estupidez. Google tiene una voz gratis, esa es la que
+// vamos a usar." Asi que aqui suena SOLO speechSynthesis (motor de Google del
+// telefono): cero red, cero costo. Si el S22 no trae voz en espanol, habla con
+// la que tenga y lo dice en pantalla para que instale los datos de idioma.
 const LLAVE="casita-abvc-clande-2026";
 // LINEA DIRECTA: es la misma que traia el archivo de Google que JJ pegó.
 // Con una llave b44_ de su perfil, la casita habla DIRECTO con la API del agente,
@@ -351,7 +352,7 @@ function llaveDirecta(){
   TOK=v;localStorage.setItem("casita_token",v);
   $("status").textContent="Línea directa encendida: hablo con la API del agente.";
 }
-let audioAlma=null, cacheVoz=new Map();
+let audioAlma=null;
 
 function limpiarVoz(t){
   return String(t||"").replace(/https?:\/\/\S+/g,"enlace").replace(/[*_~`>#|]/g,"")
@@ -363,10 +364,10 @@ async function speak(t){
   if(!voiceOn)return;
   const clean=limpiarVoz(t);
   if(!clean)return;
-  // 29-oct noche: la voz del telefono no existe en su S22 -> silencio total.
-  // La voz de Cindy la genera el servidor (casitaHabla) y aqui solo suena el MP3.
-  const sono = await vozServidor(clean);
-  if(!sono) vozNavegador(clean);
+  // 29-oct noche, orden de JJ: "la voz de Eleven Labs, quitala. Google tiene una
+  // voz gratis, esa es la que vamos a usar." Cero red, cero costo: solo la voz
+  // del telefono (motor de Google). Si no hay voz, los avisos de la pagina lo dicen.
+  vozNavegador(clean);
 }
 
 // parte el texto en trozos porque las voces del telefono cortan los textos largos
@@ -383,44 +384,25 @@ function partirVoz(t,max){
   return out;
 }
 
-async function vozServidor(txt){
-  try{
-    setModo("speaking");
-    let b64=cacheVoz.get(txt);
-    if(!b64){
-      const ctl=new AbortController();
-      const to=setTimeout(()=>ctl.abort(),9000);
-      const r=await fetch(TTS,{method:"POST",signal:ctl.signal,
-        headers:{"Content-Type":"application/json","X-Casita-Key":LLAVE},
-        body:JSON.stringify({text:txt})});
-      clearTimeout(to);
-      if(!r.ok)throw new Error("HTTP "+r.status);
-      const d=await r.json();
-      if(!d.audio)throw new Error(d.error||"sin audio");
-      b64=d.audio;
-      if(cacheVoz.size<20)cacheVoz.set(txt,b64);
-    }
-    if(audioAlma){try{audioAlma.pause()}catch(e){}}
-    audioAlma=new Audio("data:audio/mpeg;base64,"+b64);
-    audioAlma.onended=()=>setModo("idle");
-    audioAlma.onerror=()=>setModo("idle");
-    await audioAlma.play();
-    return true;
-  }catch(e){
-    setModo("idle");
-    $("status").textContent="No llego la voz del servidor ("+((e&&e.message)||e)+"): uso la del telefono";
-    return false;
-  }
-}
+
 
 function vozNavegador(clean){
   if(!("speechSynthesis" in window)){$("status").textContent="Este navegador no tiene voz. Ábreme en Chrome.";return}
   try{speechSynthesis.cancel();speechSynthesis.resume();}catch(e){}
   const todas=speechSynthesis.getVoices()||[];
   const es=todas.filter(v=>v.lang&&v.lang.toLowerCase().startsWith("es"));
+  // antes que nada: la de Google en espanol. Si el telefono no trae ninguna en
+  // espanol (el caso del S22), usa la que exista antes que quedarse muda.
   const elegida=es.find(v=>/google/i.test(v.name)&&/mx/i.test(v.lang))
             ||es.find(v=>/google/i.test(v.name))
-            ||es[0]||null;
+            ||es[0]
+            ||todas.find(v=>/google/i.test(v.name))
+            ||todas[0]||null;
+  if(!todas.length){
+    $("status").textContent="El telefono aun no me da voces. Toca otra vez o pon Ajustes > Texto a voz.";
+  }else if(!es.length){
+    $("status").textContent="Tu S22 no tiene voz en espanol: hablo con la que trae ("+elegida.name+"). Instala Ajustes > Texto a voz > datos en espanol.";
+  }
   const trozos=partirVoz(clean,180);
   let i=0;
   setModo("speaking");
