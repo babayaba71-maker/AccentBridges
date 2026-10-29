@@ -739,7 +739,11 @@ function bikeOn(){
   if(typeof bubble==="function") bubble("🚴 Tablero listo. Dale ARRANCAR cuando subas a la bici.","a");
   window.scrollTo({top:0,behavior:"smooth"});
 }
-function bikeOff(){const p=document.getElementById("bike");if(p)p.style.display="none";bikeStop()}
+function bikeOff(){
+  // cerrar el tablero NO detiene el paseo: solo lo esconde. Para parar está PARAR.
+  const p=document.getElementById("bike"); if(p)p.style.display="none";
+  guardarPaseo();
+}
 function haversine(a,b,c,d){
   const R=6371000,t=Math.PI/180;
   const dLa=(c-a)*t,dLo=(d-b)*t;
@@ -844,13 +848,22 @@ function bikePaint(){
 function tellAlmaRide(){
   // si me piden el parte sin arrancar, YO arranco: nunca mas "no arranco el paseo"
   if(!BIKE.on){
+    const g=leerPaseo();
+    const vigente = g && g.on && g.start>0 && (Date.now()-g.start) < 6*3600*1000;
     const panel=document.getElementById("bike"); if(panel)panel.style.display="block";
     if(typeof mapaInit==="function") mapaInit();
-    arrancarPaseo(false);
-    const t0="🚴 Arranqué el paseo yo mismo, no lo tenías encendido. Ya empecé a contar desde ahora: en unos minutos te mando distancia, tiempo y promedio. Deja esta página abierta con la pantalla encendida y no la cierres.";
-    const i0=document.getElementById("txt");
-    if(i0){i0.value=t0;if(typeof sendTxt==="function")sendTxt()}
-    return;
+    if(vigente){
+      // había un paseo vivo guardado: lo retomo y reporto los números reales
+      BIKE.start=g.start; BIKE.dist=g.dist||0; BIKE.max=g.max||0;
+      arrancarPaseo(true);
+    } else {
+      arrancarPaseo(false);
+      const terminado = g && !g.on && (g.dist||0)>30 ? " (el anterior quedó en "+((g.dist||0)/1000).toFixed(2)+" km)" : "";
+      const t0="🚴 Arranqué el paseo yo mismo, no lo tenías encendido. Ya empecé a contar desde ahora: en unos minutos te mando distancia, tiempo y promedio. Deja esta página abierta con la pantalla encendida y no la cierres."+terminado;
+      const i0=document.getElementById("txt");
+      if(i0){i0.value=t0;if(typeof sendTxt==="function")sendTxt()}
+      return;
+    }
   }
   const encendido = BIKE.on && BIKE.start>0;
   const seg = encendido ? Math.max(0, Math.round((Date.now()-BIKE.start)/1000)) : 0;
