@@ -123,7 +123,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">v3.0 · voz del servidor · auto-envío</div>
+        <div class="badge" id="placa">v3.1 · voz al abrir · línea directa</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -145,6 +145,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
     <button class="icon" id="fotoBtn" onclick="document.getElementById('foto').click()" title="Screenshot">📷</button>
     <button class="icon" id="archBtn" onclick="document.getElementById('arch').click()" title="Archivo">📄</button>
     <button class="icon" id="voice" onclick="voiceToggle()" title="Voz de Alma">🔊</button>
+    <button class="icon" id="key" onclick="llaveDirecta()" title="Línea directa (llave b44_)">🔑</button>
     <button class="icon off" id="gps" onclick="gpsToggle()" title="Ubicación apagada">📍</button>
   </div>
 </div>
@@ -324,6 +325,32 @@ function bubble(txt,who){
 // aqui solo se reproduce. La voz del navegador queda como plan B.
 const TTS="https://base44.app/api/apps/6adecb1874687a1b299764fa/functions/casitaHabla";
 const LLAVE="casita-abvc-clande-2026";
+// LINEA DIRECTA: es la misma que traia el archivo de Google que JJ pegó.
+// Con una llave b44_ de su perfil, la casita habla DIRECTO con la API del agente,
+// sin pasar por mis funciones de relé. Sin llave, todo sigue igual que hoy.
+const API_AG="https://app.base44.com/api/agents/6adecb1874687a1b299764fa";
+let TOK=localStorage.getItem("casita_token")||"";
+async function apiAg(p,o){
+  o=o||{};
+  const r=await fetch(API_AG+p,{method:o.method||"GET",
+    headers:{Authorization:"Bearer "+TOK,"Content-Type":"application/json"},body:o.body});
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  return r.json();
+}
+async function convDirecta(){
+  if(CID){try{await apiAg("/conversations/"+CID);return CID}catch(e){}}
+  const c=await apiAg("/conversations",{method:"POST",body:"{}"});
+  CID=c.id;localStorage.setItem("casita_conv",CID);return CID;
+}
+function llaveDirecta(){
+  const t=prompt("Pega tu llave de Alma (pestaña Developer de mi perfil, empieza con b44_). Déjala vacía para borrarla.",TOK);
+  if(t===null)return;
+  const v=t.trim();
+  if(!v){TOK="";localStorage.removeItem("casita_token");$("status").textContent="Línea directa apagada: uso el relé.";return}
+  if(v.indexOf("b44_")!==0){$("status").textContent="Esa llave no empieza con b44_. Cópiala otra vez.";return}
+  TOK=v;localStorage.setItem("casita_token",v);
+  $("status").textContent="Línea directa encendida: hablo con la API del agente.";
+}
 let audioAlma=null, cacheVoz=new Map();
 
 function limpiarVoz(t){
@@ -433,6 +460,18 @@ function voiceToggle(){
 }
 if(!voiceOn)$("voice").classList.add("off");
 
+/* ---------- DESPERTAR LA VOZ ----------
+   El navegador NO deja sonar audio sin un toque del usuario: por eso al abrir
+   la casita no se oía nada. El primer toque en cualquier parte la saluda. */
+let yaSalude=false;
+function despertarVoz(){
+  if(yaSalude||!voiceOn||recOn)return;
+  yaSalude=true;
+  speak("Aquí estoy, Clyde. Ya tengo voz. Toca el micrófono y te escucho.");
+}
+document.addEventListener("pointerdown",despertarVoz,true);
+document.addEventListener("keydown",despertarVoz,true);
+
 /* ---------- hablar con Alma (relé, sin llaves) ---------- */
 async function sendMsg(text,oculto){
   if(!text.trim()||sending)return;
@@ -443,9 +482,15 @@ async function sendMsg(text,oculto){
   $("status").textContent="ALMA ESTÁ PENSANDO… (20 s a 2 min)";
   if(gpsOn){ try{ if(!pos||Date.now()-pos.ts>300000){ await gpsFijar(); await gpsLugar(); } }catch(e){} }
   try{
-    const r=await fetch(RELAY+"sendAlmaMessage",{method:"POST",headers:H,body:JSON.stringify({message:conTexto(text).slice(0,4000)})});
-    const d=await r.json();
-    if(d.conversationId&&d.conversationId!==CID){CID=d.conversationId;localStorage.setItem("casita_conv",CID)}
+    if(TOK){
+      await convDirecta();
+      await apiAg("/conversations/"+CID+"/messages",{method:"POST",
+        body:JSON.stringify({content:conTexto(text).slice(0,4000)})});
+    }else{
+      const r=await fetch(RELAY+"sendAlmaMessage",{method:"POST",headers:H,body:JSON.stringify({message:conTexto(text).slice(0,4000)})});
+      const d=await r.json();
+      if(d.conversationId&&d.conversationId!==CID){CID=d.conversationId;localStorage.setItem("casita_conv",CID)}
+    }
   }catch(e){
     bubble("No pude mandar el mensaje — revisa tu internet y reprueba","a");
     sending=false;setModo("idle");return;
@@ -457,8 +502,9 @@ async function poll(){
   pollCount++;
   if(!CID){setModo("idle");return}
   try{
-    const r=await fetch(RELAY+"getAlmaReply",{method:"POST",headers:H,body:JSON.stringify({conversationId:CID})});
-    const d=await r.json();
+    const d=TOK
+      ? await apiAg("/conversations/"+CID)
+      : await (await fetch(RELAY+"getAlmaReply",{method:"POST",headers:H,body:JSON.stringify({conversationId:CID})})).json();
     const fresh=(d.messages||[]).filter(m=>m.content&&!base.has(m.role+"|"+m.content));
     const replies=fresh.filter(m=>m.role==="assistant");
     if(replies.length){
