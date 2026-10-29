@@ -165,6 +165,24 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
   #bike .land .centro .n{font-size:clamp(84px,30vh,220px)}
   #bike .land .minimapa{width:clamp(170px,26vw,280px);height:clamp(96px,15vw,160px)}
 }
+
+/* ===== HORIZONTAL FORZADO: para teléfonos con rotación bloqueada (S22 Ultra) =====
+   Giras el teléfono DE LADO en el manubrio y el contenido se acuesta solo,
+   aunque el sistema no rote la pantalla. */
+body.bici-acostada{overflow:hidden}
+body.bici-acostada #bike{display:block!important}
+body.bici-acostada #bike .vert{display:none!important}
+body.bici-acostada #bike .land{display:block!important}
+body.bici-acostada .app{display:none!important}
+body.bici-acostada #bike{
+  position:fixed!important;top:0;left:0;
+  width:100vh;height:100vw;
+  transform:rotate(90deg);transform-origin:top left;
+  margin-left:100vw;
+  border:0;border-radius:0;z-index:320}
+body.bici-acostada #bike .land .centro .n{font-size:clamp(64px,22vh,150px)}
+body.bici-acostada #bike .land .volver{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:9;
+  background:rgba(8,22,36,.85);border:1px solid #35e0ff;color:#35e0ff;border-radius:10px;padding:5px 14px;font-size:11px;font-weight:700}
 </style><link rel="manifest" href="./manifest-bici.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -212,15 +230,15 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
     <div id="mapa" style="height:210px;margin-top:10px;border-radius:12px;overflow:hidden;border:1px solid #2c3a4a"></div>
     <div class="mut" id="mapaNota" style="font-size:.68rem;margin-top:4px;text-align:center">Tu ruta se dibuja aquí mientras ruedas.</div>
     <div style="display:flex;gap:8px;margin-top:10px">
-      <button id="bikePlay2" onclick="bikeToggle()" style="flex:1;padding:10px;border-radius:12px;border:1px solid #ffc14d;background:#ffc14d;color:#121a21;font-weight:800">▶ ARRANCAR</button>
-      <button onclick="abrirFull()" style="padding:10px 12px;border-radius:12px;border:1px solid #2c3a4a;background:transparent;color:#d8cfc5">⛶</button>
-      <button onclick="girarHorizontal()" title="Ver en horizontal" style="padding:10px 12px;border-radius:12px;border:1px solid #2c3a4a;background:transparent;color:#d8cfc5">⟳</button>
+      <button onclick="abrirFull()" title="Mapa a pantalla completa" style="padding:10px 14px;border-radius:12px;border:1px solid #2c3a4a;background:transparent;color:#d8cfc5;font-size:15px">⛶</button>
+      <button onclick="acostar(true)" title="Modo horizontal" style="padding:10px 14px;border-radius:12px;border:1px solid #35e0ff;background:rgba(53,224,255,.12);color:#35e0ff;font-weight:800;font-size:13px">⟳ HORIZONTAL</button>
     </div>
     </div><!-- /vert -->
 
     <!-- ===== LAYOUT HORIZONTAL (opción C) ===== -->
     <div class="land">
       <button class="cerrar" onclick="bikeOff()">✕ volver al chat</button>
+      <button class="volver" onclick="acostar(false)">↺ vertical</button>
       <div class="anillo"></div>
       <div class="anillo2"></div>
       <div class="centro"><div class="n" data-v="vel">0</div><div class="u">KM/H</div></div>
@@ -1004,6 +1022,26 @@ function girarHorizontal(){
       bubble("📱 Gira el teléfono a horizontal para ver el tablero completo.","a");
     }
   }catch(e){}
+}
+
+function acostar(on){
+  const b=document.body;
+  if(on){
+    b.classList.add("bici-acostada");
+    const p=document.getElementById("bike"); if(p)p.style.display="block";
+    try{ mapaInit(); }catch(e){}
+    setTimeout(()=>{ try{mapaMini()}catch(e){} }, 350);
+    try{
+      if(screen.orientation&&screen.orientation.lock){
+        screen.orientation.lock("landscape").catch(()=>{});
+      }
+    }catch(e){}
+    if(typeof bubble==="function") bubble("🔄 Modo horizontal acostado. Pon el teléfono de lado en el manubrio.","a");
+  }else{
+    b.classList.remove("bici-acostada");
+    if(typeof bubble==="function") bubble("↺ De vuelta al modo vertical.","a");
+  }
+  setTimeout(()=>{try{bikePaint()}catch(e){}},420);
 }
 </script>
 </body></html>
