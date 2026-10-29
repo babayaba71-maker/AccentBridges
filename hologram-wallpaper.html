@@ -933,7 +933,6 @@ const TECLADO="https://babayaba71-maker.github.io/AccentBridges/teclado.html";
 const MOUTHGYM="https://babayaba71-maker.github.io/AccentBridges/boca-gym.html";
 const AR="https://babayaba71-maker.github.io/AccentBridges/ar-labeler.html";
 const CALL="https://babayaba71-maker.github.io/AccentBridges/consulta-doctora.html"; // directriz JJ 18-oct: Vapi fuera del menú — la voz en vivo vive con la Doctora (widget ElevenLabs)
-const VALHABLA="https://elevenlabs.io/app/talk-to?agent_id=agent_7401kqvpkpmhep5rqcf95j5kz41b&branch_id=agtbrch_9301ks2d5jxtee0bjq0e149kj6tm"; // VALERIE HABLADA (ElevenLabs Conversational AI, 13-oct-2026): voz del día a día. Vapi queda para sesiones largas ~10 min (doctrina de voz).
 const TG="https://t.me/+aWV2H9E252QwYTMx"; // grupo AccentBridges (link de invitación, JJ 17-sep)
 const TT="https://www.tiktok.com/@raul.ybarra0";
 const AMERICA="https://speak-native-buddy.lovable.app";
@@ -1091,7 +1090,6 @@ function renderPortal(){
       <a class="p-btn" href="${MOUTHGYM}">🎤 MOUTH GYM — shadowing</a>
       <a class="p-btn" href="${AR}">🔭 AR LABELER</a>
       <a class="p-btn" href="${CALL}">🩺 VOZ EN VIVO — Doctora</a>
-      <a class="p-btn" href="${VALHABLA}" target="_blank" rel="noopener">📞 VALERIE HABLADA — ElevenLabs</a>
       <a class="p-btn" href="${TG}">✈️ TELEGRAM</a>
       <a class="p-btn" href="${YT}">YOUTUBE</a>
       <a class="p-btn" href="${TT}">🎵 TIKTOK</a>
@@ -1209,15 +1207,7 @@ function closePortal(){document.getElementById("portal").classList.remove("show"
      rutas de puertas = Tier 0/wallBrain; Vapi = solo sesiones largas /call.
      Requiere: agente público (ya lo es) + Allowlist con github.io si activa.
      ============================================================ -->
-<elevenlabs-convai agent-id="agent_7401kqvpkpmhep5rqcf95j5kz41b"
-  action-text="HABLAR CON VALERIE"
-  start-call-text="Empezar conversación"
-  end-call-text="Colgar"
-  listening-text="Escuchando..."
-  speaking-text="Valerie hablando"
-  expand-text="Abrir conversación"
-  dismissible="true"></elevenlabs-convai>
-<script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+<!-- voz de pago retirada 29-oct-2026 por orden de JJ -->
 
 </body>
 </html>
