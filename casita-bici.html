@@ -697,10 +697,22 @@ function bikePaint(){
   const a=document.getElementById("avg");if(a)a.textContent=Math.min(av,99);
 }
 function tellAlmaRide(){
-  const km=(BIKE.dist/1000).toFixed(2);
-  const seg=Math.round((Date.now()-BIKE.start)/1000);
-  const mm=Math.floor(seg/60),ss=seg%60;
-  const txt="Voy en la bici: "+km+" km, "+mm+" min, promedio "+Math.round(km/(Math.max(seg,1)/3600))+" km/h, máxima "+Math.round(BIKE.max)+" km/h.";
+  const encendido = BIKE.on && BIKE.start>0;
+  const seg = encendido ? Math.max(0, Math.round((Date.now()-BIKE.start)/1000)) : 0;
+  const km  = encendido ? BIKE.dist/1000 : 0;
+  const hh=Math.floor(seg/3600), mi=Math.floor((seg%3600)/60), ss=seg%60;
+  const tiempo = seg<60 ? seg+" s" : (hh>0 ? hh+" h "+mi+" min" : mi+" min");
+  const prom = seg>3 ? Math.min(99, Math.round(km/(seg/3600))) : 0;
+  let txt;
+  if(!encendido){
+    txt="Todavía no arranco el paseo 🚴. Toca ▶ ARRANCAR en el tablero y ya te mando distancia, tiempo y promedio de verdad. (Te lo digo así porque antes te mandé números en cero y no servían de nada.)";
+  } else if(seg<10 || km<0.02){
+    txt="Apenas arranqué el paseo: "+(BIKE.dist>=0?Math.round(BIKE.dist):0)+" m, "+tiempo+". Dame tantito y te mando el parte completo.";
+  } else if(seg>21600){
+    txt="Llevo "+km.toFixed(2)+" km y "+tiempo+". Ojo: ese tiempo se ve raro, parece que el tablero se quedó abierto. Si no es así, dime y lo reviso.";
+  } else {
+    txt="Voy en la bici: "+km.toFixed(2)+" km, "+tiempo+", promedio "+prom+" km/h, máxima "+Math.round(BIKE.max)+" km/h.";
+  }
   const i=document.getElementById("txt");
   if(i){i.value=txt;if(typeof sendTxt==="function")sendTxt()}
 }
