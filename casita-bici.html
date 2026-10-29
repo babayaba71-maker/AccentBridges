@@ -635,7 +635,7 @@ if(gpsOn){ gpsFijar().then(gpsLugar).then(()=>gpsPinta()).catch(()=>{ gpsOn=fals
 
 <script>
 /* ===== TABLERO DE LA BICI v0 (misma casita, mismo Alma) ===== */
-let BIKE={on:false,watch:null,start:0,dist:0,last:null,vel:0,max:0};
+let BIKE={on:false,watch:null,start:0,dist:0,last:null,vel:0,max:0,acc:null,err:''};
 function bikeOn(){
   const p=document.getElementById("bike");
   if(p)p.style.display="block";
@@ -653,27 +653,32 @@ function haversine(a,b,c,d){
 function bikeToggle(){
   if(BIKE.on){bikeStop();return}
   if(!navigator.geolocation){alert("Este navegador no da GPS");return}
-  BIKE.on=true;BIKE.start=Date.now();BIKE.dist=0;BIKE.last=null;BIKE.vel=0;BIKE.max=0;
+  BIKE.on=true;BIKE.start=Date.now();BIKE.dist=0;BIKE.last=null;BIKE.vel=0;BIKE.max=0;BIKE.acc=null;BIKE.err='';
   M.pts=[];if(M.line)M.line.setLatLngs([]);if(M.you){M.map.removeLayer(M.you);M.you=null}if(M.start){M.map.removeLayer(M.start);M.start=null}
   const b=document.getElementById("bikePlay");
   if(b){b.textContent="⏸ PARAR";b.style.background="#121a21";b.style.color="#ffc14d"}
   BIKE.watch=navigator.geolocation.watchPosition(pos=>{
     const {latitude:la,longitude:lo,accuracy:ac,speed:sp}=pos.coords;
     const t=pos.timestamp;
+    BIKE.acc=ac!=null?Math.round(ac):null;
+    BIKE.err='';
     if(BIKE.last){
       const dt=(t-BIKE.last.t)/1000;
       const d=haversine(BIKE.last.la,BIKE.last.lo,la,lo);
-      // filtra saltos absurdos (mala precisión) y desplazamientos de pie
-      if(dt>0.5&&d<120&&ac<60&&d>1) BIKE.dist+=d;
+      // acepta el tramo si el GPS no está disparando (precisión muy mala) y no es un salto imposible
+      if(dt>0.5&&d<200&&(ac==null||ac<120)&&d>2) BIKE.dist+=d;
       let v=(sp!=null&&!isNaN(sp))?sp*3.6:(dt>0?(d/dt)*3.6:0);
-      if(BIKE.dist>d&&d>1)v=Math.min(v,60);
+      if(v>60)v=60;                     // arriba de 60 km/h es ruido del GPS, no la bici
       BIKE.vel=Math.max(0,Math.min(80,v));
       if(BIKE.vel>BIKE.max)BIKE.max=BIKE.vel;
     }
     BIKE.last={la,lo,t};
     mapaPunto(la,lo);
     bikePaint();
-  },err=>{bikePaint();}, {enableHighAccuracy:true,maximumAge:2000,timeout:15000});
+  },err=>{
+    BIKE.err = err.code===1 ? 'permiso de ubicación negado' : (err.code===3 ? 'sin señal de GPS todavía' : (err.message||'GPS con problema'));
+    bikePaint();
+  }, {enableHighAccuracy:true,maximumAge:2000,timeout:15000});
   if(typeof bubble==="function") bubble("🚴 En marcha. Casco puesto y ojos en la calle.","a");
   bikeTick();
 }
@@ -695,6 +700,13 @@ function bikePaint(){
   const tt=document.getElementById("time");if(tt)tt.textContent=mm+":"+ss;
   const av=km>0.01?Math.round(km/(seg/3600)):0;
   const a=document.getElementById("avg");if(a)a.textContent=Math.min(av,99);
+  const st=document.getElementById("status");
+  if(st){
+    if(!BIKE.on) st.textContent="";
+    else if(BIKE.err) st.textContent="📡 "+BIKE.err;
+    else if(BIKE.acc==null) st.textContent="📡 buscando señal GPS…";
+    else st.textContent="📡 GPS ±"+BIKE.acc+" m · "+(BIKE.acc<=25?"señal buena":BIKE.acc<=60?"señal regular, cuenta igual":"señal floja, la distancia puede salir corta");
+  }
 }
 function tellAlmaRide(){
   const encendido = BIKE.on && BIKE.start>0;
