@@ -123,7 +123,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">v2.4 · WALLPAPER · ícono en tu teléfono</div>
+        <div class="badge" id="placa">v2.5 · GPS · sabe dónde estás</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -145,6 +145,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
     <button class="icon" id="fotoBtn" onclick="document.getElementById('foto').click()" title="Screenshot">📷</button>
     <button class="icon" id="archBtn" onclick="document.getElementById('arch').click()" title="Archivo">📄</button>
     <button class="icon" id="voice" onclick="voiceToggle()" title="Voz de Alma">🔊</button>
+    <button class="icon off" id="gps" onclick="gpsToggle()" title="Ubicación apagada">📍</button>
   </div>
 </div>
 
@@ -348,8 +349,9 @@ async function sendMsg(text,oculto){
   $("txt").value="";
   setModo("thinking");
   $("status").textContent="ALMA ESTÁ PENSANDO… (20 s a 2 min)";
+  if(gpsOn){ try{ if(!pos||Date.now()-pos.ts>300000){ await gpsFijar(); await gpsLugar(); } }catch(e){} }
   try{
-    const r=await fetch(RELAY+"sendAlmaMessage",{method:"POST",headers:H,body:JSON.stringify({message:text.slice(0,4000)})});
+    const r=await fetch(RELAY+"sendAlmaMessage",{method:"POST",headers:H,body:JSON.stringify({message:conTexto(text).slice(0,4000)})});
     const d=await r.json();
     if(d.conversationId&&d.conversationId!==CID){CID=d.conversationId;localStorage.setItem("casita_conv",CID)}
   }catch(e){
@@ -526,5 +528,82 @@ if("speechSynthesis" in window)speechSynthesis.getVoices();
     });
   }catch(e){}
 })();
+</script>
+
+<script>
+/* ---------- GPS: que Alma sepa dónde estás (v2.5) ----------
+   Permiso del navegador, sin servidores de terceros mas que el nombre de la colonia.
+   Redondeo a 3 decimales (~110 m): alcanza para el contexto, no para rastrearte. */
+let gpsOn = localStorage.getItem("casita_gps")==="1";
+let pos = null;
+
+function gpsPinta(msg){
+  const b=document.getElementById("gps");
+  if(!b) return;
+  b.classList.toggle("off",!gpsOn);
+  b.style.color = gpsOn ? "var(--cyan)" : "";
+  b.style.borderColor = gpsOn ? "rgba(0,242,254,.85)" : "";
+  b.title = msg || (gpsOn ? (pos&&pos.lugar ? "Estás en "+pos.lugar : "Ubicación encendida") : "Ubicación apagada");
+}
+
+async function gpsFijar(){
+  if(!navigator.geolocation) throw new Error("este navegador no da GPS");
+  return new Promise((ok,mal)=>{
+    navigator.geolocation.getCurrentPosition(
+      p=>{
+        pos={ lat:+p.coords.latitude.toFixed(3), lon:+p.coords.longitude.toFixed(3),
+              prec:Math.round(p.coords.accuracy), lugar:(pos&&pos.lugar)||"", ts:Date.now() };
+        ok(pos);
+      },
+      e=>mal(new Error(e.code===1 ? "permiso negado, dale PERMITIR a la ubicación" : (e.message||"sin señal") )),
+      {enableHighAccuracy:false, timeout:12000, maximumAge:120000}
+    );
+  });
+}
+
+async function gpsLugar(){
+  if(!pos) return;
+  try{
+    const r=await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=16&accept-language=es&lat="+pos.lat+"&lon="+pos.lon,{headers:{"Accept":"application/json"}});
+    if(!r.ok) throw new Error("geo "+r.status);
+    const d=await r.json();
+    const a=d.address||{};
+    const barrio=a.suburb||a.neighbourhood||a.quarter||a.residential||a.village||a.hamlet||"";
+    const ciudad=a.city||a.town||a.municipality||a.county||"";
+    const estado=a.state||"";
+    pos.lugar=[barrio,ciudad,estado].filter(Boolean).join(", ");
+  }catch(e){ pos.lugar = pos.lugar || ""; }
+}
+
+async function gpsToggle(){
+  if(gpsOn){
+    gpsOn=false; localStorage.setItem("casita_gps","0");
+    gpsPinta("Ubicación apagada"); vib(15);
+    return;
+  }
+  gpsPinta("Pidiendo permiso…");
+  try{
+    await gpsFijar();
+    await gpsLugar();
+    gpsOn=true; localStorage.setItem("casita_gps","1");
+    gpsPinta(pos.lugar ? "Estás en "+pos.lugar : "Ubicación encendida");
+    vib([15,30,15]);
+    if(typeof bubble==="function") bubble("📍 Listo, ya sé dónde estás: "+(pos.lugar||(pos.lat+", "+pos.lon)),"a");
+  }catch(e){
+    gpsOn=false; localStorage.setItem("casita_gps","0");
+    gpsPinta("No se pudo: "+e.message);
+    if(typeof bubble==="function") bubble("📍 No pude leer tu ubicación: "+e.message,"a");
+  }
+}
+
+function conTexto(t){
+  if(!gpsOn || !pos) return t;
+  const rato = (Date.now()-pos.ts) > 300000;
+  const etiqueta = pos.lugar || "colonia sin nombre";
+  return "[📍 "+etiqueta+" · "+pos.lat+", "+pos.lon+" · \u00b1"+pos.prec+" m"+(rato?" · dato de hace rato":"")+"]\n"+t;
+}
+
+gpsPinta();
+if(gpsOn){ gpsFijar().then(gpsLugar).then(()=>gpsPinta()).catch(()=>{ gpsOn=false; localStorage.setItem("casita_gps","0"); gpsPinta(); }); }
 </script>
 </body></html>
