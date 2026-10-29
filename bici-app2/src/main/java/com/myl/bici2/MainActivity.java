@@ -7,6 +7,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -36,6 +37,7 @@ import java.net.URL;
 public class MainActivity extends Activity {
 
     private static final int PEDIR = 10;
+    private static final String CASITA = "https://babayaba71-maker.github.io/AccentBridges/casita.html?v=19";
     private static final String RELAY = "https://base44.app/api/apps/6adecb1874687a1b299764fa/functions/sendAlmaMessage";
 
     private static final int NAVY = Color.rgb(7, 16, 38);
@@ -158,6 +160,16 @@ public class MainActivity extends Activity {
                 LinearLayout.LayoutParams.MATCH_PARENT, dp(50));
         lpPar.topMargin = dp(10);
         col.addView(tvParte, lpPar);
+
+        // ---- botón para hablar con Alma (abre la Casita)
+        TextView tvVoz = boton("🎙  HABLAR CON ALMA", false);
+        tvVoz.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { hablarConAlma(); }
+        });
+        LinearLayout.LayoutParams lpVoz = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, dp(46));
+        lpVoz.topMargin = dp(10);
+        col.addView(tvVoz, lpVoz);
 
         TextView nota = new TextView(this);
         nota.setText("Cuenta con la pantalla apagada. Al terminar, toca PARAR.");
@@ -343,7 +355,34 @@ public class MainActivity extends Activity {
         }).start();
     }
 
+    private void hablarConAlma() {
+        try {
+            Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(CASITA));
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+        } catch (Exception e) {
+            Toast.makeText(this, "No encontré navegador en el teléfono", Toast.LENGTH_LONG).show();
+        }
+    }
+
     private String enviar(String texto) {
+        String ultimo = "";
+        for (int intento = 1; intento <= 3; intento++) {
+            String r = unIntento(texto);
+            if (r.startsWith("OK")) return r.substring(3);
+            ultimo = r;
+            // 429 / 5xx: la línea está saturada, esperar y reintentar
+            if (!r.startsWith("REINTENTA")) break;
+            try { Thread.sleep(4000L * intento); } catch (InterruptedException ignored) {}
+        }
+        if (ultimo.startsWith("REINTENTA")) {
+            return "La línea estaba ocupada (" + ultimo.substring(10) + ") y reintenté 3 veces. El parte quedó copiado: pégalo en el chat.";
+        }
+        return ultimo;
+    }
+
+    /** devuelve "OKmensaje", "REINTENTAhttpNNN" o el texto del error */
+    private String unIntento(String texto) {
         HttpURLConnection c = null;
         try {
             URL u = new URL(RELAY);
@@ -359,7 +398,9 @@ public class MainActivity extends Activity {
             os.write(cuerpo.getBytes("UTF-8"));
             os.flush(); os.close();
             int code = c.getResponseCode();
-            return code >= 200 && code < 300 ? "Parte enviado a Alma ✅" : "No se pudo enviar (HTTP " + code + "). Quedó copiado.";
+            if (code >= 200 && code < 300) return "OKParte enviado a Alma ✅";
+            if (code == 429 || code >= 500) return "REINTENTAHTTP " + code;
+            return "No se pudo enviar (HTTP " + code + "). Quedó copiado.";
         } catch (Exception e) {
             return "Sin internet. El parte quedó copiado en el portapapeles.";
         } finally {
