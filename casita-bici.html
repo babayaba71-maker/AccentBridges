@@ -635,7 +635,7 @@ if(gpsOn){ gpsFijar().then(gpsLugar).then(()=>gpsPinta()).catch(()=>{ gpsOn=fals
 
 <script>
 /* ===== TABLERO DE LA BICI v0 (misma casita, mismo Alma) ===== */
-let BIKE={on:false,watch:null,start:0,dist:0,last:null,vel:0,max:0};
+let BIKE={on:false,watch:null,start:0,dist:0,last:null,vel:0,max:0,acc:null,err:'',ultima:0,n:0,porVel:0};
 function bikeOn(){
   const p=document.getElementById("bike");
   if(p)p.style.display="block";
@@ -650,39 +650,70 @@ function haversine(a,b,c,d){
   const x=Math.sin(dLa/2)**2+Math.cos(a*t)*Math.cos(c*t)*Math.sin(dLo/2)**2;
   return 2*R*Math.asin(Math.sqrt(x));
 }
+const BIKE_KEY="casita_paseo";
+function guardarPaseo(){
+  try{ localStorage.setItem(BIKE_KEY, JSON.stringify({
+    on:BIKE.on, start:BIKE.start, dist:BIKE.dist, max:BIKE.max, acc:BIKE.acc, ts:Date.now()
+  })); }catch(e){}
+}
+function leerPaseo(){
+  try{ const d=JSON.parse(localStorage.getItem(BIKE_KEY)||"null"); return (d&&typeof d==="object")?d:null }catch(e){ return null }
+}
 function bikeToggle(){
   if(BIKE.on){bikeStop();return}
+  arrancarPaseo(false);
+}
+function arrancarPaseo(reanudar){
   if(!navigator.geolocation){alert("Este navegador no da GPS");return}
-  BIKE.on=true;BIKE.start=Date.now();BIKE.dist=0;BIKE.last=null;BIKE.vel=0;BIKE.max=0;
-  M.pts=[];if(M.line)M.line.setLatLngs([]);if(M.you){M.map.removeLayer(M.you);M.you=null}if(M.start){M.map.removeLayer(M.start);M.start=null}
+  if(!reanudar){
+    BIKE.start=Date.now();BIKE.dist=0;BIKE.max=0;
+    M.pts=[];if(M.line)M.line.setLatLngs([]);if(M.you){M.map.removeLayer(M.you);M.you=null}if(M.start){M.map.removeLayer(M.start);M.start=null}
+  }
+  BIKE.on=true;BIKE.last=null;BIKE.vel=0;BIKE.acc=null;BIKE.err='';
   const b=document.getElementById("bikePlay");
   if(b){b.textContent="⏸ PARAR";b.style.background="#121a21";b.style.color="#ffc14d"}
   BIKE.watch=navigator.geolocation.watchPosition(pos=>{
     const {latitude:la,longitude:lo,accuracy:ac,speed:sp}=pos.coords;
     const t=pos.timestamp;
+    BIKE.acc=ac!=null?Math.round(ac):null;
+    BIKE.err='';BIKE.n=(BIKE.n||0)+1;
     if(BIKE.last){
       const dt=(t-BIKE.last.t)/1000;
       const d=haversine(BIKE.last.la,BIKE.last.lo,la,lo);
-      // filtra saltos absurdos (mala precisión) y desplazamientos de pie
-      if(dt>0.5&&d<120&&ac<60&&d>1) BIKE.dist+=d;
+      // acepta el tramo si el GPS no está disparando (precisión muy mala) y no es un salto imposible
+      let sumado=false;
+      if(dt>0.5&&d<200&&(ac==null||ac<120)&&d>2){
+        const vImp=(d/dt)*3.6;
+        if(vImp<=70){ BIKE.dist+=d; sumado=true }  // un salto que implicaria >70 km/h es ruido, no pedaleo
+      }
+      // si las coordenadas no alcanzan (GPS grueso o parado), suma por velocidad reportada
+      if(!sumado && sp!=null && !isNaN(sp) && sp>0.6 && dt>0.5 && dt<30){
+        const m=sp*dt;
+        if(m<200){ BIKE.dist+=m; BIKE.porVel=(BIKE.porVel||0)+m }
+      }
       let v=(sp!=null&&!isNaN(sp))?sp*3.6:(dt>0?(d/dt)*3.6:0);
-      if(BIKE.dist>d&&d>1)v=Math.min(v,60);
+      if(v>60)v=60;                     // arriba de 60 km/h es ruido del GPS, no la bici
       BIKE.vel=Math.max(0,Math.min(80,v));
       if(BIKE.vel>BIKE.max)BIKE.max=BIKE.vel;
     }
     BIKE.last={la,lo,t};
+    BIKE.ultima=Date.now();
+    guardarPaseo();
     mapaPunto(la,lo);
     bikePaint();
-  },err=>{bikePaint();}, {enableHighAccuracy:true,maximumAge:2000,timeout:15000});
-  if(typeof bubble==="function") bubble("🚴 En marcha. Casco puesto y ojos en la calle.","a");
-  bikeTick();
+  },err=>{
+    BIKE.err = err.code===1 ? 'permiso de ubicación negado' : (err.code===3 ? 'sin señal de GPS todavía' : (err.message||'GPS con problema'));
+    bikePaint();
+  }, {enableHighAccuracy:true,maximumAge:2000,timeout:15000});
+  if(typeof bubble==="function") bubble(reanudar?"🚴 Retomé tu paseo donde iba. Ojos en la calle.":"🚴 En marcha. Casco puesto y ojos en la calle.","a");
+  guardarPaseo();bikeTick();
 }
 function bikeStop(){
   BIKE.on=false;
   if(BIKE.watch!=null){navigator.geolocation.clearWatch(BIKE.watch);BIKE.watch=null}
   const b=document.getElementById("bikePlay");
   if(b){b.textContent="▶ ARRANCAR";b.style.background="#ffc14d";b.style.color="#121a21"}
-  BIKE.vel=0;bikePaint();
+  BIKE.vel=0;guardarPaseo();bikePaint();
 }
 function bikeTick(){if(!BIKE.on)return;bikePaint();setTimeout(bikeTick,1000)}
 function bikePaint(){
@@ -695,12 +726,54 @@ function bikePaint(){
   const tt=document.getElementById("time");if(tt)tt.textContent=mm+":"+ss;
   const av=km>0.01?Math.round(km/(seg/3600)):0;
   const a=document.getElementById("avg");if(a)a.textContent=Math.min(av,99);
+  const st=document.getElementById("status");
+  if(st){
+    if(!BIKE.on) st.textContent="";
+    else if(BIKE.err) st.textContent="📡 "+BIKE.err;
+    else if(BIKE.acc==null) st.textContent="📡 buscando señal GPS…";
+    else if(BIKE.ultima && Date.now()-BIKE.ultima>45000) st.textContent="📡 sin lecturas hace "+Math.round((Date.now()-BIKE.ultima)/1000)+" s · ¿pantalla apagada o app en segundo plano?";
+    else st.textContent="📡 GPS ±"+BIKE.acc+" m · "+(BIKE.acc<=25?"señal buena":BIKE.acc<=60?"señal regular, cuenta igual":"señal floja, la distancia puede salir corta");
+  }
 }
+(function reanudarPaseo(){
+  const g=leerPaseo();
+  if(!g||!g.on) return;
+  if(!(g.start>0) || (Date.now()-g.start) > 6*3600*1000){ try{localStorage.removeItem(BIKE_KEY)}catch(e){} return }
+  BIKE.start=g.start; BIKE.dist=g.dist||0; BIKE.max=g.max||0;
+  const panel=document.getElementById("bike"); if(panel)panel.style.display="block";
+  if(typeof mapaInit==="function") mapaInit();
+  arrancarPaseo(true);
+  if(typeof bubble==="function") bubble("🚴 Tenía tu paseo guardado: "+((BIKE.dist/1000).toFixed(2))+" km hasta ahora. Sigo contando.","a");
+})();
+
 function tellAlmaRide(){
-  const km=(BIKE.dist/1000).toFixed(2);
-  const seg=Math.round((Date.now()-BIKE.start)/1000);
-  const mm=Math.floor(seg/60),ss=seg%60;
-  const txt="Voy en la bici: "+km+" km, "+mm+" min, promedio "+Math.round(km/(Math.max(seg,1)/3600))+" km/h, máxima "+Math.round(BIKE.max)+" km/h.";
+  // si me piden el parte sin arrancar, YO arranco: nunca mas "no arranco el paseo"
+  if(!BIKE.on){
+    const panel=document.getElementById("bike"); if(panel)panel.style.display="block";
+    if(typeof mapaInit==="function") mapaInit();
+    arrancarPaseo(false);
+    const t0="🚴 Arranqué el paseo yo mismo, no lo tenías encendido. Ya empecé a contar desde ahora: en unos minutos te mando distancia, tiempo y promedio. Deja esta página abierta con la pantalla encendida y no la cierres.";
+    const i0=document.getElementById("txt");
+    if(i0){i0.value=t0;if(typeof sendTxt==="function")sendTxt()}
+    return;
+  }
+  const encendido = BIKE.on && BIKE.start>0;
+  const seg = encendido ? Math.max(0, Math.round((Date.now()-BIKE.start)/1000)) : 0;
+  const km  = encendido ? BIKE.dist/1000 : 0;
+  const hh=Math.floor(seg/3600), mi=Math.floor((seg%3600)/60), ss=seg%60;
+  const tiempo = seg<60 ? seg+" s" : (hh>0 ? hh+" h "+mi+" min" : mi+" min");
+  const prom = seg>3 ? Math.min(60, Math.round(km/(seg/3600))) : 0;
+  let txt;
+  if(!encendido){
+    txt="Todavía no arranco el paseo 🚴. Toca ▶ ARRANCAR en el tablero y ya te mando distancia, tiempo y promedio de verdad. (Te lo digo así porque antes te mandé números en cero y no servían de nada.)";
+  } else if(seg<10 || km<0.02){
+    txt="Apenas arranqué el paseo: "+(BIKE.dist>=0?Math.round(BIKE.dist):0)+" m, "+tiempo+". Dame tantito y te mando el parte completo. (📡 ±"+(BIKE.acc==null?"sin dato":BIKE.acc)+" m, "+BIKE.n+" lecturas de GPS)";
+  } else if(seg>21600){
+    txt="Llevo "+km.toFixed(2)+" km y "+tiempo+". Ojo: ese tiempo se ve raro, parece que el tablero se quedó abierto. Si no es así, dime y lo reviso.";
+  } else {
+    const diag="📡 ±"+(BIKE.acc==null?"?":BIKE.acc)+" m, "+BIKE.n+" lecturas"+(BIKE.porVel>0?", "+Math.round(BIKE.porVel)+" m por velocidad":"")+(BIKE.ultima&&Date.now()-BIKE.ultima>45000?" · última hace "+Math.round((Date.now()-BIKE.ultima)/1000)+" s":"");
+    txt="Voy en la bici: "+km.toFixed(2)+" km, "+tiempo+", promedio "+prom+" km/h, máxima "+Math.round(BIKE.max)+" km/h. ("+diag+")"
+  }
   const i=document.getElementById("txt");
   if(i){i.value=txt;if(typeof sendTxt==="function")sendTxt()}
 }
