@@ -635,7 +635,7 @@ if(gpsOn){ gpsFijar().then(gpsLugar).then(()=>gpsPinta()).catch(()=>{ gpsOn=fals
 
 <script>
 /* ===== TABLERO DE LA BICI v0 (misma casita, mismo Alma) ===== */
-let BIKE={on:false,watch:null,start:0,dist:0,last:null,vel:0,max:0,acc:null,err:'',ultima:0};
+let BIKE={on:false,watch:null,start:0,dist:0,last:null,vel:0,max:0,acc:null,err:'',ultima:0,n:0,porVel:0};
 function bikeOn(){
   const p=document.getElementById("bike");
   if(p)p.style.display="block";
@@ -676,14 +676,20 @@ function arrancarPaseo(reanudar){
     const {latitude:la,longitude:lo,accuracy:ac,speed:sp}=pos.coords;
     const t=pos.timestamp;
     BIKE.acc=ac!=null?Math.round(ac):null;
-    BIKE.err='';
+    BIKE.err='';BIKE.n=(BIKE.n||0)+1;
     if(BIKE.last){
       const dt=(t-BIKE.last.t)/1000;
       const d=haversine(BIKE.last.la,BIKE.last.lo,la,lo);
       // acepta el tramo si el GPS no está disparando (precisión muy mala) y no es un salto imposible
+      let sumado=false;
       if(dt>0.5&&d<200&&(ac==null||ac<120)&&d>2){
         const vImp=(d/dt)*3.6;
-        if(vImp<=70) BIKE.dist+=d;   // un salto que implicaria >70 km/h es ruido, no pedaleo
+        if(vImp<=70){ BIKE.dist+=d; sumado=true }  // un salto que implicaria >70 km/h es ruido, no pedaleo
+      }
+      // si las coordenadas no alcanzan (GPS grueso o parado), suma por velocidad reportada
+      if(!sumado && sp!=null && !isNaN(sp) && sp>0.6 && dt>0.5 && dt<30){
+        const m=sp*dt;
+        if(m<200){ BIKE.dist+=m; BIKE.porVel=(BIKE.porVel||0)+m }
       }
       let v=(sp!=null&&!isNaN(sp))?sp*3.6:(dt>0?(d/dt)*3.6:0);
       if(v>60)v=60;                     // arriba de 60 km/h es ruido del GPS, no la bici
@@ -761,11 +767,12 @@ function tellAlmaRide(){
   if(!encendido){
     txt="Todavía no arranco el paseo 🚴. Toca ▶ ARRANCAR en el tablero y ya te mando distancia, tiempo y promedio de verdad. (Te lo digo así porque antes te mandé números en cero y no servían de nada.)";
   } else if(seg<10 || km<0.02){
-    txt="Apenas arranqué el paseo: "+(BIKE.dist>=0?Math.round(BIKE.dist):0)+" m, "+tiempo+". Dame tantito y te mando el parte completo.";
+    txt="Apenas arranqué el paseo: "+(BIKE.dist>=0?Math.round(BIKE.dist):0)+" m, "+tiempo+". Dame tantito y te mando el parte completo. (📡 ±"+(BIKE.acc==null?"sin dato":BIKE.acc)+" m, "+BIKE.n+" lecturas de GPS)";
   } else if(seg>21600){
     txt="Llevo "+km.toFixed(2)+" km y "+tiempo+". Ojo: ese tiempo se ve raro, parece que el tablero se quedó abierto. Si no es así, dime y lo reviso.";
   } else {
-    txt="Voy en la bici: "+km.toFixed(2)+" km, "+tiempo+", promedio "+prom+" km/h, máxima "+Math.round(BIKE.max)+" km/h.";
+    const diag="📡 ±"+(BIKE.acc==null?"?":BIKE.acc)+" m, "+BIKE.n+" lecturas"+(BIKE.porVel>0?", "+Math.round(BIKE.porVel)+" m por velocidad":"")+(BIKE.ultima&&Date.now()-BIKE.ultima>45000?" · última hace "+Math.round((Date.now()-BIKE.ultima)/1000)+" s":"");
+    txt="Voy en la bici: "+km.toFixed(2)+" km, "+tiempo+", promedio "+prom+" km/h, máxima "+Math.round(BIKE.max)+" km/h. ("+diag+")"
   }
   const i=document.getElementById("txt");
   if(i){i.value=txt;if(typeof sendTxt==="function")sendTxt()}
