@@ -123,7 +123,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">v2.9 · voz normalizada</div>
+        <div class="badge" id="placa">v2.10 · voz a prueba de Chrome</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -320,17 +320,34 @@ function bubble(txt,who){
 }
 function speak(t){
   if(!voiceOn||!("speechSynthesis" in window))return;
-  speechSynthesis.cancel();
+  // Chrome Android: cancel() pegado a speak() se come la voz; y si el motor quedo
+  // atorado hay que despertarlo con resume(). Antes fallaba en silencio.
+  try{speechSynthesis.cancel();speechSynthesis.resume();}catch(e){}
   const clean=t.replace(/https?:\/\/\S+/g,"enlace").replace(/[*_~`>#|]/g,"")
     .replace(/[\u{1F300}-\u{1FAFF}\u2700-\u27BF\u2600-\u26FF]/gu,"").replace(/\s+/g," ").trim().slice(0,1200);
+  if(!clean)return;
   const u=new SpeechSynthesisUtterance(clean);
-  u.lang="es-MX";u.rate=1.02;
-  const vs=speechSynthesis.getVoices().filter(v=>v.lang.startsWith("es"));
+  u.lang="es-MX";u.rate=1.02;u.volume=1;
+  const vs=speechSynthesis.getVoices().filter(v=>v.lang&&v.lang.toLowerCase().startsWith("es"));
   if(vs.length)u.voice=vs[0];
   u.onstart=()=>setModo("speaking");
   u.onend=()=>setModo("idle");
+  u.onerror=(e)=>{
+    setModo("idle");
+    const err=(e&&e.error)||"error";
+    if(err!=="interrupted"&&err!=="canceled")
+      $("status").textContent="La voz falló ("+err+"). Toca 🔊 y otra vez.";
+  };
   setModo("speaking");
-  speechSynthesis.speak(u);
+  setTimeout(function(){
+    try{speechSynthesis.speak(u);}catch(e){}
+    // si a los 1.6 s no arranco, un solo reintento limpio
+    setTimeout(function(){
+      if(!speechSynthesis.speaking&&!speechSynthesis.pending){
+        try{speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}
+      }
+    },1600);
+  },90);
 }
 function voiceToggle(){
   voiceOn=!voiceOn;
