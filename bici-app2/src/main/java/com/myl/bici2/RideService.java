@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.IBinder;
+import android.os.PowerManager;
 
 /**
  * Alma Bici — servicio en primer plano.
@@ -29,6 +30,7 @@ public class RideService extends Service implements LocationListener {
 
     static final String K_ON="on", K_START="start", K_DIST="dist", K_MAX="max",
                         K_ACC="acc", K_N="n", K_ULT="ult", K_SALTO="salto", K_REIN="rein";
+    private PowerManager.WakeLock foco;
 
     private LocationManager lm;
     private Location ultimo;
@@ -58,6 +60,7 @@ public class RideService extends Service implements LocationListener {
         }
 
         empezarGps();
+        tomarFoco();
         vigia.postDelayed(chequeo, 30000);
         return START_STICKY;
     }
@@ -94,8 +97,28 @@ public class RideService extends Service implements LocationListener {
         }
     };
 
+    // Samsung congela el proceso a los ~2 min con la pantalla apagada: sin esto ni
+    // el GPS ni el vigilante corren (parte de JJ: 16 lecturas, luego 2 min dormido,
+    // "reinicios 0" = el vigia tampoco despertó).
+    private void tomarFoco() {
+        try {
+            if (foco != null && foco.isHeld()) return;
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            if (pm == null) return;
+            foco = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "alma_bici:pedaleo");
+            foco.setReferenceCounted(false);
+            foco.acquire(6 * 60 * 60 * 1000L);
+        } catch (Exception ignored) {}
+    }
+
+    private void soltarFoco() {
+        try { if (foco != null && foco.isHeld()) foco.release(); } catch (Exception ignored) {}
+        foco = null;
+    }
+
     private void parar() {
         try { if (lm != null) lm.removeUpdates(this); } catch (Exception ignored) {}
+        soltarFoco();
         prefs(this).edit().putBoolean(K_ON,false).apply();
         if (Build.VERSION.SDK_INT >= 24) stopForeground(true); else stopForeground(true);
         stopSelf();
@@ -103,6 +126,7 @@ public class RideService extends Service implements LocationListener {
 
     @Override public void onDestroy() {
         vigia.removeCallbacks(chequeo);
+        soltarFoco();
         try { if (lm != null) lm.removeUpdates(this); } catch (Exception ignored) {}
         super.onDestroy();
     }
@@ -129,11 +153,11 @@ public class RideService extends Service implements LocationListener {
             if (vel > max) max = vel;
 
             boolean sumado = false;
-            if (dt > 0.5 && d < 200 && loc.hasAccuracy() && acc <= 35 && d > 2 && n > 2) {
+            if (dt > 0.5 && d < 200 && loc.hasAccuracy() && acc <= 60 && d > 2 && n > 2) {
                 double vImp = (d/dt)*3.6;
                 if (vImp <= 70) { dist += (float) d; sumado = true; }
             }
-            if (!sumado && n > 2 && acc <= 50 && loc.hasSpeed() && loc.getSpeed() > 0.6f && dt > 0.5 && dt < 30) {
+            if (!sumado && n > 2 && acc <= 80 && loc.hasSpeed() && loc.getSpeed() > 0.6f && dt > 0.5 && dt < 30) {
                 float m = (float)(loc.getSpeed() * dt);
                 if (m < 200) dist += m;
             }

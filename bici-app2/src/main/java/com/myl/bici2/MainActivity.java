@@ -53,6 +53,14 @@ public class MainActivity extends Activity {
     private File archivoNota;
     private long t0Nota = 0;
     private boolean grabando = false;
+    private int ampMax = 0;
+    private final Runnable mirarNivel = new Runnable() {
+        @Override public void run() {
+            if (!grabando || rec == null) return;
+            try { int a = rec.getMaxAmplitude(); if (a > ampMax) ampMax = a; } catch (Exception ignored) {}
+            h.postDelayed(this, 400);
+        }
+    };
     private TextView tvVoz;
 
     private static final int NAVY = Color.rgb(7, 16, 38);
@@ -99,7 +107,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v2.6 · holo");
+        placa.setText("v2.7 · holo");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -296,6 +304,29 @@ public class MainActivity extends Activity {
         } catch (Exception ignored) {}
     }
 
+    // Samsung/One UI manda la app a "reposo profundo" a los minutos y congela el
+    // servicio: el GPS deja de dar lecturas y ni el vigilante despierta.
+    private void pedirBateria() {
+        try {
+            if (Build.VERSION.SDK_INT < 23) return;
+            android.os.PowerManager pm = (android.os.PowerManager) getSystemService(Context.POWER_SERVICE);
+            if (pm == null || pm.isIgnoringBatteryOptimizations(getPackageName())) return;
+            Intent i = new Intent(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                    Uri.parse("package:" + getPackageName()));
+            startActivity(i);
+            Toast.makeText(this, "Dale PERMITIR para que el paseo cuente con la pantalla apagada", Toast.LENGTH_LONG).show();
+        } catch (Exception ignored) {}
+    }
+
+    private String estadoBateria() {
+        try {
+            if (Build.VERSION.SDK_INT < 23) return "bateria normal";
+            android.os.PowerManager pm = (android.os.PowerManager) getSystemService(Context.POWER_SERVICE);
+            return (pm != null && pm.isIgnoringBatteryOptimizations(getPackageName()))
+                    ? "bateria sin restricciones" : "BATERIA OPTIMIZADA (se duerme)";
+        } catch (Exception e) { return "bateria ?"; }
+    }
+
     private void alternar() {
         SharedPreferences p = RideService.prefs(this);
         if (p.getBoolean("on", false)) {
@@ -308,6 +339,7 @@ public class MainActivity extends Activity {
                 Toast.makeText(this, "Primero dame permiso de ubicación", Toast.LENGTH_LONG).show();
                 return;
             }
+            pedirBateria();
             Intent i = new Intent(this, RideService.class).setAction(RideService.ACT_START);
             if (Build.VERSION.SDK_INT >= 26) startForegroundService(i); else startService(i);
             Toast.makeText(this, "En marcha. Ojos en la calle 🚴", Toast.LENGTH_SHORT).show();
@@ -383,7 +415,7 @@ public class MainActivity extends Activity {
                 + ", promedio " + String.format("%.1f", prom) + " km/h, máxima "
                 + String.format("%.1f", p.getFloat("max", 0f))
                 + " km/h. (app Alma Bici v2 · GPS ±" + p.getInt("acc", -1) + " m, " + p.getInt("n", 0) + " lecturas"
-                + " · " + edadLectura(p) + " · " + estadoPermiso() + " · reinicios " + p.getInt("rein", 0) + ")";
+                + " · " + edadLectura(p) + " · " + estadoPermiso() + " · " + estadoBateria() + " · reinicios " + p.getInt("rein", 0) + ")";
     }
 
     private String edadLectura(SharedPreferences p) {
@@ -445,7 +477,7 @@ public class MainActivity extends Activity {
             rec.setOutputFile(archivoNota.getAbsolutePath());
             rec.prepare();
             rec.start();
-            grabando = true; t0Nota = System.currentTimeMillis();
+            grabando = true; t0Nota = System.currentTimeMillis(); ampMax = 0; h.postDelayed(mirarNivel, 400);
             tvVoz.setText("⏹  GRABANDO · TOCA");
             Toast.makeText(this, "Grabando… toca otra vez y la mando", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
@@ -463,6 +495,10 @@ public class MainActivity extends Activity {
         rec = null;
         tvVoz.setText("🎙  HABLAR");
         if (dur < 1.0) { Toast.makeText(this, "Muy corta, otra vez", Toast.LENGTH_SHORT).show(); return; }
+        if (ampMax < 1500) {
+            Toast.makeText(this, "Se oyó muy bajito (pico " + ampMax + "): el micrófono va tapado, acércalo a la boca",
+                    Toast.LENGTH_LONG).show();
+        }
         Toast.makeText(this, "Mandándola…", Toast.LENGTH_SHORT).show();
         new Thread(new Runnable() { @Override public void run() {
             final String r = subirNota(dur);
