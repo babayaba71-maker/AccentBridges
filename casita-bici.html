@@ -220,7 +220,7 @@ body.bici-acostada #bike .land .volver{position:absolute;top:8px;left:50%;transf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">BICI v6 · un solo micrófono</div>
+        <div class="badge" id="placa">BICI v7 · voz normalizada</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -660,6 +660,42 @@ function pararGrabacion(){
   clearInterval(recTimer);$("mic").textContent="🎙️ MANDANDO…";setModo("thinking");
   try{mediaRec.stop()}catch(e){}
 }
+
+/* ---------- NORMALIZADOR: la nota se va con el volumen al tope, no como salga ---------- */
+function wavDe16k(x){
+  const n=x.length, ab=new ArrayBuffer(44+n*2), v=new DataView(ab);
+  const w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+  w(0,"RIFF");v.setUint32(4,36+n*2,true);w(8,"WAVEfmt ");v.setUint32(16,16,true);
+  v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,16000,true);
+  v.setUint32(28,32000,true);v.setUint16(32,2,true);v.setUint16(34,16,true);
+  w(36,"data");v.setUint32(40,n*2,true);
+  let o=44;
+  for(let i=0;i<n;i++){const s=Math.max(-1,Math.min(1,x[i]));v.setInt16(o,s<0?s*0x8000:s*0x7FFF,true);o+=2}
+  return new Blob([ab],{type:"audio/wav"});
+}
+async function notaLimpia(blob){
+  const AC=window.AudioContext||window.webkitAudioContext; if(!AC)return null;
+  let ctx=null;
+  try{
+    ctx=new AC();
+    const audio=await ctx.decodeAudioData(await blob.arrayBuffer());
+    const d0=audio.getChannelData(0);
+    let pico=0; for(let i=0;i<d0.length;i+=4){const a=Math.abs(d0[i]); if(a>pico)pico=a}
+    if(!pico){try{ctx.close()}catch(e){}return null}
+    const Off=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+    const off=new Off(1,Math.max(1600,Math.ceil(audio.duration*16000)),16000);
+    const src=off.createBufferSource();src.buffer=audio;src.connect(off.destination);src.start();
+    const out=await off.startRendering();
+    try{ctx.close()}catch(e){}
+    const x=out.getChannelData(0);
+    let p2=0; for(let i=0;i<x.length;i++){const a=Math.abs(x[i]); if(a>p2)p2=a}
+    // subimos hasta dejar el pico en -3 dBFS, con techo de +30 dB para no inflar puro silencio
+    const gan=Math.min(Math.pow(10,-3/20)/(p2||1),31.6);
+    const y=new Float32Array(x.length);
+    for(let i=0;i<x.length;i++){y[i]=Math.max(-1,Math.min(1,x[i]*gan))}
+    return {blob:wavDe16k(y), picoDb:20*Math.log10(pico||1e-9), ganDb:20*Math.log10(gan)};
+  }catch(e){ try{ctx&&ctx.close()}catch(_){} return null }
+}
 async function mandarGrabacion(){
   const dur=Math.round((Date.now()-recT0)/100)/10;
   pararNivel();
@@ -668,8 +704,10 @@ async function mandarGrabacion(){
   const blob=new Blob(chunks,{type:(mediaRec&&mediaRec.mimeType)||"audio/webm"});
   if(!blob.size||dur<0.4){micReset("Muy corto, otra vez");return}
   try{
-    const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(",")[1]);r.onerror=rej;r.readAsDataURL(blob)});
-    const r=await fetch(RELAY+"casitaVoz",{method:"POST",headers:H,body:JSON.stringify({audio_b64:b64,mime:blob.type,dur,sid:"jj"})});
+    const limpia=await notaLimpia(blob);
+    const envio=limpia&&limpia.blob?limpia.blob:blob;
+    const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(",")[1]);r.onerror=rej;r.readAsDataURL(envio)});
+    const r=await fetch(RELAY+"casitaVoz",{method:"POST",headers:H,body:JSON.stringify({audio_b64:b64,mime:envio.type,dur,sid:"jj",gan:limpia?Math.round(limpia.ganDb):0})});
     const d=await r.json();
     if(!d.ok)throw new Error(d.error||"no subió");
     bubble("🎤 Nota de voz ("+Math.round(d.dur)+"s)","u");vib([20,40,20]);try{landReset()}catch(e){}
