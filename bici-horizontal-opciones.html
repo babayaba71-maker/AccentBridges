@@ -1,0 +1,86 @@
+<!doctype html><html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Alma Bici · Setups horizontales</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#04080f;color:#dbe7f3;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:18px}
+h1{font-size:15px;letter-spacing:.22em;color:#ffc14d;text-align:center;margin-bottom:4px}
+.sub{text-align:center;font-size:11px;color:#6d8299;margin-bottom:16px;letter-spacing:.08em}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:1240px;margin:0 auto}
+.opt{background:#070e18;border:1px solid #17293c;border-radius:14px;overflow:hidden}
+.tag{display:flex;justify-content:space-between;align-items:baseline;padding:8px 12px;border-bottom:1px solid #17293c}
+.tag b{font-size:12px;color:#35e0ff;letter-spacing:.12em}
+.tag span{font-size:10px;color:#6d8299}
+.screen{position:relative;aspect-ratio:16/9;overflow:hidden;background:radial-gradient(120% 120% at 50% 55%,#0a2138 0%,#061020 55%,#03070d 100%)}
+.orb{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:46%;aspect-ratio:1;border-radius:50%;
+background:radial-gradient(circle at 45% 40%,rgba(255,255,255,.92) 0%,rgba(160,230,255,.65) 18%,rgba(53,224,255,.30) 42%,rgba(20,90,140,.12) 68%,transparent 78%);
+filter:blur(1px);box-shadow:0 0 60px rgba(53,224,255,.35),0 0 140px rgba(53,224,255,.14)}
+.grid-lines{position:absolute;inset:0;background-image:linear-gradient(rgba(53,224,255,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(53,224,255,.055) 1px,transparent 1px);background-size:36px 36px}
+.speed{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;z-index:3}
+.speed .n{font-variant-numeric:tabular-nums;font-weight:800;line-height:.9;letter-spacing:-.03em;text-shadow:0 0 26px rgba(53,224,255,.55)}
+.speed .u{font-size:10px;letter-spacing:.3em;color:#8fd4e8;margin-top:4px}
+.corner{position:absolute;z-index:3;text-align:center}
+.corner .v{font-variant-numeric:tabular-nums;font-weight:700;line-height:1}
+.corner .l{font-size:8.5px;letter-spacing:.22em;color:#6d8299;margin-top:3px}
+.tl{left:14px;top:12px}.tr{right:14px;top:12px}.bl{left:14px;bottom:12px}.br{right:14px;bottom:12px}
+.chip{background:rgba(8,22,36,.72);border:1px solid #1b3purple;border-radius:10px;padding:6px 10px}
+.ring{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;z-index:2}
+.dial{width:70px;height:70px;border-radius:50%;border:2px solid rgba(53,224,255,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(6,18,30,.6)}
+.map{position:absolute;border:1px solid rgba(53,224,255,.35);border-radius:10px;background:
+radial-gradient(circle at 30% 30%,rgba(53,224,255,.18),transparent 60%),#08131f;overflow:hidden}
+.map:after{content:"";position:absolute;inset:0;background-image:linear-gradient(115deg,transparent 46%,rgba(53,224,255,.45) 47%,rgba(53,224,255,.45) 49%,transparent 50%)}
+.note{padding:7px 12px;font-size:10.5px;color:#8fa3b8;background:#060c15;border-top:1px solid #17293c}
+</style></head><body>
+<h1>ALMA BICI · MODO HORIZONTAL · 4 SETUPS</h1>
+<div class="sub">EL CERO AL CENTRO SOBRE EL ORBE · DATOS EN LAS ESQUINAS</div>
+<div class="grid">
+
+  <!-- A -->
+  <div class="opt"><div class="tag"><b>A · CABINA CLÁSICA</b><span>anillo + esquinas en chip</span></div>
+    <div class="screen"><div class="grid-lines"></div><div class="orb"></div>
+      <div class="ring" style="width:150px;height:150px;border:2px solid rgba(53,224,255,.45);box-shadow:0 0 40px rgba(53,224,255,.25) inset,0 0 30px rgba(53,224,255,.2)"></div>
+      <div class="speed"><div class="n" style="font-size:64px;color:#fff">0</div><div class="u">KM/H</div></div>
+      <div class="corner tl chip"><div class="v" style="font-size:19px;color:#ffc14d">0.00</div><div class="l">KM</div></div>
+      <div class="corner tr chip"><div class="v" style="font-size:19px;color:#ffc14d">00:00</div><div class="l">TIEMPO</div></div>
+      <div class="corner bl chip"><div class="v" style="font-size:19px;color:#ffc14d">0</div><div class="l">PROMEDIO</div></div>
+      <div class="corner br chip"><div class="v" style="font-size:19px;color:#ffc14d">0</div><div class="l">MÁXIMA</div></div>
+    </div><div class="note">Todo legible de un vistazo. El orbe respira detrás del número.</div></div>
+
+  <!-- B -->
+  <div class="opt"><div class="tag"><b>B · HUD RADAR</b><span>mapa de fondo + diales</span></div>
+    <div class="screen"><div class="grid-lines"></div>
+      <div class="map" style="inset:0;border-radius:0;opacity:.55"></div>
+      <div class="orb" style="width:40%;opacity:.85"></div>
+      <div class="ring" style="width:170px;height:170px;border:1px dashed rgba(53,224,255,.5)"></div>
+      <div class="ring" style="width:120px;height:120px;border:1px solid rgba(53,224,255,.25)"></div>
+      <div class="speed"><div class="n" style="font-size:70px;color:#fff">0</div><div class="u">KM/H</div></div>
+      <div class="corner tl"><div class="dial"><div class="v" style="font-size:16px;color:#ffc14d">0.0</div><div class="l">KM</div></div></div>
+      <div class="corner tr"><div class="dial"><div class="v" style="font-size:16px;color:#ffc14d">00:00</div><div class="l">TIEMPO</div></div></div>
+      <div class="corner bl"><div class="dial"><div class="v" style="font-size:16px;color:#ffc14d">0</div><div class="l">PROM</div></div></div>
+      <div class="corner br"><div class="dial"><div class="v" style="font-size:16px;color:#ffc14d">0</div><div class="l">MÁX</div></div></div>
+    </div><div class="note">El mapa es el fondo. Muy "cabina de nave", menos lectura rápida.</div></div>
+
+  <!-- C -->
+  <div class="opt"><div class="tag"><b>C · NEÓN MINIMAL</b><span>número gigante + líneas</span></div>
+    <div class="screen"><div class="grid-lines"></div><div class="orb" style="width:34%;opacity:.7"></div>
+      <div class="speed"><div class="n" style="font-size:86px;color:#eafcff">0</div><div class="u">KM/H</div></div>
+      <div class="corner tl"><div class="v" style="font-size:22px;color:#35e0ff">0.00<span style="font-size:9px;color:#6d8299"> KM</span></div></div>
+      <div class="corner tr"><div class="v" style="font-size:22px;color:#35e0ff">00:00<span style="font-size:9px;color:#6d8299"> MIN</span></div></div>
+      <div class="corner bl"><div class="v" style="font-size:22px;color:#35e0ff">0<span style="font-size:9px;color:#6d8299"> PROM</span></div></div>
+      <div class="corner br"><div class="v" style="font-size:22px;color:#35e0ff">0<span style="font-size:9px;color:#6d8299"> MÁX</span></div></div>
+      <div class="map" style="right:14px;bottom:44px;width:96px;height:56px;opacity:.9"></div>
+    </div><div class="note">Máximo contraste del número. Elegante, pero los datos pesan menos.</div></div>
+
+  <!-- D -->
+  <div class="opt"><div class="tag"><b>D · CABINA COMPLETA</b><span>anillo + mapa + botones</span></div>
+    <div class="screen"><div class="grid-lines"></div><div class="orb" style="width:44%"></div>
+      <div class="ring" style="width:145px;height:145px;border:3px solid rgba(53,224,255,.55);box-shadow:0 0 50px rgba(53,224,255,.35)"></div>
+      <div class="speed"><div class="n" style="font-size:62px;color:#fff">0</div><div class="u">KM/H</div></div>
+      <div class="corner tl chip"><div class="v" style="font-size:17px;color:#ffc14d">0.00</div><div class="l">KM</div></div>
+      <div class="corner tr chip"><div class="v" style="font-size:17px;color:#ffc14d">00:00</div><div class="l">TIEMPO</div></div>
+      <div class="map" style="left:14px;bottom:14px;width:120px;height:70px"></div>
+      <div class="corner br chip" style="border-color:#ffc14d"><div class="v" style="font-size:13px;color:#ffc14d">▶ ARRANCAR</div></div>
+      <div class="corner bl" style="left:146px;bottom:16px"><div class="v" style="font-size:15px;color:#8fa3b8">prom 0 · máx 0</div></div>
+    </div><div class="note">Trae todo: ruta, botón y métricas. Más completo, más ocupado.</div></div>
+
+</div></body></html>
