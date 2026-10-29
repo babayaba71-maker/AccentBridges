@@ -84,7 +84,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v2.2 · holo");
+        placa.setText("v2.3 · holo");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -160,13 +160,15 @@ public class MainActivity extends Activity {
         lpFB.topMargin = dp(8);
         col.addView(filaBotones, lpFB);
 
-        tvParte = boton("📤  PARTE A ALMA", false);
+        // PARTE a todo lo ancho con el nombre completo (JJ: "estaba mejor de la otra
+        // manera") y HABLAR chiquito al lado, para no volver a comerse la pantalla
+        tvParte = boton("📤  MANDAR EL PARTE A ALMA", false);
         tvParte.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         tvParte.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) { mandarParte(); }
         });
         LinearLayout.LayoutParams lpPar = new LinearLayout.LayoutParams(0, dp(42), 1f);
-        lpPar.rightMargin = dp(5);
+        lpPar.rightMargin = dp(8);
         filaBotones.addView(tvParte, lpPar);
 
         TextView tvVoz = boton("🎙  HABLAR", false);
@@ -174,8 +176,7 @@ public class MainActivity extends Activity {
         tvVoz.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) { hablarConAlma(); }
         });
-        LinearLayout.LayoutParams lpVoz = new LinearLayout.LayoutParams(0, dp(42), 1f);
-        lpVoz.leftMargin = dp(5);
+        LinearLayout.LayoutParams lpVoz = new LinearLayout.LayoutParams(dp(104), dp(42));
         filaBotones.addView(tvVoz, lpVoz);
 
         TextView nota = new TextView(this);
