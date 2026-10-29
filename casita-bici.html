@@ -761,6 +761,7 @@ function mapaPintaCanvas(){
   g.fillStyle="#ffc14d";g.beginPath();g.arc(X(b[1]),Y(b[0]),6,0,7);g.fill();
 }
 /* prueba interna de dibujo (solo se usa en QA, no hay botón) */
+if(location.search.indexOf("demo=1")>=0){setTimeout(()=>{try{bikeOn();window.__bikeDemo()}catch(e){}},700)}
 window.__bikeDemo=function(){
   mapaInit();
   let la=24.8091,lo=-107.3940;
