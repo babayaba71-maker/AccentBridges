@@ -16,6 +16,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.media.MediaRecorder;
+import android.util.Base64;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -24,6 +26,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -37,8 +43,17 @@ import java.net.URL;
 public class MainActivity extends Activity {
 
     private static final int PEDIR = 10;
-    private static final String CASITA = "https://babayaba71-maker.github.io/AccentBridges/casita.html?v=19";
+    private static final int PEDIR_MIC = 11;
+    private static final String LLAVE = "casita-abvc-clande-2026";
+    private static final String VOZ_URL = "https://base44.app/api/apps/6adecb1874687a1b299764fa/functions/casitaVoz";
+    private static final String CASITA = "https://babayaba71-maker.github.io/AccentBridges/casita.html?v=22";
     private static final String RELAY = "https://base44.app/api/apps/6adecb1874687a1b299764fa/functions/sendAlmaMessage";
+
+    private MediaRecorder rec;
+    private File archivoNota;
+    private long t0Nota = 0;
+    private boolean grabando = false;
+    private TextView tvVoz;
 
     private static final int NAVY = Color.rgb(7, 16, 38);
     private static final int CYAN = Color.rgb(0, 242, 254);
@@ -84,7 +99,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v2.5 · holo");
+        placa.setText("v2.6 · holo");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -171,16 +186,22 @@ public class MainActivity extends Activity {
         lpPar.rightMargin = dp(8);
         filaBotones.addView(tvParte, lpPar);
 
-        TextView tvVoz = boton("🎙  HABLAR", false);
+        tvVoz = boton("🎙  HABLAR", false);
         tvVoz.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         tvVoz.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) { hablarConAlma(); }
+            @Override public void onClick(View v) { grabarVoz(); }
+        });
+        tvVoz.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override public boolean onLongClick(View v) {
+                Toast.makeText(MainActivity.this, "Abriendo la casita…", Toast.LENGTH_SHORT).show();
+                hablarConAlma(); return true;
+            }
         });
         LinearLayout.LayoutParams lpVoz = new LinearLayout.LayoutParams(dp(104), dp(42));
         filaBotones.addView(tvVoz, lpVoz);
 
         TextView nota = new TextView(this);
-        nota.setText("Cuenta con la pantalla apagada. Al terminar, toca PARAR.");
+        nota.setText("Cuenta con la pantalla apagada. 🎙 = mandarme tu voz; déjalo apretado = casita.");
         nota.setTextColor(GRIS2);
         nota.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
         nota.setGravity(Gravity.CENTER);
@@ -400,6 +421,116 @@ public class MainActivity extends Activity {
                 }});
             }
         }).start();
+    }
+
+    // ---- voz desde la bici, sin salir al navegador (JJ: "no puedo hablar
+    // contigo desde el GPS de la bicicleta")
+    private void grabarVoz() {
+        if (grabando) { pararYEnviar(); return; }
+        if (Build.VERSION.SDK_INT >= 23 &&
+            checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, PEDIR_MIC);
+            Toast.makeText(this, "Dame el micrófono y vuelve a tocar 🎙", Toast.LENGTH_LONG).show();
+            return;
+        }
+        try {
+            archivoNota = new File(getFilesDir(), "nota-bici.m4a");
+            rec = new MediaRecorder();
+            rec.setAudioSource(MediaRecorder.AudioSource.MIC);
+            rec.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+            rec.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+            rec.setAudioChannels(1);
+            rec.setAudioSamplingRate(16000);
+            rec.setAudioEncodingBitRate(48000);
+            rec.setOutputFile(archivoNota.getAbsolutePath());
+            rec.prepare();
+            rec.start();
+            grabando = true; t0Nota = System.currentTimeMillis();
+            tvVoz.setText("⏹  GRABANDO · TOCA");
+            Toast.makeText(this, "Grabando… toca otra vez y la mando", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            grabando = false;
+            tvVoz.setText("🎙  HABLAR");
+            Toast.makeText(this, "No pude grabar: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void pararYEnviar() {
+        grabando = false;
+        final double dur = (System.currentTimeMillis() - t0Nota) / 1000.0;
+        try { rec.stop(); } catch (Exception ignored) {}
+        try { rec.release(); } catch (Exception ignored) {}
+        rec = null;
+        tvVoz.setText("🎙  HABLAR");
+        if (dur < 1.0) { Toast.makeText(this, "Muy corta, otra vez", Toast.LENGTH_SHORT).show(); return; }
+        Toast.makeText(this, "Mandándola…", Toast.LENGTH_SHORT).show();
+        new Thread(new Runnable() { @Override public void run() {
+            final String r = subirNota(dur);
+            runOnUiThread(new Runnable() { @Override public void run() {
+                Toast.makeText(MainActivity.this, r, Toast.LENGTH_LONG).show();
+            }});
+        }}).start();
+    }
+
+    private String subirNota(double dur) {
+        try {
+            byte[] datos = leerBytes(archivoNota);
+            String b64 = Base64.encodeToString(datos, Base64.NO_WRAP);
+            HttpURLConnection c = (HttpURLConnection) new URL(VOZ_URL).openConnection();
+            c.setRequestMethod("POST");
+            c.setDoOutput(true);
+            c.setConnectTimeout(20000);
+            c.setReadTimeout(60000);
+            c.setRequestProperty("Content-Type", "application/json");
+            c.setRequestProperty("X-Casita-Key", LLAVE);
+            String cuerpo = "{\"audio_b64\":\"" + b64 + "\",\"mime\":\"audio/mp4\",\"dur\":"
+                    + Math.round(dur) + ",\"sid\":\"jj\",\"gan\":0}";
+            OutputStream os = c.getOutputStream();
+            os.write(cuerpo.getBytes("UTF-8"));
+            os.flush(); os.close();
+            int code = c.getResponseCode();
+            String resp = leerStream(code < 400 ? c.getInputStream() : c.getErrorStream());
+            if (code >= 400) return "El servidor dijo " + code + ". Prueba otra vez.";
+            String id = entre(resp, "\"id\":\"", "\"");
+            if (id == null) return "Subió pero no me dio el id. Prueba otra vez.";
+            String msg = "🎤 Te mando una nota de voz de " + Math.round(dur)
+                    + " segundos (grabada desde la bici). Transcríbela desde aquí y contéstame: "
+                    + VOZ_URL + "?id=" + id;
+            enviar(msg);
+            return "Nota de " + Math.round(dur) + " s enviada 🚴";
+        } catch (Exception e) {
+            return "No pude mandar la nota: " + e.getMessage();
+        }
+    }
+
+    private byte[] leerBytes(File f) throws Exception {
+        FileInputStream in = new FileInputStream(f);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        byte[] buf = new byte[8192];
+        int n;
+        while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+        try { in.close(); } catch (Exception ignored) {}
+        return out.toByteArray();
+    }
+
+    private String leerStream(InputStream in) {
+        try {
+            if (in == null) return "";
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] buf = new byte[4096];
+            int n;
+            while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+            in.close();
+            return new String(out.toByteArray(), "UTF-8");
+        } catch (Exception e) { return ""; }
+    }
+
+    private String entre(String s, String a, String b) {
+        int i = s.indexOf(a);
+        if (i < 0) return null;
+        i += a.length();
+        int j = s.indexOf(b, i);
+        return j < 0 ? null : s.substring(i, j);
     }
 
     private void hablarConAlma() {
