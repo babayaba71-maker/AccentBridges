@@ -179,6 +179,10 @@ body.bici-acostada #bike .land .volver{position:absolute;top:8px;left:50%;transf
   border-radius:10px;padding:5px 14px;font-size:11px}
 /* si el teléfono NO rota (S22 Ultra con rotación bloqueada) acostamos el contenido */
 #bikeLand.acostado .env{width:100vh;height:100vw;left:0;top:0;transform:rotate(90deg);transform-origin:top left;margin-left:100vw}
+
+/* ===== FULL MAP TAMBIÉN EN HORIZONTAL ===== */
+#mapFull.acostado{width:100vh;height:100vw;transform:rotate(90deg);transform-origin:top left;margin-left:100vw}
+#mapFull .barra .girar{background:rgba(8,22,36,.85);border:1px solid #1b3a52;color:#8fa3b8;border-radius:10px;padding:6px 12px;font-weight:700}
 </style><link rel="manifest" href="./manifest-bici.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -280,7 +284,10 @@ body.bici-acostada #bike .land .volver{position:absolute;top:8px;left:50%;transf
   <div id="mapa2"></div>
   <div class="barra">
     <b>RUTA EN VIVO</b>
-    <button class="close" onclick="cerrarFull()">✕ cerrar</button>
+    <div style="display:flex;gap:8px">
+      <button class="girar" onclick="girarFull()">↻ girar</button>
+      <button class="close" onclick="cerrarFull()">✕ cerrar</button>
+    </div>
   </div>
   <div class="pie">
     <div><span data-v="dist">0.00</span><em>KM</em></div>
@@ -970,6 +977,7 @@ function mapaPintaCanvas(){
 }
 /* prueba interna de dibujo (solo se usa en QA, no hay botón) */
 if(location.search.indexOf("bici=1")>=0){setTimeout(()=>{try{bikeOn()}catch(e){}},400)}
+if(location.search.indexOf("fullacostado=1")>=0){setTimeout(()=>{try{bikeOn();window.__bikeDemo();abrirFull(true)}catch(e){}},900)}
 if(location.search.indexOf("demo=1")>=0){setTimeout(()=>{try{bikeOn();window.__bikeDemo()}catch(e){}},700)}
 window.__bikeDemo=function(){
   mapaInit();
@@ -1002,10 +1010,23 @@ function mapaMini(){
 }
 /* ===== MAPA A PANTALLA COMPLETA (modo horizontal) ===== */
 let M2=null;
-function abrirFull(){
+function girarFull(){
+  const ov=document.getElementById("mapFull");
+  if(!ov)return;
+  ov.classList.toggle("acostado");
+  setTimeout(()=>{ if(M2){ try{M2.invalidateSize()}catch(e){} } if(M.pts&&M.pts.length>1&&M2){try{M2.fitBounds(L.latLngBounds(M.pts),{padding:[30,30]})}catch(e){}} }, 380);
+}
+function abrirFull(forzarAcostado){
   const ov=document.getElementById("mapFull");
   if(!ov)return;
   ov.classList.add("on");
+  // el mapa también se acuesta cuando el teléfono no rota (S22 Ultra)
+  const yaAcostado = window.matchMedia("(orientation: landscape)").matches;
+  if(forzarAcostado===true || (forzarAcostado!==false && !yaAcostado)) ov.classList.add("acostado");
+  else ov.classList.remove("acostado");
+  try{
+    if(screen.orientation&&screen.orientation.lock&&!yaAcostado) screen.orientation.lock("landscape").catch(()=>{});
+  }catch(e){}
   try{ if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){}
   const pts=(M&&M.pts)?M.pts:[];
   if(typeof L==="undefined")return;
@@ -1023,7 +1044,7 @@ function abrirFull(){
       if(pts.length>1)M2.fitBounds(L.latLngBounds(pts),{padding:[30,30]});
     }catch(e){}
   }
-  setTimeout(()=>{if(M2)M2.invalidateSize()},250);
+  setTimeout(()=>{if(M2)M2.invalidateSize()}, 420);
   bikePaint();
 }
 function cerrarFull(){
