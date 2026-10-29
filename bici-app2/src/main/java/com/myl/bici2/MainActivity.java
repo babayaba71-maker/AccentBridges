@@ -16,7 +16,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.media.ToneGenerator;
 import android.util.Base64;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -26,7 +31,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -107,7 +115,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v2.8 · holo");
+        placa.setText("v3.0 · suena");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -331,6 +339,7 @@ public class MainActivity extends Activity {
         SharedPreferences p = RideService.prefs(this);
         if (p.getBoolean("on", false)) {
             startService(new Intent(this, RideService.class).setAction(RideService.ACT_STOP));
+            sonar(0);
             Toast.makeText(this, "Paseo guardado 🚴", Toast.LENGTH_SHORT).show();
         } else {
             if (Build.VERSION.SDK_INT >= 23 &&
@@ -342,6 +351,8 @@ public class MainActivity extends Activity {
             pedirBateria();
             Intent i = new Intent(this, RideService.class).setAction(RideService.ACT_START);
             if (Build.VERSION.SDK_INT >= 26) startForegroundService(i); else startService(i);
+            sonar(0);
+            decirAlma("En marcha. Ojos en la calle.");
             Toast.makeText(this, "En marcha. Ojos en la calle 🚴", Toast.LENGTH_SHORT).show();
         }
         h.postDelayed(new Runnable(){ @Override public void run(){ pintar(); } }, 600);
@@ -438,17 +449,91 @@ public class MainActivity extends Activity {
         return "permiso " + ubi + " / " + fondo;
     }
 
+    // ---- LA VOZ DE ALMA, AQUI MISMO (JJ: "se suponia que iba a tener un telefono
+    // donde iba a hablar contigo"). El MP3 lo hace el servidor con la voz de Cindy;
+    // el telefono solo lo reproduce. Si no hay internet, cae al tono del sistema.
+    private static final String HABLA = "https://base44.app/api/apps/6adecb1874687a1b299764fa/functions/casitaHabla";
+    private MediaPlayer reproductor = null;
+
+    private void decirAlma(final String frase) {
+        new Thread(new Runnable() { @Override public void run() {
+            HttpURLConnection c = null;
+            try {
+                URL u = new URL(HABLA);
+                c = (HttpURLConnection) u.openConnection();
+                c.setRequestMethod("POST");
+                c.setDoOutput(true);
+                c.setConnectTimeout(8000);
+                c.setReadTimeout(15000);
+                c.setRequestProperty("Content-Type", "application/json");
+                c.setRequestProperty("X-Casita-Key", "casita-abvc-clande-2026");
+                String cuerpo = "{\"text\":\"" + frase.replace("\"", "'") + "\"}";
+                OutputStream os = c.getOutputStream();
+                os.write(cuerpo.getBytes("UTF-8")); os.flush(); os.close();
+                if (c.getResponseCode() != 200) return;
+                BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream(), "UTF-8"));
+                StringBuilder sb = new StringBuilder(); String ln;
+                while ((ln = br.readLine()) != null) sb.append(ln);
+                br.close();
+                String json = sb.toString();
+                int i = json.indexOf("\"audio\":\"");
+                if (i < 0) return;
+                int f = json.indexOf('"', i + 9);
+                if (f < 0) return;
+                byte[] mp3 = Base64.decode(json.substring(i + 9, f), Base64.DEFAULT);
+                final File f2 = new File(getCacheDir(), "alma-voz.mp3");
+                FileOutputStream fo = new FileOutputStream(f2);
+                fo.write(mp3); fo.close();
+                runOnUiThread(new Runnable() { @Override public void run() {
+                    try {
+                        if (reproductor != null) { reproductor.release(); reproductor = null; }
+                        reproductor = new MediaPlayer();
+                        reproductor.setDataSource(f2.getAbsolutePath());
+                        reproductor.prepare();
+                        reproductor.start();
+                    } catch (Throwable ignored) {}
+                }});
+            } catch (Throwable ignored) {
+            } finally { if (c != null) c.disconnect(); }
+        }}).start();
+    }
+
+    // ---- SONIDO (JJ, 29-oct: "no tiene un puto chingado sonido la chingadera esa").
+    // No usa la voz del telefono (su S22 no trae espanol): usa tonos del sistema,
+    // que suenan siempre, y vibracion. 0=exito, 1=fallo, 2=toque
+    private ToneGenerator tono = null;
+    private void sonar(int cual) {
+        try {
+            if (tono == null) tono = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
+            if (cual == 0) tono.startTone(ToneGenerator.TONE_CDMA_CONFIRM, 300);
+            else if (cual == 1) tono.startTone(ToneGenerator.TONE_PROP_NACK, 400);
+            else tono.startTone(ToneGenerator.TONE_PROP_ACK, 120);
+        } catch (Throwable ignored) {}
+        try {
+            Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+            if (v != null && v.hasVibrator()) {
+                long ms = (cual == 1) ? 400 : 160;
+                if (Build.VERSION.SDK_INT >= 26)
+                    v.vibrate(VibrationEffect.createOneShot(ms, VibrationEffect.DEFAULT_AMPLITUDE));
+                else v.vibrate(ms);
+            }
+        } catch (Throwable ignored) {}
+    }
+
     private void mandarParte() {
         final String txt = textoParte();
         try {
             ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             if (cm != null) cm.setPrimaryClip(ClipData.newPlainText("parte", txt));
         } catch (Exception ignored) {}
+        sonar(2);
         Toast.makeText(this, "Mandando el parte…", Toast.LENGTH_SHORT).show();
         new Thread(new Runnable() {
             @Override public void run() {
                 final String msg = enviar(txt);
                 runOnUiThread(new Runnable() { @Override public void run() {
+                    if (msg.contains("enviado")) { sonar(0); decirAlma("Parte enviado. Ya se donde andas, Clyde."); }
+                    else sonar(1);
                     Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show();
                 }});
             }
@@ -499,6 +584,7 @@ public class MainActivity extends Activity {
             Toast.makeText(this, "Se oyó muy bajito (pico " + ampMax + "): el micrófono va tapado, acércalo a la boca",
                     Toast.LENGTH_LONG).show();
         }
+        sonar(2);
         Toast.makeText(this, "Mandándola…", Toast.LENGTH_SHORT).show();
         new Thread(new Runnable() { @Override public void run() {
             final String r = subirNota(dur);
