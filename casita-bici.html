@@ -747,7 +747,7 @@ if(gpsOn){ gpsFijar().then(gpsLugar).then(()=>gpsPinta()).catch(()=>{ gpsOn=fals
 
 <script>
 /* ===== TABLERO DE LA BICI v0 (misma casita, mismo Alma) ===== */
-let BIKE={on:false,watch:null,start:0,dist:0,last:null,vel:0,max:0,acc:null,err:'',ultima:0,n:0,porVel:0};
+let BIKE={on:false,watch:null,start:0,dist:0,last:null,vel:0,max:0,acc:null,err:'',ultima:0,n:0,porVel:0,saltoMax:0};
 function bikeOn(){
   const p=document.getElementById("bike");
   if(p)p.style.display="block";
@@ -785,7 +785,7 @@ function arrancarPaseo(reanudar){
     BIKE.start=Date.now();BIKE.dist=0;BIKE.max=0;
     M.pts=[];if(M.line)M.line.setLatLngs([]);if(M.you){M.map.removeLayer(M.you);M.you=null}if(M.start){M.map.removeLayer(M.start);M.start=null}
   }
-  BIKE.on=true;BIKE.last=null;BIKE.vel=0;BIKE.acc=null;BIKE.err='';
+  BIKE.on=true;BIKE.last=null;BIKE.vel=0;BIKE.acc=null;BIKE.err='';BIKE.saltoMax=0;BIKE.n=0;BIKE.porVel=0;
   const b=document.getElementById("bikePlay");
   if(b){b.textContent="⏸ PARAR";b.style.background="#121a21";b.style.color="#ffc14d"}
   const b2=document.getElementById("goLand");
@@ -798,6 +798,7 @@ function arrancarPaseo(reanudar){
     if(BIKE.last){
       const dt=(t-BIKE.last.t)/1000;
       const d=haversine(BIKE.last.la,BIKE.last.lo,la,lo);
+      if(d>BIKE.saltoMax) BIKE.saltoMax=d;   // para saber si el GPS ve movimiento o no
       // acepta el tramo si el GPS no está disparando (precisión muy mala) y no es un salto imposible
       let sumado=false;
       if(dt>0.5&&d<200&&(ac==null||ac<120)&&d>2){
@@ -902,7 +903,7 @@ function tellAlmaRide(){
   if(!encendido){
     txt="Todavía no arranco el paseo 🚴. Toca ▶ ARRANCAR en el tablero y ya te mando distancia, tiempo y promedio de verdad. (Te lo digo así porque antes te mandé números en cero y no servían de nada.)";
   } else if(seg<10 || km<0.02){
-    txt="Apenas arranqué el paseo: "+(BIKE.dist>=0?Math.round(BIKE.dist):0)+" m, "+tiempo+". Dame tantito y te mando el parte completo. (📡 ±"+(BIKE.acc==null?"sin dato":BIKE.acc)+" m, "+BIKE.n+" lecturas de GPS)";
+    txt="Apenas arranqué el paseo: "+(BIKE.dist>=0?Math.round(BIKE.dist):0)+" m, "+tiempo+". Dame tantito y te mando el parte completo. (📡 ±"+(BIKE.acc==null?"sin dato":BIKE.acc)+" m, "+BIKE.n+" lecturas, salto mayor "+BIKE.saltoMax.toFixed(1)+" m)";
   } else if(seg>21600){
     txt="Llevo "+km.toFixed(2)+" km y "+tiempo+". Ojo: ese tiempo se ve raro, parece que el tablero se quedó abierto. Si no es así, dime y lo reviso.";
   } else {
