@@ -650,11 +650,26 @@ function haversine(a,b,c,d){
   const x=Math.sin(dLa/2)**2+Math.cos(a*t)*Math.cos(c*t)*Math.sin(dLo/2)**2;
   return 2*R*Math.asin(Math.sqrt(x));
 }
+const BIKE_KEY="casita_paseo";
+function guardarPaseo(){
+  try{ localStorage.setItem(BIKE_KEY, JSON.stringify({
+    on:BIKE.on, start:BIKE.start, dist:BIKE.dist, max:BIKE.max, acc:BIKE.acc, ts:Date.now()
+  })); }catch(e){}
+}
+function leerPaseo(){
+  try{ const d=JSON.parse(localStorage.getItem(BIKE_KEY)||"null"); return (d&&typeof d==="object")?d:null }catch(e){ return null }
+}
 function bikeToggle(){
   if(BIKE.on){bikeStop();return}
+  arrancarPaseo(false);
+}
+function arrancarPaseo(reanudar){
   if(!navigator.geolocation){alert("Este navegador no da GPS");return}
-  BIKE.on=true;BIKE.start=Date.now();BIKE.dist=0;BIKE.last=null;BIKE.vel=0;BIKE.max=0;BIKE.acc=null;BIKE.err='';
-  M.pts=[];if(M.line)M.line.setLatLngs([]);if(M.you){M.map.removeLayer(M.you);M.you=null}if(M.start){M.map.removeLayer(M.start);M.start=null}
+  if(!reanudar){
+    BIKE.start=Date.now();BIKE.dist=0;BIKE.max=0;
+    M.pts=[];if(M.line)M.line.setLatLngs([]);if(M.you){M.map.removeLayer(M.you);M.you=null}if(M.start){M.map.removeLayer(M.start);M.start=null}
+  }
+  BIKE.on=true;BIKE.last=null;BIKE.vel=0;BIKE.acc=null;BIKE.err='';
   const b=document.getElementById("bikePlay");
   if(b){b.textContent="⏸ PARAR";b.style.background="#121a21";b.style.color="#ffc14d"}
   BIKE.watch=navigator.geolocation.watchPosition(pos=>{
@@ -673,21 +688,22 @@ function bikeToggle(){
       if(BIKE.vel>BIKE.max)BIKE.max=BIKE.vel;
     }
     BIKE.last={la,lo,t};
+    guardarPaseo();
     mapaPunto(la,lo);
     bikePaint();
   },err=>{
     BIKE.err = err.code===1 ? 'permiso de ubicación negado' : (err.code===3 ? 'sin señal de GPS todavía' : (err.message||'GPS con problema'));
     bikePaint();
   }, {enableHighAccuracy:true,maximumAge:2000,timeout:15000});
-  if(typeof bubble==="function") bubble("🚴 En marcha. Casco puesto y ojos en la calle.","a");
-  bikeTick();
+  if(typeof bubble==="function") bubble(reanudar?"🚴 Retomé tu paseo donde iba. Ojos en la calle.":"🚴 En marcha. Casco puesto y ojos en la calle.","a");
+  guardarPaseo();bikeTick();
 }
 function bikeStop(){
   BIKE.on=false;
   if(BIKE.watch!=null){navigator.geolocation.clearWatch(BIKE.watch);BIKE.watch=null}
   const b=document.getElementById("bikePlay");
   if(b){b.textContent="▶ ARRANCAR";b.style.background="#ffc14d";b.style.color="#121a21"}
-  BIKE.vel=0;bikePaint();
+  BIKE.vel=0;guardarPaseo();bikePaint();
 }
 function bikeTick(){if(!BIKE.on)return;bikePaint();setTimeout(bikeTick,1000)}
 function bikePaint(){
@@ -708,6 +724,17 @@ function bikePaint(){
     else st.textContent="📡 GPS ±"+BIKE.acc+" m · "+(BIKE.acc<=25?"señal buena":BIKE.acc<=60?"señal regular, cuenta igual":"señal floja, la distancia puede salir corta");
   }
 }
+(function reanudarPaseo(){
+  const g=leerPaseo();
+  if(!g||!g.on) return;
+  if(!(g.start>0) || (Date.now()-g.start) > 6*3600*1000){ try{localStorage.removeItem(BIKE_KEY)}catch(e){} return }
+  BIKE.start=g.start; BIKE.dist=g.dist||0; BIKE.max=g.max||0;
+  const panel=document.getElementById("bike"); if(panel)panel.style.display="block";
+  if(typeof mapaInit==="function") mapaInit();
+  arrancarPaseo(true);
+  if(typeof bubble==="function") bubble("🚴 Tenía tu paseo guardado: "+((BIKE.dist/1000).toFixed(2))+" km hasta ahora. Sigo contando.","a");
+})();
+
 function tellAlmaRide(){
   const encendido = BIKE.on && BIKE.start>0;
   const seg = encendido ? Math.max(0, Math.round((Date.now()-BIKE.start)/1000)) : 0;
