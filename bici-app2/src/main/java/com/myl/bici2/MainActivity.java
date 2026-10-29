@@ -84,7 +84,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v2.4 · holo");
+        placa.setText("v2.5 · holo");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -256,8 +256,23 @@ public class MainActivity extends Activity {
             if (Build.VERSION.SDK_INT >= 33 &&
                 checkSelfPermission("android.permission.POST_NOTIFICATIONS") != PackageManager.PERMISSION_GRANTED)
                 falta.add("android.permission.POST_NOTIFICATIONS");
-            if (!falta.isEmpty()) requestPermissions(falta.toArray(new String[0]), PEDIR);
+            if (!falta.isEmpty()) { requestPermissions(falta.toArray(new String[0]), PEDIR); return; }
         }
+        pedirFondo();
+    }
+
+    // En Android 10+ el permiso de "todo el tiempo" ya no se puede pedir con un
+    // dialogo: hay que mandar al ajuste. Sin el, el GPS se apaga al apagar pantalla.
+    private void pedirFondo() {
+        if (Build.VERSION.SDK_INT < 29) return;
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) return;
+        if (checkSelfPermission("android.permission.ACCESS_BACKGROUND_LOCATION") == PackageManager.PERMISSION_GRANTED) return;
+        Toast.makeText(this, "Falta un paso: Permisos > Ubicación > Permitir todo el tiempo", Toast.LENGTH_LONG).show();
+        try {
+            Intent i = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.parse("package:" + getPackageName()));
+            startActivity(i);
+        } catch (Exception ignored) {}
     }
 
     private void alternar() {
@@ -315,7 +330,9 @@ public class MainActivity extends Activity {
             int n = p.getInt("n", 0);
             long ult = p.getLong("ult", 0);
             String senal;
-            if (acc < 0) senal = "buscando señal de GPS";
+            if (!"todo el tiempo".equals(estadoPermiso().split(" / ")[1]))
+                senal = "Pon Ubicación en \"Permitir todo el tiempo\" o el GPS se apaga al cerrar la app";
+            else if (acc < 0) senal = "buscando señal de GPS";
             else if (n < 5) senal = "calentando GPS (" + n + " lectura" + (n == 1 ? "" : "s") + ", ±" + acc + " m) · dale 30-60 s al aire libre";
             else if (acc > 60) senal = "señal débil (±" + acc + " m) · sal a la calle";
             else senal = "GPS ±" + acc + " m" + (acc >= 90 ? " · permiso APROXIMADO: ponlo en exacta" : "");
@@ -344,7 +361,28 @@ public class MainActivity extends Activity {
         return "Voy en la bici: " + String.format("%.2f", km) + " km, " + reloj(seg)
                 + ", promedio " + String.format("%.1f", prom) + " km/h, máxima "
                 + String.format("%.1f", p.getFloat("max", 0f))
-                + " km/h. (app Alma Bici v2 · GPS ±" + p.getInt("acc", -1) + " m, " + p.getInt("n", 0) + " lecturas)";
+                + " km/h. (app Alma Bici v2 · GPS ±" + p.getInt("acc", -1) + " m, " + p.getInt("n", 0) + " lecturas"
+                + " · " + edadLectura(p) + " · " + estadoPermiso() + " · reinicios " + p.getInt("rein", 0) + ")";
+    }
+
+    private String edadLectura(SharedPreferences p) {
+        long ult = p.getLong("ult", 0);
+        if (ult <= 0) return "sin lecturas todavia";
+        long s2 = Math.max(0, (System.currentTimeMillis() - ult) / 1000);
+        if (s2 < 90) return "ultima lectura hace " + s2 + " s";
+        return "ultima lectura hace " + (s2 / 60) + " min (GPS dormido)";
+    }
+
+    private String estadoPermiso() {
+        String ubi = "exacta";
+        if (Build.VERSION.SDK_INT >= 23 &&
+            checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            ubi = "APROXIMADA";
+        String fondo = "todo el tiempo";
+        if (Build.VERSION.SDK_INT >= 29 &&
+            checkSelfPermission("android.permission.ACCESS_BACKGROUND_LOCATION") != PackageManager.PERMISSION_GRANTED)
+            fondo = "solo con la app abierta";
+        return "permiso " + ubi + " / " + fondo;
     }
 
     private void mandarParte() {

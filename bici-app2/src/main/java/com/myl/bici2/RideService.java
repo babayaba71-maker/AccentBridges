@@ -12,6 +12,8 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.IBinder;
 
 /**
@@ -26,7 +28,7 @@ public class RideService extends Service implements LocationListener {
     public static final String ACT_STOP  = "com.myl.bici.STOP";
 
     static final String K_ON="on", K_START="start", K_DIST="dist", K_MAX="max",
-                        K_ACC="acc", K_N="n", K_ULT="ult", K_SALTO="salto";
+                        K_ACC="acc", K_N="n", K_ULT="ult", K_SALTO="salto", K_REIN="rein";
 
     private LocationManager lm;
     private Location ultimo;
@@ -51,11 +53,12 @@ public class RideService extends Service implements LocationListener {
             SharedPreferences p = prefs(this);
             p.edit().putBoolean(K_ON,true).putLong(K_START,System.currentTimeMillis())
                 .putFloat(K_DIST,0f).putFloat(K_MAX,0f).putInt(K_N,0).putFloat(K_SALTO,0f)
-                .putInt(K_ACC,-1).putLong(K_ULT,0L).apply();
+                .putInt(K_ACC,-1).putLong(K_ULT,0L).putInt(K_REIN,0).apply();
             ultimo = null;
         }
 
         empezarGps();
+        vigia.postDelayed(chequeo, 30000);
         return START_STICKY;
     }
 
@@ -70,6 +73,27 @@ public class RideService extends Service implements LocationListener {
         } catch (Exception e) { /* sin permiso o sin proveedor */ }
     }
 
+    // Android puede dejar de entregar lecturas (permiso "solo con la app abierta",
+    // ahorro de bateria agresivo, cache del proveedor). Si pasa mas de 45 s sin
+    // lecturas, se vuelve a registrar solo. JJ: "1:31:30 y 0.00 km, 1 lectura".
+    private final Handler vigia = new Handler(Looper.getMainLooper());
+    private final Runnable chequeo = new Runnable() {
+        @Override public void run() {
+            try {
+                SharedPreferences p = prefs(RideService.this);
+                if (!p.getBoolean(K_ON,false)) return;
+                long ult = p.getLong(K_ULT,0);
+                boolean dormido = ult > 0 && System.currentTimeMillis() - ult > 45000;
+                if (dormido) {
+                    p.edit().putInt(K_REIN, p.getInt(K_REIN,0)+1).apply();
+                    try { if (lm != null) lm.removeUpdates(RideService.this); } catch (Exception ignored) {}
+                    empezarGps();
+                }
+            } catch (Exception ignored) {}
+            vigia.postDelayed(this, 30000);
+        }
+    };
+
     private void parar() {
         try { if (lm != null) lm.removeUpdates(this); } catch (Exception ignored) {}
         prefs(this).edit().putBoolean(K_ON,false).apply();
@@ -78,6 +102,7 @@ public class RideService extends Service implements LocationListener {
     }
 
     @Override public void onDestroy() {
+        vigia.removeCallbacks(chequeo);
         try { if (lm != null) lm.removeUpdates(this); } catch (Exception ignored) {}
         super.onDestroy();
     }
