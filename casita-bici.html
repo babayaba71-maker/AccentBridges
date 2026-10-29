@@ -183,6 +183,11 @@ body.bici-acostada #bike .land .volver{position:absolute;top:8px;left:50%;transf
 /* ===== FULL MAP TAMBIÉN EN HORIZONTAL ===== */
 #mapFull.acostado{width:100vh;height:100vw;transform:rotate(90deg);transform-origin:top left;margin-left:100vw}
 #mapFull .barra .girar{background:rgba(8,22,36,.85);border:1px solid #1b3a52;color:#8fa3b8;border-radius:10px;padding:6px 12px;font-weight:700}
+
+#bikeLand .hablar{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 130px);transform:translateX(-50%);
+  z-index:7;padding:12px 22px;border-radius:999px;border:1px solid #35e0ff;background:rgba(53,224,255,.16);
+  color:#35e0ff;font-weight:800;font-size:14px;letter-spacing:.04em}
+#bikeLand .hablar.grabando{background:#e5484d;border-color:#e5484d;color:#fff}
 </style><link rel="manifest" href="./manifest-bici.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -278,6 +283,7 @@ body.bici-acostada #bike .land .volver{position:absolute;top:8px;left:50%;transf
       <button class="full" onclick="event.stopPropagation();abrirFull()">⛶</button>
     </div>
     <button class="salir" onclick="acostar(false)">↺ volver al tablero</button>
+    <button class="hablar" id="landMic" onclick="hablarDesdeLand()">🎙️ HABLAR</button>
   </div>
 </div>
 <div id="mapFull">
@@ -596,6 +602,7 @@ function pararNivel(){
 function micReset(msg){
   recOn=false;clearInterval(recTimer);setModo("idle");pararNivel();
   $("mic").textContent="🎙️ HÁBLAME";$("mic").classList.remove("rec");
+  const lm0=document.getElementById("landMic"); if(lm0){lm0.classList.remove("grabando");lm0.textContent="🎙️ HABLAR"}
   if(msg){$("status").textContent=msg;vib(80)}
 }
 async function micToggle(){
@@ -1126,6 +1133,13 @@ function _acostarViejo(on){
     if(typeof bubble==="function") bubble("↺ De vuelta al modo vertical.","a");
   }
   setTimeout(()=>{try{bikePaint()}catch(e){}},420);
+}
+
+function hablarDesdeLand(){
+  // la grabación vive en el dock de la casita, que en horizontal queda tapado:
+  // regresamos al tablero y arrancamos la nota de voz de una vez.
+  try{ acostar(false); }catch(e){}
+  setTimeout(()=>{ try{ micToggle(); }catch(e){} }, 380);
 }
 </script>
 </body></html>
