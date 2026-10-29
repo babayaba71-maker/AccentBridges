@@ -123,7 +123,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">v2.14 · voz del teléfono</div>
+        <div class="badge" id="placa">v3.0 · voz del servidor · auto-envío</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -336,8 +336,10 @@ async function speak(t){
   if(!voiceOn)return;
   const clean=limpiarVoz(t);
   if(!clean)return;
-  // JJ 29-oct: CERO creditos de ElevenLabs. Habla la voz del telefono (Google).
-  vozNavegador(clean);
+  // 29-oct noche: la voz del telefono no existe en su S22 -> silencio total.
+  // La voz de Cindy la genera el servidor (casitaHabla) y aqui solo suena el MP3.
+  const sono = await vozServidor(clean);
+  if(!sono) vozNavegador(clean);
 }
 
 // parte el texto en trozos porque las voces del telefono cortan los textos largos
@@ -422,11 +424,11 @@ function voiceToggle(){
     const todas=("speechSynthesis" in window)?(speechSynthesis.getVoices()||[]):[];
     const es=todas.filter(v=>v.lang&&v.lang.toLowerCase().startsWith("es"));
     if(!es.length){
-      $("status").textContent="Tu teléfono no tiene voz en español. Ve a Ajustes > Texto a voz y descarga la de Google.";
+      $("status").textContent="Tu teléfono no tiene voz en español: hablo con la del servidor.";
     }else{
       $("status").textContent="Voz activada ("+es[0].name+")";
     }
-    vozNavegador("Aquí estoy, JJ. Voz del teléfono, sin gastar créditos.");
+    speak("Aquí estoy, JJ. Ya te hablo con la voz del servidor, no con la del teléfono.");
   }
 }
 if(!voiceOn)$("voice").classList.add("off");
@@ -520,7 +522,7 @@ function empezarNivel(stream){
     medir();
   }catch(e){}
 }
-let picoVoz=.05;
+let picoVoz=.05,vozVista=false,ultimaVoz=0;
 function medir(){
   if(!analyser){ESTADO.nivel=0;return}
   analyser.getByteTimeDomainData(dataBuf);
@@ -530,6 +532,14 @@ function medir(){
   // GANANCIA AUTOMÁTICA: se calibra sola al micrófono de cada teléfono
   if(rms>picoVoz)picoVoz=picoVoz*.7+rms*.3;else picoVoz*=.9993;
   const ref=Math.max(.03,picoVoz*1.15);          // deja aire arriba: la voz normal NO satura
+  // AUTO-ENVIO (como la primera casita que si le gusto): si callas 1.5 s, se manda
+  if(recOn){
+    const ahora=Date.now();
+    if(rms>0.02){vozVista=true;ultimaVoz=ahora}
+    else if(vozVista && ahora-ultimaVoz>1500 && ahora-recT0>1000){
+      vozVista=false;vib([20,40,20]);pararGrabacion();return;
+    }
+  }
   const n=rms<.012?0:Math.min(1,Math.pow(rms/ref,.85));   // compuerta de ruido + curva suave
   ESTADO.nivel=ESTADO.nivel*.40+n*.60;
   nivelLoop=requestAnimationFrame(medir);
@@ -569,12 +579,12 @@ async function micToggle(){
     empezarNivel(recStream);
     mantenerPantalla();
   }catch(e){micReset("No pude grabar: "+e.message);return}
-  recOn=true;recT0=Date.now();vib(30);setModo("listening");
-  $("mic").textContent="🔴 GRABANDO…";$("mic").classList.add("rec");
+  recOn=true;recT0=Date.now();vozVista=false;ultimaVoz=Date.now();vib(30);setModo("listening");
+  $("mic").textContent="🔴 TE OIGO…";$("mic").classList.add("rec");
   clearInterval(recTimer);
   recTimer=setInterval(()=>{
     const s=Math.floor((Date.now()-recT0)/1000);
-    $("mic").textContent="🔴 GRABANDO "+s+"s · TOCA";
+    $("mic").textContent="🔴 TE OIGO "+s+"s · calla y se manda";
     if(s>=120)pararGrabacion();
   },400);
 }
