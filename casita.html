@@ -123,7 +123,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">v3.3 · voz mejicana gratis</div>
+        <div class="badge" id="placa">v3.4 · responde con voz</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -420,8 +420,19 @@ function vozNavegador(clean){
     u.lang=(elegida&&elegida.lang)||"es-MX";
     if(elegida)u.voice=elegida;
     u.rate=1.03;u.volume=1;u.pitch=1;
-    u.onend=siguiente;
+    let vigia=null, reintento=false;
+    const limpiar=function(){if(vigia){clearTimeout(vigia);vigia=null}};
+    // 29-oct: el dijo "ya me puedes oir, pero ya no puedes contestar". El saludo
+    // sonaba (lo dispara su toque) y las respuestas no. En Android, si la pagina
+    // lleva rato sin un toque, el motor se traga la frase en silencio. Si en
+    // 1.2 s nadie esta hablando, se la repito UNA vez.
+    vigia=setTimeout(function(){
+      if(reintento)return;
+      try{ if(!speechSynthesis.speaking){ reintento=true; speechSynthesis.cancel(); speechSynthesis.resume(); speechSynthesis.speak(u); } }catch(e){ setModo("idle"); }
+    },1200);
+    u.onend=function(){limpiar();siguiente()};
     u.onerror=function(e){
+      limpiar();
       setModo("idle");
       const err=(e&&e.error)||"error";
       if(err!=="interrupted"&&err!=="canceled")
@@ -429,6 +440,11 @@ function vozNavegador(clean){
     };
     try{speechSynthesis.speak(u)}catch(e){setModo("idle")}
   };
+  // que se vea SIEMPRE con que voz hablo, para saber si es mejicana o castellana
+  if(!window.vozDicha && elegida){
+    window.vozDicha=true;
+    $("status").textContent="voz: "+elegida.name+" ("+elegida.lang+")";
+  }
   setTimeout(siguiente,60);
 }
 
