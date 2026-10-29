@@ -123,7 +123,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">v2.6 · GPS · oído de verdad</div>
+        <div class="badge" id="placa">v2.7 · GPS · oído con ganancia</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -456,10 +456,15 @@ function micReset(msg){
 async function micToggle(){
   if(recOn){pararGrabacion();return}
   if(!navigator.mediaDevices||!window.MediaRecorder){micReset("Este navegador no deja grabar. Ábreme en CHROME directo.");return}
-  try{recStream=await navigator.mediaDevices.getUserMedia({audio:true})}
+  try{recStream=await navigator.mediaDevices.getUserMedia({audio:{
+      echoCancellation:false,      // la cancelación de eco recorta la voz bajita
+      noiseSuppression:false,      // el filtro de ruido se come el habla suave
+      autoGainControl:true,        // sube sola la voz cuando hablas lejos
+      channelCount:1
+    }})}
   catch(e){micReset("MICRÓFONO BLOQUEADO — ábreme en Chrome y presiona PERMITIR");return}
   try{
-    chunks=[];mediaRec=new MediaRecorder(recStream);
+    chunks=[];mediaRec=new MediaRecorder(recStream,{audioBitsPerSecond:128000});
     mediaRec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
     mediaRec.onstop=mandarGrabacion;
     mediaRec.start();
