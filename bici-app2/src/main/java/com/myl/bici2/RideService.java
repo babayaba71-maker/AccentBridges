@@ -64,9 +64,9 @@ public class RideService extends Service implements LocationListener {
             lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             if (lm == null) return;
             if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER))
-                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 3, this);
+                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
             if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
-                lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 3000, 5, this);
+                lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 0, this);
         } catch (Exception e) { /* sin permiso o sin proveedor */ }
     }
 
@@ -104,11 +104,11 @@ public class RideService extends Service implements LocationListener {
             if (vel > max) max = vel;
 
             boolean sumado = false;
-            if (dt > 0.5 && d < 200 && loc.hasAccuracy() && acc <= 50 && d > 2) {
+            if (dt > 0.5 && d < 200 && loc.hasAccuracy() && acc <= 35 && d > 2 && n > 2) {
                 double vImp = (d/dt)*3.6;
                 if (vImp <= 70) { dist += (float) d; sumado = true; }
             }
-            if (!sumado && loc.hasSpeed() && loc.getSpeed() > 0.6f && dt > 0.5 && dt < 30) {
+            if (!sumado && n > 2 && acc <= 50 && loc.hasSpeed() && loc.getSpeed() > 0.6f && dt > 0.5 && dt < 30) {
                 float m = (float)(loc.getSpeed() * dt);
                 if (m < 200) dist += m;
             }

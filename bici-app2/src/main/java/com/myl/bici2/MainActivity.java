@@ -84,7 +84,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v2.3 · holo");
+        placa.setText("v2.4 · holo");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -316,6 +316,7 @@ public class MainActivity extends Activity {
             long ult = p.getLong("ult", 0);
             String senal;
             if (acc < 0) senal = "buscando señal de GPS";
+            else if (n < 5) senal = "calentando GPS (" + n + " lectura" + (n == 1 ? "" : "s") + ", ±" + acc + " m) · dale 30-60 s al aire libre";
             else if (acc > 60) senal = "señal débil (±" + acc + " m) · sal a la calle";
             else senal = "GPS ±" + acc + " m" + (acc >= 90 ? " · permiso APROXIMADO: ponlo en exacta" : "");
             String dormido = (ult > 0 && System.currentTimeMillis() - ult > 60000)
