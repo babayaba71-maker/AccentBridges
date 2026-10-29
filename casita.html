@@ -123,7 +123,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">v3.4 · responde con voz</div>
+        <div class="badge" id="placa">v3.5 · voz en inglés</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -397,8 +397,15 @@ function vozNavegador(clean){
   // espanola". La voz gratis si sonaba, pero elegia castellano. Orden nuevo:
   // primero mexicana/latina (es-MX, es-US, es-419, y el resto de America), y
   // solo despues la de Espana. Mismo motor, cero costo.
+  // 29-oct 21:51, orden de JJ en su nota de 5 s: "Prefiero una voz en ingles,
+  // en realidad." Primero inglesa (Google en-US de preferencia), y de ahi la
+  // mexicana/latina. Mismo speechSynthesis gratis, cero costo.
+  const en=todas.filter(v=>v.lang&&/^en/i.test(v.lang));
   const deAca=es.filter(v=>!/es-es/i.test(v.lang));
-  const elegida=deAca.find(v=>/es-mx/i.test(v.lang)&&/google/i.test(v.name))
+  const elegida=en.find(v=>/en-us/i.test(v.lang)&&/google/i.test(v.name))
+            ||en.find(v=>/google/i.test(v.name))
+            ||en.find(v=>/en-us/i.test(v.lang))
+            ||en[0]
             ||deAca.find(v=>/es-mx/i.test(v.lang))
             ||deAca.find(v=>/es-us|es-419/i.test(v.lang))
             ||deAca[0]
@@ -457,11 +464,11 @@ function voiceToggle(){
     const todas=("speechSynthesis" in window)?(speechSynthesis.getVoices()||[]):[];
     const es=todas.filter(v=>v.lang&&v.lang.toLowerCase().startsWith("es"));
     if(!es.length){
-      $("status").textContent="Tu teléfono no tiene voz en español: hablo con la del servidor.";
+      $("status").textContent="Tu teléfono no me dio voces: revisa Ajustes > Texto a voz.";
     }else{
       $("status").textContent="Voz activada ("+es[0].name+")";
     }
-    speak("Aquí estoy, JJ. Ya te hablo con la voz del servidor, no con la del teléfono.");
+    speak("Listo, Clyde. Voz prendida.");
   }
 }
 if(!voiceOn)$("voice").classList.add("off");
