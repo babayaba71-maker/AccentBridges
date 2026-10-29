@@ -834,14 +834,21 @@ function bikeStop(){
   BIKE.vel=0;guardarPaseo();bikePaint();
 }
 function bikeTick(){if(!BIKE.on)return;bikePaint();setTimeout(bikeTick,1000)}
+function _pinta(k,val){
+  // pinta en los tres layouts (vertical, horizontal y mapa completo) sin depender del orden de los <script>
+  try{
+    if(typeof _setV==="function") _setV(k,val);
+    else document.querySelectorAll('[data-v="'+k+'"]').forEach(function(el){el.textContent=val});
+  }catch(e){}
+}
 function bikePaint(){
   const v=Math.round(BIKE.vel);
   const km=(BIKE.dist/1000);
   const seg=BIKE.on?Math.round((Date.now()-BIKE.start)/1000):0;
   const mm=String(Math.floor(seg/60)).padStart(2,"0"),ss=String(seg%60).padStart(2,"0");
   const av=km>0.01?Math.round(km/(seg/3600)):0;
-  _setV("vel",v); _setV("dist",km.toFixed(2)); _setV("time",mm+":"+ss);
-  _setV("avg",Math.min(av,99)); _setV("max",Math.round(BIKE.max||0));
+  _pinta("vel",v); _pinta("dist",km.toFixed(2)); _pinta("time",mm+":"+ss);
+  _pinta("avg",Math.min(av,99)); _pinta("max",Math.round(BIKE.max||0));
   mapaMini();
   const st=document.getElementById("status");
   if(st){
