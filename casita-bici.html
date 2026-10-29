@@ -188,6 +188,16 @@ body.bici-acostada #bike .land .volver{position:absolute;top:8px;left:50%;transf
   z-index:7;padding:12px 22px;border-radius:999px;border:1px solid #35e0ff;background:rgba(53,224,255,.16);
   color:#35e0ff;font-weight:800;font-size:14px;letter-spacing:.04em}
 #bikeLand .hablar.grabando{background:#e5484d;border-color:#e5484d;color:#fff}
+
+/* ===== EL DOCK CON EL 🎙️ SIEMPRE VISIBLE (aunque el tablero ocupe la pantalla) ===== */
+.app .dock{
+  position:sticky;bottom:0;
+  background:linear-gradient(180deg,rgba(6,14,22,0),rgba(6,14,22,.92) 28%);
+  padding:10px 0 calc(env(safe-area-inset-bottom,0px) + 8px);
+  margin-top:auto;z-index:130}
+.app .dock::before{content:"";position:absolute;inset:-14px 0 0;pointer-events:none}
+/* el chat scrollea, el dock nunca se va */
+#chat{overflow-y:auto;min-height:0;flex:1 1 auto}
 </style><link rel="manifest" href="./manifest-bici.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
