@@ -741,6 +741,16 @@ function bikePaint(){
 })();
 
 function tellAlmaRide(){
+  // si me piden el parte sin arrancar, YO arranco: nunca mas "no arranco el paseo"
+  if(!BIKE.on){
+    const panel=document.getElementById("bike"); if(panel)panel.style.display="block";
+    if(typeof mapaInit==="function") mapaInit();
+    arrancarPaseo(false);
+    const t0="🚴 Arranqué el paseo yo mismo, no lo tenías encendido. Ya empecé a contar desde ahora: en unos minutos te mando distancia, tiempo y promedio. Deja esta página abierta con la pantalla encendida y no la cierres.";
+    const i0=document.getElementById("txt");
+    if(i0){i0.value=t0;if(typeof sendTxt==="function")sendTxt()}
+    return;
+  }
   const encendido = BIKE.on && BIKE.start>0;
   const seg = encendido ? Math.max(0, Math.round((Date.now()-BIKE.start)/1000)) : 0;
   const km  = encendido ? BIKE.dist/1000 : 0;
