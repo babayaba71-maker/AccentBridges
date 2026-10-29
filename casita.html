@@ -123,7 +123,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">v2.12 · voz del servidor</div>
+        <div class="badge" id="placa">v2.13 · voz del teléfono</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -336,8 +336,22 @@ async function speak(t){
   if(!voiceOn)return;
   const clean=limpiarVoz(t);
   if(!clean)return;
-  const ok=await vozServidor(clean);
-  if(!ok)vozNavegador(clean);
+  // JJ 29-oct: CERO creditos de ElevenLabs. Habla la voz del telefono (Google).
+  vozNavegador(clean);
+}
+
+// parte el texto en trozos porque las voces del telefono cortan los textos largos
+function partirVoz(t,max){
+  const out=[];let s=String(t||"").trim();
+  while(s.length>max){
+    let i=s.lastIndexOf(". ",max);
+    if(i<40)i=s.lastIndexOf(", ",max);
+    if(i<40)i=max;
+    out.push(s.slice(0,i+1).trim());
+    s=s.slice(i+1).trim();
+  }
+  if(s)out.push(s);
+  return out;
 }
 
 async function vozServidor(txt){
@@ -371,22 +385,32 @@ async function vozServidor(txt){
 }
 
 function vozNavegador(clean){
-  if(!("speechSynthesis" in window))return;
+  if(!("speechSynthesis" in window)){$("status").textContent="Este navegador no tiene voz. Ábreme en Chrome.";return}
   try{speechSynthesis.cancel();speechSynthesis.resume();}catch(e){}
-  const u=new SpeechSynthesisUtterance(clean);
-  u.lang="es-MX";u.rate=1.02;u.volume=1;
-  const vs=speechSynthesis.getVoices().filter(v=>v.lang&&v.lang.toLowerCase().startsWith("es"));
-  if(vs.length)u.voice=vs[0];
-  u.onstart=()=>setModo("speaking");
-  u.onend=()=>setModo("idle");
-  u.onerror=(e)=>{
-    setModo("idle");
-    const err=(e&&e.error)||"error";
-    if(err!=="interrupted"&&err!=="canceled")
-      $("status").textContent="Sin voz en el telefono ("+err+"). Revisa el volumen del aparato.";
-  };
+  const todas=speechSynthesis.getVoices()||[];
+  const es=todas.filter(v=>v.lang&&v.lang.toLowerCase().startsWith("es"));
+  const elegida=es.find(v=>/google/i.test(v.name)&&/mx/i.test(v.lang))
+            ||es.find(v=>/google/i.test(v.name))
+            ||es[0]||null;
+  const trozos=partirVoz(clean,180);
+  let i=0;
   setModo("speaking");
-  setTimeout(function(){try{speechSynthesis.speak(u);}catch(e){}},90);
+  const siguiente=function(){
+    if(i>=trozos.length){setModo("idle");return}
+    const u=new SpeechSynthesisUtterance(trozos[i++]);
+    u.lang=(elegida&&elegida.lang)||"es-MX";
+    if(elegida)u.voice=elegida;
+    u.rate=1.03;u.volume=1;u.pitch=1;
+    u.onend=siguiente;
+    u.onerror=function(e){
+      setModo("idle");
+      const err=(e&&e.error)||"error";
+      if(err!=="interrupted"&&err!=="canceled")
+        $("status").textContent="Sin voz en el teléfono ("+err+"). Ajustes > Texto a voz > motor de Google.";
+    };
+    try{speechSynthesis.speak(u)}catch(e){setModo("idle")}
+  };
+  setTimeout(siguiente,60);
 }
 
 function voiceToggle(){
@@ -602,6 +626,8 @@ async function notaLimpia(blob){
     return {blob:wavDe16k(y), picoDb:20*Math.log10(pico||1e-9), ganDb:20*Math.log10(gan)};
   }catch(e){ try{ctx&&ctx.close()}catch(_){} return null }
 }
+let ultimaNota=null;
+
 async function mandarGrabacion(){
   const dur=Math.round((Date.now()-recT0)/100)/10;
   pararNivel();
@@ -609,26 +635,61 @@ async function mandarGrabacion(){
   recOn=false;$("mic").classList.remove("rec");
   const blob=new Blob(chunks,{type:(mediaRec&&mediaRec.mimeType)||"audio/webm"});
   if(!blob.size||dur<0.4){micReset("Muy corto, otra vez");return}
+  let envio=blob,pico=null;
   try{
     const limpia=await notaLimpia(blob);
-    const envio=limpia&&limpia.blob?limpia.blob:blob;
-    const pico=limpia?limpia.picoDb:(await picoDeNota(blob));
-    if(limpia&&limpia.ganDb>=10) $("status").textContent="VOLUMEN SUBIDO "+Math.round(limpia.ganDb)+" dB · se va limpia";
-    // flojo se usaba mas abajo pero nunca se declaraba: eso tiraba ReferenceError
-    // DESPUES de subir el audio, asi que la nota quedaba guardada pero el mensaje
-    // al hilo nunca salia ("no se estan mandando las notas de voz", JJ 29-oct)
-    const flojo=(pico!=null&&pico<-32);
-    const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(",")[1]);r.onerror=rej;r.readAsDataURL(envio)});
-    const r=await fetch(RELAY+"casitaVoz",{method:"POST",headers:H,body:JSON.stringify({audio_b64:b64,mime:envio.type,dur,sid:"jj",gan:limpia?Math.round(limpia.ganDb):0})});
-    const d=await r.json();
-    if(!d.ok)throw new Error(d.error||"no subió");
-    bubble("🎤 Nota de voz ("+Math.round(d.dur)+"s)","u");vib([20,40,20]);
-    sendMsg("🎤 Te mando una nota de voz de "+Math.round(d.dur)+" segundos"+(flojo?" (OJO: el teléfono marcó que se oyó muy bajito, pico "+Math.round(pico)+" dB)":"")+".\nTranscríbela desde aquí y contéstame: "+RELAY+"casitaVoz?id="+d.id,"1");
-    $("mic").textContent="🎙️ HÁBLAME";
-    return;
-  }catch(e){micReset("No pude mandar la nota: "+e.message)}
-  $("mic").textContent="🎙️ HÁBLAME";setModo("idle");
+    if(limpia&&limpia.blob)envio=limpia.blob;
+    pico=limpia?limpia.picoDb:null;
+    if(pico==null)pico=await picoDeNota(blob);
+    if(limpia&&limpia.ganDb>=10)$("status").textContent="VOLUMEN SUBIDO "+Math.round(limpia.ganDb)+" dB · se va limpia";
+  }catch(e){}
+  // el WAV normalizado pesa ~32 KB por segundo (90 s = 2.9 MB y el servidor la rechaza).
+  // el opus original pesa 5 veces menos: si la nota es larga, se manda comprimida.
+  if(envio.size>1200000&&blob.size&&blob.size<envio.size){
+    envio=blob;
+    $("status").textContent="Nota larga: se manda comprimida para que sí entre";
+  }
+  await subirYEnviar(envio,dur,pico);
 }
+
+async function subirYEnviar(envio,dur,pico){
+  setModo("thinking");
+  try{
+    $("status").textContent="Subiendo "+Math.max(1,Math.round(envio.size/1024))+" KB…";
+    const b64=await new Promise(function(res,rej){
+      const r=new FileReader();
+      r.onload=function(){res(String(r.result).split(",")[1])};
+      r.onerror=rej;r.readAsDataURL(envio);
+    });
+    const r=await fetch(RELAY+"casitaVoz",{method:"POST",headers:H,
+      body:JSON.stringify({audio_b64:b64,mime:envio.type,dur:dur,sid:"jj",gan:0})});
+    const d=await r.json();
+    if(!d.ok)throw new Error(d.error||("HTTP "+r.status));
+    bubble("🎤 Nota de voz ("+Math.round(d.dur)+"s)","u");vib([20,40,20]);
+    $("status").textContent="Subida. Mandando el aviso al hilo…";
+    const flojo=(pico!=null&&pico<-32);
+    sendMsg("🎤 Te mando una nota de voz de "+Math.round(d.dur)+" segundos"
+      +(flojo?" (se oyó bajito, pico "+Math.round(pico)+" dB)":"")
+      +".\nTranscríbela desde aquí y contéstame: "+RELAY+"casitaVoz?id="+d.id,"1");
+    ultimaNota=null;
+    $("mic").textContent="🎙️ HÁBLAME";setModo("idle");
+    $("status").textContent="Nota enviada ✓";
+  }catch(e){
+    ultimaNota={blob:envio,dur:dur,pico:pico};
+    $("mic").textContent="🎙️ HÁBLAME";setModo("idle");
+    $("status").textContent="No se mandó ("+((e&&e.message)||e)+") · TOCA AQUÍ para reintentar";
+  }
+}
+
+// tocar el renglón de estado reintenta la nota que no salió (sin volver a grabar)
+document.addEventListener("DOMContentLoaded",function(){
+  const st=$("status");
+  if(st)st.addEventListener("click",function(){
+    if(!ultimaNota)return;
+    const n=ultimaNota;ultimaNota=null;
+    subirYEnviar(n.blob,n.dur,n.pico);
+  });
+});
 
 /* ---------- modo orb: quitar / poner las letras ---------- */
 function aplicarOrb(si){
