@@ -107,7 +107,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
   .b{animation:none}
   #mic.rec{animation:none}
 }
-</style><link rel="manifest" href="./manifest.json">
+</style><link rel="manifest" href="./manifest-bici.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -761,6 +761,7 @@ function mapaPintaCanvas(){
   g.fillStyle="#ffc14d";g.beginPath();g.arc(X(b[1]),Y(b[0]),6,0,7);g.fill();
 }
 /* prueba interna de dibujo (solo se usa en QA, no hay botón) */
+if(location.search.indexOf("bici=1")>=0){setTimeout(()=>{try{bikeOn()}catch(e){}},400)}
 if(location.search.indexOf("demo=1")>=0){setTimeout(()=>{try{bikeOn();window.__bikeDemo()}catch(e){}},700)}
 window.__bikeDemo=function(){
   mapaInit();

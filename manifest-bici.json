@@ -1,0 +1,15 @@
+{
+  "name": "Alma Bici · Tablero",
+  "short_name": "Alma Bici",
+  "description": "La casita de Alma en modo bici: velocímetro, ruta y mapa",
+  "start_url": "./casita-bici.html?v=1&app=1&bici=1",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#071026",
+  "theme_color": "#071026",
+  "icons": [
+    { "src": "icons/casita-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/casita-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
