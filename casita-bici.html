@@ -107,6 +107,52 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
   .b{animation:none}
   #mic.rec{animation:none}
 }
+
+/* ===== MODO HORIZONTAL (opción C: neón minimal) + MAPA FULL ===== */
+#bike .land{display:none}
+#mapFull{position:fixed;inset:0;z-index:400;display:none;background:#04080f}
+#mapFull.on{display:block}
+#mapa2{position:absolute;inset:0}
+#mapFull .barra{position:absolute;top:0;left:0;right:0;z-index:410;display:flex;justify-content:space-between;
+ align-items:center;gap:10px;padding:8px 12px;background:linear-gradient(180deg,rgba(4,8,15,.92),rgba(4,8,15,0))}
+#mapFull .barra b{font-size:13px;color:#35e0ff;letter-spacing:.14em}
+#mapFull .barra .close{background:rgba(8,22,36,.85);border:1px solid #35e0ff;color:#35e0ff;border-radius:10px;padding:6px 12px;font-weight:700}
+#mapFull .pie{position:absolute;bottom:0;left:0;right:0;z-index:410;display:flex;justify-content:space-around;
+ padding:10px 12px;background:linear-gradient(0deg,rgba(4,8,15,.94),rgba(4,8,15,0));font-variant-numeric:tabular-nums}
+#mapFull .pie div{text-align:center}
+#mapFull .pie span{display:block;font-size:15px;font-weight:800;color:#fff}
+#mapFull .pie em{font-size:8.5px;letter-spacing:.2em;color:#6d8299;font-style:normal}
+@media (orientation:landscape){
+  #bike{position:fixed;inset:0;margin:0;border-radius:0;border:0;z-index:300;padding:0!important;
+    background:radial-gradient(120% 120% at 50% 50%,#0a2138 0%,#061020 55%,#03070d 100%)}
+  #bike .vert{display:none}
+  #bike .land{display:block;position:absolute;inset:0}
+  #bike .land .cerrar{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:9;
+    background:rgba(8,22,36,.8);border:1px solid #1b3a52;color:#8fa3b8;border-radius:10px;padding:4px 12px;font-size:11px}
+  #bike .land .centro{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;z-index:3}
+  #bike .land .centro .n{font-size:clamp(64px,16vh,120px);font-weight:800;line-height:.9;color:#eafcff;
+    letter-spacing:-.04em;font-variant-numeric:tabular-nums;text-shadow:0 0 34px rgba(53,224,255,.6),0 0 80px rgba(53,224,255,.28)}
+  #bike .land .centro .u{font-size:10px;letter-spacing:.34em;color:#8fd4e8;margin-top:2px}
+  #bike .land .anillo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:clamp(150px,34vh,240px);aspect-ratio:1;border:2px dashed rgba(53,224,255,.45);border-radius:50%;
+    box-shadow:0 0 50px rgba(53,224,255,.18) inset;z-index:2}
+  #bike .land .anillo2{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:clamp(110px,24vh,170px);aspect-ratio:1;border:1px solid rgba(53,224,255,.22);border-radius:50%;z-index:2}
+  #bike .land .esq{position:absolute;z-index:4;text-align:center;font-variant-numeric:tabular-nums}
+  #bike .land .esq .v{font-size:clamp(18px,3.4vh,26px);font-weight:800;color:#35e0ff;line-height:1}
+  #bike .land .esq .l{font-size:8.5px;letter-spacing:.24em;color:#6d8299;margin-top:3px}
+  #bike .land .e-tl{left:24px;top:26px}
+  #bike .land .e-tr{right:24px;top:26px}
+  #bike .land .e-bl{left:24px;bottom:26px}
+  #bike .land .e-br{right:24px;bottom:26px}
+  #bike .land .minimapa{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
+    width:170px;height:96px;border:1px solid rgba(53,224,255,.4);border-radius:10px;background:#08131f;z-index:5}
+  #bike .land .minimapa canvas{width:100%;height:100%;display:block;border-radius:10px}
+  #bike .land .minimapa .full{position:absolute;right:4px;top:4px;background:rgba(4,8,15,.8);border:1px solid #35e0ff;
+    color:#35e0ff;border-radius:7px;font-size:11px;padding:2px 7px;z-index:6}
+  #bike .land .go{position:absolute;right:24px;top:50%;transform:translateY(-50%);z-index:6;
+    padding:12px 18px;border-radius:14px;border:1px solid #ffc14d;background:rgba(255,193,77,.14);color:#ffc14d;font-weight:800;font-size:13px}
+}
 </style><link rel="manifest" href="./manifest-bici.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -141,17 +187,40 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div style="font-size:.72rem;letter-spacing:.12em;color:#ffc14d;font-weight:700">TABLERO DE LA BICI</div>
       <button id="bikeClose" onclick="bikeOff()" style="background:none;border:0;color:#8fa3b8;font-size:1rem">✕</button>
     </div>
+    <div class="vert">
     <div style="display:flex;align-items:flex-end;justify-content:center;gap:4px;margin-top:6px">
-      <div id="vel" style="font-size:3.4rem;font-weight:800;line-height:1;color:#ffc14d;font-variant-numeric:tabular-nums">0</div>
+      <div id="vel" data-v="vel" style="font-size:3.4rem;font-weight:800;line-height:1;color:#ffc14d;font-variant-numeric:tabular-nums">0</div>
       <div style="font-size:.8rem;color:#8fa3b8;margin-bottom:8px">km/h</div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;text-align:center">
-      <div><div style="font-size:1.05rem;font-weight:700" id="dist">0.00</div><div style="font-size:.62rem;color:#8fa3b8">KM</div></div>
-      <div><div style="font-size:1.05rem;font-weight:700" id="time">00:00</div><div style="font-size:.62rem;color:#8fa3b8">TIEMPO</div></div>
-      <div><div style="font-size:1.05rem;font-weight:700" id="avg">0</div><div style="font-size:.62rem;color:#8fa3b8">PROM</div></div>
+      <div><div style="font-size:1.05rem;font-weight:700" id="dist" data-v="dist">0.00</div><div style="font-size:.62rem;color:#8fa3b8">KM</div></div>
+      <div><div style="font-size:1.05rem;font-weight:700" id="time" data-v="time">00:00</div><div style="font-size:.62rem;color:#8fa3b8">TIEMPO</div></div>
+      <div><div style="font-size:1.05rem;font-weight:700" id="avg" data-v="avg">0</div><div style="font-size:.62rem;color:#8fa3b8">PROM</div></div>
     </div>
     <div id="mapa" style="height:210px;margin-top:10px;border-radius:12px;overflow:hidden;border:1px solid #2c3a4a"></div>
     <div class="mut" id="mapaNota" style="font-size:.68rem;margin-top:4px;text-align:center">Tu ruta se dibuja aquí mientras ruedas.</div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button id="bikePlay2" onclick="bikeToggle()" style="flex:1;padding:10px;border-radius:12px;border:1px solid #ffc14d;background:#ffc14d;color:#121a21;font-weight:800">▶ ARRANCAR</button>
+      <button onclick="abrirFull()" style="padding:10px 12px;border-radius:12px;border:1px solid #2c3a4a;background:transparent;color:#d8cfc5">⛶</button>
+    </div>
+    </div><!-- /vert -->
+
+    <!-- ===== LAYOUT HORIZONTAL (opción C) ===== -->
+    <div class="land">
+      <button class="cerrar" onclick="bikeOff()">✕ volver al chat</button>
+      <div class="anillo"></div>
+      <div class="anillo2"></div>
+      <div class="centro"><div class="n" data-v="vel">0</div><div class="u">KM/H</div></div>
+      <div class="esq e-tl"><div class="v" data-v="dist">0.00</div><div class="l">KM</div></div>
+      <div class="esq e-tr"><div class="v" data-v="time">00:00</div><div class="l">TIEMPO</div></div>
+      <div class="esq e-bl"><div class="v" data-v="avg">0</div><div class="l">PROMEDIO</div></div>
+      <div class="esq e-br"><div class="v" data-v="max">0</div><div class="l">MÁXIMA</div></div>
+      <button class="go" id="go2" onclick="bikeToggle()">▶ ARRANCAR</button>
+      <div class="minimapa" onclick="abrirFull()">
+        <canvas id="miniCanvas"></canvas>
+        <button class="full" onclick="event.stopPropagation();abrirFull()">⛶</button>
+      </div>
+    </div>
     <div style="display:flex;gap:8px;margin-top:10px">
       <button id="bikePlay" onclick="bikeToggle()" style="flex:1;padding:10px;border-radius:12px;border:1px solid #ffc14d;background:#ffc14d;color:#121a21;font-weight:800">▶ ARRANCAR</button>
       <button onclick="tellAlmaRide()" style="padding:10px 12px;border-radius:12px;border:1px solid #3a4a5a;background:transparent;color:#d8cfc5">💬</button>
@@ -178,6 +247,20 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
 <input type="file" id="foto" accept="image/*" style="display:none" onchange="subirPantalla(this)">
 <input type="file" id="arch" accept=".html,.htm,.txt,.md,.json,.csv,.pdf,.js,.css,image/*" style="display:none" onchange="subirArchivo(this)">
 
+<div id="mapFull">
+  <div id="mapa2"></div>
+  <div class="barra">
+    <b>RUTA EN VIVO</b>
+    <button class="close" onclick="cerrarFull()">✕ cerrar</button>
+  </div>
+  <div class="pie">
+    <div><span data-v="dist">0.00</span><em>KM</em></div>
+    <div><span data-v="time">00:00</span><em>TIEMPO</em></div>
+    <div><span data-v="vel">0</span><em>KM/H</em></div>
+    <div><span data-v="avg">0</span><em>PROM</em></div>
+    <div><span data-v="max">0</span><em>MÁX</em></div>
+  </div>
+</div>
 <div id="orbTip">TOCA 👁 PARA VOLVER AL TEXTO</div>
 <div id="eco">
   <div class="sheet glass">
@@ -718,14 +801,13 @@ function bikeStop(){
 function bikeTick(){if(!BIKE.on)return;bikePaint();setTimeout(bikeTick,1000)}
 function bikePaint(){
   const v=Math.round(BIKE.vel);
-  const el=document.getElementById("vel");if(el)el.textContent=v;
   const km=(BIKE.dist/1000);
-  const d=document.getElementById("dist");if(d)d.textContent=km.toFixed(2);
   const seg=BIKE.on?Math.round((Date.now()-BIKE.start)/1000):0;
   const mm=String(Math.floor(seg/60)).padStart(2,"0"),ss=String(seg%60).padStart(2,"0");
-  const tt=document.getElementById("time");if(tt)tt.textContent=mm+":"+ss;
   const av=km>0.01?Math.round(km/(seg/3600)):0;
-  const a=document.getElementById("avg");if(a)a.textContent=Math.min(av,99);
+  _setV("vel",v); _setV("dist",km.toFixed(2)); _setV("time",mm+":"+ss);
+  _setV("avg",Math.min(av,99)); _setV("max",Math.round(BIKE.max||0));
+  mapaMini();
   const st=document.getElementById("status");
   if(st){
     if(!BIKE.on) st.textContent="";
@@ -842,5 +924,59 @@ window.__bikeDemo=function(){
   for(let i=0;i<14;i++){la+=0.00055*Math.cos(i*.6);lo+=0.00075*Math.sin(i*.5);mapaPunto(la,lo)}
   return M.pts.length;
 };
+
+function _setV(k,val){
+  document.querySelectorAll('[data-v="'+k+'"]').forEach(el=>{el.textContent=val});
+}
+function mapaMini(){
+  const c=document.getElementById("miniCanvas");
+  if(!c||!M||!M.pts||!M.pts.length)return;
+  const box=c.parentElement.getBoundingClientRect();
+  if(!box.width)return;
+  c.width=box.width;c.height=box.height;
+  const g=c.getContext("2d");g.clearRect(0,0,c.width,c.height);
+  let laMin=90,laMax=-90,loMin=180,loMax=-180;
+  M.pts.forEach(p=>{laMin=Math.min(laMin,p[0]);laMax=Math.max(laMax,p[0]);loMin=Math.min(loMin,p[1]);loMax=Math.max(loMax,p[1])});
+  const pad=9,dLa=Math.max(laMax-laMin,1e-5),dLo=Math.max(loMax-loMin,1e-5);
+  const X=lo=>pad+(lo-loMin)/dLo*(c.width-2*pad);
+  const Y=la=>c.height-pad-(la-laMin)/dLa*(c.height-2*pad);
+  g.strokeStyle="#35e0ff";g.lineWidth=2.5;g.lineJoin="round";g.lineCap="round";g.beginPath();
+  M.pts.forEach((p,i)=>{i?g.lineTo(X(p[1]),Y(p[0])):g.moveTo(X(p[1]),Y(p[0]))});
+  g.stroke();
+  const a=M.pts[0],b=M.pts[M.pts.length-1];
+  g.fillStyle="#6fce8f";g.beginPath();g.arc(X(a[1]),Y(a[0]),4,0,7);g.fill();
+  g.fillStyle="#ffc14d";g.beginPath();g.arc(X(b[1]),Y(b[0]),4,0,7);g.fill();
+}
+/* ===== MAPA A PANTALLA COMPLETA (modo horizontal) ===== */
+let M2=null;
+function abrirFull(){
+  const ov=document.getElementById("mapFull");
+  if(!ov)return;
+  ov.classList.add("on");
+  try{ if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){}
+  const pts=(M&&M.pts)?M.pts:[];
+  if(typeof L==="undefined")return;
+  if(!M2){
+    try{
+      M2=L.map("mapa2",{zoomControl:false,attributionControl:false}).setView([24.8091,-107.3940],15);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(M2);
+      M2.line=L.polyline(pts,{color:"#35e0ff",weight:6,opacity:.95}).addTo(M2);
+      if(pts.length>1)M2.fitBounds(L.latLngBounds(pts),{padding:[30,30]});
+      if(pts.length)M2.you=L.circleMarker(pts[pts.length-1],{radius:8,color:"#ffc14d",fillColor:"#ffc14d",fillOpacity:1,weight:3}).addTo(M2);
+    }catch(e){}
+  }else{
+    try{
+      M2.line.setLatLngs(pts);
+      if(pts.length>1)M2.fitBounds(L.latLngBounds(pts),{padding:[30,30]});
+    }catch(e){}
+  }
+  setTimeout(()=>{if(M2)M2.invalidateSize()},250);
+  bikePaint();
+}
+function cerrarFull(){
+  const ov=document.getElementById("mapFull");
+  if(ov)ov.classList.remove("on");
+  try{ if(document.fullscreenElement) document.exitFullscreen().catch(()=>{}); }catch(e){}
+}
 </script>
 </body></html>
