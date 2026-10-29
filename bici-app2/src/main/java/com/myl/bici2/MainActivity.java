@@ -84,7 +84,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v2 · holo");
+        placa.setText("v2.2 · holo");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -142,41 +142,48 @@ public class MainActivity extends Activity {
         col.addView(empuje, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
 
-        // ---- botón de oro
+        // ---- botón principal: cian holo, ya no el amarillo que chocaba
         tvArrancar = boton("▶  ARRANCAR", true);
         tvArrancar.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) { alternar(); }
         });
         LinearLayout.LayoutParams lpAr = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, dp(58));
+                LinearLayout.LayoutParams.MATCH_PARENT, dp(52));
         col.addView(tvArrancar, lpAr);
 
-        // ---- botón de cian
-        tvParte = boton("📤  MANDAR EL PARTE A ALMA", false);
+        // ---- dos pastillas en un solo renglón (antes eran dos botones de 50 y 46 dp
+        // y se comían media pantalla: JJ, "esos botones le quitan mucho espacio al GPS")
+        LinearLayout filaBotones = new LinearLayout(this);
+        filaBotones.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout.LayoutParams lpFB = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lpFB.topMargin = dp(8);
+        col.addView(filaBotones, lpFB);
+
+        tvParte = boton("📤  PARTE A ALMA", false);
+        tvParte.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         tvParte.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) { mandarParte(); }
         });
-        LinearLayout.LayoutParams lpPar = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, dp(50));
-        lpPar.topMargin = dp(10);
-        col.addView(tvParte, lpPar);
+        LinearLayout.LayoutParams lpPar = new LinearLayout.LayoutParams(0, dp(42), 1f);
+        lpPar.rightMargin = dp(5);
+        filaBotones.addView(tvParte, lpPar);
 
-        // ---- botón para hablar con Alma (abre la Casita)
-        TextView tvVoz = boton("🎙  HABLAR CON ALMA", false);
+        TextView tvVoz = boton("🎙  HABLAR", false);
+        tvVoz.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         tvVoz.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) { hablarConAlma(); }
         });
-        LinearLayout.LayoutParams lpVoz = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, dp(46));
-        lpVoz.topMargin = dp(10);
-        col.addView(tvVoz, lpVoz);
+        LinearLayout.LayoutParams lpVoz = new LinearLayout.LayoutParams(0, dp(42), 1f);
+        lpVoz.leftMargin = dp(5);
+        filaBotones.addView(tvVoz, lpVoz);
 
         TextView nota = new TextView(this);
         nota.setText("Cuenta con la pantalla apagada. Al terminar, toca PARAR.");
         nota.setTextColor(GRIS2);
         nota.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
         nota.setGravity(Gravity.CENTER);
-        nota.setPadding(0, dp(12), 0, 0);
+        nota.setPadding(0, dp(10), 0, 0);
         col.addView(nota);
 
         setContentView(raiz);
@@ -225,15 +232,15 @@ public class MainActivity extends Activity {
         v.setClickable(true);
         if (oro) {
             GradientDrawable g = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
-                    new int[]{Color.rgb(255, 214, 128), ORO});
+                    new int[]{Color.rgb(125, 240, 255), Color.rgb(0, 214, 240)});
             g.setCornerRadius(dp(16));
             v.setBackground(g);
-            v.setTextColor(Color.rgb(26, 18, 4));
+            v.setTextColor(Color.rgb(4, 18, 31));
         } else {
             GradientDrawable g = new GradientDrawable();
             g.setColor(Color.rgb(12, 26, 48));
             g.setCornerRadius(dp(16));
-            g.setStroke(dp(2), Color.argb(200, 0, 242, 254));
+            g.setStroke(dp(1), Color.argb(170, 0, 242, 254));
             v.setBackground(g);
             v.setTextColor(CYAN);
         }
@@ -299,9 +306,9 @@ public class MainActivity extends Activity {
             GradientDrawable g = new GradientDrawable();
             g.setColor(Color.rgb(12, 26, 48));
             g.setCornerRadius(dp(16));
-            g.setStroke(dp(2), Color.argb(220, 255, 193, 77));
+            g.setStroke(dp(2), Color.argb(220, 0, 242, 254));
             tvArrancar.setBackground(g);
-            tvArrancar.setTextColor(ORO);
+            tvArrancar.setTextColor(Color.rgb(125, 240, 255));
 
             int acc = p.getInt("acc", -1);
             int n = p.getInt("n", 0);
@@ -316,10 +323,10 @@ public class MainActivity extends Activity {
         } else {
             tvArrancar.setText("▶  ARRANCAR");
             GradientDrawable g = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
-                    new int[]{Color.rgb(255, 214, 128), ORO});
+                    new int[]{Color.rgb(125, 240, 255), Color.rgb(0, 214, 240)});
             g.setCornerRadius(dp(16));
             tvArrancar.setBackground(g);
-            tvArrancar.setTextColor(Color.rgb(26, 18, 4));
+            tvArrancar.setTextColor(Color.rgb(4, 18, 31));
             tvEstado.setText("Todo listo. Dale ARRANCAR cuando subas a la bici.");
         }
 
