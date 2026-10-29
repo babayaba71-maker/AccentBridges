@@ -112,6 +112,8 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="icons/casita-192.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head><body>
 <canvas id="holo"></canvas>
 <div class="vignette"></div>
@@ -148,6 +150,8 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div><div style="font-size:1.05rem;font-weight:700" id="time">00:00</div><div style="font-size:.62rem;color:#8fa3b8">TIEMPO</div></div>
       <div><div style="font-size:1.05rem;font-weight:700" id="avg">0</div><div style="font-size:.62rem;color:#8fa3b8">PROM</div></div>
     </div>
+    <div id="mapa" style="height:210px;margin-top:10px;border-radius:12px;overflow:hidden;border:1px solid #2c3a4a"></div>
+    <div class="mut" id="mapaNota" style="font-size:.68rem;margin-top:4px;text-align:center">Tu ruta se dibuja aquí mientras ruedas.</div>
     <div style="display:flex;gap:8px;margin-top:10px">
       <button id="bikePlay" onclick="bikeToggle()" style="flex:1;padding:10px;border-radius:12px;border:1px solid #ffc14d;background:#ffc14d;color:#121a21;font-weight:800">▶ ARRANCAR</button>
       <button onclick="tellAlmaRide()" style="padding:10px 12px;border-radius:12px;border:1px solid #3a4a5a;background:transparent;color:#d8cfc5">💬</button>
@@ -635,6 +639,7 @@ let BIKE={on:false,watch:null,start:0,dist:0,last:null,vel:0,max:0};
 function bikeOn(){
   const p=document.getElementById("bike");
   if(p)p.style.display="block";
+  mapaInit();
   if(typeof bubble==="function") bubble("🚴 Tablero listo. Dale ARRANCAR cuando subas a la bici.","a");
   window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -649,6 +654,7 @@ function bikeToggle(){
   if(BIKE.on){bikeStop();return}
   if(!navigator.geolocation){alert("Este navegador no da GPS");return}
   BIKE.on=true;BIKE.start=Date.now();BIKE.dist=0;BIKE.last=null;BIKE.vel=0;BIKE.max=0;
+  M.pts=[];if(M.line)M.line.setLatLngs([]);if(M.you){M.map.removeLayer(M.you);M.you=null}if(M.start){M.map.removeLayer(M.start);M.start=null}
   const b=document.getElementById("bikePlay");
   if(b){b.textContent="⏸ PARAR";b.style.background="#121a21";b.style.color="#ffc14d"}
   BIKE.watch=navigator.geolocation.watchPosition(pos=>{
@@ -665,6 +671,7 @@ function bikeToggle(){
       if(BIKE.vel>BIKE.max)BIKE.max=BIKE.vel;
     }
     BIKE.last={la,lo,t};
+    mapaPunto(la,lo);
     bikePaint();
   },err=>{bikePaint();}, {enableHighAccuracy:true,maximumAge:2000,timeout:15000});
   if(typeof bubble==="function") bubble("🚴 En marcha. Casco puesto y ojos en la calle.","a");
@@ -697,5 +704,68 @@ function tellAlmaRide(){
   const i=document.getElementById("txt");
   if(i){i.value=txt;if(typeof sendTxt==="function")sendTxt()}
 }
+</script>
+
+<script>
+/* ===== MAPA DE LA RUTA (Leaflet + OpenStreetMap, gratis y sin llave) =====
+   Dibuja la ruta en vivo; si el teléfono se queda sin datos, cae al trazador propio. */
+let M={map:null,line:null,you:null,start:null,pts:[],canvas:null,fail:false};
+function mapaInit(){
+  const el=document.getElementById("mapa");
+  if(!el||M.map)return;
+  if(typeof L==="undefined"){ M.fail=true; mapaFallback(); return; }
+  try{
+    M.map=L.map(el,{zoomControl:false,attributionControl:false}).setView([24.8091,-107.3940],14);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(M.map);
+    M.line=L.polyline([],{color:"#ffc14d",weight:5,opacity:.95}).addTo(M.map);
+    setTimeout(()=>{if(M.map)M.map.invalidateSize()},300);
+  }catch(e){M.fail=true;mapaFallback()}
+}
+function mapaFallback(){
+  const el=document.getElementById("mapa");
+  if(!el)return;
+  el.innerHTML='<canvas id="mapaCanvas" style="width:100%;height:100%;display:block;background:#0b1420"></canvas>';
+  M.canvas=document.getElementById("mapaCanvas");
+  mapaPintaCanvas();
+}
+function mapaPunto(la,lo){
+  if(!isFinite(la)||!isFinite(lo))return;
+  M.pts.push([la,lo]);
+  if(M.pts.length>4000)M.pts.shift();
+  const nota=document.getElementById("mapaNota");
+  if(M.fail||!M.map){mapaPintaCanvas();return}
+  M.line.setLatLngs(M.pts);
+  if(!M.start){M.start=L.circleMarker(M.pts[0],{radius:6,color:"#6fce8f",fillColor:"#6fce8f",fillOpacity:1,weight:2}).addTo(M.map)}
+  if(!M.you){M.you=L.circleMarker([la,lo],{radius:7,color:"#ffc14d",fillColor:"#ffc14d",fillOpacity:1,weight:3}).addTo(M.map)}
+  else M.you.setLatLng([la,lo]);
+  if(M.pts.length===1)M.map.setView([la,lo],16);
+  else if(M.pts.length%8===0)M.map.fitBounds(L.latLngBounds(M.pts),{padding:[24,24],maxZoom:17});
+  if(nota)nota.textContent="Ruta en vivo · "+M.pts.length+" puntos";
+}
+function mapaPintaCanvas(){
+  const c=M.canvas;if(!c)return;
+  const box=c.parentElement.getBoundingClientRect();
+  c.width=box.width;c.height=box.height;
+  const g=c.getContext("2d");g.clearRect(0,0,c.width,c.height);
+  if(!M.pts.length)return;
+  let laMin=90,laMax=-90,loMin=180,loMax=-180;
+  M.pts.forEach(p=>{laMin=Math.min(laMin,p[0]);laMax=Math.max(laMax,p[0]);loMin=Math.min(loMin,p[1]);loMax=Math.max(loMax,p[1])});
+  const pad=18, dLa=Math.max(laMax-laMin,1e-5), dLo=Math.max(loMax-loMin,1e-5);
+  const X=lo=>pad+(lo-loMin)/dLo*(c.width-2*pad);
+  const Y=la=>c.height-pad-(la-laMin)/dLa*(c.height-2*pad);
+  g.strokeStyle="#ffc14d";g.lineWidth=4;g.lineJoin="round";g.lineCap="round";g.beginPath();
+  M.pts.forEach((p,i)=>{i?g.lineTo(X(p[1]),Y(p[0])):g.moveTo(X(p[1]),Y(p[0]))});
+  g.stroke();
+  const a=M.pts[0],b=M.pts[M.pts.length-1];
+  g.fillStyle="#6fce8f";g.beginPath();g.arc(X(a[1]),Y(a[0]),6,0,7);g.fill();
+  g.fillStyle="#ffc14d";g.beginPath();g.arc(X(b[1]),Y(b[0]),6,0,7);g.fill();
+}
+/* prueba interna de dibujo (solo se usa en QA, no hay botón) */
+window.__bikeDemo=function(){
+  mapaInit();
+  let la=24.8091,lo=-107.3940;
+  for(let i=0;i<14;i++){la+=0.00055*Math.cos(i*.6);lo+=0.00075*Math.sin(i*.5);mapaPunto(la,lo)}
+  return M.pts.length;
+};
 </script>
 </body></html>
