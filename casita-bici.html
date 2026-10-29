@@ -635,7 +635,7 @@ if(gpsOn){ gpsFijar().then(gpsLugar).then(()=>gpsPinta()).catch(()=>{ gpsOn=fals
 
 <script>
 /* ===== TABLERO DE LA BICI v0 (misma casita, mismo Alma) ===== */
-let BIKE={on:false,watch:null,start:0,dist:0,last:null,vel:0,max:0,acc:null,err:''};
+let BIKE={on:false,watch:null,start:0,dist:0,last:null,vel:0,max:0,acc:null,err:'',ultima:0};
 function bikeOn(){
   const p=document.getElementById("bike");
   if(p)p.style.display="block";
@@ -681,13 +681,17 @@ function arrancarPaseo(reanudar){
       const dt=(t-BIKE.last.t)/1000;
       const d=haversine(BIKE.last.la,BIKE.last.lo,la,lo);
       // acepta el tramo si el GPS no está disparando (precisión muy mala) y no es un salto imposible
-      if(dt>0.5&&d<200&&(ac==null||ac<120)&&d>2) BIKE.dist+=d;
+      if(dt>0.5&&d<200&&(ac==null||ac<120)&&d>2){
+        const vImp=(d/dt)*3.6;
+        if(vImp<=70) BIKE.dist+=d;   // un salto que implicaria >70 km/h es ruido, no pedaleo
+      }
       let v=(sp!=null&&!isNaN(sp))?sp*3.6:(dt>0?(d/dt)*3.6:0);
       if(v>60)v=60;                     // arriba de 60 km/h es ruido del GPS, no la bici
       BIKE.vel=Math.max(0,Math.min(80,v));
       if(BIKE.vel>BIKE.max)BIKE.max=BIKE.vel;
     }
     BIKE.last={la,lo,t};
+    BIKE.ultima=Date.now();
     guardarPaseo();
     mapaPunto(la,lo);
     bikePaint();
@@ -721,6 +725,7 @@ function bikePaint(){
     if(!BIKE.on) st.textContent="";
     else if(BIKE.err) st.textContent="📡 "+BIKE.err;
     else if(BIKE.acc==null) st.textContent="📡 buscando señal GPS…";
+    else if(BIKE.ultima && Date.now()-BIKE.ultima>45000) st.textContent="📡 sin lecturas hace "+Math.round((Date.now()-BIKE.ultima)/1000)+" s · ¿pantalla apagada o app en segundo plano?";
     else st.textContent="📡 GPS ±"+BIKE.acc+" m · "+(BIKE.acc<=25?"señal buena":BIKE.acc<=60?"señal regular, cuenta igual":"señal floja, la distancia puede salir corta");
   }
 }
@@ -741,7 +746,7 @@ function tellAlmaRide(){
   const km  = encendido ? BIKE.dist/1000 : 0;
   const hh=Math.floor(seg/3600), mi=Math.floor((seg%3600)/60), ss=seg%60;
   const tiempo = seg<60 ? seg+" s" : (hh>0 ? hh+" h "+mi+" min" : mi+" min");
-  const prom = seg>3 ? Math.min(99, Math.round(km/(seg/3600))) : 0;
+  const prom = seg>3 ? Math.min(60, Math.round(km/(seg/3600))) : 0;
   let txt;
   if(!encendido){
     txt="Todavía no arranco el paseo 🚴. Toca ▶ ARRANCAR en el tablero y ya te mando distancia, tiempo y promedio de verdad. (Te lo digo así porque antes te mandé números en cero y no servían de nada.)";
