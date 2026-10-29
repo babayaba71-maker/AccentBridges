@@ -107,7 +107,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v2.7 · holo");
+        placa.setText("v2.8 · holo");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -478,7 +478,7 @@ public class MainActivity extends Activity {
             rec.prepare();
             rec.start();
             grabando = true; t0Nota = System.currentTimeMillis(); ampMax = 0; h.postDelayed(mirarNivel, 400);
-            tvVoz.setText("⏹  GRABANDO · TOCA");
+            tvVoz.setText("⏹  GRABANDO · TOCA PARA MANDAR");
             Toast.makeText(this, "Grabando… toca otra vez y la mando", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             grabando = false;
