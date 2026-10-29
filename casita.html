@@ -123,7 +123,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">v3.2 · voz gratis del teléfono</div>
+        <div class="badge" id="placa">v3.3 · voz mejicana gratis</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -393,7 +393,15 @@ function vozNavegador(clean){
   const es=todas.filter(v=>v.lang&&v.lang.toLowerCase().startsWith("es"));
   // antes que nada: la de Google en espanol. Si el telefono no trae ninguna en
   // espanol (el caso del S22), usa la que exista antes que quedarse muda.
-  const elegida=es.find(v=>/google/i.test(v.name)&&/mx/i.test(v.lang))
+  // 29-oct: su nota de 20 s traia mi saludo y luego su voz: "ahora hablas como
+  // espanola". La voz gratis si sonaba, pero elegia castellano. Orden nuevo:
+  // primero mexicana/latina (es-MX, es-US, es-419, y el resto de America), y
+  // solo despues la de Espana. Mismo motor, cero costo.
+  const deAca=es.filter(v=>!/es-es/i.test(v.lang));
+  const elegida=deAca.find(v=>/es-mx/i.test(v.lang)&&/google/i.test(v.name))
+            ||deAca.find(v=>/es-mx/i.test(v.lang))
+            ||deAca.find(v=>/es-us|es-419/i.test(v.lang))
+            ||deAca[0]
             ||es.find(v=>/google/i.test(v.name))
             ||es[0]
             ||todas.find(v=>/google/i.test(v.name))
