@@ -115,7 +115,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v3.0 · suena");
+        placa.setText("v3.1 · habla · mic limpio");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -456,6 +456,10 @@ public class MainActivity extends Activity {
     private MediaPlayer reproductor = null;
 
     private void decirAlma(final String frase) {
+        // 29-oct: su nota de 47 s salió con MI voz dentro ("Parte enviado..." y
+        // "En marcha...") porque el micro seguía abierto cuando yo hablaba.
+        // Si está grabando, no hablo.
+        if (grabando) return;
         new Thread(new Runnable() { @Override public void run() {
             HttpURLConnection c = null;
             try {
@@ -551,6 +555,8 @@ public class MainActivity extends Activity {
             return;
         }
         try {
+            // el altavoz se calla antes de abrir el micrófono (cero realimentación)
+            if (reproductor != null) { try { reproductor.stop(); } catch (Throwable t) {} try { reproductor.release(); } catch (Throwable t) {} reproductor = null; }
             archivoNota = new File(getFilesDir(), "nota-bici.m4a");
             rec = new MediaRecorder();
             rec.setAudioSource(MediaRecorder.AudioSource.MIC);
