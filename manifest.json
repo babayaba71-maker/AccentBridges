@@ -2,7 +2,7 @@
   "name": "Casita de Alma",
   "short_name": "Casita",
   "description": "La casita privada de Alma: orb vivo, voz y ecosistema Action Bridges",
-  "start_url": "./casita.html?v=36&app=1",
+  "start_url": "./casita.html?v=37&app=1",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

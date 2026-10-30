@@ -123,7 +123,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">v3.6 · vuelve a saludar</div>
+        <div class="badge" id="placa">v3.7 · se manda al callar</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -609,11 +609,17 @@ function medir(){
   // GANANCIA AUTOMÁTICA: se calibra sola al micrófono de cada teléfono
   if(rms>picoVoz)picoVoz=picoVoz*.7+rms*.3;else picoVoz*=.9993;
   const ref=Math.max(.03,picoVoz*1.15);          // deja aire arriba: la voz normal NO satura
-  // AUTO-ENVIO (como la primera casita que si le gusto): si callas 1.5 s, se manda
+  // AUTO-ENVIO: si callas, se manda solo. 30-oct (JJ: "no se cerro solo..."):
+  // el umbral fijo de 0.02 no servia pedaleando — el viento y la calle dejan el
+  // piso de ruido ARRIBA de 0.02, asi que la app nunca "oia" silencio y habia que
+  // apretar el boton otra vez. Ahora el silencio es RELATIVO a su propia voz:
+  // cuenta como callado si el volumen baja al 45% del pico que el mismo Calibró,
+  // y hay que sostenerse 2.2 s.
   if(recOn){
     const ahora=Date.now();
-    if(rms>0.02){vozVista=true;ultimaVoz=ahora}
-    else if(vozVista && ahora-ultimaVoz>1500 && ahora-recT0>1000){
+    const piso=Math.max(0.022, picoVoz*0.45);   // se adapta al ruido real del lugar
+    if(rms>piso){vozVista=true;ultimaVoz=ahora}
+    else if(vozVista && ahora-ultimaVoz>2200 && ahora-recT0>1200){
       vozVista=false;vib([20,40,20]);pararGrabacion();return;
     }
   }
@@ -661,7 +667,7 @@ async function micToggle(){
   clearInterval(recTimer);
   recTimer=setInterval(()=>{
     const s=Math.floor((Date.now()-recT0)/1000);
-    $("mic").textContent="🔴 TE OIGO "+s+"s · calla y se manda";
+    $("mic").textContent="🔴 TE OIGO "+s+"s · calla 2 s y se manda";
     if(s>=120)pararGrabacion();
   },400);
 }
