@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tecnicismos — tres canales</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:radial-gradient(circle at 50% 0%,#0a2033,#040a12 70%);color:#fff;
+ font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh;padding:18px 14px 40px}
+.wrap{max-width:640px;margin:0 auto}
+h1{font-size:18px;letter-spacing:.14em;color:#00f0ff;text-align:center;margin:6px 0 2px;font-weight:700}
+.sub{text-align:center;color:#7d93a8;font-size:11px;letter-spacing:.12em;margin-bottom:16px}
+.card{background:rgba(9,20,32,.92);border:1px solid #1c3a52;border-radius:16px;padding:18px;margin-bottom:14px}
+.preg{color:#9fb6c9;font-size:11px;letter-spacing:.08em;margin:4px 0 10px;text-transform:uppercase}
+.frase{font-size:22px;font-weight:700;line-height:1.35;margin:10px 0 4px}
+.chip{display:inline-block;background:#0e2a3d;border:1px solid #2a5570;color:#bfe9f7;border-radius:10px;
+ padding:9px 12px;margin:5px 6px 0 0;font-size:15px;cursor:pointer}
+.chip.sel{background:#0a3a52;border-color:#00f0ff;color:#fff}
+.chip.ok{background:#08301f;border-color:#00c07a;color:#9ff5cd}
+.chip.no{background:#301015;border-color:#c0392b;color:#ffb3ad}
+button.op{display:block;width:100%;text-align:left;background:#0b1a28;color:#dbe9f4;border:1px solid #24465f;
+ border-radius:12px;padding:13px 14px;font-size:15px;margin-bottom:9px;cursor:pointer;font-family:inherit;line-height:1.35}
+button.op.ok{background:#08301f;border-color:#00c07a;color:#9ff5cd}
+button.op.no{background:#301015;border-color:#c0392b;color:#ffb3ad}
+button.op:disabled{opacity:.8}
+.barra{height:5px;background:#12293c;border-radius:99px;overflow:hidden;margin-bottom:16px}
+.barra i{display:block;height:100%;background:linear-gradient(90deg,#00f0ff,#007bff);width:0%;transition:width .25s}
+.hero{color:#c8dced;font-size:14px;line-height:1.6}
+.hint{color:#7d93a8;font-size:12px;line-height:1.55;margin-top:10px}
+.cta{display:block;width:100%;background:linear-gradient(90deg,#00f0ff,#007bff);color:#04121f;border:0;
+ border-radius:14px;padding:16px;font-size:15px;font-weight:800;letter-spacing:.05em;cursor:pointer;
+ font-family:inherit;margin-top:10px;text-align:center;text-decoration:none}
+input{width:100%;background:#0b1a28;border:1px solid #24465f;color:#fff;border-radius:12px;padding:14px;
+ font-size:16px;font-family:inherit;margin-bottom:12px}
+.tres{display:flex;gap:8px;margin:14px 0}
+.tres div{flex:1;background:#0a1b29;border:1px solid #1e3d55;border-radius:12px;padding:10px 5px;text-align:center}
+.tres b{display:block;font-size:24px;margin-bottom:2px}
+.tres span{font-size:9px;color:#7d93a8;letter-spacing:.08em}
+.gano{color:#00e0a0}.medio{color:#ffb700}.pierde{color:#ff8b80}
+.aviso{border-left:3px solid #ffb700;padding:8px 0 8px 12px;margin:12px 0;font-size:13px;color:#ffe0a3}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>TECNICISMOS</h1>
+  <div class="sub">LECTURA · ESTRUCTURA · ESPAÑOL</div>
+  <div id="app"></div>
+</div>
+<script>
+const EXP_URL="https://valerie.base44.app/functions/logMorfofonoSession";
+const EXP_KEY="ABVC-PILOTO-2026";
+
+/* ============ CANAL 1 · LECTURA (entender) ============
+   Frases reales con marcadores de postura y discurso. Nivel avanzado primero:
+   si acierta, no se le hace perder tiempo en lo básico (correccion JJ). */
+const LECTURA = [
+ {n:"A", f:"I guess we should wait.", o:["Supongo que deberíamos esperar.","Adivino que esperamos.","Supongo que ya esperamos ayer."]},
+ {n:"A", f:"By the way, she called you.", o:["Por cierto, ella te llamó.","Por el camino, ella te llamó.","De paso, ella te llamará."]},
+ {n:"A", f:"As far as I know, it's open.", o:["Hasta donde sé, está abierto.","Tan lejos como sé, está abierto.","Por lo que veo, está cerrado."]},
+ {n:"A", f:"The thing is, I don't have time.", o:["El asunto es que no tengo tiempo.","La cosa está sin tiempo.","Esa cosa no tiene tiempo."]},
+ {n:"A", f:"I'd rather stay home tonight.", o:["Preferiría quedarme en casa esta noche.","Debería quedarme en casa esta noche.","Mejor me quedé en casa anoche."]},
+ {n:"B", f:"I think so.", o:["Creo que sí.","Pienso mucho.","Creo que no."]}
+];
+
+/* ============ CANAL 2 · ESTRUCTURA (armar lo que piensa) ============
+   No es gramática suelta: son BLOQUES ya pegados que se acomodan en orden.
+   Esto mide lo que ella traba: estructurar la idea, no recordar reglas. */
+const ESTRUCTURA = [
+ {es:"Creo que va a llover.", bl:["I think","it's going to","rain"], junk:["is raining"]},
+ {es:"Por cierto, no tengo tiempo.", bl:["By the way","I don't have","time"], junk:["no time have"]},
+ {es:"Hasta donde sé, ella trabaja aquí.", bl:["As far as I know","she works","here"], junk:["she working"]},
+ {es:"En mi caso, prefiero el café.", bl:["In my case","I prefer","coffee"], junk:["I preferring"]},
+ {es:"No estoy seguro de que eso sea verdad.", bl:["I'm not sure","that's","true"], junk:["is true that"]}
+];
+
+/* ============ CANAL 3 · ESPAÑOL (línea base) ============
+   Si la palabra no existe en su español, el cognado NO es ancla: el problema
+   es fondo educativo, no inglés. Este delta es lo nuevo. */
+const ESPANOL = [
+ {en:"assessment", o:["evaluación / medición de nivel","accesorio / adorno","aceleración"]},
+ {en:"evidence", o:["evidencia / prueba","evento / suceso","advertencia"]},
+ {en:"requirement", o:["requisito / exigencia","reclamo / queja","requiebro"]},
+ {en:"nevertheless", o:["sin embargo / no obstante","nunca jamás","mientras tanto"]},
+ {en:"thorough", o:["minucioso / completo","atrevido / valiente","a través de"]}
+];
+
+const app=document.getElementById('app');
+const sh=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
+let nombre="", rl=0, tl=0, re=0, te=0, rs=0, ts=0;
+
+function inicio(){
+  app.innerHTML=`<div class="card"><div class="hero">
+    Aquí entramos en los tecnicismos, pero medidos como se debe: <b>tres canales separados</b>.<br><br>
+    <b>LECTURA</b> — ¿entiendes la frase? Empieza por las difíciles: si las aciertas, no pierdes tiempo en lo básico.<br>
+    <b>ESTRUCTURA</b> — ¿armas lo que piensas? Con bloques, tocando en orden.<br>
+    <b>ESPAÑOL</b> — ¿la palabra existe en tu español? Si no existe ahí, el problema no es el inglés.<br><br>
+    <b>La pronunciación no va aquí.</b> Esa se mide aparte, con oído humano.
+    </div>
+    <div class="preg">¿Cómo te llamas?</div>
+    <input id="nom" placeholder="Tu nombre">
+    <button class="cta" onclick="empezar()">▶ EMPEZAR</button>
+    <div class="hint">Unos 4 minutos. No hay calificación: hay mapa.</div>
+  </div>`;
+}
+function empezar(){
+  nombre=(document.getElementById('nom').value||"Estudiante").trim().slice(0,30);
+  rl=0;tl=0;re=0;te=0;rs=0;ts=0;
+  lectura(0);
+}
+/* ---------- CANAL 1 ---------- */
+function lectura(i){
+  if(i>=LECTURA.length) return estructura(0);
+  const it=LECTURA[i];
+  const pct=Math.round((i/LECTURA.length)*33);
+  app.innerHTML=`<div class="barra"><i style="width:${pct}%"></i></div>
+   <div class="card">
+     <div class="preg">CANAL 1 · LECTURA · ${i+1} DE ${LECTURA.length}</div>
+     <div class="frase">${it.f}</div>
+     <div class="preg" style="margin-top:16px">¿Qué dice?</div>
+     <div id="ops"></div>
+   </div>`;
+  const ops=document.getElementById('ops');
+  sh([...it.o]).forEach(t=>{
+    const b=document.createElement('button');b.className='op';b.textContent=t;
+    b.onclick=()=>{
+      const bien=(t===it.o[0]); tl++; if(bien){rl++;b.classList.add('ok');}
+      else{b.classList.add('no');[...ops.children].forEach(c=>{if(c.textContent===it.o[0])c.classList.add('ok')});}
+      [...ops.children].forEach(c=>c.disabled=true);
+      setTimeout(()=>lectura(i+1),430);
+    };
+    ops.appendChild(b);
+  });
+}
+/* ---------- CANAL 2 ---------- */
+function estructura(i){
+  if(i>=ESTRUCTURA.length) return espanol(0);
+  const it=ESTRUCTURA[i];
+  const piezas = sh([...it.bl, it.junk]);
+  const pct=33+Math.round((i/ESTRUCTURA.length)*33);
+  app.innerHTML=`<div class="barra"><i style="width:${pct}%"></i></div>
+   <div class="card">
+     <div class="preg">CANAL 2 · ESTRUCTURA · ${i+1} DE ${ESTRUCTURA.length}</div>
+     <div class="frase" style="font-size:17px;color:#9fdcf5">Dilo en inglés: "${it.es}"</div>
+     <div class="preg" style="margin-top:14px">Toca los bloques en orden (sobra uno)</div>
+     <div id="zon" style="min-height:44px;background:#08151f;border:1px dashed #2a5570;border-radius:12px;
+       padding:8px;margin-bottom:10px"></div>
+     <div id="chips"></div>
+     <button class="cta" id="btnOk" onclick="revisar(${i})">LISTO →</button>
+   </div>`;
+  let orden=[];
+  const chips=document.getElementById('chips'), zon=document.getElementById('zon');
+  piezas.forEach(p=>{
+    const c=document.createElement('span');c.className='chip';c.textContent=p;
+    c.onclick=()=>{ if(c.classList.contains('sel')) return;
+      c.classList.add('sel'); orden.push(p);
+      const s=document.createElement('span');s.className='chip sel';s.textContent=p;
+      s.onclick=()=>{ orden=orden.filter(x=>x!==p); s.remove(); c.classList.remove('sel'); };
+      zon.appendChild(s);
+    };
+    chips.appendChild(c);
+  });
+  window._orden = ()=>orden;
+}
+function revisar(i){
+  const it=ESTRUCTURA[i];
+  const dado = window._orden();
+  const bien = dado.join(" ") === it.bl.join(" ");
+  te++; if(bien) re++;
+  const zon=document.getElementById('zon');
+  zon.style.borderColor = bien ? "#00c07a" : "#c0392b";
+  zon.innerHTML = `<div style="color:${bien?'#9ff5cd':'#ffb3ad'};font-size:13.5px;line-height:1.5">
+    ${bien?'✓ Así es.':'Se arma así:'}<br><b>${it.bl.join(" ")}</b></div>`;
+  setTimeout(()=>estructura(i+1), bien?700:1500);
+}
+/* ---------- CANAL 3 ---------- */
+function espanol(i){
+  if(i>=ESPANOL.length) return fin();
+  const it=ESPANOL[i];
+  const pct=66+Math.round((i/ESPANOL.length)*34);
+  app.innerHTML=`<div class="barra"><i style="width:${pct}%"></i></div>
+   <div class="card">
+     <div class="preg">CANAL 3 · ESPAÑOL · ${i+1} DE ${ESPANOL.length}</div>
+     <div class="frase">${it.en}</div>
+     <div class="preg" style="margin-top:14px">En español, ¿qué significa?</div>
+     <div id="ops"></div>
+   </div>`;
+  const ops=document.getElementById('ops');
+  sh([...it.o]).forEach(t=>{
+    const b=document.createElement('button');b.className='op';b.textContent=t;
+    b.onclick=()=>{
+      const bien=(t===it.o[0]); ts++; if(bien){rs++;b.classList.add('ok');}
+      else{b.classList.add('no');[...ops.children].forEach(c=>{if(c.textContent===it.o[0])c.classList.add('ok')});}
+      [...ops.children].forEach(c=>c.disabled=true);
+      setTimeout(()=>espanol(i+1),430);
+    };
+    ops.appendChild(b);
+  });
+}
+/* ---------- RESULTADO ---------- */
+function fin(){
+  const pl=Math.round(rl/tl*100), pe=Math.round(re/te*100), ps=Math.round(rs/ts*100);
+  const cls=p=>p>=70?"gano":(p>=50?"medio":"pierde");
+  let diag="", sigue="";
+  if(pl>=70 && pe<60){
+    diag="<b>Entiendes leyendo, pero no armas lo que piensas.</b> Ese es el patrón clásico: el reconocimiento va adelante de la producción. No le falta vocabulario, le falta estructura para sacarlo.";
+    sigue="Bloques de pensamiento en voz alta: I think, by the way, as far as I know. Acomodarlos hasta que salgan sin pensar.";
+  } else if(pl<60 && ps>=70){
+    diag="<b>El español está fuerte y el inglés todavía no.</b> Eso es buena noticia: hay de dónde jalar. Los cognados y las frases ancla van a funcionar.";
+    sigue="Emparejar cada palabra que ya sabes en español con su forma inglesa, en frase.";
+  } else if(pl>=70 && pe>=70){
+    diag="<b>Entiendes y armas.</b> El siguiente paso ya no es comprensión: es sonido y soltura al hablar.";
+    sigue="Producción en voz alta con el maestro, y pronunciación medida aparte.";
+  } else if(ps<60){
+    diag="<b>Ojo con esto:</b> varias de estas palabras tampoco existen claras en el español de la persona. Si no hay palabra en español, el cognado no sirve de ancla: el problema es de fondo educativo, no de inglés.";
+    sigue="Enseñar el concepto en los dos idiomas a la vez, anclado en situación, no en traducción.";
+  } else {
+    diag="<b>Hay huecos repartidos entre los tres canales.</b> Se entrenan por separado, no todos de golpe.";
+    sigue="Una cosa a la vez: primero estructura de bloques, luego lectura fina.";
+  }
+  app.innerHTML=`<div class="card">
+    <div class="sub" style="margin-bottom:6px">MAPA POR CANAL</div>
+    <div class="tres">
+      <div><b class="${cls(pl)}">${pl}%</b><span>LECTURA</span></div>
+      <div><b class="${cls(pe)}">${pe}%</b><span>ESTRUCTURA</span></div>
+      <div><b class="${cls(ps)}">${ps}%</b><span>ESPAÑOL</span></div>
+    </div>
+    <div class="hero" style="text-align:left">${diag}</div>
+    <div class="hint"><b>Qué sigue:</b> ${sigue}</div>
+    <div class="aviso"><b>Pronunciación:</b> no se midió aquí y no se va a fingir. Esa se mide aparte, con oído humano, inicial, vocal y final.</div>
+  </div>
+  <button class="cta" onclick="inicio()">HACERLO OTRA VEZ</button>`;
+  try{localStorage.setItem("tecnicismos_"+nombre,JSON.stringify({pl,pe,ps,cuando:Date.now()}))}catch(e){}
+  try{fetch(EXP_URL,{method:"POST",headers:{"Content-Type":"application/json",api_key:EXP_KEY},
+    body:JSON.stringify({topic:"Tecnicismos — tres canales (lectura/estructura/español)",userId:nombre,
+      passed:(pl+pe+ps)/3>=70, accuracy:Math.round((pl+pe+ps)/3),
+      challengeSentence:"lectura + estructura + español",
+      spokenText:"tecnicismos · lectura:"+pl+"% estructura:"+pe+"% español:"+ps+"%",
+      location:"Tecnicismos",sessionId:"tec-"+Date.now()})}).catch(()=>{})}catch(e){}
+}
+inicio();
+</script>
+</body>
+</html>
