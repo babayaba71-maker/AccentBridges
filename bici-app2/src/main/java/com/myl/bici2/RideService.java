@@ -122,10 +122,22 @@ public class RideService extends Service implements LocationListener {
         try {
             gnss = new android.location.GnssStatus.Callback() {
                 @Override public void onSatelliteStatusChanged(android.location.GnssStatus st) {
-                    int usados = 0, vistos = st.getSatelliteCount();
-                    for (int i = 0; i < vistos; i++) if (st.usedInFix(i)) usados++;
+                    // 30-oct: el parte de JJ dijo "0/1 satelites" durante 7 min al
+                    // aire libre. Para saber si el motor GNSS ve cielo o no, se
+                    // guarda cuantos satelites traen señal y el mejor CN0 (dB-Hz):
+                    // 0 con señal = el motor no está escuchando; 6 con 30 dB y sin
+                    // fix = hay cielo pero el chip no cierra la posición.
+                    int usados = 0, vistos = st.getSatelliteCount(), conSenal = 0;
+                    float mejor = 0f;
+                    for (int i = 0; i < vistos; i++) {
+                        if (st.usedInFix(i)) usados++;
+                        float cn0 = st.getCn0DbHz(i);
+                        if (cn0 > 0f) { conSenal++; if (cn0 > mejor) mejor = cn0; }
+                    }
                     prefs(RideService.this).edit().putInt("sats", vistos)
-                            .putInt("satsUsados", usados).apply();
+                            .putInt("satsUsados", usados)
+                            .putInt("satsSenal", conSenal)
+                            .putInt("satsCn0", Math.round(mejor)).apply();
                 }
             };
             lm.registerGnssStatusCallback(gnss, null);
@@ -136,11 +148,23 @@ public class RideService extends Service implements LocationListener {
         try {
             lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             if (lm == null) return;
-            if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER))
-                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
-            if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
-                lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 0, this);
-        } catch (Exception e) { /* sin permiso o sin proveedor */ }
+            // 30-oct: cada proveedor con su try/catch y su error guardado. Antes
+            // iban juntos: si el pedido de GPS tronaba, la antena tampoco se pedía
+            // y nadie sabía por qué. El parte ahora puede decir el error exacto.
+            try {
+                if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                    lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
+                else prefs(this).edit().putString("gpsErr", "GPS apagado en el telefono").apply();
+            } catch (Exception e) {
+                prefs(this).edit().putString("gpsErr", e.getClass().getSimpleName() + ": " + e.getMessage()).apply();
+            }
+            try {
+                if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+                    lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 0, this);
+            } catch (Exception e) {
+                prefs(this).edit().putString("redErr", e.getClass().getSimpleName() + ": " + e.getMessage()).apply();
+            }
+        } catch (Exception e) { /* sin servicio de ubicacion */ }
         contarSatelites();
     }
 
@@ -333,7 +357,7 @@ public class RideService extends Service implements LocationListener {
         if (mandaGps == esGps || !mandaGps) {
             Location ancla = esGps ? anclaGps : anclaRed;
             float margen = esGps ? Math.max(10f, Math.min(acc * 1.5f, 60f))
-                                 : Math.max(30f, Math.min(acc * 2f, 90f));
+                                 : Math.max(25f, Math.min(acc, 60f));
             float topeVel = esGps ? 70f : 50f;
 
             if (ancla == null) {
