@@ -70,6 +70,7 @@ const app=document.getElementById('app');
 const sh=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
 let nombre="", rl=0, tl=0, re=0, te=0, rs=0, ts=0;
 let rlT=0, tlT=0, reT=0, teT=0;   // bloque TECHO (B2)
+let fallosL=[], fallosE=[], fallosS=[];   // que se trabo, para diagnostico fino
 
 function inicio(){
   app.innerHTML=`<div class="card"><div class="hero">
@@ -87,7 +88,7 @@ function inicio(){
 }
 function empezar(){
   nombre=(document.getElementById('nom').value||"Estudiante").trim().slice(0,30);
-  rl=0;tl=0;re=0;te=0;rs=0;ts=0;rlT=0;tlT=0;reT=0;teT=0;
+  rl=0;tl=0;re=0;te=0;rs=0;ts=0;rlT=0;tlT=0;reT=0;teT=0;fallosL=[];fallosE=[];fallosS=[];
   lectura(0);
 }
 /* ---------- CANAL 1 ---------- */
@@ -106,7 +107,7 @@ function lectura(i){
   sh([...it.o]).forEach(t=>{
     const b=document.createElement('button');b.className='op';b.textContent=t;
     b.onclick=()=>{
-      const bien=(t===it.o[0]); tl++; if(it.t==='techo') tlT++; if(bien){rl++; if(it.t==='techo') rlT++; b.classList.add('ok');}
+      const bien=(t===it.o[0]); tl++; if(it.t==='techo') tlT++; if(bien){rl++; if(it.t==='techo') rlT++; b.classList.add('ok');} else { fallosL.push(it.f); }
       else{b.classList.add('no');[...ops.children].forEach(c=>{if(c.textContent===it.o[0])c.classList.add('ok')});}
       [...ops.children].forEach(c=>c.disabled=true);
       setTimeout(()=>lectura(i+1),430);
@@ -148,7 +149,7 @@ function revisar(i){
   const it=ESTRUCTURA[i];
   const dado = window._orden();
   const bien = dado.join(" ") === it.bl.join(" ");
-  te++; if(it.t==='techo') teT++; if(bien){ re++; if(it.t==='techo') reT++; }
+  te++; if(it.t==='techo') teT++; if(bien){ re++; if(it.t==='techo') reT++; } else { fallosE.push(it.es); }
   const zon=document.getElementById('zon');
   zon.style.borderColor = bien ? "#00c07a" : "#c0392b";
   zon.innerHTML = `<div style="color:${bien?'#9ff5cd':'#ffb3ad'};font-size:13.5px;line-height:1.5">
@@ -171,7 +172,7 @@ function espanol(i){
   sh([...it.o]).forEach(t=>{
     const b=document.createElement('button');b.className='op';b.textContent=t;
     b.onclick=()=>{
-      const bien=(t===it.o[0]); ts++; if(bien){rs++;b.classList.add('ok');}
+      const bien=(t===it.o[0]); ts++; if(bien){rs++;b.classList.add('ok');} else { fallosS.push(it.en); }
       else{b.classList.add('no');[...ops.children].forEach(c=>{if(c.textContent===it.o[0])c.classList.add('ok')});}
       [...ops.children].forEach(c=>c.disabled=true);
       setTimeout(()=>espanol(i+1),430);
@@ -185,11 +186,12 @@ function fin(){
   // TECHO ALCANZADO: solo cuenta el bloque B2. 70% o más = llegó; menos = se quedó abajo.
   const pT = (tlT&&teT) ? Math.round(((rlT/tlT)+(reT/teT))/2*100) : 0;
   const nivel = pT>=80?"B2 medio":(pT>=60?"B1 alto":(pT>=35?"B1 bajo":"A2"));
+  // OJO: esto NO es el nivel de inglés de la persona. Es hasta donde alcanza ESTA prueba.
   const aviso = pT>=80
-    ? "Llegaste al techo de esta prueba. Para medir más arriba hace falta otro escalón (C1), y eso ya no es vocabulario: es matiz y registro."
+    ? "Esta prueba ya te queda corta: no alcanza a medirte más arriba. Lo que sigue ya no es vocabulario, es matiz y registro, y eso se mide hablando."
     : (pT>=60
-      ? "Tocaste B1 alto. El siguiente escalón es el matiz: no qué significa, sino qué tan fuerte lo dices."
-      : "El techo quedó abajo: conviene consolidar B1 antes de subir. No es fracaso, es el dato que necesitábamos.");
+      ? "La prueba alcanza a medirte hasta aquí. Arriba de este punto lo que se traba no es el vocabulario: es la subordinación, la frase dentro de la frase."
+      : "La prueba alcanza a medirte hasta aquí. Conviene consolidar antes de subir: no es fracaso, es el dato que necesitábamos.");
   const cls=p=>p>=70?"gano":(p>=50?"medio":"pierde");
   let diag="", sigue="";
   if(pl>=70 && pe<60){
@@ -216,10 +218,18 @@ function fin(){
       <div><b class="${cls(ps)}">${ps}%</b><span>ESPAÑOL</span></div>
     </div>
     <div class="card" style="background:#0c1f2e;border-color:#2a5570;margin:0 0 14px">
-      <div class="preg" style="margin:0 0 6px">TECHO ALCANZADO</div>
+      <div class="preg" style="margin:0 0 6px">HASTA AQUÍ ALCANZA LA PRUEBA</div>
       <div class="big" style="font-size:34px;margin:0">${nivel}</div>
       <div class="hint" style="margin-top:6px">${aviso}</div>
+      <div class="hint" style="margin-top:8px;color:#ffb700"><b>Esto no es tu nivel de inglés.</b> Es hasta dónde llega este instrumento.</div>
     </div>
+    ${(fallosL.length||fallosE.length||fallosS.length)?`<div class="card" style="background:#0c1f2e;border-color:#2a5570;margin:0 0 14px">
+      <div class="preg" style="margin:0 0 6px">SE TE RESISTIERON</div>
+      ${fallosE.length?`<div class="hint"><b>Al armar (estructura):</b><br>${fallosE.map(x=>"· "+x).join("<br>")}</div>`:""}
+      ${fallosL.length?`<div class="hint"><b>Al leer:</b><br>${fallosL.map(x=>"· "+x).join("<br>")}</div>`:""}
+      ${fallosS.length?`<div class="hint"><b>En español:</b><br>${fallosS.map(x=>"· "+x).join("<br>")}</div>`:""}
+      <div class="hint" style="color:#ffb700">Esos son los que hay que trabajar. No todos: esos.</div>
+    </div>`:""}
     <div class="hero" style="text-align:left">${diag}</div>
     <div class="hint"><b>Qué sigue:</b> ${sigue}</div>
     <div class="aviso"><b>Pronunciación:</b> no se midió aquí y no se va a fingir. Esa se mide aparte, con oído humano, inicial, vocal y final.</div>
@@ -230,7 +240,7 @@ function fin(){
     body:JSON.stringify({topic:"Tecnicismos — tres canales (lectura/estructura/español)",userId:nombre,
       passed:(pl+pe+ps)/3>=70, accuracy:Math.round((pl+pe+ps)/3),
       challengeSentence:"lectura + estructura + español",
-      spokenText:"tecnicismos · lectura:"+pl+"% estructura:"+pe+"% español:"+ps+"% techo:"+nivel+" ("+pT+"%)",
+      spokenText:"tecnicismos · lectura:"+pl+"% estructura:"+pe+"% español:"+ps+"% alcance:"+nivel+" ("+pT+"%) · fallosE:"+fallosE.join(" | ")+" · fallosL:"+fallosL.join(" | ")+" · fallosS:"+fallosS.join(" | "),
       location:"Tecnicismos",sessionId:"tec-"+Date.now()})}).catch(()=>{})}catch(e){}
 }
 inicio();
