@@ -122,7 +122,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v3.4 · parte con datos");
+        placa.setText("v3.5 · latido de reloj");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -443,7 +443,8 @@ public class MainActivity extends Activity {
                 + String.format("%.1f", p.getFloat("max", 0f))
                 + " km/h. (app Alma Bici " + versionReal() + " · candado " + (p.getBoolean("candado", false) ? "puesto" : "NO PUESTO")
                 + " · GPS ±" + p.getInt("acc", -1) + " m, " + p.getInt("n", 0) + " lecturas"
-                + " · " + edadLectura(p) + " · " + estadoPermiso() + " · " + estadoBateria() + " · reinicios " + p.getInt("rein", 0) + ")";
+                + " · " + edadLectura(p) + " · " + estadoPermiso() + " · " + estadoBateria()
+                + " · reinicios " + p.getInt("rein", 0) + " · latidos " + p.getInt("latidos", 0) + ")";
     }
 
     // 30-oct: el parte decia "v2" escrito a mano en TODAS las versiones, asi que

@@ -49,6 +49,17 @@ public class RideService extends Service implements LocationListener {
             return START_NOT_STICKY;
         }
 
+        // latido de la alarma: aunque Samsung haya congelado el proceso, aquí
+        // reenganchamos el GPS y pedimos una lectura suelta
+        if (Latido.ACT_LATIDO.equals(accion)) {
+            if (prefs(this).getBoolean(K_ON, false)) {
+                empezarGps();
+                tomarFoco();
+                pedirUna();
+            }
+            return START_STICKY;
+        }
+
         crearCanal();
         iniciarForeground("Arrancando el paseo…");
 
@@ -60,13 +71,29 @@ public class RideService extends Service implements LocationListener {
             ultimo = null;
             String ver = "?";
             try { ver = getPackageManager().getPackageInfo(getPackageName(), 0).versionName; } catch (Exception ignored) {}
-            p.edit().putString(K_VER, ver).putInt(K_VIG, 0).putLong(K_VIGT, 0L).putBoolean(K_CAND, false).apply();
+            p.edit().putString(K_VER, ver).putInt(K_VIG, 0).putLong(K_VIGT, 0L).putBoolean(K_CAND, false)
+                .putInt("latidos", 0).putLong("latidoT", 0L).apply();
+            Latido.programar(this);   // alarma propia, independiente del proceso
         }
 
         empezarGps();
         tomarFoco();
         vigia.postDelayed(chequeo, 30000);
         return START_STICKY;
+    }
+
+    private void pedirUna() {
+        try {
+            if (lm == null) lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            if (lm == null) return;
+            Location ult = null;
+            try { ult = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER); } catch (Exception ignored) {}
+            if (ult != null && System.currentTimeMillis() - ult.getTime() < 20000) onLocationChanged(ult);
+            if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                lm.requestSingleUpdate(LocationManager.GPS_PROVIDER, this, Looper.getMainLooper());
+            if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+                lm.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, Looper.getMainLooper());
+        } catch (Exception ignored) {}
     }
 
     private void empezarGps() {
@@ -146,6 +173,7 @@ public class RideService extends Service implements LocationListener {
     private void soltarFoco() {
         try { if (foco != null && foco.isHeld()) foco.release(); } catch (Exception ignored) {}
         try { prefs(this).edit().putBoolean("candado", false).apply(); } catch (Exception ignored) {}
+        try { Latido.cancelar(this); } catch (Exception ignored) {}
         foco = null;
     }
 
