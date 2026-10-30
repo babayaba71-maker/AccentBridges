@@ -157,6 +157,28 @@ public class RideService extends Service implements LocationListener {
     // Samsung congela el proceso a los ~2 min con la pantalla apagada: sin esto ni
     // el GPS ni el vigilante corren (parte de JJ: 16 lecturas, luego 2 min dormido,
     // "reinicios 0" = el vigia tampoco despertó).
+    private PowerManager.WakeLock pantalla;
+    private void fijarPantalla() {
+        // 30-oct (JJ: "todavía se queda dormida"): el flag de la actividad sólo
+        // defiende mientras la pantalla del tablero está al frente. Este candado
+        // vive en el SERVICIO, así que la pantalla no se apaga sola aunque el
+        // tablero pase a segundo plano. Se suelta al PARAR.
+        try {
+            if (pantalla != null && pantalla.isHeld()) return;
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            if (pm == null) return;
+            pantalla = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "alma_bici:pantalla");
+            pantalla.setReferenceCounted(false);
+            pantalla.acquire(6 * 60 * 60 * 1000L);
+            prefs(this).edit().putBoolean("pantallaFija", pantalla.isHeld()).apply();
+        } catch (Exception ignored) {}
+    }
+
+    private void soltarPantalla() {
+        try { if (pantalla != null && pantalla.isHeld()) pantalla.release(); } catch (Exception ignored) {}
+        try { prefs(this).edit().putBoolean("pantallaFija", false).apply(); } catch (Exception ignored) {}
+    }
+
     private void tomarFoco() {
         try {
             if (foco != null && foco.isHeld()) return;
@@ -168,11 +190,13 @@ public class RideService extends Service implements LocationListener {
             prefs(this).edit().putBoolean(K_CAND, foco.isHeld()).apply();
             prefs(this).edit().putBoolean("candado", foco.isHeld()).apply();
         } catch (Exception ignored) {}
+        fijarPantalla();
     }
 
     private void soltarFoco() {
         try { if (foco != null && foco.isHeld()) foco.release(); } catch (Exception ignored) {}
         try { prefs(this).edit().putBoolean("candado", false).apply(); } catch (Exception ignored) {}
+        soltarPantalla();
         try { Latido.cancelar(this); } catch (Exception ignored) {}
         foco = null;
     }
