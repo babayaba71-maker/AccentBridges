@@ -38,6 +38,18 @@ Una sola cuenta de ElevenLabs, plan **Creator**, con **~88% del tanque libre**
 
 Llamada: `GET/POST {BASE}/functions/elVozSalud?api_key=ABVC-PILOTO-2026`
 
+## ✅ DECISIÓN 29-OCT: UNA SOLA LLAVE
+
+JJ: "no entiendo cuál es cuál". La solución no fue explicarle mejor, fue **dejar una sola**.
+`bocaValerie` y `elStt` se redesplegaron para leer **únicamente** `ELEVENLABS_API_KEY_3`
+(+ `_2` como respaldo opcional mientras se borra). Probado con audio real:
+
+- bocaValerie → HTTP 200, MP3 de 2.32 s generado con `_3`
+- elStt → transcribió correctamente (respondió, no 401)
+
+**Entonces:** conserva `ELEVENLABS_API_KEY_3` (…8bc4) y borra las otras tres.
+Ninguna función depende de ellas ya.
+
 ## Pendiente del dueño (dos toques)
 
 Borrar `ELEVENLABS_API_KEY` del editor de secretos. El código ya no la necesita:
