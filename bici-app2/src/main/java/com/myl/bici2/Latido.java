@@ -53,7 +53,11 @@ public class Latido extends BroadcastReceiver {
             Intent svc = new Intent(ctx, RideService.class).setAction(ACT_LATIDO);
             if (Build.VERSION.SDK_INT >= 26) ctx.startForegroundService(svc);
             else ctx.startService(svc);
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            // si Android 12+ niega levantar el servicio desde segundo plano,
+            // al menos el intento queda contado y la próxima alarma reintenta
+            try { ctx.startService(new Intent(ctx, RideService.class).setAction(ACT_LATIDO)); } catch (Exception ignored) {}
+        }
 
         programar(ctx);
 

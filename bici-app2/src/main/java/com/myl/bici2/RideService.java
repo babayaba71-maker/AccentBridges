@@ -78,6 +78,8 @@ public class RideService extends Service implements LocationListener {
 
         empezarGps();
         tomarFoco();
+        // cualquier arranque con el paseo vivo reprograma la alarma
+        if (prefs(this).getBoolean(K_ON, false)) Latido.programar(this);
         vigia.postDelayed(chequeo, 30000);
         return START_STICKY;
     }
@@ -193,11 +195,23 @@ public class RideService extends Service implements LocationListener {
         fijarPantalla();
     }
 
-    private void soltarFoco() {
+    private void soltarFoco() { soltarFoco(true); }
+
+    /**
+     * matarPaseo=true  -> JJ apretó PARAR: se suelta todo y se apaga la alarma.
+     * matarPaseo=false -> el servicio se está muriendo con el paseo VIVO: se suelta
+     * el candado pero la alarma SIGUE programada, porque es justo la que va a
+     * revivir el paseo. Ése era el bug de la 3.5: onDestroy cancelaba el latido
+     * en el momento exacto en que se necesitaba (parte: "candado NO PUESTO",
+     * "latidos 0").
+     */
+    private void soltarFoco(boolean matarPaseo) {
         try { if (foco != null && foco.isHeld()) foco.release(); } catch (Exception ignored) {}
         try { prefs(this).edit().putBoolean("candado", false).apply(); } catch (Exception ignored) {}
-        soltarPantalla();
-        try { Latido.cancelar(this); } catch (Exception ignored) {}
+        if (matarPaseo) {
+            soltarPantalla();
+            try { Latido.cancelar(this); } catch (Exception ignored) {}
+        }
         foco = null;
     }
 
@@ -211,7 +225,9 @@ public class RideService extends Service implements LocationListener {
 
     @Override public void onDestroy() {
         vigia.removeCallbacks(chequeo);
-        soltarFoco();
+        boolean paseoVivo = false;
+        try { paseoVivo = prefs(this).getBoolean(K_ON, false); } catch (Exception ignored) {}
+        soltarFoco(!paseoVivo);
         try { if (lm != null) lm.removeUpdates(this); } catch (Exception ignored) {}
         super.onDestroy();
     }

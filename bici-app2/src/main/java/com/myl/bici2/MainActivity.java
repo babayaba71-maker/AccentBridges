@@ -122,7 +122,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v3.7 · pantalla clavada");
+        placa.setText("v3.8 · latido que no se apaga");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -446,6 +446,13 @@ public class MainActivity extends Activity {
         } catch (Exception ignored) {}
     }
 
+    private String edadLatido(SharedPreferences p) {
+        long t = p.getLong("latidoT", 0L);
+        if (t <= 0) return "nunca";
+        long s = (System.currentTimeMillis() - t) / 1000L;
+        return s < 90 ? ("hace " + s + " s") : ("hace " + (s / 60) + " min");
+    }
+
     private String textoParte() {
         SharedPreferences p = RideService.prefs(this);
         float km = p.getFloat("dist", 0f) / 1000f;
@@ -458,7 +465,8 @@ public class MainActivity extends Activity {
                 + " · GPS ±" + p.getInt("acc", -1) + " m, " + p.getInt("n", 0) + " lecturas"
                 + " · " + edadLectura(p) + " · " + estadoPermiso() + " · " + estadoBateria()
                 + " · reinicios " + p.getInt("rein", 0) + " · latidos " + p.getInt("latidos", 0)
-                + " · pantalla " + (p.getBoolean("pantallaFija", false) ? "fija" : "suelta") + ")";
+                + " · pantalla " + (p.getBoolean("pantallaFija", false) ? "fija" : "suelta")
+                + " · ultimo latido " + edadLatido(p) + ")";
     }
 
     // 30-oct: el parte decia "v2" escrito a mano en TODAS las versiones, asi que
