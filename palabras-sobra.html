@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Palabras de sobra</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:radial-gradient(circle at 50% 0%,#0a2033,#040a12 70%);color:#fff;
+ font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh;padding:16px 14px 36px}
+.wrap{max-width:620px;margin:0 auto}
+h1{font-size:18px;letter-spacing:.13em;color:#00f0ff;text-align:center;margin:8px 0 2px;font-weight:700}
+.sub{text-align:center;color:#7d93a8;font-size:11px;letter-spacing:.1em;margin-bottom:14px}
+.card{background:rgba(9,20,32,.93);border:1px solid #1c3a52;border-radius:16px;padding:16px;margin-bottom:12px}
+.frase{font-size:21px;font-weight:700;line-height:1.4;margin:10px 0 6px;text-align:center}
+.frase b{color:#00f0ff;border-bottom:2px solid #00f0ff;padding-bottom:1px}
+.preg{color:#9fb6c9;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;margin-bottom:9px}
+button.op{display:block;width:100%;text-align:left;background:#0b1a28;color:#dbe9f4;border:1px solid #24465f;
+ border-radius:12px;padding:13px;font-size:14.5px;margin-bottom:8px;cursor:pointer;font-family:inherit;line-height:1.4}
+button.op.ok{background:#08301f;border-color:#00c07a;color:#9ff5cd}
+button.op.no{background:#301015;border-color:#c0392b;color:#ffb3ad}
+button.op:disabled{opacity:.85}
+.barra{height:5px;background:#12293c;border-radius:99px;overflow:hidden;margin-bottom:12px}
+.barra i{display:block;height:100%;background:linear-gradient(90deg,#00f0ff,#007bff);width:0%;transition:width .2s}
+.nota{border-left:3px solid #ffb700;padding:9px 0 9px 11px;font-size:13.5px;color:#ffe0a3;margin-top:12px;line-height:1.5}
+.hero{color:#c8dced;font-size:14px;line-height:1.6}
+.hint{color:#7d93a8;font-size:12px;line-height:1.5;margin-top:8px}
+.cta{display:block;width:100%;background:linear-gradient(90deg,#00f0ff,#007bff);color:#04121f;border:0;
+ border-radius:14px;padding:15px;font-size:15px;font-weight:800;letter-spacing:.05em;cursor:pointer;font-family:inherit;margin-top:10px}
+input{width:100%;background:#0b1a28;border:1px solid #24465f;color:#fff;border-radius:12px;padding:13px;
+ font-size:16px;font-family:inherit;margin-bottom:10px}
+.big{font-size:46px;font-weight:800;text-align:center;margin:6px 0}
+.chip{display:inline-block;background:#0e2a3d;border:1px solid #2a5570;border-radius:9px;padding:5px 9px;
+ margin:4px 5px 0 0;font-size:12px;color:#bfe9f7}
+.chip.mal{background:#301015;border-color:#c0392b;color:#ffb3ad}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>PALABRAS DE SOBRA</h1>
+  <div class="sub">IT · COULD · OF · TO · THAT · WOULD · THERE · DO · BEEN</div>
+  <div id="app"></div>
+</div>
+<script>
+const ITEMS = [{"w": "it", "f": "It's raining again.", "ok": "Ocupa el lugar del sujeto, aunque el clima no tenga sujeto real.", "o": ["Ocupa el lugar del sujeto, aunque el clima no tenga sujeto real.", "Reemplaza una cosa que ya se mencionó.", "Significa «eso» y señala algo con el dedo.", "Indica que algo pertenece a alguien."], "n": "El «it» del clima no se traduce. Está de relleno obligatorio: en inglés la frase necesita sujeto siempre."}, {"w": "it", "f": "I bought it yesterday.", "ok": "Reemplaza una cosa que ya se mencionó.", "o": ["Reemplaza una cosa que ya se mencionó.", "Ocupa el lugar del sujeto sin significado.", "Anticipa una idea que viene después.", "Marca una posesión."], "n": "Aquí sí es pronombre de objeto: sustituye algo ya nombrado. En español muchas veces se omite; en inglés no."}, {"w": "it", "f": "It's hard to say.", "ok": "Anticipa una idea que viene después en la frase.", "o": ["Anticipa una idea que viene después en la frase.", "Reemplaza una cosa ya mencionada.", "Es el «it» del clima.", "Señala un lugar."], "n": "«It» anuncia que viene la idea real («to say»). El inglés casi nunca empieza con «To say is hard»."}, {"w": "could", "f": "Could you help me with this?", "ok": "Cortesía: es una petición, no una habilidad.", "o": ["Cortesía: es una petición, no una habilidad.", "Pasado de «can»: no podía hacerlo.", "Posibilidad futura.", "Obligación fuerte."], "n": "«Could you...?» es el piso mínimo de cortesía. No habla de si puedes: habla de cómo pides."}, {"w": "could", "f": "I couldn't sleep last night.", "ok": "Pasado de «can»: no podía, no lograba.", "o": ["Pasado de «can»: no podía, no lograba.", "Cortesía al pedir algo.", "Hipótesis sobre el futuro.", "Permiso formal."], "n": "Aquí sí es pasado real. El mismo «could» que era cortesía dos tarjetas atrás."}, {"w": "could", "f": "We could go tomorrow, if you want.", "ok": "Posibilidad: una opción abierta, no un plan cerrado.", "o": ["Posibilidad: una opción abierta, no un plan cerrado.", "Pasado: pudimos ir ayer.", "Cortesía al pedir un favor.", "Obligación."], "n": "Tres funciones del mismo «could»: cortesía, pasado y posibilidad. Por eso es sistema, no vocabulario."}, {"w": "of", "f": "I need a cup of coffee.", "ok": "Indica cantidad o medida de algo.", "o": ["Indica cantidad o medida de algo.", "Marca quién posee la cosa.", "Conecta dos ideas completas.", "Indica dirección hacia un lugar."], "n": "«a cup of» mide. En español también decimos «una taza de», pero el inglés lo usa mucho más seguido."}, {"w": "of", "f": "The end of the day is my favorite part.", "ok": "Marca una relación de pertenencia entre dos cosas.", "o": ["Marca una relación de pertenencia entre dos cosas.", "Indica una cantidad exacta.", "Introduce una pregunta.", "Es una preposición de lugar físico."], "n": "Pertenencia, no lugar: «the end of the day» no está dentro del día, es su parte final."}, {"w": "to", "f": "I want to go home.", "ok": "Marca el infinitivo: es el «to» que no se traduce.", "o": ["Marca el infinitivo: es el «to» que no se traduce.", "Indica dirección hacia un lugar.", "Marca posesión.", "Es una preposición de tiempo."], "n": "Aquí no va a ningún lado: solo sirve de gancho para el verbo. Ese «to» no se traduce nunca."}, {"w": "to", "f": "Give it to me.", "ok": "Indica el destino: hacia quién va la cosa.", "o": ["Indica el destino: hacia quién va la cosa.", "Marca el infinitivo del verbo.", "Indica cantidad.", "Conecta dos ideas."], "n": "Y el mismo «to» de la tarjeta anterior, ahora sí de dirección. Dos trabajos, una palabra."}, {"w": "that", "f": "I know that she's coming.", "ok": "Conecta dos ideas completas: es un puente.", "o": ["Conecta dos ideas completas: es un puente.", "Señala un objeto cercano.", "Reemplaza un nombre ya dicho.", "Marca una pregunta."], "n": "Este «that» se puede omitir y casi nadie lo nota. Por eso nadie lo enseña, y por eso se atora."}, {"w": "that", "f": "That car is mine.", "ok": "Señala cuál: es demostrativo.", "o": ["Señala cuál: es demostrativo.", "Conecta dos ideas completas.", "Es un pronombre de objeto.", "Marca posesión."], "n": "Mismo «that», otro trabajo: señalar. Aquí sí equivale a «ese»."}, {"w": "would", "f": "Would you like some coffee?", "ok": "Cortesía: es una invitación.", "o": ["Cortesía: es una invitación.", "Hipótesis sobre el pasado.", "Pasado de «will».", "Obligación."], "n": "«Would you like» es la forma cortés de ofrecer. No tiene nada de futuro ni de pasado."}, {"w": "would", "f": "I would go if I had time.", "ok": "Hipótesis: algo que no es real ahora.", "o": ["Hipótesis: algo que no es real ahora.", "Cortesía al ofrecer algo.", "Pasado de «will».", "Una orden suave."], "n": "Hipótesis con su pareja «had»: los dos van juntos. Si cambias uno, se rompe."}, {"w": "there", "f": "There's a problem with the car.", "ok": "Anuncia que algo existe, no indica lugar.", "o": ["Anuncia que algo existe, no indica lugar.", "Indica un lugar físico.", "Reemplaza un nombre ya dicho.", "Marca una posesión."], "n": "Este «there» no es «allá». Es el «hay» del español, pero con verbo: there is, there are."}, {"w": "do", "f": "Do you like it?", "ok": "Es auxiliar de pregunta: no significa «hacer».", "o": ["Es auxiliar de pregunta: no significa «hacer».", "Es el verbo «hacer» en presente.", "Marca el pasado.", "Indica posesión."], "n": "Aquí «do» no hace nada, solo abre la pregunta. El verbo real es «like»."}, {"w": "been", "f": "I've been working all day.", "ok": "Marca que la acción empezó antes y sigue.", "o": ["Marca que la acción empezó antes y sigue.", "Indica que la acción ya terminó.", "Marca el futuro.", "Es un pasado simple."], "n": "«have been + -ing» es la doctrina del Puente -ANDO: empecé antes y todavía no paro."}];
+const EXP_URL="https://valerie.base44.app/functions/logMorfofonoSession";
+const EXP_KEY="ABVC-PILOTO-2026";
+let nombre="", i=0, ok=0, fallos=[], notas={}, porPalabra={};
+
+const app=document.getElementById('app');
+const sh=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
+
+function inicio(){
+  app.innerHTML=`<div class="card"><div class="hero">
+    Las palabras que no significan nada y sostienen todo.<br><br>
+    Aquí no te pregunto qué significan, porque no significan. Te pregunto
+    <b>qué están haciendo</b> en la frase.<br><br>
+    Y ojo: la misma palabra cambia de trabajo. «Could» es cortesía en una frase, pasado en otra
+    y posibilidad en la tercera. Eso no es vocabulario, es sistema.
+    </div>
+    <div class="preg" style="margin-top:14px">¿Cómo te llamas?</div>
+    <input id="nom" placeholder="Tu nombre">
+    <button class="cta" onclick="empezar()">▶ EMPEZAR</button>
+    <div class="hint">17 frases, 4 opciones cada una. El azar aquí solo regala el 25%.</div>
+  </div>`;
+}
+function empezar(){
+  nombre=(document.getElementById('nom').value||"Estudiante").trim().slice(0,30);
+  i=0;ok=0;fallos=[];notas={};porPalabra={};
+  draw();
+}
+function draw(){
+  if(i>=ITEMS.length) return fin();
+  const it=ITEMS[i];
+  const pct=Math.round(i/ITEMS.length*100);
+  app.innerHTML=`<div class="barra"><i style="width:${pct}%"></i></div>
+   <div class="card">
+     <div class="preg">${i+1} DE ${ITEMS.length}</div>
+     <div class="frase">${it.f.replace(new RegExp('\\b('+it.w+')\\b','i'),'<b>$1</b>')}</div>
+     <div class="preg" style="margin-top:14px">¿Qué está haciendo «${it.w}» aquí?</div>
+     <div id="ops"></div>
+   </div>`;
+  const ops=document.getElementById('ops');
+  sh([...it.o]).forEach(txt=>{
+    const b=document.createElement('button');b.className='op';b.textContent=txt;
+    b.onclick=()=>{
+      const bien=(txt===it.ok);
+      [...ops.children].forEach(c=>{c.disabled=true; if(c.textContent===it.ok)c.classList.add('ok');});
+      const p=it.w; if(!porPalabra[p]) porPalabra[p]=[0,0]; porPalabra[p][1]++;
+      if(bien){ ok++; porPalabra[p][0]++; b.classList.add('ok'); }
+      else{
+        b.classList.add('no'); fallos.push(it.f); notas[it.f]=it.n;
+        const card=document.querySelector('.card');
+        const n=document.createElement('div');n.className='nota';n.innerHTML='<b>Ojo:</b> '+it.n;
+        card.appendChild(n);
+        const cont=document.createElement('button');cont.className='cta';cont.textContent='ENTENDIDO →';
+        cont.onclick=()=>{ i++; draw(); };
+        card.appendChild(cont);
+        return;   // sin avance automático: la nota se queda
+      }
+      setTimeout(()=>{ i++; draw(); }, 340);
+    };
+    ops.appendChild(b);
+  });
+}
+function fin(){
+  const pct=Math.round(ok/ITEMS.length*100);
+  const ajustado=Math.max(0,Math.round((pct-25)/75*100));
+  const feas=Object.entries(porPalabra).filter(([p,v])=>v[1]&&v[0]/v[1]<0.6).map(([p])=>p);
+  let diag;
+  if(pct>=85) diag="<b>Las palabras de sobra no son tu problema.</b> Las tienes sistematizadas. Lo que falta es soltarlas hablando.";
+  else if(pct>=60) diag="<b>Vas a medias, y con un patrón:</b> las que fallas suelen ser las que cambian de trabajo. No las estudies como palabras: estúdialas por función.";
+  else diag="<b>Este es tu hueso real.</b> Y no es vergüenza: nadie las enseña porque no se pueden traducir. Son las más frecuentes del idioma.";
+  app.innerHTML=`<div class="card">
+    <div class="sub" style="margin-bottom:2px">PALABRAS DE SOBRA</div>
+    <div class="big">${pct}%</div>
+    <div class="aviso" style="border-left:3px solid #ffb700;padding:9px 0 9px 12px;margin:10px 0;font-size:13.5px;color:#ffe0a3">
+      <b>Descontando azar: ${ajustado}%.</b> Con cuatro opciones, una de cada cuatro se acierta sin saber.
+    </div>
+    <div class="hero" style="text-align:left">${diag}</div>
+    ${feas.length?`<div class="hint"><b>Las que cambian de trabajo y se te resisten:</b><br>${feas.map(p=>'<span class="chip mal">'+p+'</span>').join('')}</div>`:''}
+    <div class="hint">${Object.keys(porPalabra).length} palabras probadas · ${fallos.length} fallos.</div>
+  </div>
+  ${Object.keys(notas).length?`<div class="card">
+    <div class="preg" style="text-align:left;margin-bottom:10px">LO QUE HAY QUE REPASAR</div>
+    ${Object.entries(notas).map(([f,n])=>`<div class="hint" style="margin-bottom:12px"><b style="color:#fff">${f}</b><br>${n}</div>`).join("")}
+    <div class="hint" style="color:#ffb700">Una palabra de sobra no se memoriza: se reconoce por su trabajo en la frase.</div>
+  </div>`:""}
+  <button class="cta" onclick="inicio()">OTRA VEZ</button>`;
+  try{fetch(EXP_URL,{method:"POST",headers:{"Content-Type":"application/json",api_key:EXP_KEY},
+    body:JSON.stringify({topic:"Palabras de sobra — función, no traducción",userId:nombre,
+      passed:pct>=70, accuracy:pct, challengeSentence:"17 frases, función de la palabra vacía",
+      spokenText:"sobra · "+pct+"% · ajustado:"+ajustado+"% · flojas:"+feas.join(",")+" · fallos:"+fallos.join(" | "),
+      location:"Palabras de sobra",sessionId:"sob-"+Date.now()})}).catch(()=>{})}catch(e){}
+}
+inicio();
+</script>
+</body>
+</html>
