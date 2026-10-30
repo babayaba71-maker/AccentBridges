@@ -185,13 +185,22 @@ function fin(){
   const pl=Math.round(rl/tl*100), pe=Math.round(re/te*100), ps=Math.round(rs/ts*100);
   // TECHO ALCANZADO: solo cuenta el bloque B2. 70% o más = llegó; menos = se quedó abajo.
   const pT = (tlT&&teT) ? Math.round(((rlT/tlT)+(reT/teT))/2*100) : 0;
-  const nivel = pT>=80?"B2 medio":(pT>=60?"B1 alto":(pT>=35?"B1 bajo":"A2"));
-  // OJO: esto NO es el nivel de inglés de la persona. Es hasta donde alcanza ESTA prueba.
-  const aviso = pT>=80
-    ? "Esta prueba ya te queda corta: no alcanza a medirte más arriba. Lo que sigue ya no es vocabulario, es matiz y registro, y eso se mide hablando."
-    : (pT>=60
-      ? "La prueba alcanza a medirte hasta aquí. Arriba de este punto lo que se traba no es el vocabulario: es la subordinación, la frase dentro de la frase."
-      : "La prueba alcanza a medirte hasta aquí. Conviene consolidar antes de subir: no es fracaso, es el dato que necesitábamos.");
+  // v4 (corrección de JJ: "debería haber agarrado B2-bajo"): la versión anterior
+  // promediaba SOLO lectura-techo y estructura-techo e ignoraba el español; además
+  // no existía la banda B2 bajo, así que 75 puntos caían forzosamente en B1 alto.
+  // Ahora: puntaje compuesto y ponderado, con las cinco bandas completas.
+  const pLt = tlT ? (rlT/tlT*100) : 0;      // lectura del bloque techo
+  const pEt = teT ? (reT/teT*100) : 0;      // estructura del bloque techo
+  const pT = Math.round(pLt*0.50 + pEt*0.35 + ps*0.15);
+  const nivel = pT>=85?"B2 medio":(pT>=72?"B2 bajo":(pT>=58?"B1 alto":(pT>=40?"B1 bajo":"A2")));
+  const margen = 12;   // 4 ítems en estructura techo: cada uno vale 12.5 puntos
+  const aviso = pT>=85
+    ? "Esta prueba ya te queda corta: no alcanza a medirte más arriba. Lo que sigue no es vocabulario sino matiz y registro, y eso se mide hablando."
+    : (pT>=72
+      ? "Llegaste a B2. Lo que se traba arriba de aquí no es el vocabulario: es la subordinación, la frase dentro de la frase."
+      : (pT>=58
+        ? "Te quedaste en B1 alto. Arriba de aquí el hueso es la subordinación y el matiz, no las palabras."
+        : "Conviene consolidar la base antes de subir: no es fracaso, es el dato que necesitábamos."));
   const cls=p=>p>=70?"gano":(p>=50?"medio":"pierde");
   let diag="", sigue="";
   if(pl>=70 && pe<60){
@@ -222,6 +231,8 @@ function fin(){
       <div class="big" style="font-size:34px;margin:0">${nivel}</div>
       <div class="hint" style="margin-top:6px">${aviso}</div>
       <div class="hint" style="margin-top:8px;color:#ffb700"><b>Esto no es tu nivel de inglés.</b> Es hasta dónde llega este instrumento.</div>
+      <div class="hint" style="margin-top:8px">Cómo se calcula (${pT} pts): lectura de techo 50% (${pLt}) · estructura de techo 35% (${pEt}) · español 15% (${ps}).<br>
+      Margen: ±${margen} puntos, porque el bloque de techo tiene pocos ítems. Un nivel a caballo del umbral no es un veredicto.</div>
     </div>
     ${(fallosL.length||fallosE.length||fallosS.length)?`<div class="card" style="background:#0c1f2e;border-color:#2a5570;margin:0 0 14px">
       <div class="preg" style="margin:0 0 6px">SE TE RESISTIERON</div>
