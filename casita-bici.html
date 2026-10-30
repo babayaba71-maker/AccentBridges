@@ -168,6 +168,10 @@ body.bici-acostada #bike .land .volver{position:absolute;top:8px;left:50%;transf
 #bikeLand .mini{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);transform:translateX(-50%);
   width:clamp(150px,24vw,250px);height:clamp(80px,15vw,150px);border:1px solid rgba(53,224,255,.4);
   border-radius:10px;background:#08131f;z-index:5;overflow:hidden}
+#bikeLand .recPill{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 12px);transform:translateX(-50%);
+  z-index:9;display:none;background:rgba(255,70,70,.18);border:1px solid #ff5a5a;color:#ffd9d9;
+  font-size:11px;font-weight:800;letter-spacing:.1em;padding:7px 14px;border-radius:999px;white-space:nowrap}
+#bikeLand .recPill.on{display:block}
 #bikeLand .mini canvas{width:100%;height:100%;display:block}
 #bikeLand .mini .full{position:absolute;right:4px;top:4px;background:rgba(4,8,15,.85);border:1px solid #35e0ff;
   color:#35e0ff;border-radius:7px;font-size:11px;padding:2px 7px}
@@ -216,7 +220,7 @@ body.bici-acostada #bike .land .volver{position:absolute;top:8px;left:50%;transf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">BICI v3 · velocímetro · Alma a bordo</div>
+        <div class="badge" id="placa">BICI v7 · voz normalizada</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -294,6 +298,7 @@ body.bici-acostada #bike .land .volver{position:absolute;top:8px;left:50%;transf
     </div>
     <button class="salir" onclick="acostar(false)">↺ volver al tablero</button>
     <button class="hablar" id="landMic" onclick="hablarDesdeLand()">🎙️ HABLAR</button>
+    <div class="recPill" id="landPill">● GRABANDO <span id="landSec">0</span>s · toca 🎙️ para MANDAR</div>
   </div>
 </div>
 <div id="mapFull">
@@ -611,6 +616,7 @@ function pararNivel(){
 }
 function micReset(msg){
   recOn=false;clearInterval(recTimer);setModo("idle");pararNivel();
+  try{if(typeof landReset==="function")landReset()}catch(e){}
   $("mic").textContent="🎙️ HÁBLAME";$("mic").classList.remove("rec");
   const lm0=document.getElementById("landMic"); if(lm0){lm0.classList.remove("grabando");lm0.textContent="🎙️ HABLAR"}
   if(msg){$("status").textContent=msg;vib(80)}
@@ -618,10 +624,23 @@ function micReset(msg){
 async function micToggle(){
   if(recOn){pararGrabacion();return}
   if(!navigator.mediaDevices||!window.MediaRecorder){micReset("Este navegador no deja grabar. Ábreme en CHROME directo.");return}
-  try{recStream=await navigator.mediaDevices.getUserMedia({audio:true})}
-  catch(e){micReset("MICRÓFONO BLOQUEADO — ábreme en Chrome y presiona PERMITIR");return}
   try{
-    chunks=[];mediaRec=new MediaRecorder(recStream);
+    recStream=await navigator.mediaDevices.getUserMedia({audio:{
+      echoCancellation:false,      // la cancelación de eco recorta la voz bajita
+      noiseSuppression:false,      // el filtro de ruido se come el habla suave
+      autoGainControl:true,        // sube sola la voz cuando hablas lejos
+      channelCount:1
+    }});
+  }catch(e1){
+    if(e1&&(e1.name==="NotAllowedError"||e1.name==="SecurityError"||e1.name==="PermissionDeniedError")){
+      micReset("MICRÓFONO BLOQUEADO — ábreme en Chrome y presiona PERMITIR");return
+    }
+    // el teléfono no aceptó los ajustes finos: pedimos el micrófono a secas
+    try{ recStream=await navigator.mediaDevices.getUserMedia({audio:true}) }
+    catch(e2){ micReset("MICRÓFONO BLOQUEADO — ábreme en Chrome y presiona PERMITIR");return }
+  }
+  try{
+    chunks=[];mediaRec=new MediaRecorder(recStream,{audioBitsPerSecond:128000});
     mediaRec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
     mediaRec.onstop=mandarGrabacion;
     mediaRec.start();
@@ -641,6 +660,42 @@ function pararGrabacion(){
   clearInterval(recTimer);$("mic").textContent="🎙️ MANDANDO…";setModo("thinking");
   try{mediaRec.stop()}catch(e){}
 }
+
+/* ---------- NORMALIZADOR: la nota se va con el volumen al tope, no como salga ---------- */
+function wavDe16k(x){
+  const n=x.length, ab=new ArrayBuffer(44+n*2), v=new DataView(ab);
+  const w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+  w(0,"RIFF");v.setUint32(4,36+n*2,true);w(8,"WAVEfmt ");v.setUint32(16,16,true);
+  v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,16000,true);
+  v.setUint32(28,32000,true);v.setUint16(32,2,true);v.setUint16(34,16,true);
+  w(36,"data");v.setUint32(40,n*2,true);
+  let o=44;
+  for(let i=0;i<n;i++){const s=Math.max(-1,Math.min(1,x[i]));v.setInt16(o,s<0?s*0x8000:s*0x7FFF,true);o+=2}
+  return new Blob([ab],{type:"audio/wav"});
+}
+async function notaLimpia(blob){
+  const AC=window.AudioContext||window.webkitAudioContext; if(!AC)return null;
+  let ctx=null;
+  try{
+    ctx=new AC();
+    const audio=await ctx.decodeAudioData(await blob.arrayBuffer());
+    const d0=audio.getChannelData(0);
+    let pico=0; for(let i=0;i<d0.length;i+=4){const a=Math.abs(d0[i]); if(a>pico)pico=a}
+    if(!pico){try{ctx.close()}catch(e){}return null}
+    const Off=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+    const off=new Off(1,Math.max(1600,Math.ceil(audio.duration*16000)),16000);
+    const src=off.createBufferSource();src.buffer=audio;src.connect(off.destination);src.start();
+    const out=await off.startRendering();
+    try{ctx.close()}catch(e){}
+    const x=out.getChannelData(0);
+    let p2=0; for(let i=0;i<x.length;i++){const a=Math.abs(x[i]); if(a>p2)p2=a}
+    // subimos hasta dejar el pico en -3 dBFS, con techo de +30 dB para no inflar puro silencio
+    const gan=Math.min(Math.pow(10,-3/20)/(p2||1),31.6);
+    const y=new Float32Array(x.length);
+    for(let i=0;i<x.length;i++){y[i]=Math.max(-1,Math.min(1,x[i]*gan))}
+    return {blob:wavDe16k(y), picoDb:20*Math.log10(pico||1e-9), ganDb:20*Math.log10(gan)};
+  }catch(e){ try{ctx&&ctx.close()}catch(_){} return null }
+}
 async function mandarGrabacion(){
   const dur=Math.round((Date.now()-recT0)/100)/10;
   pararNivel();
@@ -649,11 +704,13 @@ async function mandarGrabacion(){
   const blob=new Blob(chunks,{type:(mediaRec&&mediaRec.mimeType)||"audio/webm"});
   if(!blob.size||dur<0.4){micReset("Muy corto, otra vez");return}
   try{
-    const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(",")[1]);r.onerror=rej;r.readAsDataURL(blob)});
-    const r=await fetch(RELAY+"casitaVoz",{method:"POST",headers:H,body:JSON.stringify({audio_b64:b64,mime:blob.type,dur,sid:"jj"})});
+    const limpia=await notaLimpia(blob);
+    const envio=limpia&&limpia.blob?limpia.blob:blob;
+    const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(",")[1]);r.onerror=rej;r.readAsDataURL(envio)});
+    const r=await fetch(RELAY+"casitaVoz",{method:"POST",headers:H,body:JSON.stringify({audio_b64:b64,mime:envio.type,dur,sid:"jj",gan:limpia?Math.round(limpia.ganDb):0})});
     const d=await r.json();
     if(!d.ok)throw new Error(d.error||"no subió");
-    bubble("🎤 Nota de voz ("+Math.round(d.dur)+"s)","u");vib([20,40,20]);
+    bubble("🎤 Nota de voz ("+Math.round(d.dur)+"s)","u");vib([20,40,20]);try{landReset()}catch(e){}
     sendMsg("🎤 Te mando una nota de voz de "+Math.round(d.dur)+" segundos.\nTranscríbela desde aquí y contéstame: "+RELAY+"casitaVoz?id="+d.id,"1");
     $("mic").textContent="🎙️ HÁBLAME";
     return;
@@ -1145,11 +1202,32 @@ function _acostarViejo(on){
   setTimeout(()=>{try{bikePaint()}catch(e){}},420);
 }
 
+let landTimer=null;
+function landReset(){
+  clearInterval(landTimer);landTimer=null;
+  const b=document.getElementById("landMic"), p=document.getElementById("landPill");
+  if(b){b.textContent="🎙️ HABLAR";b.classList.remove("grabando")}
+  if(p)p.classList.remove("on");
+}
 function hablarDesdeLand(){
-  // la grabación vive en el dock de la casita, que en horizontal queda tapado:
-  // regresamos al tablero y arrancamos la nota de voz de una vez.
-  try{ acostar(false); }catch(e){}
-  setTimeout(()=>{ try{ micToggle(); }catch(e){} }, 380);
+  // se graba AQUÍ MISMO, sin regresar al tablero vertical
+  const b=document.getElementById("landMic"), p=document.getElementById("landPill");
+  if(typeof recOn!=="undefined" && recOn){ try{pararGrabacion()}catch(e){} return }
+  try{ micToggle(); }catch(e){}
+  const ok=(typeof recOn!=="undefined" && recOn);
+  if(!ok){
+    landReset();
+    if(typeof bubble==="function") bubble("🎙️ No pude abrir el micrófono aquí. Ábreme en Chrome directo y dale PERMITIR.","a");
+    return;
+  }
+  if(b){b.textContent="🔴 TOCA PARA MANDAR";b.classList.add("grabando")}
+  if(p){p.classList.add("on");const s0=Date.now();
+    clearInterval(landTimer);
+    landTimer=setInterval(()=>{
+      if(typeof recOn==="undefined"||!recOn){landReset();return}
+      const el=document.getElementById("landSec"); if(el)el.textContent=Math.floor((Date.now()-s0)/1000);
+    },400);
+  }
 }
 </script>
 </body></html>

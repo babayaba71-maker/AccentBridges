@@ -123,7 +123,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">v2.5 · GPS · sabe dónde estás</div>
+        <div class="badge" id="placa">v3.5 · voz en inglés</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -145,6 +145,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
     <button class="icon" id="fotoBtn" onclick="document.getElementById('foto').click()" title="Screenshot">📷</button>
     <button class="icon" id="archBtn" onclick="document.getElementById('arch').click()" title="Archivo">📄</button>
     <button class="icon" id="voice" onclick="voiceToggle()" title="Voz de Alma">🔊</button>
+    <button class="icon" id="key" onclick="llaveDirecta()" title="Línea directa (llave b44_)">🔑</button>
     <button class="icon off" id="gps" onclick="gpsToggle()" title="Ubicación apagada">📍</button>
   </div>
 </div>
@@ -318,28 +319,171 @@ function bubble(txt,who){
   $("chat").scrollTop=$("chat").scrollHeight;
   return d;
 }
-function speak(t){
-  if(!voiceOn||!("speechSynthesis" in window))return;
-  speechSynthesis.cancel();
-  const clean=t.replace(/https?:\/\/\S+/g,"enlace").replace(/[*_~`>#|]/g,"")
-    .replace(/[\u{1F300}-\u{1FAFF}\u2700-\u27BF\u2600-\u26FF]/gu,"").replace(/\s+/g," ").trim().slice(0,1200);
-  const u=new SpeechSynthesisUtterance(clean);
-  u.lang="es-MX";u.rate=1.02;
-  const vs=speechSynthesis.getVoices().filter(v=>v.lang.startsWith("es"));
-  if(vs.length)u.voice=vs[0];
-  u.onstart=()=>setModo("speaking");
-  u.onend=()=>setModo("idle");
-  setModo("speaking");
-  speechSynthesis.speak(u);
+// ---------- LA VOZ (gratis, la del telefono) ----------
+// Orden de JJ (29-oct, noche): "la voz de Eleven Labs, quitala. No vamos a
+// gastar dinero en esta estupidez. Google tiene una voz gratis, esa es la que
+// vamos a usar." Asi que aqui suena SOLO speechSynthesis (motor de Google del
+// telefono): cero red, cero costo. Si el S22 no trae voz en espanol, habla con
+// la que tenga y lo dice en pantalla para que instale los datos de idioma.
+const LLAVE="casita-abvc-clande-2026";
+// LINEA DIRECTA: es la misma que traia el archivo de Google que JJ pegó.
+// Con una llave b44_ de su perfil, la casita habla DIRECTO con la API del agente,
+// sin pasar por mis funciones de relé. Sin llave, todo sigue igual que hoy.
+const API_AG="https://app.base44.com/api/agents/6adecb1874687a1b299764fa";
+let TOK=localStorage.getItem("casita_token")||"";
+async function apiAg(p,o){
+  o=o||{};
+  const r=await fetch(API_AG+p,{method:o.method||"GET",
+    headers:{Authorization:"Bearer "+TOK,"Content-Type":"application/json"},body:o.body});
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  return r.json();
 }
+async function convDirecta(){
+  if(CID){try{await apiAg("/conversations/"+CID);return CID}catch(e){}}
+  const c=await apiAg("/conversations",{method:"POST",body:"{}"});
+  CID=c.id;localStorage.setItem("casita_conv",CID);return CID;
+}
+function llaveDirecta(){
+  const t=prompt("Pega tu llave de Alma (pestaña Developer de mi perfil, empieza con b44_). Déjala vacía para borrarla.",TOK);
+  if(t===null)return;
+  const v=t.trim();
+  if(!v){TOK="";localStorage.removeItem("casita_token");$("status").textContent="Línea directa apagada: uso el relé.";return}
+  if(v.indexOf("b44_")!==0){$("status").textContent="Esa llave no empieza con b44_. Cópiala otra vez.";return}
+  TOK=v;localStorage.setItem("casita_token",v);
+  $("status").textContent="Línea directa encendida: hablo con la API del agente.";
+}
+let audioAlma=null;
+
+function limpiarVoz(t){
+  return String(t||"").replace(/https?:\/\/\S+/g,"enlace").replace(/[*_~`>#|]/g,"")
+    .replace(/[\u{1F300}-\u{1FAFF}\u2700-\u27BF\u2600-\u26FF]/gu,"").replace(/\s+/g," ")
+    .trim().slice(0,700);
+}
+
+async function speak(t){
+  if(!voiceOn)return;
+  const clean=limpiarVoz(t);
+  if(!clean)return;
+  // 29-oct noche, orden de JJ: "la voz de Eleven Labs, quitala. Google tiene una
+  // voz gratis, esa es la que vamos a usar." Cero red, cero costo: solo la voz
+  // del telefono (motor de Google). Si no hay voz, los avisos de la pagina lo dicen.
+  vozNavegador(clean);
+}
+
+// parte el texto en trozos porque las voces del telefono cortan los textos largos
+function partirVoz(t,max){
+  const out=[];let s=String(t||"").trim();
+  while(s.length>max){
+    let i=s.lastIndexOf(". ",max);
+    if(i<40)i=s.lastIndexOf(", ",max);
+    if(i<40)i=max;
+    out.push(s.slice(0,i+1).trim());
+    s=s.slice(i+1).trim();
+  }
+  if(s)out.push(s);
+  return out;
+}
+
+
+
+function vozNavegador(clean){
+  if(!("speechSynthesis" in window)){$("status").textContent="Este navegador no tiene voz. Ábreme en Chrome.";return}
+  try{speechSynthesis.cancel();speechSynthesis.resume();}catch(e){}
+  const todas=speechSynthesis.getVoices()||[];
+  const es=todas.filter(v=>v.lang&&v.lang.toLowerCase().startsWith("es"));
+  // antes que nada: la de Google en espanol. Si el telefono no trae ninguna en
+  // espanol (el caso del S22), usa la que exista antes que quedarse muda.
+  // 29-oct: su nota de 20 s traia mi saludo y luego su voz: "ahora hablas como
+  // espanola". La voz gratis si sonaba, pero elegia castellano. Orden nuevo:
+  // primero mexicana/latina (es-MX, es-US, es-419, y el resto de America), y
+  // solo despues la de Espana. Mismo motor, cero costo.
+  // 29-oct 21:51, orden de JJ en su nota de 5 s: "Prefiero una voz en ingles,
+  // en realidad." Primero inglesa (Google en-US de preferencia), y de ahi la
+  // mexicana/latina. Mismo speechSynthesis gratis, cero costo.
+  const en=todas.filter(v=>v.lang&&/^en/i.test(v.lang));
+  const deAca=es.filter(v=>!/es-es/i.test(v.lang));
+  const elegida=en.find(v=>/en-us/i.test(v.lang)&&/google/i.test(v.name))
+            ||en.find(v=>/google/i.test(v.name))
+            ||en.find(v=>/en-us/i.test(v.lang))
+            ||en[0]
+            ||deAca.find(v=>/es-mx/i.test(v.lang))
+            ||deAca.find(v=>/es-us|es-419/i.test(v.lang))
+            ||deAca[0]
+            ||es.find(v=>/google/i.test(v.name))
+            ||es[0]
+            ||todas.find(v=>/google/i.test(v.name))
+            ||todas[0]||null;
+  if(!todas.length){
+    $("status").textContent="El telefono aun no me da voces. Toca otra vez o pon Ajustes > Texto a voz.";
+  }else if(!es.length){
+    $("status").textContent="Tu S22 no tiene voz en espanol: hablo con la que trae ("+elegida.name+"). Instala Ajustes > Texto a voz > datos en espanol.";
+  }
+  const trozos=partirVoz(clean,180);
+  let i=0;
+  setModo("speaking");
+  const siguiente=function(){
+    if(i>=trozos.length){setModo("idle");return}
+    const u=new SpeechSynthesisUtterance(trozos[i++]);
+    u.lang=(elegida&&elegida.lang)||"es-MX";
+    if(elegida)u.voice=elegida;
+    u.rate=1.03;u.volume=1;u.pitch=1;
+    let vigia=null, reintento=false;
+    const limpiar=function(){if(vigia){clearTimeout(vigia);vigia=null}};
+    // 29-oct: el dijo "ya me puedes oir, pero ya no puedes contestar". El saludo
+    // sonaba (lo dispara su toque) y las respuestas no. En Android, si la pagina
+    // lleva rato sin un toque, el motor se traga la frase en silencio. Si en
+    // 1.2 s nadie esta hablando, se la repito UNA vez.
+    vigia=setTimeout(function(){
+      if(reintento)return;
+      try{ if(!speechSynthesis.speaking){ reintento=true; speechSynthesis.cancel(); speechSynthesis.resume(); speechSynthesis.speak(u); } }catch(e){ setModo("idle"); }
+    },1200);
+    u.onend=function(){limpiar();siguiente()};
+    u.onerror=function(e){
+      limpiar();
+      setModo("idle");
+      const err=(e&&e.error)||"error";
+      if(err!=="interrupted"&&err!=="canceled")
+        $("status").textContent="Sin voz en el teléfono ("+err+"). Ajustes > Texto a voz > motor de Google.";
+    };
+    try{speechSynthesis.speak(u)}catch(e){setModo("idle")}
+  };
+  // que se vea SIEMPRE con que voz hablo, para saber si es mejicana o castellana
+  if(!window.vozDicha && elegida){
+    window.vozDicha=true;
+    $("status").textContent="voz: "+elegida.name+" ("+elegida.lang+")";
+  }
+  setTimeout(siguiente,60);
+}
+
 function voiceToggle(){
   voiceOn=!voiceOn;
   $("voice").classList.toggle("off",!voiceOn);
   localStorage.setItem("casita_voice",voiceOn?"1":"0");
-  if(!voiceOn){speechSynthesis.cancel();setModo("idle")}
-  else{$("status").textContent="Voz activada";}
+  if(!voiceOn){try{speechSynthesis.cancel();}catch(e){}if(audioAlma){try{audioAlma.pause();}catch(e){}setModo("idle")}}
+  else{
+    const todas=("speechSynthesis" in window)?(speechSynthesis.getVoices()||[]):[];
+    const es=todas.filter(v=>v.lang&&v.lang.toLowerCase().startsWith("es"));
+    if(!es.length){
+      $("status").textContent="Tu teléfono no me dio voces: revisa Ajustes > Texto a voz.";
+    }else{
+      $("status").textContent="Voz activada ("+es[0].name+")";
+    }
+    speak("Listo, Clyde. Voz prendida.");
+  }
 }
 if(!voiceOn)$("voice").classList.add("off");
+
+/* ---------- DESPERTAR LA VOZ ----------
+   El navegador NO deja sonar audio sin un toque del usuario: por eso al abrir
+   la casita no se oía nada. El primer toque en cualquier parte la saluda. */
+let yaSalude=false;
+function despertarVoz(){
+  if(yaSalude||!voiceOn||recOn)return;
+  yaSalude=true;
+  speak("Aquí estoy, Clyde. Ya tengo voz. Toca el micrófono y te escucho.");
+}
+document.addEventListener("pointerdown",despertarVoz,true);
+document.addEventListener("keydown",despertarVoz,true);
 
 /* ---------- hablar con Alma (relé, sin llaves) ---------- */
 async function sendMsg(text,oculto){
@@ -351,9 +495,15 @@ async function sendMsg(text,oculto){
   $("status").textContent="ALMA ESTÁ PENSANDO… (20 s a 2 min)";
   if(gpsOn){ try{ if(!pos||Date.now()-pos.ts>300000){ await gpsFijar(); await gpsLugar(); } }catch(e){} }
   try{
-    const r=await fetch(RELAY+"sendAlmaMessage",{method:"POST",headers:H,body:JSON.stringify({message:conTexto(text).slice(0,4000)})});
-    const d=await r.json();
-    if(d.conversationId&&d.conversationId!==CID){CID=d.conversationId;localStorage.setItem("casita_conv",CID)}
+    if(TOK){
+      await convDirecta();
+      await apiAg("/conversations/"+CID+"/messages",{method:"POST",
+        body:JSON.stringify({content:conTexto(text).slice(0,4000)})});
+    }else{
+      const r=await fetch(RELAY+"sendAlmaMessage",{method:"POST",headers:H,body:JSON.stringify({message:conTexto(text).slice(0,4000)})});
+      const d=await r.json();
+      if(d.conversationId&&d.conversationId!==CID){CID=d.conversationId;localStorage.setItem("casita_conv",CID)}
+    }
   }catch(e){
     bubble("No pude mandar el mensaje — revisa tu internet y reprueba","a");
     sending=false;setModo("idle");return;
@@ -365,8 +515,9 @@ async function poll(){
   pollCount++;
   if(!CID){setModo("idle");return}
   try{
-    const r=await fetch(RELAY+"getAlmaReply",{method:"POST",headers:H,body:JSON.stringify({conversationId:CID})});
-    const d=await r.json();
+    const d=TOK
+      ? await apiAg("/conversations/"+CID)
+      : await (await fetch(RELAY+"getAlmaReply",{method:"POST",headers:H,body:JSON.stringify({conversationId:CID})})).json();
     const fresh=(d.messages||[]).filter(m=>m.content&&!base.has(m.role+"|"+m.content));
     const replies=fresh.filter(m=>m.role==="assistant");
     if(replies.length){
@@ -430,7 +581,7 @@ function empezarNivel(stream){
     medir();
   }catch(e){}
 }
-let picoVoz=.05;
+let picoVoz=.05,vozVista=false,ultimaVoz=0;
 function medir(){
   if(!analyser){ESTADO.nivel=0;return}
   analyser.getByteTimeDomainData(dataBuf);
@@ -440,6 +591,14 @@ function medir(){
   // GANANCIA AUTOMÁTICA: se calibra sola al micrófono de cada teléfono
   if(rms>picoVoz)picoVoz=picoVoz*.7+rms*.3;else picoVoz*=.9993;
   const ref=Math.max(.03,picoVoz*1.15);          // deja aire arriba: la voz normal NO satura
+  // AUTO-ENVIO (como la primera casita que si le gusto): si callas 1.5 s, se manda
+  if(recOn){
+    const ahora=Date.now();
+    if(rms>0.02){vozVista=true;ultimaVoz=ahora}
+    else if(vozVista && ahora-ultimaVoz>1500 && ahora-recT0>1000){
+      vozVista=false;vib([20,40,20]);pararGrabacion();return;
+    }
+  }
   const n=rms<.012?0:Math.min(1,Math.pow(rms/ref,.85));   // compuerta de ruido + curva suave
   ESTADO.nivel=ESTADO.nivel*.40+n*.60;
   nivelLoop=requestAnimationFrame(medir);
@@ -456,22 +615,35 @@ function micReset(msg){
 async function micToggle(){
   if(recOn){pararGrabacion();return}
   if(!navigator.mediaDevices||!window.MediaRecorder){micReset("Este navegador no deja grabar. Ábreme en CHROME directo.");return}
-  try{recStream=await navigator.mediaDevices.getUserMedia({audio:true})}
-  catch(e){micReset("MICRÓFONO BLOQUEADO — ábreme en Chrome y presiona PERMITIR");return}
   try{
-    chunks=[];mediaRec=new MediaRecorder(recStream);
+    recStream=await navigator.mediaDevices.getUserMedia({audio:{
+      echoCancellation:false,      // la cancelación de eco recorta la voz bajita
+      noiseSuppression:false,      // el filtro de ruido se come el habla suave
+      autoGainControl:true,        // sube sola la voz cuando hablas lejos
+      channelCount:1
+    }});
+  }catch(e1){
+    if(e1&&(e1.name==="NotAllowedError"||e1.name==="SecurityError"||e1.name==="PermissionDeniedError")){
+      micReset("MICRÓFONO BLOQUEADO — ábreme en Chrome y presiona PERMITIR");return
+    }
+    // el teléfono no aceptó los ajustes finos: pedimos el micrófono a secas
+    try{ recStream=await navigator.mediaDevices.getUserMedia({audio:true}) }
+    catch(e2){ micReset("MICRÓFONO BLOQUEADO — ábreme en Chrome y presiona PERMITIR");return }
+  }
+  try{
+    chunks=[];mediaRec=new MediaRecorder(recStream,{audioBitsPerSecond:128000});
     mediaRec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
     mediaRec.onstop=mandarGrabacion;
     mediaRec.start();
     empezarNivel(recStream);
     mantenerPantalla();
   }catch(e){micReset("No pude grabar: "+e.message);return}
-  recOn=true;recT0=Date.now();vib(30);setModo("listening");
-  $("mic").textContent="🔴 GRABANDO…";$("mic").classList.add("rec");
+  recOn=true;recT0=Date.now();vozVista=false;ultimaVoz=Date.now();vib(30);setModo("listening");
+  $("mic").textContent="🔴 TE OIGO…";$("mic").classList.add("rec");
   clearInterval(recTimer);
   recTimer=setInterval(()=>{
     const s=Math.floor((Date.now()-recT0)/1000);
-    $("mic").textContent="🔴 GRABANDO "+s+"s · TOCA";
+    $("mic").textContent="🔴 TE OIGO "+s+"s · calla y se manda";
     if(s>=120)pararGrabacion();
   },400);
 }
@@ -479,6 +651,61 @@ function pararGrabacion(){
   clearInterval(recTimer);$("mic").textContent="🎙️ MANDANDO…";setModo("thinking");
   try{mediaRec.stop()}catch(e){}
 }
+async function picoDeNota(blob){
+  try{
+    const ab=await blob.arrayBuffer();
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC) return null;
+    const ac=new AC();
+    const aud=await ac.decodeAudioData(ab);
+    let pico=0;
+    for(let c=0;c<aud.numberOfChannels;c++){
+      const d=aud.getChannelData(c);
+      for(let i=0;i<d.length;i+=4){ const v=Math.abs(d[i]); if(v>pico)pico=v }
+    }
+    try{await ac.close()}catch(e){}
+    return 20*Math.log10(Math.max(pico,1e-6));
+  }catch(e){ return null }
+}
+
+
+/* ---------- NORMALIZADOR: la nota se va con el volumen al tope, no como salga ---------- */
+function wavDe16k(x){
+  const n=x.length, ab=new ArrayBuffer(44+n*2), v=new DataView(ab);
+  const w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+  w(0,"RIFF");v.setUint32(4,36+n*2,true);w(8,"WAVEfmt ");v.setUint32(16,16,true);
+  v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,16000,true);
+  v.setUint32(28,32000,true);v.setUint16(32,2,true);v.setUint16(34,16,true);
+  w(36,"data");v.setUint32(40,n*2,true);
+  let o=44;
+  for(let i=0;i<n;i++){const s=Math.max(-1,Math.min(1,x[i]));v.setInt16(o,s<0?s*0x8000:s*0x7FFF,true);o+=2}
+  return new Blob([ab],{type:"audio/wav"});
+}
+async function notaLimpia(blob){
+  const AC=window.AudioContext||window.webkitAudioContext; if(!AC)return null;
+  let ctx=null;
+  try{
+    ctx=new AC();
+    const audio=await ctx.decodeAudioData(await blob.arrayBuffer());
+    const d0=audio.getChannelData(0);
+    let pico=0; for(let i=0;i<d0.length;i+=4){const a=Math.abs(d0[i]); if(a>pico)pico=a}
+    if(!pico){try{ctx.close()}catch(e){}return null}
+    const Off=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+    const off=new Off(1,Math.max(1600,Math.ceil(audio.duration*16000)),16000);
+    const src=off.createBufferSource();src.buffer=audio;src.connect(off.destination);src.start();
+    const out=await off.startRendering();
+    try{ctx.close()}catch(e){}
+    const x=out.getChannelData(0);
+    let p2=0; for(let i=0;i<x.length;i++){const a=Math.abs(x[i]); if(a>p2)p2=a}
+    // subimos hasta dejar el pico en -3 dBFS, con techo de +30 dB para no inflar puro silencio
+    const gan=Math.min(Math.pow(10,-3/20)/(p2||1),31.6);
+    const y=new Float32Array(x.length);
+    for(let i=0;i<x.length;i++){y[i]=Math.max(-1,Math.min(1,x[i]*gan))}
+    return {blob:wavDe16k(y), picoDb:20*Math.log10(pico||1e-9), ganDb:20*Math.log10(gan)};
+  }catch(e){ try{ctx&&ctx.close()}catch(_){} return null }
+}
+let ultimaNota=null;
+
 async function mandarGrabacion(){
   const dur=Math.round((Date.now()-recT0)/100)/10;
   pararNivel();
@@ -486,18 +713,61 @@ async function mandarGrabacion(){
   recOn=false;$("mic").classList.remove("rec");
   const blob=new Blob(chunks,{type:(mediaRec&&mediaRec.mimeType)||"audio/webm"});
   if(!blob.size||dur<0.4){micReset("Muy corto, otra vez");return}
+  let envio=blob,pico=null;
   try{
-    const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(",")[1]);r.onerror=rej;r.readAsDataURL(blob)});
-    const r=await fetch(RELAY+"casitaVoz",{method:"POST",headers:H,body:JSON.stringify({audio_b64:b64,mime:blob.type,dur,sid:"jj"})});
-    const d=await r.json();
-    if(!d.ok)throw new Error(d.error||"no subió");
-    bubble("🎤 Nota de voz ("+Math.round(d.dur)+"s)","u");vib([20,40,20]);
-    sendMsg("🎤 Te mando una nota de voz de "+Math.round(d.dur)+" segundos.\nTranscríbela desde aquí y contéstame: "+RELAY+"casitaVoz?id="+d.id,"1");
-    $("mic").textContent="🎙️ HÁBLAME";
-    return;
-  }catch(e){micReset("No pude mandar la nota: "+e.message)}
-  $("mic").textContent="🎙️ HÁBLAME";setModo("idle");
+    const limpia=await notaLimpia(blob);
+    if(limpia&&limpia.blob)envio=limpia.blob;
+    pico=limpia?limpia.picoDb:null;
+    if(pico==null)pico=await picoDeNota(blob);
+    if(limpia&&limpia.ganDb>=10)$("status").textContent="VOLUMEN SUBIDO "+Math.round(limpia.ganDb)+" dB · se va limpia";
+  }catch(e){}
+  // el WAV normalizado pesa ~32 KB por segundo (90 s = 2.9 MB y el servidor la rechaza).
+  // el opus original pesa 5 veces menos: si la nota es larga, se manda comprimida.
+  if(envio.size>1200000&&blob.size&&blob.size<envio.size){
+    envio=blob;
+    $("status").textContent="Nota larga: se manda comprimida para que sí entre";
+  }
+  await subirYEnviar(envio,dur,pico);
 }
+
+async function subirYEnviar(envio,dur,pico){
+  setModo("thinking");
+  try{
+    $("status").textContent="Subiendo "+Math.max(1,Math.round(envio.size/1024))+" KB…";
+    const b64=await new Promise(function(res,rej){
+      const r=new FileReader();
+      r.onload=function(){res(String(r.result).split(",")[1])};
+      r.onerror=rej;r.readAsDataURL(envio);
+    });
+    const r=await fetch(RELAY+"casitaVoz",{method:"POST",headers:H,
+      body:JSON.stringify({audio_b64:b64,mime:envio.type,dur:dur,sid:"jj",gan:0})});
+    const d=await r.json();
+    if(!d.ok)throw new Error(d.error||("HTTP "+r.status));
+    bubble("🎤 Nota de voz ("+Math.round(d.dur)+"s)","u");vib([20,40,20]);
+    $("status").textContent="Subida. Mandando el aviso al hilo…";
+    const flojo=(pico!=null&&pico<-32);
+    sendMsg("🎤 Te mando una nota de voz de "+Math.round(d.dur)+" segundos"
+      +(flojo?" (se oyó bajito, pico "+Math.round(pico)+" dB)":"")
+      +".\nTranscríbela desde aquí y contéstame: "+RELAY+"casitaVoz?id="+d.id,"1");
+    ultimaNota=null;
+    $("mic").textContent="🎙️ HÁBLAME";setModo("idle");
+    $("status").textContent="Nota enviada ✓";
+  }catch(e){
+    ultimaNota={blob:envio,dur:dur,pico:pico};
+    $("mic").textContent="🎙️ HÁBLAME";setModo("idle");
+    $("status").textContent="No se mandó ("+((e&&e.message)||e)+") · TOCA AQUÍ para reintentar";
+  }
+}
+
+// tocar el renglón de estado reintenta la nota que no salió (sin volver a grabar)
+document.addEventListener("DOMContentLoaded",function(){
+  const st=$("status");
+  if(st)st.addEventListener("click",function(){
+    if(!ultimaNota)return;
+    const n=ultimaNota;ultimaNota=null;
+    subirYEnviar(n.blob,n.dur,n.pico);
+  });
+});
 
 /* ---------- modo orb: quitar / poner las letras ---------- */
 function aplicarOrb(si){
