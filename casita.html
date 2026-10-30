@@ -123,7 +123,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">v3.8 · voz mexicana</div>
+        <div class="badge" id="placa">v3.9 · escojo idioma</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -147,6 +147,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
     <button class="icon" id="voice" onclick="voiceToggle()" title="Voz de Alma">🔊</button>
     <button class="icon" id="key" onclick="llaveDirecta()" title="Línea directa (llave b44_)">🔑</button>
     <button class="icon off" id="gps" onclick="gpsToggle()" title="Ubicación apagada">📍</button>
+    <button class="icon" id="lang" onclick="idiomaToggle()" title="Idioma de la voz">🇲🇽</button>
   </div>
 </div>
 
@@ -407,17 +408,25 @@ function vozNavegador(clean){
   // en español, así que manda la voz en español: primero mexicana/latina
   // (es-MX, es-US, es-419 y el resto de América), después España, y SOLO si el
   // teléfono no tiene ninguna en español, la inglesa. Mismo motor, cero costo.
-  const elegida=deAca.find(v=>/es-mx/i.test(v.lang)&&/google/i.test(v.name))
+  const cadenaEs=deAca.find(v=>/es-mx/i.test(v.lang)&&/google/i.test(v.name))
             ||deAca.find(v=>/es-mx/i.test(v.lang))
             ||deAca.find(v=>/es-us|es-419/i.test(v.lang))
             ||deAca.find(v=>/google/i.test(v.name))
             ||deAca[0]
             ||es.find(v=>/google/i.test(v.name))
             ||es[0]
-            ||en.find(v=>/en-us/i.test(v.lang)&&/google/i.test(v.name))
+            ||null;
+  const cadenaEn=en.find(v=>/en-us/i.test(v.lang)&&/google/i.test(v.name))
+            ||en.find(v=>/google/i.test(v.name))
+            ||en.find(v=>/en-us/i.test(v.lang))
             ||en[0]
-            ||todas.find(v=>/google/i.test(v.name))
-            ||todas[0]||null;
+            ||null;
+  // 30-oct (JJ: "yo te dije una voz en ingles, pero NO hablando espanol... hable
+  // ingles para hablar ingles yo con ella"): el idioma de la voz lo elige el boton
+  // 🇲🇽/🇺🇸. En ingles la casita dice sus frases en ingles Y le pide a Alma que
+  // conteste en ingles, para que el practique. El texto nunca va en un idioma y la
+  // voz en otro.
+  const elegida=(LANG==="en")?(cadenaEn||cadenaEs):(cadenaEs||cadenaEn)||todas.find(v=>/google/i.test(v.name))||todas[0]||null;
   if(!todas.length){
     // Android casi siempre entrega la lista de voces DESPUES del primer toque.
     // Antes: aqui se rendia muda. Ahora: espera el aviso y se reintenta sola.
@@ -478,6 +487,22 @@ function vozNavegador(clean){
   setTimeout(siguiente,60);
 }
 
+let LANG=(localStorage.getItem("casita_lang")||"es");
+function pintarIdioma(){
+  const b=$("lang"); if(!b)return;
+  b.textContent=(LANG==="en")?"🇺🇸":"🇲🇽";
+  b.title=(LANG==="en")?"Voz en inglés (practicas tú)":"Voz en español";
+}
+function idiomaToggle(){
+  LANG=(LANG==="en")?"es":"en";
+  localStorage.setItem("casita_lang",LANG);
+  pintarIdioma();
+  window.vozDicha=false;
+  speak(LANG==="en"
+    ? "English mode. I speak English, and I answer you in English so you can practice."
+    : "Modo español. Te hablo y te contesto en español, Clyde.");
+}
+
 function voiceToggle(){
   voiceOn=!voiceOn;
   $("voice").classList.toggle("off",!voiceOn);
@@ -495,6 +520,7 @@ function voiceToggle(){
   }
 }
 if(!voiceOn)$("voice").classList.add("off");
+pintarIdioma();
 
 /* ---------- DESPERTAR LA VOZ ----------
    El navegador NO deja sonar audio sin un toque del usuario: por eso al abrir
@@ -503,7 +529,9 @@ let yaSalude=false;
 function despertarVoz(){
   if(yaSalude||!voiceOn||recOn)return;
   yaSalude=true;
-  speak("Aquí estoy, Clyde. Ya tengo voz. Toca el micrófono y te escucho.");
+  speak(LANG==="en"
+    ? "Here I am, Clyde. I have a voice. Tap the mic and talk to me."
+    : "Aquí estoy, Clyde. Ya tengo voz. Toca el micrófono y te escucho.");
 }
 document.addEventListener("pointerdown",despertarVoz,true);
 document.addEventListener("keydown",despertarVoz,true);
@@ -896,10 +924,11 @@ async function gpsToggle(){
 }
 
 function conTexto(t){
-  if(!gpsOn || !pos) return t;
+  const orden = (LANG==="en") ? "[\u00a1OJO! Estoy en modo inglés: contéstame EN INGLÉS, corto y natural.]\n" : "";
+  if(!gpsOn || !pos) return orden+t;
   const rato = (Date.now()-pos.ts) > 300000;
   const etiqueta = pos.lugar || "colonia sin nombre";
-  return "[📍 "+etiqueta+" · "+pos.lat+", "+pos.lon+" · \u00b1"+pos.prec+" m"+(rato?" · dato de hace rato":"")+"]\n"+t;
+  return orden+"[📍 "+etiqueta+" · "+pos.lat+", "+pos.lon+" · \u00b1"+pos.prec+" m"+(rato?" · dato de hace rato":"")+"]\n"+t;
 }
 
 gpsPinta();
