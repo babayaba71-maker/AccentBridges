@@ -95,6 +95,7 @@ public class MainActivity extends Activity {
 
     @Override protected void onCreate(Bundle b) {
         super.onCreate(b);
+        prepararVoz();   // 30-oct: el motor de voz se calienta al abrir, no al primer aviso
 
         FrameLayout raiz = new FrameLayout(this);
         raiz.setBackgroundColor(NAVY);
@@ -121,7 +122,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v3.2 · voz gratis");
+        placa.setText("v3.3 · voz al arrancar");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -358,6 +359,7 @@ public class MainActivity extends Activity {
             Intent i = new Intent(this, RideService.class).setAction(RideService.ACT_START);
             if (Build.VERSION.SDK_INT >= 26) startForegroundService(i); else startService(i);
             sonar(0);
+            aviseGps = false;
             decirAlma("En marcha. Ojos en la calle.");
             Toast.makeText(this, "En marcha. Ojos en la calle 🚴", Toast.LENGTH_SHORT).show();
         }
@@ -372,6 +374,13 @@ public class MainActivity extends Activity {
 
     private String dos(long n) {
         return n < 10 ? ("0" + n) : String.valueOf(n);
+    }
+
+    private boolean aviseGps = false;
+    private void avisarGpsListo(int acc) {
+        if (aviseGps || acc <= 0 || acc > 25) return;
+        aviseGps = true;
+        decirAlma("GPS listo. Contando.");
     }
 
     private void pintar() {
@@ -398,6 +407,7 @@ public class MainActivity extends Activity {
 
             int acc = p.getInt("acc", -1);
             int n = p.getInt("n", 0);
+            avisarGpsListo(acc);
             long ult = p.getLong("ult", 0);
             String senal;
             if (!"todo el tiempo".equals(estadoPermiso().split(" / ")[1]))
@@ -465,6 +475,7 @@ public class MainActivity extends Activity {
     // idioma que tenga. Los tonos y la vibracion siguen de respaldo.
     private TextToSpeech tts = null;
     private boolean ttsListo = false;
+    private String vozPendiente = null;   // frase guardada esperando al motor
 
     private void prepararVoz() {
         if (tts != null) return;
@@ -479,6 +490,10 @@ public class MainActivity extends Activity {
                         }
                         tts.setSpeechRate(1.02f);
                         ttsListo = true;
+                        if (vozPendiente != null) {
+                            final String f = vozPendiente; vozPendiente = null;
+                            try { tts.speak(f, TextToSpeech.QUEUE_FLUSH, null, "alma"); } catch (Throwable ignored) {}
+                        }
                     } catch (Throwable ignored) {}
                 }
             });
@@ -492,6 +507,7 @@ public class MainActivity extends Activity {
         if (ttsListo && tts != null) {
             try { tts.speak(frase, TextToSpeech.QUEUE_FLUSH, null, "alma"); return; } catch (Throwable ignored) {}
         }
+        vozPendiente = frase;   // el motor viene en camino: se dice en cuanto llegue
         sonar(0);
     }
 
