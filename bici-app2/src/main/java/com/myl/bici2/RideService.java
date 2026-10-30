@@ -27,6 +27,12 @@ public class RideService extends Service implements LocationListener {
     public static final int NOTIF_ID = 77;
     public static final String ACT_START = "com.myl.bici.START";
     public static final String ACT_STOP  = "com.myl.bici.STOP";
+    /** Retomar un paseo que ya estaba en marcha SIN reiniciar los números.
+     *  Nace del parte del 30-oct: al instalar un APK nuevo Android mata el proceso
+     *  y borra las alarmas, y al abrir la app el paseo seguía "en marcha" del
+     *  guardado viejo, así que nadie le ordenaba nada al servicio (candado NO
+     *  PUESTO, último latido "nunca"). */
+    public static final String ACT_REANUDAR = "com.myl.bici.REANUDAR";
 
     static final String K_ON="on", K_START="start", K_DIST="dist", K_MAX="max",
                         K_ACC="acc", K_N="n", K_ULT="ult", K_SALTO="salto", K_REIN="rein",
@@ -49,24 +55,81 @@ public class RideService extends Service implements LocationListener {
             return START_NOT_STICKY;
         }
 
+        // latido de la alarma: aunque Samsung haya congelado el proceso, aquí
+        // reenganchamos el GPS y pedimos una lectura suelta
+        if (Latido.ACT_LATIDO.equals(accion)) {
+            if (prefs(this).getBoolean(K_ON, false)) {
+                empezarGps();
+                tomarFoco();
+                pedirUna();
+            }
+            return START_STICKY;
+        }
+
         crearCanal();
         iniciarForeground("Arrancando el paseo…");
 
-        if (ACT_START.equals(accion)) {
+        if (ACT_REANUDAR.equals(accion)) {
+            prefs(this).edit().putBoolean(K_ON, true).apply();
+            anclaGps = null; anclaRed = null; ultimoGpsT = 0L;   // al retomar, el ancla vieja ya no sirve
+            try { Latido.programar(this); } catch (Exception ignored) {}
+        } else if (ACT_START.equals(accion)) {
             SharedPreferences p = prefs(this);
             p.edit().putBoolean(K_ON,true).putLong(K_START,System.currentTimeMillis())
                 .putFloat(K_DIST,0f).putFloat(K_MAX,0f).putInt(K_N,0).putFloat(K_SALTO,0f)
-                .putInt(K_ACC,-1).putLong(K_ULT,0L).putInt(K_REIN,0).apply();
+                .putInt(K_ACC,-1).putLong(K_ULT,0L).putInt(K_REIN,0)
+                .putLong("finT",0L).putFloat("finDist",0f).putLong("finSeg",0L).putFloat("finMax",0f).apply();
             ultimo = null;
+            anclaGps = null; anclaRed = null; ultimoGpsT = 0L;   // paseo nuevo, ancla nueva (si no, sumaría el salto desde el punto viejo)
             String ver = "?";
             try { ver = getPackageManager().getPackageInfo(getPackageName(), 0).versionName; } catch (Exception ignored) {}
-            p.edit().putString(K_VER, ver).putInt(K_VIG, 0).putLong(K_VIGT, 0L).putBoolean(K_CAND, false).apply();
+            p.edit().putString(K_VER, ver).putInt(K_VIG, 0).putLong(K_VIGT, 0L).putBoolean(K_CAND, false)
+                .putInt("latidos", 0).putLong("latidoT", 0L).apply();
+            Latido.programar(this);   // alarma propia, independiente del proceso
         }
 
         empezarGps();
         tomarFoco();
+        // cualquier arranque con el paseo vivo reprograma la alarma
+        if (prefs(this).getBoolean(K_ON, false)) Latido.programar(this);
         vigia.postDelayed(chequeo, 30000);
         return START_STICKY;
+    }
+
+    private void pedirUna() {
+        try {
+            if (lm == null) lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            if (lm == null) return;
+            Location ult = null;
+            try { ult = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER); } catch (Exception ignored) {}
+            if (ult != null && System.currentTimeMillis() - ult.getTime() < 20000) onLocationChanged(ult);
+            if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                lm.requestSingleUpdate(LocationManager.GPS_PROVIDER, this, Looper.getMainLooper());
+            if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+                lm.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, Looper.getMainLooper());
+        } catch (Exception ignored) {}
+    }
+
+    private android.location.GnssStatus.Callback gnss;
+    /** punto de referencia para sumar distancia (ver onLocationChanged) */
+    private Location anclaGps;
+    private Location anclaRed;
+    private long ultimoGpsT = 0L;
+    private void contarSatelites() {
+        // 30-oct: saber si el telefono VE satelites o solo antenas. ±100 m
+        // significa antena; el parte necesita decirlo con nombre y apellido.
+        if (Build.VERSION.SDK_INT < 24 || lm == null || gnss != null) return;
+        try {
+            gnss = new android.location.GnssStatus.Callback() {
+                @Override public void onSatelliteStatusChanged(android.location.GnssStatus st) {
+                    int usados = 0, vistos = st.getSatelliteCount();
+                    for (int i = 0; i < vistos; i++) if (st.usedInFix(i)) usados++;
+                    prefs(RideService.this).edit().putInt("sats", vistos)
+                            .putInt("satsUsados", usados).apply();
+                }
+            };
+            lm.registerGnssStatusCallback(gnss, null);
+        } catch (Exception ignored) {}
     }
 
     private void empezarGps() {
@@ -78,6 +141,7 @@ public class RideService extends Service implements LocationListener {
             if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
                 lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 0, this);
         } catch (Exception e) { /* sin permiso o sin proveedor */ }
+        contarSatelites();
     }
 
     // Android puede dejar de entregar lecturas (permiso "solo con la app abierta",
@@ -102,6 +166,7 @@ public class RideService extends Service implements LocationListener {
                 } catch (Exception ignored) {}
                 p.edit().putInt(K_VIG, p.getInt(K_VIG,0)+1)
                         .putLong(K_VIGT, System.currentTimeMillis())
+                        .putLong("vivo", System.currentTimeMillis())
                         .putBoolean(K_CAND, cand).putBoolean(K_PWR, pwr).putBoolean(K_IDLE, idle).apply();
 
                 long ult = p.getLong(K_ULT,0);
@@ -130,6 +195,28 @@ public class RideService extends Service implements LocationListener {
     // Samsung congela el proceso a los ~2 min con la pantalla apagada: sin esto ni
     // el GPS ni el vigilante corren (parte de JJ: 16 lecturas, luego 2 min dormido,
     // "reinicios 0" = el vigia tampoco despertó).
+    private PowerManager.WakeLock pantalla;
+    private void fijarPantalla() {
+        // 30-oct (JJ: "todavía se queda dormida"): el flag de la actividad sólo
+        // defiende mientras la pantalla del tablero está al frente. Este candado
+        // vive en el SERVICIO, así que la pantalla no se apaga sola aunque el
+        // tablero pase a segundo plano. Se suelta al PARAR.
+        try {
+            if (pantalla != null && pantalla.isHeld()) return;
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            if (pm == null) return;
+            pantalla = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "alma_bici:pantalla");
+            pantalla.setReferenceCounted(false);
+            pantalla.acquire(6 * 60 * 60 * 1000L);
+            prefs(this).edit().putBoolean("pantallaFija", pantalla.isHeld()).apply();
+        } catch (Exception ignored) {}
+    }
+
+    private void soltarPantalla() {
+        try { if (pantalla != null && pantalla.isHeld()) pantalla.release(); } catch (Exception ignored) {}
+        try { prefs(this).edit().putBoolean("pantallaFija", false).apply(); } catch (Exception ignored) {}
+    }
+
     private void tomarFoco() {
         try {
             if (foco != null && foco.isHeld()) return;
@@ -141,15 +228,47 @@ public class RideService extends Service implements LocationListener {
             prefs(this).edit().putBoolean(K_CAND, foco.isHeld()).apply();
             prefs(this).edit().putBoolean("candado", foco.isHeld()).apply();
         } catch (Exception ignored) {}
+        fijarPantalla();
     }
 
-    private void soltarFoco() {
+    private void soltarFoco() { soltarFoco(true); }
+
+    /**
+     * matarPaseo=true  -> JJ apretó PARAR: se suelta todo y se apaga la alarma.
+     * matarPaseo=false -> el servicio se está muriendo con el paseo VIVO: se suelta
+     * el candado pero la alarma SIGUE programada, porque es justo la que va a
+     * revivir el paseo. Ése era el bug de la 3.5: onDestroy cancelaba el latido
+     * en el momento exacto en que se necesitaba (parte: "candado NO PUESTO",
+     * "latidos 0").
+     */
+    private void soltarFoco(boolean matarPaseo) {
         try { if (foco != null && foco.isHeld()) foco.release(); } catch (Exception ignored) {}
         try { prefs(this).edit().putBoolean("candado", false).apply(); } catch (Exception ignored) {}
+        if (matarPaseo) {
+            soltarPantalla();
+            try { Latido.cancelar(this); } catch (Exception ignored) {}
+        }
         foco = null;
     }
 
+    private void soltarSatelites() {
+        try { if (gnss != null && lm != null) lm.unregisterGnssStatusCallback(gnss); } catch (Exception ignored) {}
+        gnss = null;
+    }
+
     private void parar() {
+        // 30-oct: al PARAR se guarda el resumen del paseo (finDist/finSeg/finMax)
+        // para que la pantalla pueda mostrar el paseo terminado completo en vez
+        // de dejar el número viejo con el reloj en 0:00.
+        SharedPreferences p0 = prefs(this);
+        long ini = p0.getLong(K_START, 0L);
+        long segFin = ini > 0 ? Math.max(0, (System.currentTimeMillis() - ini) / 1000) : 0;
+        p0.edit().putFloat("finDist", p0.getFloat(K_DIST, 0f))
+                 .putLong("finSeg", segFin)
+                 .putFloat("finMax", p0.getFloat(K_MAX, 0f))
+                 .putLong("finT", System.currentTimeMillis()).apply();
+
+        soltarSatelites();
         try { if (lm != null) lm.removeUpdates(this); } catch (Exception ignored) {}
         soltarFoco();
         prefs(this).edit().putBoolean(K_ON,false).apply();
@@ -159,51 +278,111 @@ public class RideService extends Service implements LocationListener {
 
     @Override public void onDestroy() {
         vigia.removeCallbacks(chequeo);
-        soltarFoco();
+        boolean paseoVivo = false;
+        try { paseoVivo = prefs(this).getBoolean(K_ON, false); } catch (Exception ignored) {}
+        soltarFoco(!paseoVivo);
         try { if (lm != null) lm.removeUpdates(this); } catch (Exception ignored) {}
         super.onDestroy();
     }
 
+    // 30-oct (nota de voz de JJ: "los ceros no se mueven ni caminando, y tengo
+    // el GPS prendido y estoy afuera"). BUG MÍO, doble: (1) se sumaba sólo con
+    // precisión <= 60 m y saltos > 2 m, así que caminando a 1.4 m/s con lecturas
+    // cada segundo el salto (1.4 m) NUNCA pasaba el filtro; (2) se comparaba
+    // contra la última lectura de CUALQUIER proveedor, así que un punto de antena
+    // (±100 m) envenenaba la comparación. Nuevo método: ANCLA.
+    //  - La distancia sólo se suma con lecturas de satélite (provider gps).
+    //  - Se guarda un punto ancla; cuando el nuevo punto se aleja del ancla más
+    //    que el margen (8 a 40 m, según la precisión real) se suma ESA distancia
+    //    y el ancla se mueve. Así el temblor de la señal no acumula metros falsos
+    //    y caminar despacio sí cuenta.
+    //  - Si la precisión es mala (50-120 m) pero hay velocidad, se suma
+    //    velocidad x tiempo como respaldo, para no volver a mostrar ceros.
+    // 30-oct (parte real de JJ desde la bici: "0/1 satelites · ANTENA (sin
+    // satelites", 0.03 km en 7:30). El telefono NO esta viendo el cielo: sus
+    // lecturas son de antena telefonica (±18 m), y la 4.2 solo confiaba en
+    // satelites, asi que la bici seguia marcando cero. Ahora hay DOS cadenas
+    // de ancla, una por proveedor, y se suma con la que este mandando:
+    //  - Si hay satelites, manda la cadena GPS (margen 10-60 m).
+    //  - Si no hay satelites hace 30 s, manda la cadena de ANTENA (margen
+    //    30-90 m, porque el error de antena es mucho mayor). Mejor un numero
+    //    con 10% de error que un cero perfecto.
+    //  - Nunca se mezclan las dos cadenas (eso inventaria saltos de 100 m).
+    // Tambien se guarda si el GPS del SISTEMA esta encendido, para separar
+    // "GPS apagado en el telefono" de "GPS prendido pero sin satelites".
     @Override public void onLocationChanged(Location loc) {
         if (loc == null) return;
         SharedPreferences p = prefs(this);
         if (!p.getBoolean(K_ON,false)) return;
 
-        float acc = loc.hasAccuracy() ? loc.getAccuracy() : 99f;
+        float acc = loc.hasAccuracy() ? loc.getAccuracy() : 199f;
+        boolean esGps = loc.getProvider() != null && loc.getProvider().contains("gps");
         float dist = p.getFloat(K_DIST,0f);
-        float max = p.getFloat(K_MAX,0f);
+        float max  = p.getFloat(K_MAX,0f);
         int n = p.getInt(K_N,0) + 1;
-        float saltoMax = p.getFloat(K_SALTO,0f);
+        boolean sumado = false;
+        long ahoraMs = System.currentTimeMillis();
 
-        if (ultimo != null) {
-            long dtMs = loc.getTime() - ultimo.getTime();
-            double dt = dtMs / 1000.0;
-            double d = distancia(ultimo.getLatitude(), ultimo.getLongitude(), loc.getLatitude(), loc.getLongitude());
-            if (d > saltoMax) saltoMax = (float) d;
-
-            float vel = loc.hasSpeed() ? loc.getSpeed() * 3.6f : (dt > 0 ? (float)((d/dt)*3.6) : 0f);
-            if (vel > 60f) vel = 60f;
-            if (vel > max) max = vel;
-
-            boolean sumado = false;
-            if (dt > 0.5 && d < 200 && loc.hasAccuracy() && acc <= 60 && d > 2 && n > 2) {
-                double vImp = (d/dt)*3.6;
-                if (vImp <= 70) { dist += (float) d; sumado = true; }
-            }
-            if (!sumado && n > 2 && acc <= 80 && loc.hasSpeed() && loc.getSpeed() > 0.6f && dt > 0.5 && dt < 30) {
-                float m = (float)(loc.getSpeed() * dt);
-                if (m < 200) dist += m;
-            }
+        if (esGps) {
+            ultimoGpsT = ahoraMs;
+            p.edit().putLong("ultimoGps", ahoraMs).apply();
+            anclaRed = null;              // llegó satélite: la cadena de antena se descarta
         }
-        ultimo = loc;
+        boolean mandaGps = esGps || (ahoraMs - ultimoGpsT) < 30000L;
+
+        if (mandaGps == esGps || !mandaGps) {
+            Location ancla = esGps ? anclaGps : anclaRed;
+            float margen = esGps ? Math.max(10f, Math.min(acc * 1.5f, 60f))
+                                 : Math.max(30f, Math.min(acc * 2f, 90f));
+            float topeVel = esGps ? 70f : 50f;
+
+            if (ancla == null) {
+                ancla = loc;
+            } else {
+                long dtMs = loc.getTime() - ancla.getTime();
+                double dt = dtMs / 1000.0;
+                double d = distancia(ancla.getLatitude(), ancla.getLongitude(),
+                                     loc.getLatitude(), loc.getLongitude());
+
+                if (dt > 1.0 && dt < 600 && d >= margen && d < 2000) {
+                    double vImp = (d / dt) * 3.6;
+                    if (vImp <= topeVel) {
+                        dist += (float) d;
+                        sumado = true;
+                        if (vImp > max) max = (float) vImp;
+                    }
+                    ancla = loc;          // el ancla se mueve aun si el tramo se descartó
+                } else if (loc.hasSpeed() && loc.getSpeed() > 0.6f
+                           && dt > 1.0 && dt < 60 && acc <= 120f) {
+                    float m = (float)(loc.getSpeed() * dt);
+                    if (m < 500) {
+                        dist += m;
+                        sumado = true;
+                        float vel = loc.getSpeed() * 3.6f;
+                        if (vel <= topeVel && vel > max) max = vel;
+                        ancla = loc;
+                    }
+                }
+            }
+            if (esGps) anclaGps = ancla; else anclaRed = ancla;
+        }
 
         boolean cand = (foco != null && foco.isHeld());
-        p.edit().putBoolean(K_CAND,cand).putFloat(K_DIST,dist).putFloat(K_MAX,max).putInt(K_N,n)
-         .putFloat(K_SALTO,saltoMax).putInt(K_ACC,Math.round(acc))
-         .putLong(K_ULT,System.currentTimeMillis()).apply();
+        boolean gpsSistema = true;
+        try {
+            android.location.LocationManager lm =
+                    (android.location.LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            gpsSistema = lm != null && lm.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER);
+        } catch (Exception ignored) {}
 
-        long ahora = System.currentTimeMillis();
-        if (ahora - ultimoAviso > 5000) { ultimoAviso = ahora; iniciarForeground(textoNotif(p)); }
+        p.edit().putBoolean(K_CAND,cand).putFloat(K_DIST,dist).putFloat(K_MAX,max).putInt(K_N,n)
+         .putInt(K_ACC,Math.round(acc))
+         .putString("prov", loc.getProvider() == null ? "?" : loc.getProvider())
+         .putBoolean("sumo", sumado)
+         .putBoolean("gpsSistema", gpsSistema)
+         .putLong(K_ULT,ahoraMs).apply();
+
+        if (ahoraMs - ultimoAviso > 5000) { ultimoAviso = ahoraMs; iniciarForeground(textoNotif(p)); }
     }
 
     @Override public void onStatusChanged(String s, int i, Bundle b) {}

@@ -80,7 +80,7 @@ public class MainActivity extends Activity {
     private static final int GRIS = Color.rgb(109, 130, 153);
     private static final int GRIS2 = Color.rgb(110, 130, 150);
 
-    private TextView tvKm, tvTiempo, tvProm, tvMax, tvEstado, tvArrancar, tvParte;
+    private TextView tvKm, tvTiempo, tvProm, tvMax, tvEstado, tvArrancar, tvParte, tvKmLabel;
     private OrbView orb;
     private final Handler h = new Handler(Looper.getMainLooper());
 
@@ -122,7 +122,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v3.4 · parte con datos");
+        placa.setText("v4.4 · resumen del paseo");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -139,7 +139,10 @@ public class MainActivity extends Activity {
         tvKm.setPadding(0, dp(16), 0, 0);
         col.addView(tvKm);
 
-        col.addView(etiqueta("KILÓMETROS"));
+        // 30-oct: la etiqueta cambia a "ÚLTIMO PASEO" cuando el paseo ya terminó,
+        // para que el número grande no parezca atorado.
+        tvKmLabel = etiqueta("KILÓMETROS");
+        col.addView(tvKmLabel);
 
         // ---- rayita de oro
         View raya = new View(this);
@@ -191,6 +194,43 @@ public class MainActivity extends Activity {
 
         // ---- dos pastillas en un solo renglón (antes eran dos botones de 50 y 46 dp
         // y se comían media pantalla: JJ, "esos botones le quitan mucho espacio al GPS")
+        // 🎵 MÚSICA (30-oct, pedido de JJ por nota de voz desde la bici:
+        // "¿crees que le podemos conectar algún botón para que me conecte con
+        // Amazon Prime para oír música?"). Tres teclas grandes: abrir el
+        // reproductor, play/pausa y siguiente, para no soltar el manubrio
+        // buscando la app.
+        LinearLayout filaMusica = new LinearLayout(this);
+        filaMusica.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout.LayoutParams lpFM = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lpFM.topMargin = dp(8);
+        col.addView(filaMusica, lpFM);
+
+        TextView tvMus = boton("🎵  MÚSICA", false);
+        tvMus.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        tvMus.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { abrirMusica(); }
+        });
+        LinearLayout.LayoutParams lpMus = new LinearLayout.LayoutParams(0, dp(42), 1f);
+        lpMus.rightMargin = dp(6);
+        filaMusica.addView(tvMus, lpMus);
+
+        TextView tvPlay = boton("⏯", false);
+        tvPlay.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        tvPlay.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { teclaMusica(android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE); }
+        });
+        LinearLayout.LayoutParams lpPlay = new LinearLayout.LayoutParams(dp(56), dp(42));
+        lpPlay.rightMargin = dp(6);
+        filaMusica.addView(tvPlay, lpPlay);
+
+        TextView tvNext = boton("⏭", false);
+        tvNext.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        tvNext.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { teclaMusica(android.view.KeyEvent.KEYCODE_MEDIA_NEXT); }
+        });
+        filaMusica.addView(tvNext, new LinearLayout.LayoutParams(dp(56), dp(42)));
+
         LinearLayout filaBotones = new LinearLayout(this);
         filaBotones.setOrientation(LinearLayout.HORIZONTAL);
         LinearLayout.LayoutParams lpFB = new LinearLayout.LayoutParams(
@@ -224,7 +264,7 @@ public class MainActivity extends Activity {
         filaBotones.addView(tvVoz, lpVoz);
 
         TextView nota = new TextView(this);
-        nota.setText("Cuenta con la pantalla apagada. 🎙 = mandarme tu voz; déjalo apretado = casita.");
+        nota.setText("Pantalla fija mientras pedaleas. 🎙 = tu voz; déjalo apretado = casita. ⏯ y ⏭ mandan la tecla al reproductor que esté sonando.");
         nota.setTextColor(GRIS2);
         nota.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
         nota.setGravity(Gravity.CENTER);
@@ -372,6 +412,14 @@ public class MainActivity extends Activity {
         return mm + ":" + dos(ss);
     }
 
+    private String hace(long t) {
+        long m = Math.max(0, (System.currentTimeMillis() - t) / 60000);
+        if (m < 1) return "hace un momento";
+        if (m < 60) return "hace " + m + " min";
+        long h = m / 60;
+        return "hace " + h + " h" + (m % 60 > 0 ? " " + (m % 60) + " min" : "");
+    }
+
     private String dos(long n) {
         return n < 10 ? ("0" + n) : String.valueOf(n);
     }
@@ -386,15 +434,39 @@ public class MainActivity extends Activity {
     private void pintar() {
         SharedPreferences p = RideService.prefs(this);
         boolean on = p.getBoolean("on", false);
-        float km = p.getFloat("dist", 0f) / 1000f;
-        long seg = on ? Math.max(0, (System.currentTimeMillis() - p.getLong("start", 0)) / 1000) : 0;
+        // 30-oct (JJ: "pues todavía se sigue cerrando la pantalla"): mientras el
+        // paseo está en marcha, la pantalla NO se apaga sola. Se quita al parar.
+        pantallaPrendida(on);
+        // 30-oct (JJ: "se quedó atorado en el tres cuando terminé el ride"): al
+        // PARAR quedaba 0.03 km con el reloj en 0:00 y promedio 0.0 — número del
+        // paseo viejo con reloj nuevo, se ve atorado y no dice nada. Ahora, si hay
+        // un paseo terminado, la pantalla muestra SU resumen completo (km, tiempo,
+        // promedio, máxima) y la etiqueta dice ÚLTIMO PASEO; los ceros vuelven al
+        // apretar ARRANCAR.
+        long finT = p.getLong("finT", 0L);
+        boolean resumen = !on && finT > 0L;
+
+        float km; long seg; float max;
+        if (on) {
+            km  = p.getFloat("dist", 0f) / 1000f;
+            seg = Math.max(0, (System.currentTimeMillis() - p.getLong("start", 0)) / 1000);
+            max = p.getFloat("max", 0f);
+        } else if (resumen) {
+            km  = p.getFloat("finDist", 0f) / 1000f;
+            seg = p.getLong("finSeg", 0L);
+            max = p.getFloat("finMax", 0f);
+        } else {
+            km  = p.getFloat("dist", 0f) / 1000f;
+            seg = 0L;
+            max = 0f;
+        }
         float prom = seg > 5 ? Math.min(70f, km / (seg / 3600f)) : 0f;
-        float max = p.getFloat("max", 0f);
 
         tvKm.setText(String.format("%.2f", km));
-        tvTiempo.setText(on ? reloj(seg) : "0:00");
+        tvTiempo.setText(reloj(seg));
         tvProm.setText(String.format("%.1f", prom));
         tvMax.setText(String.format("%.1f", max));
+        tvKmLabel.setText(resumen ? "ÚLTIMO PASEO · KILÓMETROS" : "KILÓMETROS");
 
         if (on) {
             tvArrancar.setText("⏸  PARAR");
@@ -426,11 +498,100 @@ public class MainActivity extends Activity {
             g.setCornerRadius(dp(16));
             tvArrancar.setBackground(g);
             tvArrancar.setTextColor(Color.rgb(4, 18, 31));
-            tvEstado.setText("Todo listo. Dale ARRANCAR cuando subas a la bici.");
+            if (resumen) {
+                tvEstado.setText("Paseo terminado " + hace(finT) + " · " + reloj(seg)
+                        + " en la bici. ARRANCAR empieza uno nuevo.");
+            } else {
+                tvEstado.setText("Todo listo. Dale ARRANCAR cuando subas a la bici.");
+            }
         }
 
         // el orb se aviva con la velocidad
         orb.setNivel(on ? Math.min(1f, (prom / 22f) + 0.12f) : 0f);
+    }
+
+    private boolean pantallaFija = false;
+    private void pantallaPrendida(boolean prender) {
+        if (prender == pantallaFija) return;
+        pantallaFija = prender;
+        try {
+            if (prender) getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            else getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } catch (Exception ignored) {}
+    }
+
+    /** 30-oct: el parte tiene que decir si hay satélites o si sólo hay antena. */
+    private String senal(SharedPreferences p) {
+        int sats = p.getInt("sats", -1);
+        int usados = p.getInt("satsUsados", 0);
+        String prov = p.getString("prov", "?");
+        String deDonde = prov.contains("gps") ? "satelite" : (prov.contains("network") ? "ANTENA (sin satelites)" : prov);
+        String cabeza = (sats < 0) ? deDonde : (usados + "/" + sats + " satelites · " + deDonde);
+        // 30-oct: si el parte dice ANTENA hay que distinguir dos mundos muy
+        // distintos: el GPS del telefono APAGADO (se arregla en Ajustes) o
+        // prendido pero sin cielo (bajo techo / cañon urbano). El 4.3 suma
+        // distancia con antena, pero el dato sigue siendo clave.
+        if (!p.getBoolean("gpsSistema", true)) cabeza = "GPS DEL TELEFONO APAGADO · " + cabeza;
+        // edad de la última lectura de SATÉLITE (no de antena): es la que suma distancia
+        long g = p.getLong("ultimoGps", 0L);
+        String cola;
+        if (g == 0L) cola = " · sin lectura de satelite en este paseo";
+        else {
+            long sg = Math.max(0, (System.currentTimeMillis() - g) / 1000);
+            cola = " · satelite hace " + (sg < 60 ? sg + " s" : (sg / 60) + " min");
+        }
+        return cabeza + cola;
+    }
+
+    /** Abre el reproductor: Amazon Music primero, y si no está, el que haya. */
+    private void abrirMusica() {
+        String[][] opciones = {
+                {"com.amazon.mp3", "Amazon Music"},
+                {"com.spotify.music", "Spotify"},
+                {"com.google.android.apps.youtube.music", "YouTube Music"},
+                {"com.google.android.music", "Google Play Music"}
+        };
+        for (String[] o : opciones) {
+            try {
+                Intent it = getPackageManager().getLaunchIntentForPackage(o[0]);
+                if (it != null) {
+                    it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(it);
+                    Toast.makeText(this, "Abriendo " + o[1] + "…", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            } catch (Exception ignored) {}
+        }
+        // no hay reproductor instalado: llevar a Amazon Music en la tienda
+        try {
+            Intent it = new Intent(Intent.ACTION_VIEW,
+                    android.net.Uri.parse("https://music.amazon.com.mx"));
+            startActivity(it);
+            Toast.makeText(this, "No encontré reproductor; abro Amazon Music", Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "No encontré app de música en el teléfono", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /** Manda la tecla al reproductor que esté sonando (sirve para Amazon, Spotify, YouTube…). */
+    private void teclaMusica(int tecla) {
+        try {
+            android.media.AudioManager am =
+                    (android.media.AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            if (am == null) return;
+            long t = android.os.SystemClock.uptimeMillis();
+            am.dispatchMediaKeyEvent(new android.view.KeyEvent(t, t, android.view.KeyEvent.ACTION_DOWN, tecla, 0));
+            am.dispatchMediaKeyEvent(new android.view.KeyEvent(t, t, android.view.KeyEvent.ACTION_UP, tecla, 0));
+        } catch (Exception e) {
+            Toast.makeText(this, "El teléfono no dejó mandar la tecla de música", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private String edadLatido(SharedPreferences p) {
+        long t = p.getLong("latidoT", 0L);
+        if (t <= 0) return "nunca";
+        long s = (System.currentTimeMillis() - t) / 1000L;
+        return s < 90 ? ("hace " + s + " s") : ("hace " + (s / 60) + " min");
     }
 
     private String textoParte() {
@@ -443,7 +604,12 @@ public class MainActivity extends Activity {
                 + String.format("%.1f", p.getFloat("max", 0f))
                 + " km/h. (app Alma Bici " + versionReal() + " · candado " + (p.getBoolean("candado", false) ? "puesto" : "NO PUESTO")
                 + " · GPS ±" + p.getInt("acc", -1) + " m, " + p.getInt("n", 0) + " lecturas"
-                + " · " + edadLectura(p) + " · " + estadoPermiso() + " · " + estadoBateria() + " · reinicios " + p.getInt("rein", 0) + ")";
+                + " · " + senal(p)
+                + " · " + edadLectura(p) + " · " + estadoPermiso() + " · " + estadoBateria()
+                + " · reinicios " + p.getInt("rein", 0) + " · latidos " + p.getInt("latidos", 0)
+                + " · pantalla " + (p.getBoolean("pantallaFija", false) ? "fija" : "suelta")
+                + " · ultimo latido " + edadLatido(p)
+                + " · servicio " + (((System.currentTimeMillis() - p.getLong("vivo", 0L)) < 90000L) ? "vivo" : "DORMIDO") + ")";
     }
 
     // 30-oct: el parte decia "v2" escrito a mano en TODAS las versiones, asi que
@@ -735,7 +901,25 @@ public class MainActivity extends Activity {
         }
     }
 
-    @Override protected void onResume() { super.onResume(); h.post(refresco); }
+    @Override protected void onResume() {
+        super.onResume();
+        // 30-oct: si hay un paseo guardado en marcha pero el servicio no está vivo
+        // (p. ej. porque se instaló un APK nuevo y Android borró las alarmas),
+        // se rearma solo. Sin esto el paseo seguía contando tiempo sin GPS.
+        try {
+            SharedPreferences p = RideService.prefs(this);
+            if (p.getBoolean("on", false)) {
+                long vivo = p.getLong("vivo", 0L);
+                boolean respira = vivo > 0 && (System.currentTimeMillis() - vivo) < 90000L;
+                if (!respira) {
+                    Intent i = new Intent(this, RideService.class);
+                    i.setAction(RideService.ACT_REANUDAR);
+                    if (Build.VERSION.SDK_INT >= 26) startForegroundService(i); else startService(i);
+                }
+            }
+        } catch (Exception ignored) {}
+        h.post(refresco);
+    }
 
     @Override protected void onPause() { super.onPause(); h.removeCallbacks(refresco); }
 }
