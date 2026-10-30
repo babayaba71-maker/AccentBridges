@@ -123,7 +123,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">v3.7 · se manda al callar</div>
+        <div class="badge" id="placa">v3.8 · voz mexicana</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -402,15 +402,20 @@ function vozNavegador(clean){
   // mexicana/latina. Mismo speechSynthesis gratis, cero costo.
   const en=todas.filter(v=>v.lang&&/^en/i.test(v.lang));
   const deAca=es.filter(v=>!/es-es/i.test(v.lang));
-  const elegida=en.find(v=>/en-us/i.test(v.lang)&&/google/i.test(v.name))
-            ||en.find(v=>/google/i.test(v.name))
-            ||en.find(v=>/en-us/i.test(v.lang))
-            ||en[0]
+  // 30-oct (JJ, nota real: "posiste a hablar a una gringa en español... se oye
+  // culero"): la voz inglesa leyendo español suena a gringa. Todo lo que digo va
+  // en español, así que manda la voz en español: primero mexicana/latina
+  // (es-MX, es-US, es-419 y el resto de América), después España, y SOLO si el
+  // teléfono no tiene ninguna en español, la inglesa. Mismo motor, cero costo.
+  const elegida=deAca.find(v=>/es-mx/i.test(v.lang)&&/google/i.test(v.name))
             ||deAca.find(v=>/es-mx/i.test(v.lang))
             ||deAca.find(v=>/es-us|es-419/i.test(v.lang))
+            ||deAca.find(v=>/google/i.test(v.name))
             ||deAca[0]
             ||es.find(v=>/google/i.test(v.name))
             ||es[0]
+            ||en.find(v=>/en-us/i.test(v.lang)&&/google/i.test(v.name))
+            ||en[0]
             ||todas.find(v=>/google/i.test(v.name))
             ||todas[0]||null;
   if(!todas.length){
@@ -484,7 +489,7 @@ function voiceToggle(){
     if(!es.length){
       $("status").textContent="Tu teléfono no me dio voces: revisa Ajustes > Texto a voz.";
     }else{
-      $("status").textContent="Voz activada ("+es[0].name+")";
+      $("status").textContent="Voz activada ("+(es[0]?es[0].name:"sin español")+")";
     }
     speak("Listo, Clyde. Voz prendida.");
   }
