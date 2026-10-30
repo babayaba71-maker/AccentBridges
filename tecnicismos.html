@@ -59,7 +59,7 @@ const LECTURA = [{"t": "techo", "f": "To be fair, nobody told us either.", "o": 
 /* ============ CANAL 2 · ESTRUCTURA (armar lo que piensa) ============
    No es gramática suelta: son BLOQUES ya pegados que se acomodan en orden.
    Esto mide lo que ella traba: estructurar la idea, no recordar reglas. */
-const ESTRUCTURA = [{"t": "techo", "es": "Lo que quiero decir es que no depende de mí.", "bl": ["What I mean is", "it's not up to", "me"], "junk": ["it doesn't depend of"], "alt": []}, {"t": "techo", "es": "Si tuviera tiempo, lo haría.", "bl": ["If I had", "time", "I'd do it"], "junk": ["If I have had"], "alt": ["I'd do it if I had time"]}, {"t": "techo", "es": "No es que no quiera, es que no puedo.", "bl": ["It's not that", "I don't want to", "it's that I can't"], "junk": ["I don't want"], "alt": []}, {"t": "techo", "es": "A menos que me digas lo contrario, sigo adelante.", "bl": ["Unless you tell me otherwise", "I'll go ahead"], "junk": ["If you don't tell"], "alt": ["I'll go ahead unless you tell me otherwise"]}, {"t": "base", "es": "Creo que va a llover.", "bl": ["I think", "it's going to", "rain"], "junk": ["is raining"], "alt": ["I think it's going to rain"]}, {"t": "base", "es": "Por cierto, no tengo tiempo.", "bl": ["By the way", "I don't have", "time"], "junk": ["no time have"], "alt": ["I don't have time, by the way"]}, {"t": "base", "es": "Hasta donde sé, ella trabaja aquí.", "bl": ["As far as I know", "she works", "here"], "junk": ["she working"], "alt": ["She works here, as far as I know"]}, {"t": "base", "es": "En mi caso, prefiero el café.", "bl": ["In my case", "I prefer", "coffee"], "junk": ["I preferring"], "alt": ["I prefer coffee, in my case"]}, {"t": "base", "es": "No estoy seguro de que eso sea verdad.", "bl": ["I'm not sure", "that's", "true"], "junk": ["is true that"], "alt": ["That's not true, I'm not sure"]}];
+const ESTRUCTURA = [{"t": "techo", "es": "Lo que quiero decir es que no depende de mí.", "bl": ["What I mean is", "it's not up to", "me"], "junk": "It doesn't depend of me", "alt": []}, {"t": "techo", "es": "Si tuviera tiempo, lo haría.", "bl": ["If I had", "time", "I'd do it"], "junk": ["If I have had"], "alt": ["I'd do it if I had time"]}, {"t": "techo", "es": "No es que no quiera, es que no puedo.", "bl": ["It's not that", "I don't want to", "it's that I can't"], "junk": ["I don't want"], "alt": []}, {"t": "techo", "es": "A menos que me digas lo contrario, sigo adelante.", "bl": ["Unless you tell me otherwise", "I'll go ahead"], "junk": "If you not tell me otherwise", "alt": ["I'll go ahead unless you tell me otherwise"]}, {"t": "base", "es": "Creo que va a llover.", "bl": ["I think", "it's going to", "rain"], "junk": ["is raining"], "alt": ["I think it's going to rain"]}, {"t": "base", "es": "Por cierto, no tengo tiempo.", "bl": ["By the way", "I don't have", "time"], "junk": ["no time have"], "alt": ["I don't have time, by the way"]}, {"t": "base", "es": "Hasta donde sé, ella trabaja aquí.", "bl": ["As far as I know", "she works", "here"], "junk": ["she working"], "alt": ["She works here, as far as I know"]}, {"t": "base", "es": "En mi caso, prefiero el café.", "bl": ["In my case", "I prefer", "coffee"], "junk": ["I preferring"], "alt": ["I prefer coffee, in my case"]}, {"t": "base", "es": "No estoy seguro de que eso sea verdad.", "bl": ["I'm not sure", "that's", "true"], "junk": ["is true that"], "alt": ["That's not true, I'm not sure"]}];
 
 /* ============ CANAL 3 · ESPAÑOL (línea base) ============
    Si la palabra no existe en su español, el cognado NO es ancla: el problema
@@ -75,6 +75,7 @@ let nombre="", rl=0, tl=0, re=0, te=0, rs=0, ts=0;
 let rlT=0, tlT=0, reT=0, teT=0;   // bloque TECHO (B2)
 let fallosL=[], fallosE=[], fallosS=[];
 let ambiguos=0;   // palabras que SI conoce, con otro significado
+let detalleE=[];  // v7: lo que armó en cada fallo, para diagnosticar el POR QUÉ
 // v6 (JJ: 'se va a necesitar el cronometro'): tiempo por item. No penaliza:
 // separa lo que es reflejo de lo que todavia se piensa (automaticidad).
 let t0=0, tiempos=[];   // que se trabo, para diagnostico fino
@@ -95,7 +96,7 @@ function inicio(){
 }
 function empezar(){
   nombre=(document.getElementById('nom').value||"Estudiante").trim().slice(0,30);
-  rl=0;tl=0;re=0;te=0;rs=0;ts=0;rlT=0;tlT=0;reT=0;teT=0;fallosL=[];fallosE=[];fallosS=[];ambiguos=0;tiempos=[];
+  rl=0;tl=0;re=0;te=0;rs=0;ts=0;rlT=0;tlT=0;reT=0;teT=0;fallosL=[];fallosE=[];fallosS=[];detalleE=[];ambiguos=0;tiempos=[];
   lectura(0);
 }
 /* ---------- CANAL 1 ---------- */
@@ -172,7 +173,8 @@ function revisar(i){
   const validas = [it.bl.join(" ")].concat(it.alt||[]).map(norm);
   const bien = validas.indexOf(dicho) >= 0;
   tiempos.push({c:'E',it:it.es,ms:Date.now()-t0,bien:bien});
-  te++; if(it.t==='techo') teT++; if(bien){ re++; if(it.t==='techo') reT++; } else { fallosE.push(it.es); }
+  te++; if(it.t==='techo') teT++;
+  if(bien){ re++; if(it.t==='techo') reT++; } else { fallosE.push(it.es); detalleE.push(it.es+" >> armo: "+dado.join(" | ")); }
   const zon=document.getElementById('zon');
   zon.style.borderColor = bien ? "#00c07a" : "#c0392b";
   zon.innerHTML = `<div style="color:${bien?'#9ff5cd':'#ffb3ad'};font-size:13.5px;line-height:1.5">
@@ -288,7 +290,7 @@ function fin(){
     </div>
     ${(fallosL.length||fallosE.length||fallosS.length)?`<div class="card" style="background:#0c1f2e;border-color:#2a5570;margin:0 0 14px">
       <div class="preg" style="margin:0 0 6px">SE TE RESISTIERON</div>
-      ${fallosE.length?`<div class="hint"><b>Al armar (estructura):</b><br>${fallosE.map(x=>"· "+x).join("<br>")}</div>`:""}
+      ${detalleE.length?`<div class="hint"><b>Al armar (estructura):</b><br>${detalleE.map(x=>"· "+x).join("<br>")}</div>`:fallosE.length?`<div class="hint"><b>Al armar:</b><br>${fallosE.map(x=>"· "+x).join("<br>")}</div>`:""}
       ${fallosL.length?`<div class="hint"><b>Al leer:</b><br>${fallosL.map(x=>"· "+x).join("<br>")}</div>`:""}
       ${fallosS.length?`<div class="hint"><b>En español:</b><br>${fallosS.map(x=>"· "+x).join("<br>")}</div>`:""}
       <div class="hint" style="color:#ffb700">Esos son los que hay que trabajar. No todos: esos.</div>
@@ -311,7 +313,7 @@ function fin(){
     body:JSON.stringify({topic:"Tecnicismos — tres canales (lectura/estructura/español)",userId:nombre,
       passed:(pl+pe+ps)/3>=70, accuracy:Math.round((pl+pe+ps)/3),
       challengeSentence:"lectura + estructura + español",
-      spokenText:"tecnicismos · ritmoL:"+seg(prom('L'))+" ritmoE:"+seg(prom('E'))+" ritmoS:"+seg(prom('S'))+" lentos:"+lentos.length+" · ambiguos:"+ambiguos+" · lectura:"+pl+"% estructura:"+pe+"% español:"+ps+"% alcance:"+nivel+" ("+pT+"%) · fallosE:"+fallosE.join(" | ")+" · fallosL:"+fallosL.join(" | ")+" · fallosS:"+fallosS.join(" | "),
+      spokenText:"tecnicismos · armado:"+detalleE.join(" ;; ")+" · ritmoL:"+seg(prom('L'))+" ritmoE:"+seg(prom('E'))+" ritmoS:"+seg(prom('S'))+" lentos:"+lentos.length+" · ambiguos:"+ambiguos+" · lectura:"+pl+"% estructura:"+pe+"% español:"+ps+"% alcance:"+nivel+" ("+pT+"%) · fallosE:"+fallosE.join(" | ")+" · fallosL:"+fallosL.join(" | ")+" · fallosS:"+fallosS.join(" | "),
       location:"Tecnicismos",sessionId:"tec-"+Date.now()})}).catch(()=>{})}catch(e){}
 }
 inicio();
