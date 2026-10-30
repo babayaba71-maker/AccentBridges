@@ -47,7 +47,9 @@ const RONDAS = 3;
 const EXP_URL="https://valerie.base44.app/functions/logMorfofonoSession";
 const EXP_KEY="ABVC-PILOTO-2026";
 
-let nombre="", ronda=0, i=0, aciertosR=[], t0R=0, t0=0, totalAciertos=0, totalItems=0, marcas=[];
+let nombre="", ronda=0, i=0, aciertosR=[], t0R=0, t0=0, totalAciertos=0, totalItems=0;
+// v2 (JJ: «🤔» con 9-8-9): la app decia "mas rapido" SIN medir tiempo. Ahora si.
+let tiemposR=[], fallosR=[];
 
 const app=document.getElementById('app');
 const sh=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
@@ -69,12 +71,13 @@ function inicio(){
 }
 function empezar(){
   nombre=(document.getElementById('nom').value||"Estudiante").trim().slice(0,30);
-  ronda=0;i=0;aciertosR=[];totalAciertos=0;totalItems=0;marcas=[];
+  ronda=0;i=0;aciertosR=[];totalAciertos=0;totalItems=0;tiemposR=[];fallosR=[];
   nuevaRonda();
 }
 function nuevaRonda(){
   ronda++;
-  i=0; aciertosR[ronda]=0;
+  i=0; aciertosR[ronda]=0; fallosR[ronda]=[];
+  t0R=Date.now();
   barajarYJugar();
 }
 let orden=[];
@@ -98,7 +101,7 @@ function jugar(){
       const bien=(txt===it.ok);
       [...ops.children].forEach(c=>{c.disabled=true; if(c.textContent===it.ok)c.classList.add('ok');});
       if(bien){ aciertosR[ronda]++; totalAciertos++; }
-      else{ b.classList.add('no');
+      else{ b.classList.add('no'); fallosR[ronda].push(it.p);
         const n=document.createElement('div');n.className='nota';n.innerHTML='<b>Trampa:</b> '+it.nota;
         document.querySelector('.card').appendChild(n);
       }
@@ -111,43 +114,63 @@ function jugar(){
 }
 function finRonda(){
   const a=aciertosR[ronda];
+  tiemposR[ronda]=Date.now()-t0R;
+  const segR=ms=>(ms/1000).toFixed(1)+' s';
+  const porTarjeta=Math.round(tiemposR[ronda]/orden.length);
   if(ronda<RONDAS){
     app.innerHTML=`<div class="card">
       <div class="sub" style="margin-bottom:4px">RONDA ${ronda} TERMINADA</div>
       <div class="big">${a}/${orden.length}</div>
       <div class="hero">${a===orden.length?'Sin un solo error. Ahora más rápido, no más fácil.':'Los errores ya te mostraron la trampa. Otra vuelta, ahora con la trampa conocida.'}</div>
+      <div class="hint">Tiempo de esta ronda: <b>${segR(tiemposR[ronda])}</b> · ${(porTarjeta/1000).toFixed(1)} s por tarjeta.</div>
+      ${fallosR[ronda].length?`<div class="hint"><b>Se te fueron:</b><br>${fallosR[ronda].map(x=>'· '+x).join('<br>')}</div>`:''}
       <button class="cta" onclick="nuevaRonda()">SIGUIENTE RONDA →</button>
     </div>`;
     return;
   }
-  const prom = totalItems? (marcas) : 0;
   let marcaPrev=null;
   try{ marcaPrev=JSON.parse(localStorage.getItem("reflejos_marca")||"null"); }catch(e){}
   const pct=Math.round(totalAciertos/totalItems*100);
-  const r3=aciertosR[RONDAS];
+  const r3=aciertosR[RONDAS], r1=aciertosR[1], r2=aciertosR[2]||0;
+  const n=orden.length;
+  // DESCUENTO DE AZAR: con dos opciones, la mitad se acierta sin saber.
+  const ajustado = Math.max(0, Math.round((pct-50)/50*100));
+  const dA = r3-r1;                       // cambio en aciertos de r1 a r3
+  const dT = (tiemposR[1]||0)-(tiemposR[3]||0);   // positivo = mas rapido en r3
   let diag;
-  if(r3===orden.length && totalAciertos>=orden.length*2){
-    diag="<b>Pasaste de deliberado a reflejo.</b> Para lo que sigue, estas doce ya no se estudian: se mantienen.";
-  } else if(r3>=orden.length*0.75){
-    diag="<b>Ya casi es reflejo.</b> Acertaste las mismas tarjetas más rápido en la tercera ronda que en la primera. Eso es exactamente el cambio que buscamos.";
+  if(dA>0 && dT>2000){
+    diag="<b>Subiste aciertos y bajaste tiempo.</b> Eso sí es pasar de deliberado a reflejo.";
+  } else if(dA>0){
+    diag="<b>Subiste aciertos, pero no velocidad.</b> Ganaste precisión, no automaticidad: las reconoces, todavía no te salen de golpe.";
+  } else if(dA===0 && dT>2000){
+    diag="<b>Mismos aciertos, pero más rápido.</b> El reflejo empezó; lo que falta es precisión en las que fallas.";
   } else {
-    diag="<b>Todavía lo estás pensando</b>, y no es problema: la automaticidad tarda más que la comprensión. Repite mañana la misma sesión y compara contigo, no con nadie más.";
+    diag="<b>No se movió nada de la ronda 1 a la 3.</b> Y eso es información: repetir dentro de la misma sesión ya no te enseña. Las que fallas no son «lentas», son las que todavía no sabes.";
   }
+  try{ localStorage.setItem("reflejos_marca", JSON.stringify({prom:Math.round((tiemposR[3]||0)/n/100)/10, pct:pct, cuando:Date.now()})); }catch(e){}
+  const todosFallos=[...new Set([...(fallosR[1]||[]),...(fallosR[2]||[]),...(fallosR[3]||[])] )];
+  const reincidentes=(fallosR[3]||[]).filter(x=>(fallosR[1]||[]).includes(x));
   app.innerHTML=`<div class="card">
     <div class="sub" style="margin-bottom:2px">TRES RONDAS COMPLETAS</div>
     <div class="big">${pct}%</div>
     <div class="tres">
-      ${[1,2,3].map(r=>`<div><b>${aciertosR[r]||0}/${orden.length}</b><span>RONDA ${r}</span></div>`).join("")}
+      ${[1,2,3].map(r=>`<div><b>${aciertosR[r]||0}/${n}</b><span>R${r} · ${segR(tiemposR[r]||0)}</span></div>`).join("")}
+    </div>
+    <div class="aviso" style="border-left-color:#ffb700;color:#ffe0a3">
+      <b>Descontando el azar: ${ajustado}%.</b> Con dos opciones, la mitad se acierta sin saber.
+      Tu ${pct}% incluye esa suerte; el ${ajustado}% es lo que de verdad sabes.
     </div>
     <div class="hero" style="text-align:left">${diag}</div>
-    <div class="hint">La ronda 1 es pensando. La ronda 3 es el reflejo. Si la 3 no sube de la 1, todavía no está automático.</div>
+    ${reincidentes.length?`<div class="hint"><b>Las que fallaste en la 1 y otra vez en la 3</b> (esas no son lentas, son desconocidas):<br>${reincidentes.map(x=>"· "+x).join("<br>")}</div>`:""}
+    ${(!reincidentes.length && todosFallos.length)?`<div class="hint"><b>Se te fueron en alguna ronda:</b><br>${todosFallos.map(x=>"· "+x).join("<br>")}</div>`:""}
+    <div class="hint">Comparación honesta: aciertos ${r1} → ${r2} → ${r3} · tiempo ${segR(tiemposR[1]||0)} → ${segR(tiemposR[2]||0)} → ${segR(tiemposR[3]||0)}.</div>
   </div>
   <button class="cta" onclick="inicio()">OTRA SESIÓN</button>`;
   try{fetch(EXP_URL,{method:"POST",headers:{"Content-Type":"application/json",api_key:EXP_KEY},
     body:JSON.stringify({topic:"Reflejos — del deliberado al automático",userId:nombre,
       passed:r3>=orden.length*0.75, accuracy:pct,
       challengeSentence:"12 tarjetas × 3 rondas",
-      spokenText:"reflejos · r1:"+(aciertosR[1]||0)+" r2:"+(aciertosR[2]||0)+" r3:"+(aciertosR[3]||0)+" de "+orden.length+" · total:"+pct+"%",
+      spokenText:"reflejos · r1:"+(aciertosR[1]||0)+" r2:"+(aciertosR[2]||0)+" r3:"+(aciertosR[3]||0)+" de "+orden.length+" · total:"+pct+"% · ajustado:"+ajustado+"% · t1:"+segR(tiemposR[1]||0)+" t2:"+segR(tiemposR[2]||0)+" t3:"+segR(tiemposR[3]||0)+" · reincidentes:"+reincidentes.join(" | ")+" · fallos:"+todosFallos.join(" | "),
       location:"Reflejos",sessionId:"ref-"+Date.now()})}).catch(()=>{})}catch(e){}
 }
 inicio();
