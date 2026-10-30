@@ -122,7 +122,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v3.5 · latido de reloj");
+        placa.setText("v3.6 · pantalla fija");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -386,6 +386,9 @@ public class MainActivity extends Activity {
     private void pintar() {
         SharedPreferences p = RideService.prefs(this);
         boolean on = p.getBoolean("on", false);
+        // 30-oct (JJ: "pues todavía se sigue cerrando la pantalla"): mientras el
+        // paseo está en marcha, la pantalla NO se apaga sola. Se quita al parar.
+        pantallaPrendida(on);
         float km = p.getFloat("dist", 0f) / 1000f;
         long seg = on ? Math.max(0, (System.currentTimeMillis() - p.getLong("start", 0)) / 1000) : 0;
         float prom = seg > 5 ? Math.min(70f, km / (seg / 3600f)) : 0f;
@@ -431,6 +434,16 @@ public class MainActivity extends Activity {
 
         // el orb se aviva con la velocidad
         orb.setNivel(on ? Math.min(1f, (prom / 22f) + 0.12f) : 0f);
+    }
+
+    private boolean pantallaFija = false;
+    private void pantallaPrendida(boolean prender) {
+        if (prender == pantallaFija) return;
+        pantallaFija = prender;
+        try {
+            if (prender) getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            else getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } catch (Exception ignored) {}
     }
 
     private String textoParte() {
