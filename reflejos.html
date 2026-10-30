@@ -50,6 +50,7 @@ const EXP_KEY="ABVC-PILOTO-2026";
 let nombre="", ronda=0, i=0, aciertosR=[], t0R=0, t0=0, totalAciertos=0, totalItems=0;
 // v2 (JJ: «🤔» con 9-8-9): la app decia "mas rapido" SIN medir tiempo. Ahora si.
 let tiemposR=[], fallosR=[];
+let notas={};   // JJ 30-oct: la trampa se borraba en 1.5 s. Ahora se queda.
 
 const app=document.getElementById('app');
 const sh=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
@@ -71,7 +72,7 @@ function inicio(){
 }
 function empezar(){
   nombre=(document.getElementById('nom').value||"Estudiante").trim().slice(0,30);
-  ronda=0;i=0;aciertosR=[];totalAciertos=0;totalItems=0;tiemposR=[];fallosR=[];
+  ronda=0;i=0;aciertosR=[];totalAciertos=0;totalItems=0;tiemposR=[];fallosR=[];notas={};
   nuevaRonda();
 }
 function nuevaRonda(){
@@ -101,13 +102,26 @@ function jugar(){
       const bien=(txt===it.ok);
       [...ops.children].forEach(c=>{c.disabled=true; if(c.textContent===it.ok)c.classList.add('ok');});
       if(bien){ aciertosR[ronda]++; totalAciertos++; }
-      else{ b.classList.add('no'); fallosR[ronda].push(it.p);
+      else{
+        b.classList.add('no'); fallosR[ronda].push(it.p);
+        notas[it.p]=it.nota;
+        const card=document.querySelector('.card');
         const n=document.createElement('div');n.className='nota';n.innerHTML='<b>Trampa:</b> '+it.nota;
-        document.querySelector('.card').appendChild(n);
+        card.appendChild(n);
+        // La explicación NO se borra sola: el alumno decide cuándo ya la leyó.
+        const cont=document.createElement('button');cont.className='cta';cont.textContent='ENTENDIDO →';
+        cont.onclick=()=>{ i++; jugar(); };
+        card.appendChild(cont);
+        const rep=document.createElement('button');rep.className='cta';
+        rep.style.background='#0b1a28';rep.style.color='#9fdcf5';rep.style.border='1px solid #24465f';
+        rep.textContent='OTRA VEZ ESTA MISMA';
+        rep.onclick=()=>{ jugar(); };   // repite la misma tarjeta, sin avanzar
+        card.appendChild(rep);
       }
       b.classList.add(bien?'ok':'no');
       totalItems++;
-      setTimeout(()=>{ i++; jugar(); }, bien?320:1500);
+      if(bien) setTimeout(()=>{ i++; jugar(); }, 320);
+      // si falla: NO avanza solo. La trampa se queda hasta que la toque.
     };
     ops.appendChild(b);
   });
@@ -165,12 +179,17 @@ function finRonda(){
     ${(!reincidentes.length && todosFallos.length)?`<div class="hint"><b>Se te fueron en alguna ronda:</b><br>${todosFallos.map(x=>"· "+x).join("<br>")}</div>`:""}
     <div class="hint">Comparación honesta: aciertos ${r1} → ${r2} → ${r3} · tiempo ${segR(tiemposR[1]||0)} → ${segR(tiemposR[2]||0)} → ${segR(tiemposR[3]||0)}.</div>
   </div>
+  ${Object.keys(notas).length?`<div class="card">
+    <div class="preg" style="text-align:left;margin-bottom:10px">LAS TRAMPAS DE HOY · para repasar mañana</div>
+    ${Object.entries(notas).map(([p,n])=>`<div class="hint" style="margin-bottom:12px"><b style="color:#fff">${p}</b><br>${n}</div>`).join("")}
+    <div class="hint" style="color:#ffb700">Esto es lo que hay que leer mañana antes de volver a intentarlo. No las doce: estas.</div>
+  </div>`:""}
   <button class="cta" onclick="inicio()">OTRA SESIÓN</button>`;
   try{fetch(EXP_URL,{method:"POST",headers:{"Content-Type":"application/json",api_key:EXP_KEY},
     body:JSON.stringify({topic:"Reflejos — del deliberado al automático",userId:nombre,
       passed:r3>=orden.length*0.75, accuracy:pct,
       challengeSentence:"12 tarjetas × 3 rondas",
-      spokenText:"reflejos · r1:"+(aciertosR[1]||0)+" r2:"+(aciertosR[2]||0)+" r3:"+(aciertosR[3]||0)+" de "+orden.length+" · total:"+pct+"% · ajustado:"+ajustado+"% · t1:"+segR(tiemposR[1]||0)+" t2:"+segR(tiemposR[2]||0)+" t3:"+segR(tiemposR[3]||0)+" · reincidentes:"+reincidentes.join(" | ")+" · fallos:"+todosFallos.join(" | "),
+      spokenText:"reflejos · r1:"+(aciertosR[1]||0)+" r2:"+(aciertosR[2]||0)+" r3:"+(aciertosR[3]||0)+" de "+orden.length+" · total:"+pct+"% · ajustado:"+ajustado+"% · t1:"+segR(tiemposR[1]||0)+" t2:"+segR(tiemposR[2]||0)+" t3:"+segR(tiemposR[3]||0)+" · reincidentes:"+reincidentes.join(" | ")+" · trampasVistas:"+Object.keys(notas).length+" · fallos:"+todosFallos.join(" | "),
       location:"Reflejos",sessionId:"ref-"+Date.now()})}).catch(()=>{})}catch(e){}
 }
 inicio();
