@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reflejos — velocidad</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:radial-gradient(circle at 50% 0%,#0a2033,#040a12 70%);color:#fff;
+ font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh;padding:16px 14px 34px}
+.wrap{max-width:620px;margin:0 auto}
+h1{font-size:18px;letter-spacing:.14em;color:#00f0ff;text-align:center;margin:8px 0 2px;font-weight:700}
+.sub{text-align:center;color:#7d93a8;font-size:11px;letter-spacing:.1em;margin-bottom:14px}
+.card{background:rgba(9,20,32,.93);border:1px solid #1c3a52;border-radius:16px;padding:16px;margin-bottom:12px}
+.pista{font-size:20px;font-weight:700;line-height:1.35;margin:8px 0 14px;text-align:center}
+.preg{color:#9fb6c9;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;margin-bottom:8px;text-align:center}
+button.op{display:block;width:100%;text-align:left;background:#0b1a28;color:#dbe9f4;border:1px solid #24465f;
+ border-radius:12px;padding:14px;font-size:15px;margin-bottom:9px;cursor:pointer;font-family:inherit;line-height:1.4}
+button.op.ok{background:#08301f;border-color:#00c07a;color:#9ff5cd}
+button.op.no{background:#301015;border-color:#c0392b;color:#ffb3ad}
+button.op:disabled{opacity:.85}
+.barra{height:5px;background:#12293c;border-radius:99px;overflow:hidden;margin-bottom:12px}
+.barra i{display:block;height:100%;background:linear-gradient(90deg,#00f0ff,#007bff);width:0%;transition:width .2s}
+.nota{border-left:3px solid #ffb700;padding:8px 0 8px 11px;font-size:13px;color:#ffe0a3;margin-top:10px;line-height:1.45}
+.hero{color:#c8dced;font-size:14px;line-height:1.6}
+.hint{color:#7d93a8;font-size:12px;line-height:1.5;margin-top:8px}
+.cta{display:block;width:100%;background:linear-gradient(90deg,#00f0ff,#007bff);color:#04121f;border:0;
+ border-radius:14px;padding:15px;font-size:15px;font-weight:800;letter-spacing:.05em;cursor:pointer;font-family:inherit;margin-top:6px}
+.big{font-size:44px;font-weight:800;text-align:center;margin:4px 0}
+.tres{display:flex;gap:8px;margin:12px 0}
+.tres div{flex:1;background:#0a1b29;border:1px solid #1e3d55;border-radius:12px;padding:9px 4px;text-align:center}
+.tres b{display:block;font-size:19px}
+.tres span{font-size:8.5px;color:#7d93a8;letter-spacing:.06em}
+input{width:100%;background:#0b1a28;border:1px solid #24465f;color:#fff;border-radius:12px;padding:13px;
+ font-size:16px;font-family:inherit;margin-bottom:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>REFLEJOS</h1>
+  <div class="sub">DELIBERADO → AUTOMÁTICO</div>
+  <div id="app"></div>
+</div>
+<script>
+const T = [{"p": "Lo que quiero decir es que no depende de mí.", "ok": "What I mean is, it's not up to me.", "bad": "What I mean is, it doesn't depend of me.", "nota": "«up to me» es el modismo. «depend of» no existe: se dice depend on."}, {"p": "A menos que me digas lo contrario, sigo adelante.", "ok": "I'll go ahead unless you tell me otherwise.", "bad": "I'll go ahead if you not tell me otherwise.", "nota": "unless ya lleva el «no» adentro. «if you not» está mal armado."}, {"p": "underlying", "ok": "subyacente, de fondo", "bad": "inferior en calidad", "nota": "underlying = lo que está debajo y sostiene. No es «inferior»."}, {"p": "feasible", "ok": "factible, viable", "bad": "falso por dentro", "nota": "feasible = que se puede hacer. Se parece a «fácil» pero no es eso."}, {"p": "Si tuviera tiempo, lo haría.", "ok": "If I had time, I'd do it.", "bad": "If I would have time, I'd do it.", "nota": "después de «if» va el pasado simple, nunca «would have» en esta forma."}, {"p": "No es que no quiera, es que no puedo.", "ok": "It's not that I don't want to, it's that I can't.", "bad": "It's not that I don't want, is that I can't.", "nota": "el «to» no se cae, y la segunda parte necesita «it's that»."}, {"p": "Para ser justos, a nosotros tampoco nos avisaron.", "ok": "To be fair, nobody told us either.", "bad": "To be fair, nobody told us too.", "nota": "«tampoco» al final de una negativa es either, nunca too."}, {"p": "Ahora que lo pienso, ella nunca llamó.", "ok": "Come to think of it, she never called.", "bad": "Coming to think of it, she never called.", "nota": "la expresión fija es «come to think of it», con come."}, {"p": "Dicho eso, el plan sigue funcionando.", "ok": "Having said that, the plan still works.", "bad": "Having said that, the plan still working.", "nota": "con «still» hace falta el verbo completo: still works."}, {"p": "Aunque, también podríamos intentarlo mañana.", "ok": "Then again, we could try tomorrow.", "bad": "Then again, we can tried tomorrow.", "nota": "«could» va con verbo base: could try, no could tried."}, {"p": "En cuanto al costo, estamos bien.", "ok": "As far as the cost goes, we're fine.", "bad": "As far as the cost goes, we are fine the cost.", "nota": "la frase ya tiene sujeto: no se repite «the cost» al final."}, {"p": "Por si sirve de algo, estoy de acuerdo contigo.", "ok": "For what it's worth, I agree with you.", "bad": "For what it's worth it, I agree with you.", "nota": "la expresión es «for what it's worth», sin un «it» extra al final."}];
+const RONDAS = 3;
+const EXP_URL="https://valerie.base44.app/functions/logMorfofonoSession";
+const EXP_KEY="ABVC-PILOTO-2026";
+
+let nombre="", ronda=0, i=0, aciertosR=[], t0R=0, t0=0, totalAciertos=0, totalItems=0, marcas=[];
+
+const app=document.getElementById('app');
+const sh=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
+
+function inicio(){
+  let marca="-";
+  try{ const m=JSON.parse(localStorage.getItem("reflejos_marca")||"null"); if(m&&m.prom) marca=m.prom.toFixed(2)+" s"; }catch(e){}
+  app.innerHTML=`<div class="card"><div class="hero">
+    Doce tarjetas, tres rondas. Las mismas doce tres veces.<br><br>
+    Cada tarjeta te da una pista en español y dos versiones en inglés: una buena y una trampa.
+    La primera ronda es para pensar. La tercera es la que cuenta, porque ahí ya se ve el reflejo.<br><br>
+    <b>No hay límite de tiempo y no se reprueba.</b> El cronómetro solo mide si mejoras contra ti mismo.
+    </div>
+    <div class="preg" style="margin-top:14px">¿Cómo te llamas?</div>
+    <input id="nom" placeholder="Tu nombre">
+    <button class="cta" onclick="empezar()">▶ EMPEZAR</button>
+    <div class="hint">Tu mejor marca hasta hoy: <b>${marca}</b> por tarjeta.</div>
+  </div>`;
+}
+function empezar(){
+  nombre=(document.getElementById('nom').value||"Estudiante").trim().slice(0,30);
+  ronda=0;i=0;aciertosR=[];totalAciertos=0;totalItems=0;marcas=[];
+  nuevaRonda();
+}
+function nuevaRonda(){
+  ronda++;
+  i=0; aciertosR[ronda]=0;
+  barajarYJugar();
+}
+let orden=[];
+function barajarYJugar(){ orden = sh(T.map((_,k)=>k)); jugar(); }
+function jugar(){
+  if(i>=orden.length) return finRonda();
+  const it=T[orden[i]];
+  const pct=Math.round(i/orden.length*100);
+  app.innerHTML=`<div class="barra"><i style="width:${pct}%"></i></div>
+   <div class="card">
+     <div class="preg">RONDA ${ronda} DE ${RONDAS} · ${i+1} DE ${orden.length}</div>
+     <div class="pista">${it.p}</div>
+     <div class="preg">¿Cuál es la buena?</div>
+     <div id="ops"></div>
+   </div>`;
+  t0=Date.now();
+  const ops=document.getElementById('ops');
+  sh([it.ok, it.bad]).forEach(txt=>{
+    const b=document.createElement('button');b.className='op';b.textContent=txt;
+    b.onclick=()=>{
+      const bien=(txt===it.ok);
+      [...ops.children].forEach(c=>{c.disabled=true; if(c.textContent===it.ok)c.classList.add('ok');});
+      if(bien){ aciertosR[ronda]++; totalAciertos++; }
+      else{ b.classList.add('no');
+        const n=document.createElement('div');n.className='nota';n.innerHTML='<b>Trampa:</b> '+it.nota;
+        document.querySelector('.card').appendChild(n);
+      }
+      b.classList.add(bien?'ok':'no');
+      totalItems++;
+      setTimeout(()=>{ i++; jugar(); }, bien?320:1500);
+    };
+    ops.appendChild(b);
+  });
+}
+function finRonda(){
+  const a=aciertosR[ronda];
+  if(ronda<RONDAS){
+    app.innerHTML=`<div class="card">
+      <div class="sub" style="margin-bottom:4px">RONDA ${ronda} TERMINADA</div>
+      <div class="big">${a}/${orden.length}</div>
+      <div class="hero">${a===orden.length?'Sin un solo error. Ahora más rápido, no más fácil.':'Los errores ya te mostraron la trampa. Otra vuelta, ahora con la trampa conocida.'}</div>
+      <button class="cta" onclick="nuevaRonda()">SIGUIENTE RONDA →</button>
+    </div>`;
+    return;
+  }
+  const prom = totalItems? (marcas) : 0;
+  let marcaPrev=null;
+  try{ marcaPrev=JSON.parse(localStorage.getItem("reflejos_marca")||"null"); }catch(e){}
+  const pct=Math.round(totalAciertos/totalItems*100);
+  const r3=aciertosR[RONDAS];
+  let diag;
+  if(r3===orden.length && totalAciertos>=orden.length*2){
+    diag="<b>Pasaste de deliberado a reflejo.</b> Para lo que sigue, estas doce ya no se estudian: se mantienen.";
+  } else if(r3>=orden.length*0.75){
+    diag="<b>Ya casi es reflejo.</b> Acertaste las mismas tarjetas más rápido en la tercera ronda que en la primera. Eso es exactamente el cambio que buscamos.";
+  } else {
+    diag="<b>Todavía lo estás pensando</b>, y no es problema: la automaticidad tarda más que la comprensión. Repite mañana la misma sesión y compara contigo, no con nadie más.";
+  }
+  app.innerHTML=`<div class="card">
+    <div class="sub" style="margin-bottom:2px">TRES RONDAS COMPLETAS</div>
+    <div class="big">${pct}%</div>
+    <div class="tres">
+      ${[1,2,3].map(r=>`<div><b>${aciertosR[r]||0}/${orden.length}</b><span>RONDA ${r}</span></div>`).join("")}
+    </div>
+    <div class="hero" style="text-align:left">${diag}</div>
+    <div class="hint">La ronda 1 es pensando. La ronda 3 es el reflejo. Si la 3 no sube de la 1, todavía no está automático.</div>
+  </div>
+  <button class="cta" onclick="inicio()">OTRA SESIÓN</button>`;
+  try{fetch(EXP_URL,{method:"POST",headers:{"Content-Type":"application/json",api_key:EXP_KEY},
+    body:JSON.stringify({topic:"Reflejos — del deliberado al automático",userId:nombre,
+      passed:r3>=orden.length*0.75, accuracy:pct,
+      challengeSentence:"12 tarjetas × 3 rondas",
+      spokenText:"reflejos · r1:"+(aciertosR[1]||0)+" r2:"+(aciertosR[2]||0)+" r3:"+(aciertosR[3]||0)+" de "+orden.length+" · total:"+pct+"%",
+      location:"Reflejos",sessionId:"ref-"+Date.now()})}).catch(()=>{})}catch(e){}
+}
+inicio();
+</script>
+</body>
+</html>

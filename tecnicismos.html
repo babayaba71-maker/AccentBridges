@@ -244,6 +244,7 @@ function fin(){
   const umbL=6000, umbE=25000;
   const esRapido = t => (t.c==='L'? t.ms<=umbL : (t.c==='E'? t.ms<=umbE : true));
   const lentos = tiempos.filter(t=>t.bien && !esRapido(t));
+  const lentosDet = lentos.map(t=>t.it+' ('+seg(t.ms)+')').join(' ;; ');
   const automaticos = tiempos.filter(t=>t.bien && esRapido(t)).length;
   const totalMs = tiempos.reduce((x,t)=>x+t.ms,0);
   const nivel = pT>=85?"B2 medio":(pT>=72?"B2 bajo":(pT>=58?"B1 alto":(pT>=40?"B1 bajo":"A2")));
@@ -313,7 +314,7 @@ function fin(){
     body:JSON.stringify({topic:"Tecnicismos — tres canales (lectura/estructura/español)",userId:nombre,
       passed:(pl+pe+ps)/3>=70, accuracy:Math.round((pl+pe+ps)/3),
       challengeSentence:"lectura + estructura + español",
-      spokenText:"tecnicismos · armado:"+detalleE.join(" ;; ")+" · ritmoL:"+seg(prom('L'))+" ritmoE:"+seg(prom('E'))+" ritmoS:"+seg(prom('S'))+" lentos:"+lentos.length+" · ambiguos:"+ambiguos+" · lectura:"+pl+"% estructura:"+pe+"% español:"+ps+"% alcance:"+nivel+" ("+pT+"%) · fallosE:"+fallosE.join(" | ")+" · fallosL:"+fallosL.join(" | ")+" · fallosS:"+fallosS.join(" | "),
+      spokenText:"tecnicismos · armado:"+detalleE.join(" ;; ")+" · ritmoL:"+seg(prom('L'))+" ritmoE:"+seg(prom('E'))+" ritmoS:"+seg(prom('S'))+" lentos:"+lentos.length+" · lentosDet:"+lentosDet+" · ambiguos:"+ambiguos+" · lectura:"+pl+"% estructura:"+pe+"% español:"+ps+"% alcance:"+nivel+" ("+pT+"%) · fallosE:"+fallosE.join(" | ")+" · fallosL:"+fallosL.join(" | ")+" · fallosS:"+fallosS.join(" | "),
       location:"Tecnicismos",sessionId:"tec-"+Date.now()})}).catch(()=>{})}catch(e){}
 }
 inicio();
