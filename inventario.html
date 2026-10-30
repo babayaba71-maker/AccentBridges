@@ -173,6 +173,20 @@ function cerrar(){
     Muy bien. Una palabra bien puesta vale más que treinta a medias.<br><br>
     <span class="hint">Mañana, cuando abras otra vez, empezamos por la siguiente.</span>
   </div>
+  <div class="card">
+    <div class="es">LA TERCERA CATEGORÍA · TU NOMBRE</div>
+    <div class="hero" style="font-size:13.5px">
+      Las palabras de contenido se aprenden con imagen. Las de función, con reglas y contexto.<br><br>
+      Pero hay una tercera familia que no es ninguna de las dos: <b>los nombres propios</b>.
+      No tienen significado, no tienen imagen y no tienen traducción. <b>Lo único que tienen es deletreo.</b><br><br>
+      Y se necesitan todos los días: al teléfono con el banco, en la escuela de tu hija, en el doctor, en un trámite.
+      Escribir tu nombre mal no es un error de estilo, es un problema real.
+    </div>
+    <a class="cta" style="text-align:center;text-decoration:none;display:block" href="deletrando.html">
+      🔤 IR A DELETRAR MI NOMBRE
+    </a>
+    <div class="hint">Ahí sí hay audio: letra por letra, con ancla y con las letras trampa marcadas (E/I, G/J, B/V).</div>
+  </div>
   <button class="cta" onclick="inicio()">VOLVER AL TAMIZ</button>`;
   try{fetch(EXP_URL,{method:"POST",headers:{"Content-Type":"application/json",api_key:EXP_KEY},
     body:JSON.stringify({topic:"Inventario — lección de palabra clave",userId:nombre,passed:true,
