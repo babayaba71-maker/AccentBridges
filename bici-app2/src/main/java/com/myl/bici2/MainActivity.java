@@ -122,7 +122,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v4.4 · resumen del paseo");
+        placa.setText("v4.6 · ancla que no se borra");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -412,6 +412,14 @@ public class MainActivity extends Activity {
         return mm + ":" + dos(ss);
     }
 
+    // 30-oct: JJ leyó "servicio DORMIDO" a los 24 s de arrancar y se asustó. Era
+    // mentira: el latido tarda hasta 60 s en dar la primera vuelta. Si el servicio
+    // está entregando lecturas, está vivo, así lo diga el latido.
+    private boolean servicioVivo(SharedPreferences p) {
+        long ultimo = Math.max(p.getLong("vivo", 0L), p.getLong("ult", 0L));
+        return System.currentTimeMillis() - ultimo < 90000L;
+    }
+
     private String hace(long t) {
         long m = Math.max(0, (System.currentTimeMillis() - t) / 60000);
         if (m < 1) return "hace un momento";
@@ -532,6 +540,14 @@ public class MainActivity extends Activity {
         // prendido pero sin cielo (bajo techo / cañon urbano). El 4.3 suma
         // distancia con antena, pero el dato sigue siendo clave.
         if (!p.getBoolean("gpsSistema", true)) cabeza = "GPS DEL TELEFONO APAGADO · " + cabeza;
+        // 30-oct: cuántos satélites traen señal y el mejor CN0. Esto separa
+        // "el motor GNSS no escucha" (0 con señal) de "hay cielo pero no cierra"
+        // (varios con 30 dB y sin fix).
+        int conSenal = p.getInt("satsSenal", -1);
+        int cn0 = p.getInt("satsCn0", 0);
+        if (conSenal >= 0) cabeza += " · " + conSenal + " con senal, mejor " + cn0 + " dB";
+        String gpsErr = p.getString("gpsErr", "");
+        if (gpsErr.length() > 0) cabeza += " · error GPS: " + gpsErr;
         // edad de la última lectura de SATÉLITE (no de antena): es la que suma distancia
         long g = p.getLong("ultimoGps", 0L);
         String cola;
@@ -609,7 +625,7 @@ public class MainActivity extends Activity {
                 + " · reinicios " + p.getInt("rein", 0) + " · latidos " + p.getInt("latidos", 0)
                 + " · pantalla " + (p.getBoolean("pantallaFija", false) ? "fija" : "suelta")
                 + " · ultimo latido " + edadLatido(p)
-                + " · servicio " + (((System.currentTimeMillis() - p.getLong("vivo", 0L)) < 90000L) ? "vivo" : "DORMIDO") + ")";
+                + " · servicio " + (servicioVivo(p) ? "vivo" : "DORMIDO") + ")";
     }
 
     // 30-oct: el parte decia "v2" escrito a mano en TODAS las versiones, asi que

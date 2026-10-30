@@ -80,7 +80,7 @@ public class RideService extends Service implements LocationListener {
                 .putInt(K_ACC,-1).putLong(K_ULT,0L).putInt(K_REIN,0)
                 .putLong("finT",0L).putFloat("finDist",0f).putLong("finSeg",0L).putFloat("finMax",0f).apply();
             ultimo = null;
-            anclaGps = null; anclaRed = null; ultimoGpsT = 0L;   // paseo nuevo, ancla nueva (si no, sumaría el salto desde el punto viejo)
+            anclaGps = null; anclaRed = null; ultimoGpsT = 0L; borrarAnclas();   // paseo nuevo, ancla nueva (si no, sumaría el salto desde el punto viejo)
             String ver = "?";
             try { ver = getPackageManager().getPackageInfo(getPackageName(), 0).versionName; } catch (Exception ignored) {}
             p.edit().putString(K_VER, ver).putInt(K_VIG, 0).putLong(K_VIGT, 0L).putBoolean(K_CAND, false)
@@ -122,10 +122,22 @@ public class RideService extends Service implements LocationListener {
         try {
             gnss = new android.location.GnssStatus.Callback() {
                 @Override public void onSatelliteStatusChanged(android.location.GnssStatus st) {
-                    int usados = 0, vistos = st.getSatelliteCount();
-                    for (int i = 0; i < vistos; i++) if (st.usedInFix(i)) usados++;
+                    // 30-oct: el parte de JJ dijo "0/1 satelites" durante 7 min al
+                    // aire libre. Para saber si el motor GNSS ve cielo o no, se
+                    // guarda cuantos satelites traen señal y el mejor CN0 (dB-Hz):
+                    // 0 con señal = el motor no está escuchando; 6 con 30 dB y sin
+                    // fix = hay cielo pero el chip no cierra la posición.
+                    int usados = 0, vistos = st.getSatelliteCount(), conSenal = 0;
+                    float mejor = 0f;
+                    for (int i = 0; i < vistos; i++) {
+                        if (st.usedInFix(i)) usados++;
+                        float cn0 = st.getCn0DbHz(i);
+                        if (cn0 > 0f) { conSenal++; if (cn0 > mejor) mejor = cn0; }
+                    }
                     prefs(RideService.this).edit().putInt("sats", vistos)
-                            .putInt("satsUsados", usados).apply();
+                            .putInt("satsUsados", usados)
+                            .putInt("satsSenal", conSenal)
+                            .putInt("satsCn0", Math.round(mejor)).apply();
                 }
             };
             lm.registerGnssStatusCallback(gnss, null);
@@ -136,11 +148,23 @@ public class RideService extends Service implements LocationListener {
         try {
             lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             if (lm == null) return;
-            if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER))
-                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
-            if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
-                lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 0, this);
-        } catch (Exception e) { /* sin permiso o sin proveedor */ }
+            // 30-oct: cada proveedor con su try/catch y su error guardado. Antes
+            // iban juntos: si el pedido de GPS tronaba, la antena tampoco se pedía
+            // y nadie sabía por qué. El parte ahora puede decir el error exacto.
+            try {
+                if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                    lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
+                else prefs(this).edit().putString("gpsErr", "GPS apagado en el telefono").apply();
+            } catch (Exception e) {
+                prefs(this).edit().putString("gpsErr", e.getClass().getSimpleName() + ": " + e.getMessage()).apply();
+            }
+            try {
+                if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+                    lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 0, this);
+            } catch (Exception e) {
+                prefs(this).edit().putString("redErr", e.getClass().getSimpleName() + ": " + e.getMessage()).apply();
+            }
+        } catch (Exception e) { /* sin servicio de ubicacion */ }
         contarSatelites();
     }
 
@@ -251,6 +275,41 @@ public class RideService extends Service implements LocationListener {
         foco = null;
     }
 
+
+    // 30-oct (parte de JJ: "0.00 km, 3:18 ... reinicios 2 ... candado NO PUESTO").
+    // Tercer culpable del cero: el ancla vivía SOLO en memoria, y cada vez que
+    // Android mataba y revivía el servicio (reinicios 2 en tres minutos) el ancla
+    // se borraba. Con lecturas de antena cada ~20 s y un margen de ~40 m, nunca
+    // había tiempo de acumular un tramo: cero para siempre. Ahora el ancla se
+    // guarda en prefs y sobrevive los reinicios; solo se borra al ARRANCAR.
+    private void guardarAncla(String pre, Location l) {
+        if (l == null) return;
+        prefs(this).edit()
+            .putLong(pre + "Lat", Double.doubleToRawLongBits(l.getLatitude()))
+            .putLong(pre + "Lon", Double.doubleToRawLongBits(l.getLongitude()))
+            .putLong(pre + "T", l.getTime())
+            .putFloat(pre + "Acc", l.hasAccuracy() ? l.getAccuracy() : 199f).apply();
+    }
+
+    private Location leerAncla(String pre) {
+        SharedPreferences p = prefs(this);
+        long t = p.getLong(pre + "T", 0L);
+        if (t <= 0L) return null;
+        try {
+            Location l = new Location(pre.equals("ar") ? "network" : "gps");
+            l.setLatitude(Double.longBitsToDouble(p.getLong(pre + "Lat", 0L)));
+            l.setLongitude(Double.longBitsToDouble(p.getLong(pre + "Lon", 0L)));
+            l.setTime(t);
+            l.setAccuracy(p.getFloat(pre + "Acc", 199f));
+            return l;
+        } catch (Exception e) { return null; }
+    }
+
+    private void borrarAnclas() {
+        prefs(this).edit()
+            .putLong("agT", 0L).putLong("arT", 0L).apply();
+    }
+
     private void soltarSatelites() {
         try { if (gnss != null && lm != null) lm.unregisterGnssStatusCallback(gnss); } catch (Exception ignored) {}
         gnss = null;
@@ -280,7 +339,14 @@ public class RideService extends Service implements LocationListener {
         vigia.removeCallbacks(chequeo);
         boolean paseoVivo = false;
         try { paseoVivo = prefs(this).getBoolean(K_ON, false); } catch (Exception ignored) {}
-        soltarFoco(!paseoVivo);
+        // 30-oct: con el paseo vivo NO se toca el candado ni la pantalla. Antes se
+        // soltaban aquí y, como el servicio revive enseguida (reinicios 2), el
+        // moribundo borraba la bandera que el nuevo acababa de poner: el parte
+        // decía "candado NO PUESTO · pantalla suelta" con el paseo corriendo. El
+        // candado lo libera el sistema al morir el proceso, no hace falta a mano.
+        if (!paseoVivo) soltarFoco(true);
+        else { try { if (lm != null) lm.removeUpdates(this); } catch (Exception ignored) {}
+               super.onDestroy(); return; }
         try { if (lm != null) lm.removeUpdates(this); } catch (Exception ignored) {}
         super.onDestroy();
     }
@@ -327,13 +393,17 @@ public class RideService extends Service implements LocationListener {
             ultimoGpsT = ahoraMs;
             p.edit().putLong("ultimoGps", ahoraMs).apply();
             anclaRed = null;              // llegó satélite: la cadena de antena se descarta
+            prefs(this).edit().putLong("arT", 0L).apply();
         }
         boolean mandaGps = esGps || (ahoraMs - ultimoGpsT) < 30000L;
 
         if (mandaGps == esGps || !mandaGps) {
+            // si el servicio renació, la memoria está vacía pero el ancla sigue viva
+            if (esGps && anclaGps == null) anclaGps = leerAncla("ag");
+            if (!esGps && anclaRed == null) anclaRed = leerAncla("ar");
             Location ancla = esGps ? anclaGps : anclaRed;
             float margen = esGps ? Math.max(10f, Math.min(acc * 1.5f, 60f))
-                                 : Math.max(30f, Math.min(acc * 2f, 90f));
+                                 : Math.max(25f, Math.min(acc, 60f));
             float topeVel = esGps ? 70f : 50f;
 
             if (ancla == null) {
@@ -364,7 +434,8 @@ public class RideService extends Service implements LocationListener {
                     }
                 }
             }
-            if (esGps) anclaGps = ancla; else anclaRed = ancla;
+            if (esGps) { anclaGps = ancla; guardarAncla("ag", ancla); }
+            else       { anclaRed = ancla; guardarAncla("ar", ancla); }
         }
 
         boolean cand = (foco != null && foco.isHeld());
