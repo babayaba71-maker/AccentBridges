@@ -122,7 +122,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v4.1 · musica a un toque");
+        placa.setText("v4.2 · distancia de verdad");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -489,8 +489,16 @@ public class MainActivity extends Activity {
         int usados = p.getInt("satsUsados", 0);
         String prov = p.getString("prov", "?");
         String deDonde = prov.contains("gps") ? "satelite" : (prov.contains("network") ? "ANTENA (sin satelites)" : prov);
-        if (sats < 0) return deDonde;
-        return usados + "/" + sats + " satelites · " + deDonde;
+        String cabeza = (sats < 0) ? deDonde : (usados + "/" + sats + " satelites · " + deDonde);
+        // edad de la última lectura de SATÉLITE (no de antena): es la que suma distancia
+        long g = p.getLong("ultimoGps", 0L);
+        String cola;
+        if (g == 0L) cola = " · sin lectura de satelite en este paseo";
+        else {
+            long sg = Math.max(0, (System.currentTimeMillis() - g) / 1000);
+            cola = " · satelite hace " + (sg < 60 ? sg + " s" : (sg / 60) + " min");
+        }
+        return cabeza + cola;
     }
 
     /** Abre el reproductor: Amazon Music primero, y si no está, el que haya. */

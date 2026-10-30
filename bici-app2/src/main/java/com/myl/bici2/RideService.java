@@ -71,6 +71,7 @@ public class RideService extends Service implements LocationListener {
 
         if (ACT_REANUDAR.equals(accion)) {
             prefs(this).edit().putBoolean(K_ON, true).apply();
+            ancla = null;   // al retomar, el ancla vieja ya no sirve
             try { Latido.programar(this); } catch (Exception ignored) {}
         } else if (ACT_START.equals(accion)) {
             SharedPreferences p = prefs(this);
@@ -78,6 +79,7 @@ public class RideService extends Service implements LocationListener {
                 .putFloat(K_DIST,0f).putFloat(K_MAX,0f).putInt(K_N,0).putFloat(K_SALTO,0f)
                 .putInt(K_ACC,-1).putLong(K_ULT,0L).putInt(K_REIN,0).apply();
             ultimo = null;
+            ancla = null;   // paseo nuevo, ancla nueva (si no, sumaría el salto desde el punto viejo)
             String ver = "?";
             try { ver = getPackageManager().getPackageInfo(getPackageName(), 0).versionName; } catch (Exception ignored) {}
             p.edit().putString(K_VER, ver).putInt(K_VIG, 0).putLong(K_VIGT, 0L).putBoolean(K_CAND, false)
@@ -108,6 +110,8 @@ public class RideService extends Service implements LocationListener {
     }
 
     private android.location.GnssStatus.Callback gnss;
+    /** punto de referencia para sumar distancia (ver onLocationChanged) */
+    private Location ancla;
     private void contarSatelites() {
         // 30-oct: saber si el telefono VE satelites o solo antenas. ±100 m
         // significa antena; el parte necesita decirlo con nombre y apellido.
@@ -267,43 +271,70 @@ public class RideService extends Service implements LocationListener {
         super.onDestroy();
     }
 
+    // 30-oct (nota de voz de JJ: "los ceros no se mueven ni caminando, y tengo
+    // el GPS prendido y estoy afuera"). BUG MÍO, doble: (1) se sumaba sólo con
+    // precisión <= 60 m y saltos > 2 m, así que caminando a 1.4 m/s con lecturas
+    // cada segundo el salto (1.4 m) NUNCA pasaba el filtro; (2) se comparaba
+    // contra la última lectura de CUALQUIER proveedor, así que un punto de antena
+    // (±100 m) envenenaba la comparación. Nuevo método: ANCLA.
+    //  - La distancia sólo se suma con lecturas de satélite (provider gps).
+    //  - Se guarda un punto ancla; cuando el nuevo punto se aleja del ancla más
+    //    que el margen (8 a 40 m, según la precisión real) se suma ESA distancia
+    //    y el ancla se mueve. Así el temblor de la señal no acumula metros falsos
+    //    y caminar despacio sí cuenta.
+    //  - Si la precisión es mala (50-120 m) pero hay velocidad, se suma
+    //    velocidad x tiempo como respaldo, para no volver a mostrar ceros.
     @Override public void onLocationChanged(Location loc) {
         if (loc == null) return;
         SharedPreferences p = prefs(this);
         if (!p.getBoolean(K_ON,false)) return;
 
-        float acc = loc.hasAccuracy() ? loc.getAccuracy() : 99f;
-        try { p.edit().putString("prov", loc.getProvider() == null ? "?" : loc.getProvider()).apply(); } catch (Exception ignored) {}
+        float acc = loc.hasAccuracy() ? loc.getAccuracy() : 199f;
+        boolean esGps = loc.getProvider() != null && loc.getProvider().contains("gps");
         float dist = p.getFloat(K_DIST,0f);
-        float max = p.getFloat(K_MAX,0f);
+        float max  = p.getFloat(K_MAX,0f);
         int n = p.getInt(K_N,0) + 1;
-        float saltoMax = p.getFloat(K_SALTO,0f);
+        boolean sumado = false;
 
-        if (ultimo != null) {
-            long dtMs = loc.getTime() - ultimo.getTime();
-            double dt = dtMs / 1000.0;
-            double d = distancia(ultimo.getLatitude(), ultimo.getLongitude(), loc.getLatitude(), loc.getLongitude());
-            if (d > saltoMax) saltoMax = (float) d;
+        if (esGps) {
+            p.edit().putLong("ultimoGps", System.currentTimeMillis()).apply();
 
-            float vel = loc.hasSpeed() ? loc.getSpeed() * 3.6f : (dt > 0 ? (float)((d/dt)*3.6) : 0f);
-            if (vel > 60f) vel = 60f;
-            if (vel > max) max = vel;
+            if (ancla != null) {
+                long dtMs = loc.getTime() - ancla.getTime();
+                double dt = dtMs / 1000.0;
+                double d = distancia(ancla.getLatitude(), ancla.getLongitude(),
+                                      loc.getLatitude(), loc.getLongitude());
 
-            boolean sumado = false;
-            if (dt > 0.5 && d < 200 && loc.hasAccuracy() && acc <= 60 && d > 2 && n > 2) {
-                double vImp = (d/dt)*3.6;
-                if (vImp <= 70) { dist += (float) d; sumado = true; }
-            }
-            if (!sumado && n > 2 && acc <= 80 && loc.hasSpeed() && loc.getSpeed() > 0.6f && dt > 0.5 && dt < 30) {
-                float m = (float)(loc.getSpeed() * dt);
-                if (m < 200) dist += m;
+                if (acc <= 50f) {
+                    float margen = Math.max(8f, Math.min(acc, 40f));
+                    if (dt > 1.0 && d >= margen && d < 2000) {
+                        dist += (float) d;
+                        ancla = loc;
+                        sumado = true;
+                    }
+                    // velocidad: la del GPS manda; si no la trae, se calcula
+                    float vel = loc.hasSpeed() ? loc.getSpeed() * 3.6f
+                              : (dt > 0.5 ? (float)((d / dt) * 3.6) : 0f);
+                    if (vel > 70f && !loc.hasSpeed()) vel = 0f;   // salto raro, no ensucia la máxima
+                    if (vel > max) max = Math.min(vel, 70f);
+                } else if (acc <= 120f && loc.hasSpeed() && loc.getSpeed() > 0.6f
+                           && dt > 0.5 && dt < 60) {
+                    float m = (float)(loc.getSpeed() * dt);
+                    if (m < 500) { dist += m; sumado = true; }
+                    ancla = loc;
+                    float vel = loc.getSpeed() * 3.6f;
+                    if (vel > max) max = Math.min(vel, 70f);
+                }
+            } else {
+                ancla = loc;
             }
         }
-        ultimo = loc;
 
         boolean cand = (foco != null && foco.isHeld());
         p.edit().putBoolean(K_CAND,cand).putFloat(K_DIST,dist).putFloat(K_MAX,max).putInt(K_N,n)
-         .putFloat(K_SALTO,saltoMax).putInt(K_ACC,Math.round(acc))
+         .putInt(K_ACC,Math.round(acc))
+         .putString("prov", loc.getProvider() == null ? "?" : loc.getProvider())
+         .putBoolean("sumo", sumado)
          .putLong(K_ULT,System.currentTimeMillis()).apply();
 
         long ahora = System.currentTimeMillis();
