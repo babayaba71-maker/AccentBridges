@@ -71,7 +71,7 @@ public class RideService extends Service implements LocationListener {
 
         if (ACT_REANUDAR.equals(accion)) {
             prefs(this).edit().putBoolean(K_ON, true).apply();
-            ancla = null;   // al retomar, el ancla vieja ya no sirve
+            anclaGps = null; anclaRed = null; ultimoGpsT = 0L;   // al retomar, el ancla vieja ya no sirve
             try { Latido.programar(this); } catch (Exception ignored) {}
         } else if (ACT_START.equals(accion)) {
             SharedPreferences p = prefs(this);
@@ -79,7 +79,7 @@ public class RideService extends Service implements LocationListener {
                 .putFloat(K_DIST,0f).putFloat(K_MAX,0f).putInt(K_N,0).putFloat(K_SALTO,0f)
                 .putInt(K_ACC,-1).putLong(K_ULT,0L).putInt(K_REIN,0).apply();
             ultimo = null;
-            ancla = null;   // paseo nuevo, ancla nueva (si no, sumaría el salto desde el punto viejo)
+            anclaGps = null; anclaRed = null; ultimoGpsT = 0L;   // paseo nuevo, ancla nueva (si no, sumaría el salto desde el punto viejo)
             String ver = "?";
             try { ver = getPackageManager().getPackageInfo(getPackageName(), 0).versionName; } catch (Exception ignored) {}
             p.edit().putString(K_VER, ver).putInt(K_VIG, 0).putLong(K_VIGT, 0L).putBoolean(K_CAND, false)
@@ -111,7 +111,9 @@ public class RideService extends Service implements LocationListener {
 
     private android.location.GnssStatus.Callback gnss;
     /** punto de referencia para sumar distancia (ver onLocationChanged) */
-    private Location ancla;
+    private Location anclaGps;
+    private Location anclaRed;
+    private long ultimoGpsT = 0L;
     private void contarSatelites() {
         // 30-oct: saber si el telefono VE satelites o solo antenas. ±100 m
         // significa antena; el parte necesita decirlo con nombre y apellido.
@@ -284,6 +286,18 @@ public class RideService extends Service implements LocationListener {
     //    y caminar despacio sí cuenta.
     //  - Si la precisión es mala (50-120 m) pero hay velocidad, se suma
     //    velocidad x tiempo como respaldo, para no volver a mostrar ceros.
+    // 30-oct (parte real de JJ desde la bici: "0/1 satelites · ANTENA (sin
+    // satelites", 0.03 km en 7:30). El telefono NO esta viendo el cielo: sus
+    // lecturas son de antena telefonica (±18 m), y la 4.2 solo confiaba en
+    // satelites, asi que la bici seguia marcando cero. Ahora hay DOS cadenas
+    // de ancla, una por proveedor, y se suma con la que este mandando:
+    //  - Si hay satelites, manda la cadena GPS (margen 10-60 m).
+    //  - Si no hay satelites hace 30 s, manda la cadena de ANTENA (margen
+    //    30-90 m, porque el error de antena es mucho mayor). Mejor un numero
+    //    con 10% de error que un cero perfecto.
+    //  - Nunca se mezclan las dos cadenas (eso inventaria saltos de 100 m).
+    // Tambien se guarda si el GPS del SISTEMA esta encendido, para separar
+    // "GPS apagado en el telefono" de "GPS prendido pero sin satelites".
     @Override public void onLocationChanged(Location loc) {
         if (loc == null) return;
         SharedPreferences p = prefs(this);
@@ -295,50 +309,68 @@ public class RideService extends Service implements LocationListener {
         float max  = p.getFloat(K_MAX,0f);
         int n = p.getInt(K_N,0) + 1;
         boolean sumado = false;
+        long ahoraMs = System.currentTimeMillis();
 
         if (esGps) {
-            p.edit().putLong("ultimoGps", System.currentTimeMillis()).apply();
+            ultimoGpsT = ahoraMs;
+            p.edit().putLong("ultimoGps", ahoraMs).apply();
+            anclaRed = null;              // llegó satélite: la cadena de antena se descarta
+        }
+        boolean mandaGps = esGps || (ahoraMs - ultimoGpsT) < 30000L;
 
-            if (ancla != null) {
+        if (mandaGps == esGps || !mandaGps) {
+            Location ancla = esGps ? anclaGps : anclaRed;
+            float margen = esGps ? Math.max(10f, Math.min(acc * 1.5f, 60f))
+                                 : Math.max(30f, Math.min(acc * 2f, 90f));
+            float topeVel = esGps ? 70f : 50f;
+
+            if (ancla == null) {
+                ancla = loc;
+            } else {
                 long dtMs = loc.getTime() - ancla.getTime();
                 double dt = dtMs / 1000.0;
                 double d = distancia(ancla.getLatitude(), ancla.getLongitude(),
-                                      loc.getLatitude(), loc.getLongitude());
+                                     loc.getLatitude(), loc.getLongitude());
 
-                if (acc <= 50f) {
-                    float margen = Math.max(8f, Math.min(acc, 40f));
-                    if (dt > 1.0 && d >= margen && d < 2000) {
+                if (dt > 1.0 && dt < 600 && d >= margen && d < 2000) {
+                    double vImp = (d / dt) * 3.6;
+                    if (vImp <= topeVel) {
                         dist += (float) d;
-                        ancla = loc;
                         sumado = true;
+                        if (vImp > max) max = (float) vImp;
                     }
-                    // velocidad: la del GPS manda; si no la trae, se calcula
-                    float vel = loc.hasSpeed() ? loc.getSpeed() * 3.6f
-                              : (dt > 0.5 ? (float)((d / dt) * 3.6) : 0f);
-                    if (vel > 70f && !loc.hasSpeed()) vel = 0f;   // salto raro, no ensucia la máxima
-                    if (vel > max) max = Math.min(vel, 70f);
-                } else if (acc <= 120f && loc.hasSpeed() && loc.getSpeed() > 0.6f
-                           && dt > 0.5 && dt < 60) {
+                    ancla = loc;          // el ancla se mueve aun si el tramo se descartó
+                } else if (loc.hasSpeed() && loc.getSpeed() > 0.6f
+                           && dt > 1.0 && dt < 60 && acc <= 120f) {
                     float m = (float)(loc.getSpeed() * dt);
-                    if (m < 500) { dist += m; sumado = true; }
-                    ancla = loc;
-                    float vel = loc.getSpeed() * 3.6f;
-                    if (vel > max) max = Math.min(vel, 70f);
+                    if (m < 500) {
+                        dist += m;
+                        sumado = true;
+                        float vel = loc.getSpeed() * 3.6f;
+                        if (vel <= topeVel && vel > max) max = vel;
+                        ancla = loc;
+                    }
                 }
-            } else {
-                ancla = loc;
             }
+            if (esGps) anclaGps = ancla; else anclaRed = ancla;
         }
 
         boolean cand = (foco != null && foco.isHeld());
+        boolean gpsSistema = true;
+        try {
+            android.location.LocationManager lm =
+                    (android.location.LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            gpsSistema = lm != null && lm.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER);
+        } catch (Exception ignored) {}
+
         p.edit().putBoolean(K_CAND,cand).putFloat(K_DIST,dist).putFloat(K_MAX,max).putInt(K_N,n)
          .putInt(K_ACC,Math.round(acc))
          .putString("prov", loc.getProvider() == null ? "?" : loc.getProvider())
          .putBoolean("sumo", sumado)
-         .putLong(K_ULT,System.currentTimeMillis()).apply();
+         .putBoolean("gpsSistema", gpsSistema)
+         .putLong(K_ULT,ahoraMs).apply();
 
-        long ahora = System.currentTimeMillis();
-        if (ahora - ultimoAviso > 5000) { ultimoAviso = ahora; iniciarForeground(textoNotif(p)); }
+        if (ahoraMs - ultimoAviso > 5000) { ultimoAviso = ahoraMs; iniciarForeground(textoNotif(p)); }
     }
 
     @Override public void onStatusChanged(String s, int i, Bundle b) {}

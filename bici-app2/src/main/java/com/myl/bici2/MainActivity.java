@@ -122,7 +122,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v4.2 · distancia de verdad");
+        placa.setText("v4.3 · suma con antena");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -490,6 +490,11 @@ public class MainActivity extends Activity {
         String prov = p.getString("prov", "?");
         String deDonde = prov.contains("gps") ? "satelite" : (prov.contains("network") ? "ANTENA (sin satelites)" : prov);
         String cabeza = (sats < 0) ? deDonde : (usados + "/" + sats + " satelites · " + deDonde);
+        // 30-oct: si el parte dice ANTENA hay que distinguir dos mundos muy
+        // distintos: el GPS del telefono APAGADO (se arregla en Ajustes) o
+        // prendido pero sin cielo (bajo techo / cañon urbano). El 4.3 suma
+        // distancia con antena, pero el dato sigue siendo clave.
+        if (!p.getBoolean("gpsSistema", true)) cabeza = "GPS DEL TELEFONO APAGADO · " + cabeza;
         // edad de la última lectura de SATÉLITE (no de antena): es la que suma distancia
         long g = p.getLong("ultimoGps", 0L);
         String cola;
