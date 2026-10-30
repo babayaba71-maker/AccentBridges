@@ -107,6 +107,24 @@ public class RideService extends Service implements LocationListener {
         } catch (Exception ignored) {}
     }
 
+    private android.location.GnssStatus.Callback gnss;
+    private void contarSatelites() {
+        // 30-oct: saber si el telefono VE satelites o solo antenas. ±100 m
+        // significa antena; el parte necesita decirlo con nombre y apellido.
+        if (Build.VERSION.SDK_INT < 24 || lm == null || gnss != null) return;
+        try {
+            gnss = new android.location.GnssStatus.Callback() {
+                @Override public void onSatelliteStatusChanged(android.location.GnssStatus st) {
+                    int usados = 0, vistos = st.getSatelliteCount();
+                    for (int i = 0; i < vistos; i++) if (st.usedInFix(i)) usados++;
+                    prefs(RideService.this).edit().putInt("sats", vistos)
+                            .putInt("satsUsados", usados).apply();
+                }
+            };
+            lm.registerGnssStatusCallback(gnss, null);
+        } catch (Exception ignored) {}
+    }
+
     private void empezarGps() {
         try {
             lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -116,6 +134,7 @@ public class RideService extends Service implements LocationListener {
             if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
                 lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 0, this);
         } catch (Exception e) { /* sin permiso o sin proveedor */ }
+        contarSatelites();
     }
 
     // Android puede dejar de entregar lecturas (permiso "solo con la app abierta",
@@ -225,7 +244,13 @@ public class RideService extends Service implements LocationListener {
         foco = null;
     }
 
+    private void soltarSatelites() {
+        try { if (gnss != null && lm != null) lm.unregisterGnssStatusCallback(gnss); } catch (Exception ignored) {}
+        gnss = null;
+    }
+
     private void parar() {
+        soltarSatelites();
         try { if (lm != null) lm.removeUpdates(this); } catch (Exception ignored) {}
         soltarFoco();
         prefs(this).edit().putBoolean(K_ON,false).apply();
@@ -248,6 +273,7 @@ public class RideService extends Service implements LocationListener {
         if (!p.getBoolean(K_ON,false)) return;
 
         float acc = loc.hasAccuracy() ? loc.getAccuracy() : 99f;
+        try { p.edit().putString("prov", loc.getProvider() == null ? "?" : loc.getProvider()).apply(); } catch (Exception ignored) {}
         float dist = p.getFloat(K_DIST,0f);
         float max = p.getFloat(K_MAX,0f);
         int n = p.getInt(K_N,0) + 1;

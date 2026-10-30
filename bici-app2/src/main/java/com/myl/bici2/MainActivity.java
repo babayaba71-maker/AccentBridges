@@ -122,7 +122,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v3.9 · se rearma solo");
+        placa.setText("v4.0 · satelites a la vista");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -446,6 +446,16 @@ public class MainActivity extends Activity {
         } catch (Exception ignored) {}
     }
 
+    /** 30-oct: el parte tiene que decir si hay satélites o si sólo hay antena. */
+    private String senal(SharedPreferences p) {
+        int sats = p.getInt("sats", -1);
+        int usados = p.getInt("satsUsados", 0);
+        String prov = p.getString("prov", "?");
+        String deDonde = prov.contains("gps") ? "satelite" : (prov.contains("network") ? "ANTENA (sin satelites)" : prov);
+        if (sats < 0) return deDonde;
+        return usados + "/" + sats + " satelites · " + deDonde;
+    }
+
     private String edadLatido(SharedPreferences p) {
         long t = p.getLong("latidoT", 0L);
         if (t <= 0) return "nunca";
@@ -463,6 +473,7 @@ public class MainActivity extends Activity {
                 + String.format("%.1f", p.getFloat("max", 0f))
                 + " km/h. (app Alma Bici " + versionReal() + " · candado " + (p.getBoolean("candado", false) ? "puesto" : "NO PUESTO")
                 + " · GPS ±" + p.getInt("acc", -1) + " m, " + p.getInt("n", 0) + " lecturas"
+                + " · " + senal(p)
                 + " · " + edadLectura(p) + " · " + estadoPermiso() + " · " + estadoBateria()
                 + " · reinicios " + p.getInt("rein", 0) + " · latidos " + p.getInt("latidos", 0)
                 + " · pantalla " + (p.getBoolean("pantallaFija", false) ? "fija" : "suelta")
