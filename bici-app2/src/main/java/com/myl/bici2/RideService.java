@@ -29,7 +29,8 @@ public class RideService extends Service implements LocationListener {
     public static final String ACT_STOP  = "com.myl.bici.STOP";
 
     static final String K_ON="on", K_START="start", K_DIST="dist", K_MAX="max",
-                        K_ACC="acc", K_N="n", K_ULT="ult", K_SALTO="salto", K_REIN="rein";
+                        K_ACC="acc", K_N="n", K_ULT="ult", K_SALTO="salto", K_REIN="rein",
+                        K_VER="ver", K_VIG="vig", K_VIGT="vigt", K_CAND="cand", K_PWR="pwr", K_IDLE="idle";
     private PowerManager.WakeLock foco;
 
     private LocationManager lm;
@@ -57,6 +58,9 @@ public class RideService extends Service implements LocationListener {
                 .putFloat(K_DIST,0f).putFloat(K_MAX,0f).putInt(K_N,0).putFloat(K_SALTO,0f)
                 .putInt(K_ACC,-1).putLong(K_ULT,0L).putInt(K_REIN,0).apply();
             ultimo = null;
+            String ver = "?";
+            try { ver = getPackageManager().getPackageInfo(getPackageName(), 0).versionName; } catch (Exception ignored) {}
+            p.edit().putString(K_VER, ver).putInt(K_VIG, 0).putLong(K_VIGT, 0L).putBoolean(K_CAND, false).apply();
         }
 
         empezarGps();
@@ -85,12 +89,38 @@ public class RideService extends Service implements LocationListener {
             try {
                 SharedPreferences p = prefs(RideService.this);
                 if (!p.getBoolean(K_ON,false)) return;
+
+                // 30-oct: huella del vigilante para saber si el proceso sigue vivo
+                boolean cand = (foco != null && foco.isHeld());
+                boolean pwr = false, idle = false;
+                try {
+                    PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+                    if (pm != null) {
+                        pwr = pm.isPowerSaveMode();
+                        if (Build.VERSION.SDK_INT >= 23) idle = pm.isDeviceIdleMode();
+                    }
+                } catch (Exception ignored) {}
+                p.edit().putInt(K_VIG, p.getInt(K_VIG,0)+1)
+                        .putLong(K_VIGT, System.currentTimeMillis())
+                        .putBoolean(K_CAND, cand).putBoolean(K_PWR, pwr).putBoolean(K_IDLE, idle).apply();
+
                 long ult = p.getLong(K_ULT,0);
                 boolean dormido = ult > 0 && System.currentTimeMillis() - ult > 45000;
                 if (dormido) {
                     p.edit().putInt(K_REIN, p.getInt(K_REIN,0)+1).apply();
                     try { if (lm != null) lm.removeUpdates(RideService.this); } catch (Exception ignored) {}
                     empezarGps();
+                    // ademas pide UNA lectura suelta por si el flujo continuo esta muerto
+                    try {
+                        if (lm != null && lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                            if (Build.VERSION.SDK_INT >= 30)
+                                lm.getCurrentLocation(LocationManager.GPS_PROVIDER, null, getMainExecutor(), new java.util.function.Consumer<Location>() {
+                                    @Override public void accept(Location l) { if (l != null) onLocationChanged(l); }
+                                });
+                            else
+                                lm.requestSingleUpdate(LocationManager.GPS_PROVIDER, RideService.this, Looper.getMainLooper());
+                        }
+                    } catch (Exception ignored) {}
                 }
             } catch (Exception ignored) {}
             vigia.postDelayed(this, 30000);
@@ -108,11 +138,14 @@ public class RideService extends Service implements LocationListener {
             foco = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "alma_bici:pedaleo");
             foco.setReferenceCounted(false);
             foco.acquire(6 * 60 * 60 * 1000L);
+            prefs(this).edit().putBoolean(K_CAND, foco.isHeld()).apply();
+            prefs(this).edit().putBoolean("candado", foco.isHeld()).apply();
         } catch (Exception ignored) {}
     }
 
     private void soltarFoco() {
         try { if (foco != null && foco.isHeld()) foco.release(); } catch (Exception ignored) {}
+        try { prefs(this).edit().putBoolean("candado", false).apply(); } catch (Exception ignored) {}
         foco = null;
     }
 
@@ -164,7 +197,8 @@ public class RideService extends Service implements LocationListener {
         }
         ultimo = loc;
 
-        p.edit().putFloat(K_DIST,dist).putFloat(K_MAX,max).putInt(K_N,n)
+        boolean cand = (foco != null && foco.isHeld());
+        p.edit().putBoolean(K_CAND,cand).putFloat(K_DIST,dist).putFloat(K_MAX,max).putInt(K_N,n)
          .putFloat(K_SALTO,saltoMax).putInt(K_ACC,Math.round(acc))
          .putLong(K_ULT,System.currentTimeMillis()).apply();
 

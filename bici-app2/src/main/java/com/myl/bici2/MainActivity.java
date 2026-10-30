@@ -122,7 +122,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v3.3 · voz al arrancar");
+        placa.setText("v3.4 · parte con datos");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -441,8 +441,20 @@ public class MainActivity extends Activity {
         return "Voy en la bici: " + String.format("%.2f", km) + " km, " + reloj(seg)
                 + ", promedio " + String.format("%.1f", prom) + " km/h, máxima "
                 + String.format("%.1f", p.getFloat("max", 0f))
-                + " km/h. (app Alma Bici v2 · GPS ±" + p.getInt("acc", -1) + " m, " + p.getInt("n", 0) + " lecturas"
+                + " km/h. (app Alma Bici " + versionReal() + " · candado " + (p.getBoolean("candado", false) ? "puesto" : "NO PUESTO")
+                + " · GPS ±" + p.getInt("acc", -1) + " m, " + p.getInt("n", 0) + " lecturas"
                 + " · " + edadLectura(p) + " · " + estadoPermiso() + " · " + estadoBateria() + " · reinicios " + p.getInt("rein", 0) + ")";
+    }
+
+    // 30-oct: el parte decia "v2" escrito a mano en TODAS las versiones, asi que
+    // no habia forma de saber que build trae el telefono. Ahora lo lee del APK.
+    private String versionReal() {
+        try {
+            android.content.pm.PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), 0);
+            String vn = pi.versionName;
+            long vc = (Build.VERSION.SDK_INT >= 28) ? pi.getLongVersionCode() : pi.versionCode;
+            return "v" + vn + " (build " + vc + ")";
+        } catch (Exception e) { return "v?"; }
     }
 
     private String edadLectura(SharedPreferences p) {
