@@ -3,163 +3,181 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Inventario — ¿Qué palabras conoces de verdad?</title>
+<title>Inventario — palabras clave</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:radial-gradient(circle at 50% 0%,#0a2033,#040a12 70%);color:#fff;
  font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh;padding:18px 14px 40px}
-.wrap{max-width:640px;margin:0 auto}
+.wrap{max-width:620px;margin:0 auto}
 h1{font-size:19px;letter-spacing:.14em;color:#00f0ff;text-align:center;margin:6px 0 2px;font-weight:700}
 .sub{text-align:center;color:#7d93a8;font-size:11px;letter-spacing:.12em;margin-bottom:16px}
-.card{background:rgba(9,20,32,.9);border:1px solid #1c3a52;border-radius:16px;padding:18px;margin-bottom:14px}
-.palabra{font-size:34px;font-weight:800;text-align:center;letter-spacing:.02em;margin:14px 0 4px}
-.etq{text-align:center;color:#ffb700;font-size:10px;letter-spacing:.2em;margin-bottom:14px}
-.preg{color:#9fb6c9;font-size:12px;letter-spacing:.06em;margin:16px 0 8px;text-transform:uppercase}
+.card{background:rgba(9,20,32,.92);border:1px solid #1c3a52;border-radius:16px;padding:18px;margin-bottom:14px}
+.palabra{font-size:32px;font-weight:800;text-align:center;margin:10px 0 2px;word-break:break-word}
+.es{text-align:center;color:#ffb700;font-size:12px;letter-spacing:.14em;margin-bottom:6px}
+.preg{color:#9fb6c9;font-size:11px;letter-spacing:.08em;margin:16px 0 8px;text-transform:uppercase}
 button.op{display:block;width:100%;text-align:left;background:#0b1a28;color:#dbe9f4;border:1px solid #24465f;
- border-radius:12px;padding:13px 14px;font-size:15px;margin-bottom:9px;cursor:pointer;font-family:inherit}
-button.op:active{background:#0d2436}
+ border-radius:12px;padding:13px 14px;font-size:15px;margin-bottom:9px;cursor:pointer;font-family:inherit;line-height:1.35}
 button.op.ok{background:#08301f;border-color:#00c07a;color:#9ff5cd}
 button.op.no{background:#301015;border-color:#c0392b;color:#ffb3ad}
-button.op:disabled{opacity:.75}
+button.op:disabled{opacity:.8}
 .barra{height:5px;background:#12293c;border-radius:99px;overflow:hidden;margin-bottom:16px}
 .barra i{display:block;height:100%;background:linear-gradient(90deg,#00f0ff,#007bff);width:0%;transition:width .25s}
-.big{font-size:52px;text-align:center;font-weight:800;margin:8px 0}
-.bloques{display:flex;gap:10px;margin:16px 0}
-.bl{flex:1;background:#0a1b29;border:1px solid #1e3d55;border-radius:12px;padding:10px 6px;text-align:center}
-.bl b{display:block;font-size:22px}
-.bl span{font-size:9px;color:#7d93a8;letter-spacing:.08em}
+.big{font-size:50px;text-align:center;font-weight:800;margin:6px 0}
+.hero{color:#c8dced;font-size:14px;line-height:1.6}
+.hint{color:#7d93a8;font-size:12px;line-height:1.55;margin-top:10px}
 .cta{display:block;width:100%;background:linear-gradient(90deg,#00f0ff,#007bff);color:#04121f;border:0;
- border-radius:14px;padding:16px;font-size:16px;font-weight:800;letter-spacing:.06em;cursor:pointer;font-family:inherit}
-.hero{text-align:center;color:#c8dced;font-size:14px;line-height:1.55}
-.hint{color:#7d93a8;font-size:12px;line-height:1.5;margin-top:8px}
+ border-radius:14px;padding:16px;font-size:15px;font-weight:800;letter-spacing:.05em;cursor:pointer;font-family:inherit;margin-top:6px}
+.reg{border-left:3px solid #1f5a78;padding:2px 0 2px 12px;margin:12px 0}
+.reg b{display:block;font-size:10px;letter-spacing:.16em;color:#00f0ff;margin-bottom:4px}
+.reg p{margin:0;font-size:13.5px;line-height:1.55;color:#c8dced}
+.frase{background:#0a1a28;border:1px solid #1e3d55;border-radius:10px;padding:11px 12px;margin:8px 0;font-size:14px;line-height:1.5}
+input{width:100%;background:#0b1a28;border:1px solid #24465f;color:#fff;border-radius:12px;padding:14px;
+ font-size:16px;font-family:inherit;margin-bottom:12px}
 .gano{color:#00e0a0}.pierde{color:#ff8b80}
+.fila{display:flex;gap:8px;margin:10px 0}
+.mini{flex:1;background:#0a1b29;border:1px solid #1e3d55;border-radius:10px;padding:8px 4px;text-align:center}
+.mini b{display:block;font-size:17px}
+.mini span{font-size:8.5px;color:#7d93a8;letter-spacing:.06em}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>INVENTARIO</h1>
-  <div class="sub">¿QUÉ PALABRAS CONOCES DE VERDAD?</div>
+  <div class="sub">OCHO PALABRAS CLAVE · DOS MINUTOS</div>
   <div id="app"></div>
 </div>
 <script>
-const ITEMS = [["cat", "contenido", "gato", "perro", "casa", "nombra"], ["water", "contenido", "agua", "fuego", "viento", "nombra"], ["house", "contenido", "casa", "carro", "calle", "nombra"], ["baby", "contenido", "bebé", "abuela", "vecino", "nombra"], ["mother", "contenido", "madre", "hermano", "doctor", "nombra"], ["school", "contenido", "escuela", "tienda", "iglesia", "nombra"], ["food", "contenido", "comida", "ropa", "dinero", "nombra"], ["car", "contenido", "carro", "bicicleta", "avión", "nombra"], ["night", "contenido", "noche", "mañana", "tarde", "nombra"], ["hand", "contenido", "mano", "pie", "cabeza", "nombra"], ["dignity", "contenido", "dignidad", "velocidad", "cantidad", "nombra"], ["wisdom", "contenido", "sabiduría", "juventud", "enfermedad", "nombra"], ["empathy", "contenido", "empatía", "energía", "economía", "nombra"], ["passport", "contenido", "pasaporte", "boleto", "recibo", "nombra"], ["opportunity", "contenido", "oportunidad", "obligación", "operación", "nombra"], ["evidence", "contenido", "evidencia", "experiencia", "elegancia", "nombra"], ["challenge", "contenido", "desafío", "chaleco", "cambio", "nombra"], ["community", "contenido", "comunidad", "compañía", "competencia", "nombra"], ["honesty", "contenido", "honestidad", "habilidad", "humildad", "nombra"], ["effort", "contenido", "esfuerzo", "efecto", "error", "nombra"], ["to", "funcion", "hacia / para (dirección)", "también", "todo", "relacion"], ["of", "funcion", "de (pertenencia)", "o (alternativa)", "fuera", "relacion"], ["and", "funcion", "y (suma)", "o (alternativa)", "pero", "conecta"], ["but", "funcion", "pero (contraste)", "y (suma)", "porque", "conecta"], ["because", "funcion", "porque (causa)", "aunque", "entonces", "conecta"], ["with", "funcion", "con (compañía)", "sin", "contra", "relacion"], ["for", "funcion", "para (destino)", "por (a través)", "desde", "relacion"], ["in", "funcion", "en / dentro de", "sobre / encima", "debajo", "relacion"], ["on", "funcion", "sobre / encima de", "dentro de", "entre", "relacion"], ["will", "funcion", "marca el futuro", "marca el pasado", "marca el plural", "tiempo"], ["have", "funcion", "tener / haber (posesión)", "hacer (acción)", "decir", "posesion"], ["my", "funcion", "mi (posesión)", "me (objeto)", "yo (sujeto)", "posesion"]];
-const FUN = {
-  nombra:"Nombra algo (persona, cosa o idea)",
-  accion:"Es una acción",
-  conecta:"Conecta dos ideas",
-  tiempo:"Marca tiempo o futuro",
-  posesion:"Indica posesión",
-  relacion:"Indica relación, lugar o dirección"
-};
+const K = [{"w": "assessment", "es": "evaluación / medición de nivel", "sig": ["evaluación (medir en qué nivel estás)", "comentario (decir lo que opinas)", "aumento (subir de precio)"], "reg": {"tecnico": "La MEDICIÓN formal: el instrumento con criterios que te da un nivel. \"Your assessment shows B1.\"", "habla": "Una prueba rápida o informal. \"It was a quick assessment of the situation.\"", "academico": "Un instrumento documentado con criterios y evidencia. \"The course uses two assessments per term.\""}, "ctx": ["The <b>assessment</b> said B1, so we start with rhythm.", "Every <b>assessment</b> gives us a number, not a verdict."]}, {"w": "lesson", "es": "lección / clase", "sig": ["lección (contenido que se enseña)", "conversación (charla casual)", "decisión (elegir algo)"], "reg": {"tecnico": "Unidad de instrucción con objetivo y cierre. \"Lesson one is the schwa.\"", "habla": "La clase de hoy, sin técnica. \"I have a lesson at seven.\"", "academico": "Contenido planificado con objetivos observables. \"Each lesson targets one phoneme.\""}, "ctx": ["One <b>lesson</b>, one sound. Nothing else.", "This <b>lesson</b> is about the flap T."]}, {"w": "practice", "es": "práctica / practicar", "sig": ["práctica (repetir para mejorar)", "examen (demostrar lo aprendido)", "teoría (explicación de reglas)"], "reg": {"tecnico": "Ejercicio deliberado y repetido sobre un objetivo. \"Deliberate practice, not repetition.\"", "habla": "Repasar un rato. \"I need to practice before work.\"", "academico": "Actividad de aplicación medida. \"Practice tasks precede the assessment.\""}, "ctx": ["<b>Practice</b> out loud, not in your head.", "Ten minutes of <b>practice</b> beats one hour of reading."]}, {"w": "progress", "es": "progreso / avance", "sig": ["progreso (avance medido)", "promesa (algo que vas a hacer)", "problema (algo que falla)"], "reg": {"tecnico": "Avance medido contra una línea base. \"Your progress is twelve points.\"", "habla": "Cómo vas. \"Nice progress on the baby thing!\"", "academico": "Mejora documentada con evidencia. \"Students showed measurable progress.\""}, "ctx": ["Your <b>progress</b> is the distance from your first try.", "Slow <b>progress</b> is still progress."]}, {"w": "challenge", "es": "reto / desafío", "sig": ["reto (algo difícil a propósito)", "regalo (algo que te dan)", "descanso (pausa para recuperarte)"], "reg": {"tecnico": "Tarea calibrada por encima de tu nivel actual. \"This challenge is one step up.\"", "habla": "Algo que cuesta. \"The linking part is a challenge.\"", "academico": "Actividad de nivel superior con criterio. \"The challenge task is optional.\""}, "ctx": ["A <b>challenge</b> you can almost do is the right one.", "The <b>challenge</b> sentence has five TH sounds."]}, {"w": "improve", "es": "mejorar", "sig": ["mejorar (hacerlo mejor)", "impedir (no dejar que pase)", "terminar (acabarlo del todo)"], "reg": {"tecnico": "Aumentar el desempeño medible. \"We improve accuracy, not volume.\"", "habla": "Hacerlo mejor que ayer. \"I want to improve my English.\"", "academico": "Optimizar un resultado con método. \"The method improves retention.\""}, "ctx": ["You <b>improve</b> what you measure.", "One sound a day will <b>improve</b> your ear."]}, {"w": "review", "es": "repasar / revisar", "sig": ["repasar (volver a ver lo aprendido)", "estrenar (usar por primera vez)", "grabar (guardar audio)"], "reg": {"tecnico": "Revisión planificada de errores y material previo. \"Spaced review beats cramming.\"", "habla": "Volver a ver algo. \"Let me review my notes.\"", "academico": "Análisis crítico de evidencia. \"A review of the data shows one pattern.\""}, "ctx": ["We <b>review</b> yesterday before we add something new.", "<b>Review</b> is where the lesson sticks."]}, {"w": "because", "es": "porque (causa)", "sig": ["porque (causa)", "aunque (concesión)", "entonces (consecuencia)"], "reg": {"tecnico": "Conector de causa que une dos ideas. \"It works because the tongue moves back.\"", "habla": "El \"porque\" de todos los días. \"I stopped because I was tired.\"", "academico": "Marcador causal dentro de un argumento. \"The result holds because the sample was controlled.\""}, "ctx": ["I practice <b>because</b> I want to be understood.", "It sounds American <b>because</b> the schwa is there."]}];
 const EXP_URL="https://valerie.base44.app/functions/logMorfofonoSession";
 const EXP_KEY="ABVC-PILOTO-2026";
-let i=0, fase=0, ok=0, total=0, res={b1:[0,0],b2:[0,0],b3:[0,0]}, nombre="";
+let i=0, ok=0, nombre="", fallos=[], contestado=false;
 
 const app=document.getElementById('app');
-const shuffle=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
+const sh=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
+const limpiar=s=>s.replace(/<[^>]+>/g,'');
 
 function inicio(){
   app.innerHTML=`<div class="card"><div class="hero">
-    Te voy a mostrar 32 palabras <b>escritas</b>. Nada de audio.<br>
-    Por cada una hay dos preguntas: <b>qué significa</b> y <b>qué papel hace</b> en la frase.<br><br>
-    No es un examen para castigarte: es un mapa para saber qué te falta y qué ya tienes.
+    Ocho palabras. Nada más.<br><br>
+    Primero te muestro la palabra sola y tú eliges qué significa. Con eso sé por dónde empezar.
+    Después viene <b>la lección de la palabra que más se te resista</b>: los tres usos
+    (técnico, en el habla, académico) y tus frases.<br><br>
+    No es examen. Es saber dónde estás parado.
     </div>
     <div class="preg">¿Cómo te llamas?</div>
-    <input id="nom" placeholder="Tu nombre" style="width:100%;background:#0b1a28;border:1px solid #24465f;color:#fff;
-      border-radius:12px;padding:14px;font-size:16px;font-family:inherit;margin-bottom:14px">
+    <input id="nom" placeholder="Tu nombre">
     <button class="cta" onclick="empezar()">▶ EMPEZAR</button>
-    <div class="hint">Toma 5 o 6 minutos. Puedes parar cuando quieras y volver después.</div>
-    </div>`;
+    <div class="hint">Si algún día quieres el inventario largo (32 palabras), dímelo y lo abrimos.</div>
+  </div>`;
 }
 function empezar(){
   nombre=(document.getElementById('nom').value||"Estudiante").trim().slice(0,30);
-  i=0;ok=0;total=0;fase=0;res={b1:[0,0],b2:[0,0],b3:[0,0]};draw();
+  i=0;ok=0;fallos=[];draw();
 }
-function bloque(){ return i<10?"b1":(i<20?"b2":"b3"); }
 function draw(){
-  if(i>=ITEMS.length) return fin();
-  const it=ITEMS[i];
-  const [w,tipo,sig1,sig2,sig3,fun]=it;
-  const pct=Math.round((i*2)/(ITEMS.length*2)*100);
-  const etiqueta = tipo==="contenido" ? (i<10?"PALABRA BÁSICA":"PALABRA AVANZADA") : "PALABRA DE FUNCIÓN";
-  app.innerHTML=`
-   <div class="barra"><i style="width:${pct}%"></i></div>
-   <div class="card">
-     <div class="palabra">${w}</div>
-     <div class="etq">${etiqueta}</div>
-     ${fase===0? `<div class="preg">1 · ¿Qué significa?</div><div id="ops"></div>`
-                : `<div class="preg">2 · ¿Qué papel hace en la frase?</div><div id="ops"></div>`}
-   </div>`;
+  if(i>=K.length) return resultado();
+  const it=K[i];
+  const pct=Math.round(i/K.length*100);
+  app.innerHTML=`<div class="barra"><i style="width:${pct}%"></i></div>
+    <div class="card">
+      <div class="palabra">${it.w}</div>
+      <div class="es">PALABRA CLAVE ${i+1} DE ${K.length}</div>
+      <div class="preg">¿Qué significa?</div>
+      <div id="ops"></div>
+    </div>`;
   const ops=document.getElementById('ops');
-  if(fase===0){
-    shuffle([[sig1,1],[sig2,0],[sig3,0]]).forEach(([txt,bien],k)=>{
-      const b=document.createElement('button');b.className='op';b.textContent=txt;
-      b.onclick=()=>{res[bloque()][1]++;total++;if(bien){ok++;res[bloque()][0]++;b.classList.add('ok');}
-        else{b.classList.add('no');[...ops.children].forEach(c=>{if(c.textContent===sig1)c.classList.add('ok')});}
-        [...ops.children].forEach(c=>c.disabled=true);setTimeout(()=>{fase=1;draw()},420)};
-      ops.appendChild(b);
-    });
-  } else {
-    const claves=shuffle(Object.keys(FUN));
-    claves.forEach(k=>{
-      const b=document.createElement('button');b.className='op';b.textContent=FUN[k];
-      b.onclick=()=>{res[bloque()][1]++;total++;const bien=(k===fun);
-        if(bien){ok++;res[bloque()][0]++;b.classList.add('ok');}
-        else{b.classList.add('no');[...ops.children].forEach(c=>{if(c.textContent===FUN[fun])c.classList.add('ok')});}
-        [...ops.children].forEach(c=>c.disabled=true);setTimeout(()=>{i++;fase=0;draw()},420)};
-      ops.appendChild(b);
-    });
-  }
+  sh([...it.sig]).forEach(txt=>{
+    const b=document.createElement('button');b.className='op';b.textContent=txt;
+    b.onclick=()=>{
+      const bien=(txt===it.sig[0]);
+      if(bien){ok++;b.classList.add('ok');}
+      else{b.classList.add('no');fallos.push(it.w);
+        [...ops.children].forEach(c=>{if(c.textContent===it.sig[0])c.classList.add('ok')});}
+      [...ops.children].forEach(c=>c.disabled=true);
+      setTimeout(()=>{i++;draw()},430);
+    };
+    ops.appendChild(b);
+  });
 }
-function fin(){
-  const pct=Math.round(ok/total*100);
-  const p1=res.b1[1]?Math.round(res.b1[0]/res.b1[1]*100):0;
-  const p2=res.b2[1]?Math.round(res.b2[0]/res.b2[1]*100):0;
-  const p3=res.b3[1]?Math.round(res.b3[0]/res.b3[1]*100):0;
-  let diag, cura;
-  if(p3<p1-15 && p3<70){
-    diag="Conoces el SIGNIFICADO de las palabras, pero las PALABRAS DE FUNCIÓN (to, of, and, will…) se te escapan. Ese es exactamente el hueco: no es vocabulario, es la bisagra del inglés.";
-    cura="Tu siguiente paso NO son más palabras nuevas: son las 40 palabras de función en frases cortas, hasta que salgan solas.";
-  } else if(p2<p1-15){
-    diag="Lo básico está firme, pero el vocabulario abstracto todavía no aterriza. Eso es normal: son palabras que casi nunca oyes en conversación diaria.";
-    cura="Tu siguiente paso es vocabulario de contenido en contexto real (frases, no listas).";
-  } else if(pct>=80){
-    diag="Tienes el inventario sólido: significado y función. Lo que falta no es vocabulario, es usarlo hablando.";
-    cura="Tu siguiente paso es producción: frases completas con estas palabras, en voz alta.";
-  } else {
-    diag="Hay huecos repartidos entre significado y función. La buena noticia: los dos se entrenan igual, con contexto.";
-    cura="Tu siguiente paso es leer y escuchar frases cortas con estas palabras, no listas sueltas.";
-  }
-  app.innerHTML=`
-   <div class="card">
-     <div class="sub" style="margin-bottom:4px">TU INVENTARIO</div>
-     <div class="big">${pct}%</div>
-     <div class="bloques">
-       <div class="bl"><b class="${p1>=70?'gano':'pierde'}">${p1}%</b><span>BÁSICAS</span></div>
-       <div class="bl"><b class="${p2>=70?'gano':'pierde'}">${p2}%</b><span>AVANZADAS</span></div>
-       <div class="bl"><b class="${p3>=70?'gano':'pierde'}">${p3}%</b><span>DE FUNCIÓN</span></div>
-     </div>
-     <div class="hero" style="text-align:left">${diag}</div>
-     <div class="hint"><b>Qué sigue:</b> ${cura}</div>
-   </div>
-   <div class="card hero">Tu resultado ya quedó guardado con tu nombre.<br>
-     <span class="hint">Si vuelves a hacerlo en dos semanas, comparamos.</span></div>
-   <button class="cta" onclick="inicio()">HACERLO OTRA VEZ</button>`;
-  try{
-    localStorage.setItem("inventario_"+nombre, JSON.stringify({nombre,pct,p1,p2,p3,cuando:Date.now()}));
-  }catch(e){}
-  try{
-    fetch(EXP_URL,{method:"POST",headers:{"Content-Type":"application/json",api_key:EXP_KEY},
-      body:JSON.stringify({
-        topic:"Inventario — vocabulario receptivo y función",
-        userId:nombre,
-        passed:pct>=70, accuracy:pct,
-        challengeSentence:"32 palabras: significado + función",
-        spokenText:"inventario · basico:"+p1+"% avanzado:"+p2+"% funcion:"+p3+"% · total:"+pct+"%",
-        location:"Inventario",
-        sessionId:"inv-"+Date.now()
-      })}).catch(()=>{});
-  }catch(e){}
+function resultado(){
+  const pct=Math.round(ok/K.length*100);
+  let diag, sigue;
+  if(pct===100){diag="Conoces las ocho. Tu siguiente paso no es vocabulario: es usarlas hablando.";sigue="La lección de hoy es producción: una frase por palabra, en voz alta.";}
+  else if(pct>=75){diag="Casi todas. El inventario está firme y lo que falta es fino.";sigue="Vamos a la palabra que se te resistió, con sus tres usos.";}
+  else if(pct>=50){diag="La mitad. Hay huecos reales, y eso es bueno saberlo: se entrenan igual, con contexto.";sigue="Vamos a la lección de la palabra más floja.";}
+  else {diag="Menos de la mitad. No es que no puedas: son palabras que nunca te explicaron así.";sigue="Empezamos por una sola palabra. Hoy solo una.";}
+  const floja = fallos.length?fallos[0]:K[0].w;
+  window._floja = floja;
+  app.innerHTML=`<div class="card">
+    <div class="sub" style="margin-bottom:2px">TU TAMIZ</div>
+    <div class="big">${pct}%</div>
+    <div class="hero" style="text-align:left">${diag}</div>
+    <div class="hint"><b>Qué sigue:</b> ${sigue}</div>
+    ${fallos.length?`<div class="fila">${fallos.slice(0,4).map(f=>`<div class="mini"><b class="pierde">·</b><span>${f.toUpperCase()}</span></div>`).join('')}</div>`:''}
+  </div>
+  <button class="cta" onclick="leccion()">📖 VER LA LECCIÓN</button>`;
+  try{localStorage.setItem("tamiz_"+nombre,JSON.stringify({nombre,pct,fallos,cuando:Date.now()}))}catch(e){}
+  try{fetch(EXP_URL,{method:"POST",headers:{"Content-Type":"application/json",api_key:EXP_KEY},
+    body:JSON.stringify({topic:"Inventario — tamiz de 8 palabras clave",userId:nombre,passed:pct>=70,
+      accuracy:pct,challengeSentence:"8 palabras clave: significado",
+      spokenText:"tamiz · aciertos:"+ok+"/"+K.length+" · fallos:"+fallos.join(","),
+      location:"Inventario",sessionId:"tamiz-"+Date.now()})}).catch(()=>{})}catch(e){}
+}
+function leccion(){
+  const it = K.find(x=>x.w===window._floja) || K[0];
+  app.innerHTML=`<div class="card">
+    <div class="palabra">${it.w}</div>
+    <div class="es">${it.es.toUpperCase()}</div>
+    <div class="preg">LOS TRES USOS</div>
+    <div class="reg"><b>TÉCNICO · dentro del sistema</b><p>${it.reg.tecnico}</p></div>
+    <div class="reg"><b>EN EL HABLA · en la calle</b><p>${it.reg.habla}</p></div>
+    <div class="reg"><b>ACADÉMICO · en un curso</b><p>${it.reg.academico}</p></div>
+  </div>
+  <button class="cta" onclick="chequeo()">¿LA APRENDÍ? →</button>`;
+}
+function chequeo(){
+  const it = K.find(x=>x.w===window._floja) || K[0];
+  const opciones = sh([it.reg.tecnico, it.reg.habla, it.reg.academico]).map(t=>limpiar(t).slice(0,70)+"…");
+  app.innerHTML=`<div class="card">
+    <div class="preg">PREGUNTA 1 · ¿CUÁL ES EL USO TÉCNICO DE "${it.w}"?</div>
+    <div id="ops"></div>
+    <div class="hint">Una sola es la definición técnica (la del sistema, con criterios).</div>
+  </div>`;
+  const ops=document.getElementById('ops');
+  const correcta=limpiar(it.reg.tecnico).slice(0,70)+"…";
+  sh(opciones).forEach(t=>{
+    const b=document.createElement('button');b.className='op';b.textContent=t;
+    b.onclick=()=>{
+      const bien=(t===correcta);
+      if(bien){b.classList.add('ok');setTimeout(()=>contexto(),450);}
+      else{b.classList.add('no');[...ops.children].forEach(c=>{if(c.textContent===correcta)c.classList.add('ok')});
+        [...ops.children].forEach(c=>c.disabled=true);setTimeout(()=>contexto(),900);}
+      [...ops.children].forEach(c=>c.disabled=true);
+    };
+    ops.appendChild(b);
+  });
+}
+function contexto(){
+  const it = K.find(x=>x.w===window._floja) || K[0];
+  app.innerHTML=`<div class="card">
+    <div class="es">EN CONTEXTO</div>
+    <div class="hero" style="font-size:13.5px">Así vive <b>${it.w}</b> dentro de una frase. Léelas en voz alta, dos veces cada una.</div>
+    ${it.ctx.map(f=>`<div class="frase">${f}</div>`).join('')}
+    <div class="hint">Ojo primero, boca después: si puedes leerla, ya la tienes a la mitad.</div>
+  </div>
+  <button class="cta" onclick="cerrar()">LISTO ✓</button>`;
+}
+function cerrar(){
+  app.innerHTML=`<div class="card hero">
+    Muy bien. Una palabra bien puesta vale más que treinta a medias.<br><br>
+    <span class="hint">Mañana, cuando abras otra vez, empezamos por la siguiente.</span>
+  </div>
+  <button class="cta" onclick="inicio()">VOLVER AL TAMIZ</button>`;
+  try{fetch(EXP_URL,{method:"POST",headers:{"Content-Type":"application/json",api_key:EXP_KEY},
+    body:JSON.stringify({topic:"Inventario — lección de palabra clave",userId:nombre,passed:true,
+      accuracy:100,challengeSentence:"tres usos + contexto",
+      spokenText:"leccion · palabra:"+(window._floja||"")+" · vio los 3 registros y el contexto",
+      location:"Inventario",sessionId:"lec-"+Date.now()})}).catch(()=>{})}catch(e){}
 }
 inicio();
 </script>
