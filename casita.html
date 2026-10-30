@@ -123,7 +123,7 @@ body.orb #orbTip{display:block;position:fixed;left:0;right:0;bottom:calc(env(saf
       <div class="dot"></div>
       <div>
         <div class="title">ALMA</div>
-        <div class="badge" id="placa">v3.5 · voz en inglés</div>
+        <div class="badge" id="placa">v3.6 · vuelve a saludar</div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
@@ -414,7 +414,17 @@ function vozNavegador(clean){
             ||todas.find(v=>/google/i.test(v.name))
             ||todas[0]||null;
   if(!todas.length){
-    $("status").textContent="El telefono aun no me da voces. Toca otra vez o pon Ajustes > Texto a voz.";
+    // Android casi siempre entrega la lista de voces DESPUES del primer toque.
+    // Antes: aqui se rendia muda. Ahora: espera el aviso y se reintenta sola.
+    $("status").textContent="Despertando la voz del telefono…";
+    if("speechSynthesis" in window && !window.vocesEsperando){
+      window.vocesEsperando=true;
+      speechSynthesis.addEventListener("voiceschanged",function(){
+        window.vocesEsperando=false;
+        vozNavegador(clean);
+      },{once:true});
+      setTimeout(function(){ if(window.vocesEsperando){ window.vocesEsperando=false; vozNavegador(clean); } },1800);
+    }
   }else if(!es.length){
     $("status").textContent="Tu S22 no tiene voz en espanol: hablo con la que trae ("+elegida.name+"). Instala Ajustes > Texto a voz > datos en espanol.";
   }
@@ -427,16 +437,24 @@ function vozNavegador(clean){
     u.lang=(elegida&&elegida.lang)||"es-MX";
     if(elegida)u.voice=elegida;
     u.rate=1.03;u.volume=1;u.pitch=1;
-    let vigia=null, reintento=false;
+    let vigia=null, reintento=false, arranco=false;
     const limpiar=function(){if(vigia){clearTimeout(vigia);vigia=null}};
-    // 29-oct: el dijo "ya me puedes oir, pero ya no puedes contestar". El saludo
-    // sonaba (lo dispara su toque) y las respuestas no. En Android, si la pagina
-    // lleva rato sin un toque, el motor se traga la frase en silencio. Si en
-    // 1.2 s nadie esta hablando, se la repito UNA vez.
+    // 30-oct (JJ: "antes decia aqui estoy, partner, y ya no funciona"): la version
+    // anterior CANCELABA a los 1.2 s si no habia empezado, y con la voz inglesa
+    // (que tarda en cargar) cancelaba justo antes de arrancar -> silencio total.
+    // Ahora: si no arranco en 2.5 s Y no hay nada en cola, se repite UNA vez,
+    // sin cancelar de mas.
+    u.onstart=function(){ arranco=true; limpiar(); };
     vigia=setTimeout(function(){
-      if(reintento)return;
-      try{ if(!speechSynthesis.speaking){ reintento=true; speechSynthesis.cancel(); speechSynthesis.resume(); speechSynthesis.speak(u); } }catch(e){ setModo("idle"); }
-    },1200);
+      if(reintento||arranco)return;
+      try{
+        if(!speechSynthesis.speaking && !speechSynthesis.pending){
+          reintento=true;
+          speechSynthesis.resume();
+          speechSynthesis.speak(u);
+        }
+      }catch(e){ setModo("idle"); }
+    },2500);
     u.onend=function(){limpiar();siguiente()};
     u.onerror=function(e){
       limpiar();
