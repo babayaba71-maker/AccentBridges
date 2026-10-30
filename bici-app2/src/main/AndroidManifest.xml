@@ -35,12 +35,7 @@
             android:name=".RideService"
             android:exported="false"
             android:foregroundServiceType="location" />
-            <receiver android:name=".Latido" android:exported="false">
-            <intent-filter>
-                <action android:name="com.myl.bici.LATIDO"/>
-            </intent-filter>
-        </receiver>
-            <receiver android:name=".Latido" android:exported="false">
+        <receiver android:name=".Latido" android:exported="false">
             <intent-filter>
                 <action android:name="com.myl.bici.LATIDO"/>
             </intent-filter>
