@@ -122,7 +122,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v3.8 · latido que no se apaga");
+        placa.setText("v3.9 · se rearma solo");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -466,7 +466,8 @@ public class MainActivity extends Activity {
                 + " · " + edadLectura(p) + " · " + estadoPermiso() + " · " + estadoBateria()
                 + " · reinicios " + p.getInt("rein", 0) + " · latidos " + p.getInt("latidos", 0)
                 + " · pantalla " + (p.getBoolean("pantallaFija", false) ? "fija" : "suelta")
-                + " · ultimo latido " + edadLatido(p) + ")";
+                + " · ultimo latido " + edadLatido(p)
+                + " · servicio " + (((System.currentTimeMillis() - p.getLong("vivo", 0L)) < 90000L) ? "vivo" : "DORMIDO") + ")";
     }
 
     // 30-oct: el parte decia "v2" escrito a mano en TODAS las versiones, asi que
@@ -758,7 +759,25 @@ public class MainActivity extends Activity {
         }
     }
 
-    @Override protected void onResume() { super.onResume(); h.post(refresco); }
+    @Override protected void onResume() {
+        super.onResume();
+        // 30-oct: si hay un paseo guardado en marcha pero el servicio no está vivo
+        // (p. ej. porque se instaló un APK nuevo y Android borró las alarmas),
+        // se rearma solo. Sin esto el paseo seguía contando tiempo sin GPS.
+        try {
+            SharedPreferences p = RideService.prefs(this);
+            if (p.getBoolean("on", false)) {
+                long vivo = p.getLong("vivo", 0L);
+                boolean respira = vivo > 0 && (System.currentTimeMillis() - vivo) < 90000L;
+                if (!respira) {
+                    Intent i = new Intent(this, RideService.class);
+                    i.setAction(RideService.ACT_REANUDAR);
+                    if (Build.VERSION.SDK_INT >= 26) startForegroundService(i); else startService(i);
+                }
+            }
+        } catch (Exception ignored) {}
+        h.post(refresco);
+    }
 
     @Override protected void onPause() { super.onPause(); h.removeCallbacks(refresco); }
 }

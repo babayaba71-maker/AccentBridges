@@ -27,6 +27,12 @@ public class RideService extends Service implements LocationListener {
     public static final int NOTIF_ID = 77;
     public static final String ACT_START = "com.myl.bici.START";
     public static final String ACT_STOP  = "com.myl.bici.STOP";
+    /** Retomar un paseo que ya estaba en marcha SIN reiniciar los números.
+     *  Nace del parte del 30-oct: al instalar un APK nuevo Android mata el proceso
+     *  y borra las alarmas, y al abrir la app el paseo seguía "en marcha" del
+     *  guardado viejo, así que nadie le ordenaba nada al servicio (candado NO
+     *  PUESTO, último latido "nunca"). */
+    public static final String ACT_REANUDAR = "com.myl.bici.REANUDAR";
 
     static final String K_ON="on", K_START="start", K_DIST="dist", K_MAX="max",
                         K_ACC="acc", K_N="n", K_ULT="ult", K_SALTO="salto", K_REIN="rein",
@@ -63,7 +69,10 @@ public class RideService extends Service implements LocationListener {
         crearCanal();
         iniciarForeground("Arrancando el paseo…");
 
-        if (ACT_START.equals(accion)) {
+        if (ACT_REANUDAR.equals(accion)) {
+            prefs(this).edit().putBoolean(K_ON, true).apply();
+            try { Latido.programar(this); } catch (Exception ignored) {}
+        } else if (ACT_START.equals(accion)) {
             SharedPreferences p = prefs(this);
             p.edit().putBoolean(K_ON,true).putLong(K_START,System.currentTimeMillis())
                 .putFloat(K_DIST,0f).putFloat(K_MAX,0f).putInt(K_N,0).putFloat(K_SALTO,0f)
@@ -131,6 +140,7 @@ public class RideService extends Service implements LocationListener {
                 } catch (Exception ignored) {}
                 p.edit().putInt(K_VIG, p.getInt(K_VIG,0)+1)
                         .putLong(K_VIGT, System.currentTimeMillis())
+                        .putLong("vivo", System.currentTimeMillis())
                         .putBoolean(K_CAND, cand).putBoolean(K_PWR, pwr).putBoolean(K_IDLE, idle).apply();
 
                 long ult = p.getLong(K_ULT,0);
