@@ -80,7 +80,7 @@ public class MainActivity extends Activity {
     private static final int GRIS = Color.rgb(109, 130, 153);
     private static final int GRIS2 = Color.rgb(110, 130, 150);
 
-    private TextView tvKm, tvTiempo, tvProm, tvMax, tvEstado, tvArrancar, tvParte;
+    private TextView tvKm, tvTiempo, tvProm, tvMax, tvEstado, tvArrancar, tvParte, tvKmLabel;
     private OrbView orb;
     private final Handler h = new Handler(Looper.getMainLooper());
 
@@ -122,7 +122,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v4.3 · suma con antena");
+        placa.setText("v4.4 · resumen del paseo");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -139,7 +139,10 @@ public class MainActivity extends Activity {
         tvKm.setPadding(0, dp(16), 0, 0);
         col.addView(tvKm);
 
-        col.addView(etiqueta("KILÓMETROS"));
+        // 30-oct: la etiqueta cambia a "ÚLTIMO PASEO" cuando el paseo ya terminó,
+        // para que el número grande no parezca atorado.
+        tvKmLabel = etiqueta("KILÓMETROS");
+        col.addView(tvKmLabel);
 
         // ---- rayita de oro
         View raya = new View(this);
@@ -409,6 +412,14 @@ public class MainActivity extends Activity {
         return mm + ":" + dos(ss);
     }
 
+    private String hace(long t) {
+        long m = Math.max(0, (System.currentTimeMillis() - t) / 60000);
+        if (m < 1) return "hace un momento";
+        if (m < 60) return "hace " + m + " min";
+        long h = m / 60;
+        return "hace " + h + " h" + (m % 60 > 0 ? " " + (m % 60) + " min" : "");
+    }
+
     private String dos(long n) {
         return n < 10 ? ("0" + n) : String.valueOf(n);
     }
@@ -426,15 +437,36 @@ public class MainActivity extends Activity {
         // 30-oct (JJ: "pues todavía se sigue cerrando la pantalla"): mientras el
         // paseo está en marcha, la pantalla NO se apaga sola. Se quita al parar.
         pantallaPrendida(on);
-        float km = p.getFloat("dist", 0f) / 1000f;
-        long seg = on ? Math.max(0, (System.currentTimeMillis() - p.getLong("start", 0)) / 1000) : 0;
+        // 30-oct (JJ: "se quedó atorado en el tres cuando terminé el ride"): al
+        // PARAR quedaba 0.03 km con el reloj en 0:00 y promedio 0.0 — número del
+        // paseo viejo con reloj nuevo, se ve atorado y no dice nada. Ahora, si hay
+        // un paseo terminado, la pantalla muestra SU resumen completo (km, tiempo,
+        // promedio, máxima) y la etiqueta dice ÚLTIMO PASEO; los ceros vuelven al
+        // apretar ARRANCAR.
+        long finT = p.getLong("finT", 0L);
+        boolean resumen = !on && finT > 0L;
+
+        float km; long seg; float max;
+        if (on) {
+            km  = p.getFloat("dist", 0f) / 1000f;
+            seg = Math.max(0, (System.currentTimeMillis() - p.getLong("start", 0)) / 1000);
+            max = p.getFloat("max", 0f);
+        } else if (resumen) {
+            km  = p.getFloat("finDist", 0f) / 1000f;
+            seg = p.getLong("finSeg", 0L);
+            max = p.getFloat("finMax", 0f);
+        } else {
+            km  = p.getFloat("dist", 0f) / 1000f;
+            seg = 0L;
+            max = 0f;
+        }
         float prom = seg > 5 ? Math.min(70f, km / (seg / 3600f)) : 0f;
-        float max = p.getFloat("max", 0f);
 
         tvKm.setText(String.format("%.2f", km));
-        tvTiempo.setText(on ? reloj(seg) : "0:00");
+        tvTiempo.setText(reloj(seg));
         tvProm.setText(String.format("%.1f", prom));
         tvMax.setText(String.format("%.1f", max));
+        tvKmLabel.setText(resumen ? "ÚLTIMO PASEO · KILÓMETROS" : "KILÓMETROS");
 
         if (on) {
             tvArrancar.setText("⏸  PARAR");
@@ -466,7 +498,12 @@ public class MainActivity extends Activity {
             g.setCornerRadius(dp(16));
             tvArrancar.setBackground(g);
             tvArrancar.setTextColor(Color.rgb(4, 18, 31));
-            tvEstado.setText("Todo listo. Dale ARRANCAR cuando subas a la bici.");
+            if (resumen) {
+                tvEstado.setText("Paseo terminado " + hace(finT) + " · " + reloj(seg)
+                        + " en la bici. ARRANCAR empieza uno nuevo.");
+            } else {
+                tvEstado.setText("Todo listo. Dale ARRANCAR cuando subas a la bici.");
+            }
         }
 
         // el orb se aviva con la velocidad

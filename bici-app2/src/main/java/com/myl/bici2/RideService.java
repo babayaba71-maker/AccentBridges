@@ -77,7 +77,8 @@ public class RideService extends Service implements LocationListener {
             SharedPreferences p = prefs(this);
             p.edit().putBoolean(K_ON,true).putLong(K_START,System.currentTimeMillis())
                 .putFloat(K_DIST,0f).putFloat(K_MAX,0f).putInt(K_N,0).putFloat(K_SALTO,0f)
-                .putInt(K_ACC,-1).putLong(K_ULT,0L).putInt(K_REIN,0).apply();
+                .putInt(K_ACC,-1).putLong(K_ULT,0L).putInt(K_REIN,0)
+                .putLong("finT",0L).putFloat("finDist",0f).putLong("finSeg",0L).putFloat("finMax",0f).apply();
             ultimo = null;
             anclaGps = null; anclaRed = null; ultimoGpsT = 0L;   // paseo nuevo, ancla nueva (si no, sumaría el salto desde el punto viejo)
             String ver = "?";
@@ -256,6 +257,17 @@ public class RideService extends Service implements LocationListener {
     }
 
     private void parar() {
+        // 30-oct: al PARAR se guarda el resumen del paseo (finDist/finSeg/finMax)
+        // para que la pantalla pueda mostrar el paseo terminado completo en vez
+        // de dejar el número viejo con el reloj en 0:00.
+        SharedPreferences p0 = prefs(this);
+        long ini = p0.getLong(K_START, 0L);
+        long segFin = ini > 0 ? Math.max(0, (System.currentTimeMillis() - ini) / 1000) : 0;
+        p0.edit().putFloat("finDist", p0.getFloat(K_DIST, 0f))
+                 .putLong("finSeg", segFin)
+                 .putFloat("finMax", p0.getFloat(K_MAX, 0f))
+                 .putLong("finT", System.currentTimeMillis()).apply();
+
         soltarSatelites();
         try { if (lm != null) lm.removeUpdates(this); } catch (Exception ignored) {}
         soltarFoco();
