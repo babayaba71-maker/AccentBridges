@@ -74,7 +74,10 @@ const norm=t=>String(t||"").toLowerCase().replace(/[’']/g,"").replace(/\s+/g,"
 let nombre="", rl=0, tl=0, re=0, te=0, rs=0, ts=0;
 let rlT=0, tlT=0, reT=0, teT=0;   // bloque TECHO (B2)
 let fallosL=[], fallosE=[], fallosS=[];
-let ambiguos=0;   // palabras que SI conoce, con otro significado   // que se trabo, para diagnostico fino
+let ambiguos=0;   // palabras que SI conoce, con otro significado
+// v6 (JJ: 'se va a necesitar el cronometro'): tiempo por item. No penaliza:
+// separa lo que es reflejo de lo que todavia se piensa (automaticidad).
+let t0=0, tiempos=[];   // que se trabo, para diagnostico fino
 
 function inicio(){
   app.innerHTML=`<div class="card"><div class="hero">
@@ -92,7 +95,7 @@ function inicio(){
 }
 function empezar(){
   nombre=(document.getElementById('nom').value||"Estudiante").trim().slice(0,30);
-  rl=0;tl=0;re=0;te=0;rs=0;ts=0;rlT=0;tlT=0;reT=0;teT=0;fallosL=[];fallosE=[];fallosS=[];ambiguos=0;
+  rl=0;tl=0;re=0;te=0;rs=0;ts=0;rlT=0;tlT=0;reT=0;teT=0;fallosL=[];fallosE=[];fallosS=[];ambiguos=0;tiempos=[];
   lectura(0);
 }
 /* ---------- CANAL 1 ---------- */
@@ -107,11 +110,13 @@ function lectura(i){
      <div class="preg" style="margin-top:16px">¿Qué dice?</div>
      <div id="ops"></div>
    </div>`;
+  t0=Date.now();
   const ops=document.getElementById('ops');
   sh([...it.o]).forEach(t=>{
     const b=document.createElement('button');b.className='op';b.textContent=t;
     b.onclick=()=>{
       const bien=(t===it.o[0]);
+      tiempos.push({c:'L',it:it.f,ms:Date.now()-t0,bien:bien});
       tl++;
       if(it.t==='techo') tlT++;
       if(bien){
@@ -145,6 +150,7 @@ function estructura(i){
      <div id="chips"></div>
      <button class="cta" id="btnOk" onclick="revisar(${i})">LISTO →</button>
    </div>`;
+  t0=Date.now();
   let orden=[];
   const chips=document.getElementById('chips'), zon=document.getElementById('zon');
   piezas.forEach(p=>{
@@ -165,6 +171,7 @@ function revisar(i){
   const dicho = norm(dado.join(" "));
   const validas = [it.bl.join(" ")].concat(it.alt||[]).map(norm);
   const bien = validas.indexOf(dicho) >= 0;
+  tiempos.push({c:'E',it:it.es,ms:Date.now()-t0,bien:bien});
   te++; if(it.t==='techo') teT++; if(bien){ re++; if(it.t==='techo') reT++; } else { fallosE.push(it.es); }
   const zon=document.getElementById('zon');
   zon.style.borderColor = bien ? "#00c07a" : "#c0392b";
@@ -185,11 +192,13 @@ function espanol(i){
      <div class="preg" style="margin-top:14px">En español, ¿qué significa?</div>
      <div id="ops"></div>
    </div>`;
+  t0=Date.now();
   const ops=document.getElementById('ops');
   sh([...it.o]).forEach(t=>{
     const b=document.createElement('button');b.className='op';b.textContent=t;
     b.onclick=()=>{
       const bien=(t===it.o[0]);
+      tiempos.push({c:'S',it:it.en,ms:Date.now()-t0,bien:bien});
       ts++;
       if(bien){ rs++; b.classList.add('ok'); }
       [...ops.children].forEach(c=>c.disabled=true);
@@ -228,6 +237,13 @@ function fin(){
   const pLt = tlT ? (rlT/tlT*100) : 0;      // lectura del bloque techo
   const pEt = teT ? (reT/teT*100) : 0;      // estructura del bloque techo
   const pT = Math.round(pLt*0.50 + pEt*0.35 + ps*0.15);
+  const prom = c => { const a=tiempos.filter(t=>t.c===c); return a.length? a.reduce((x,t)=>x+t.ms,0)/a.length : 0; };
+  const seg = ms => (ms/1000).toFixed(1)+" s";
+  const umbL=6000, umbE=25000;
+  const esRapido = t => (t.c==='L'? t.ms<=umbL : (t.c==='E'? t.ms<=umbE : true));
+  const lentos = tiempos.filter(t=>t.bien && !esRapido(t));
+  const automaticos = tiempos.filter(t=>t.bien && esRapido(t)).length;
+  const totalMs = tiempos.reduce((x,t)=>x+t.ms,0);
   const nivel = pT>=85?"B2 medio":(pT>=72?"B2 bajo":(pT>=58?"B1 alto":(pT>=40?"B1 bajo":"A2")));
   const margen = 12;   // 4 ítems en estructura techo: cada uno vale 12.5 puntos
   const aviso = pT>=85
@@ -277,6 +293,13 @@ function fin(){
       ${fallosS.length?`<div class="hint"><b>En español:</b><br>${fallosS.map(x=>"· "+x).join("<br>")}</div>`:""}
       <div class="hint" style="color:#ffb700">Esos son los que hay que trabajar. No todos: esos.</div>
     </div>`:""}
+    <div class="card" style="background:#0c1f2e;border-color:#2a5570;margin:0 0 14px">
+      <div class="preg" style="margin:0 0 6px">RITMO</div>
+      <div class="hint"><b>Promedio por canal:</b> lectura ${seg(prom('L'))} · estructura ${seg(prom('E'))} · español ${seg(prom('S'))}</div>
+      <div class="hint"><b>Tiempo total de la prueba:</b> ${seg(totalMs)} · aciertos automáticos: ${automaticos}</div>
+      ${lentos.length?`<div class="hint"><b>Lo sabes, pero lo piensas</b> (todavía no es reflejo):<br>${lentos.map(t=>"· "+t.it+" — "+seg(t.ms)).join("<br>")}</div>`:""}
+      <div class="hint" style="color:#ffb700">El tiempo no cuenta para tu nivel. Solo dice qué ya está automático y qué todavía tienes que pensar.</div>
+    </div>
     <div class="hero" style="text-align:left">${diag}</div>
     <div class="hint"><b>Qué sigue:</b> ${sigue}</div>
     ${ambiguos?`<div class="aviso" style="border-left-color:#00c07a;color:#9ff5cd">Marcaste ${ambiguos} palabra(s) que sí conocías con otro significado. No se contaron en tu contra: el ítem estaba mal escrito, no tú.</div>`:''}
@@ -288,7 +311,7 @@ function fin(){
     body:JSON.stringify({topic:"Tecnicismos — tres canales (lectura/estructura/español)",userId:nombre,
       passed:(pl+pe+ps)/3>=70, accuracy:Math.round((pl+pe+ps)/3),
       challengeSentence:"lectura + estructura + español",
-      spokenText:"tecnicismos · ambiguos:"+ambiguos+" · lectura:"+pl+"% estructura:"+pe+"% español:"+ps+"% alcance:"+nivel+" ("+pT+"%) · fallosE:"+fallosE.join(" | ")+" · fallosL:"+fallosL.join(" | ")+" · fallosS:"+fallosS.join(" | "),
+      spokenText:"tecnicismos · ritmoL:"+seg(prom('L'))+" ritmoE:"+seg(prom('E'))+" ritmoS:"+seg(prom('S'))+" lentos:"+lentos.length+" · ambiguos:"+ambiguos+" · lectura:"+pl+"% estructura:"+pe+"% español:"+ps+"% alcance:"+nivel+" ("+pT+"%) · fallosE:"+fallosE.join(" | ")+" · fallosL:"+fallosL.join(" | ")+" · fallosS:"+fallosS.join(" | "),
       location:"Tecnicismos",sessionId:"tec-"+Date.now()})}).catch(()=>{})}catch(e){}
 }
 inicio();
