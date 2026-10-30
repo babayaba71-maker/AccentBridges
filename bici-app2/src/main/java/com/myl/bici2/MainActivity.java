@@ -122,7 +122,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v4.0 · satelites a la vista");
+        placa.setText("v4.1 · musica a un toque");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -191,6 +191,43 @@ public class MainActivity extends Activity {
 
         // ---- dos pastillas en un solo renglón (antes eran dos botones de 50 y 46 dp
         // y se comían media pantalla: JJ, "esos botones le quitan mucho espacio al GPS")
+        // 🎵 MÚSICA (30-oct, pedido de JJ por nota de voz desde la bici:
+        // "¿crees que le podemos conectar algún botón para que me conecte con
+        // Amazon Prime para oír música?"). Tres teclas grandes: abrir el
+        // reproductor, play/pausa y siguiente, para no soltar el manubrio
+        // buscando la app.
+        LinearLayout filaMusica = new LinearLayout(this);
+        filaMusica.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout.LayoutParams lpFM = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lpFM.topMargin = dp(8);
+        col.addView(filaMusica, lpFM);
+
+        TextView tvMus = boton("🎵  MÚSICA", false);
+        tvMus.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        tvMus.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { abrirMusica(); }
+        });
+        LinearLayout.LayoutParams lpMus = new LinearLayout.LayoutParams(0, dp(42), 1f);
+        lpMus.rightMargin = dp(6);
+        filaMusica.addView(tvMus, lpMus);
+
+        TextView tvPlay = boton("⏯", false);
+        tvPlay.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        tvPlay.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { teclaMusica(android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE); }
+        });
+        LinearLayout.LayoutParams lpPlay = new LinearLayout.LayoutParams(dp(56), dp(42));
+        lpPlay.rightMargin = dp(6);
+        filaMusica.addView(tvPlay, lpPlay);
+
+        TextView tvNext = boton("⏭", false);
+        tvNext.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        tvNext.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { teclaMusica(android.view.KeyEvent.KEYCODE_MEDIA_NEXT); }
+        });
+        filaMusica.addView(tvNext, new LinearLayout.LayoutParams(dp(56), dp(42)));
+
         LinearLayout filaBotones = new LinearLayout(this);
         filaBotones.setOrientation(LinearLayout.HORIZONTAL);
         LinearLayout.LayoutParams lpFB = new LinearLayout.LayoutParams(
@@ -224,7 +261,7 @@ public class MainActivity extends Activity {
         filaBotones.addView(tvVoz, lpVoz);
 
         TextView nota = new TextView(this);
-        nota.setText("Cuenta con la pantalla apagada. 🎙 = mandarme tu voz; déjalo apretado = casita.");
+        nota.setText("Pantalla fija mientras pedaleas. 🎙 = tu voz; déjalo apretado = casita. ⏯ y ⏭ mandan la tecla al reproductor que esté sonando.");
         nota.setTextColor(GRIS2);
         nota.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
         nota.setGravity(Gravity.CENTER);
@@ -454,6 +491,50 @@ public class MainActivity extends Activity {
         String deDonde = prov.contains("gps") ? "satelite" : (prov.contains("network") ? "ANTENA (sin satelites)" : prov);
         if (sats < 0) return deDonde;
         return usados + "/" + sats + " satelites · " + deDonde;
+    }
+
+    /** Abre el reproductor: Amazon Music primero, y si no está, el que haya. */
+    private void abrirMusica() {
+        String[][] opciones = {
+                {"com.amazon.mp3", "Amazon Music"},
+                {"com.spotify.music", "Spotify"},
+                {"com.google.android.apps.youtube.music", "YouTube Music"},
+                {"com.google.android.music", "Google Play Music"}
+        };
+        for (String[] o : opciones) {
+            try {
+                Intent it = getPackageManager().getLaunchIntentForPackage(o[0]);
+                if (it != null) {
+                    it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(it);
+                    Toast.makeText(this, "Abriendo " + o[1] + "…", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            } catch (Exception ignored) {}
+        }
+        // no hay reproductor instalado: llevar a Amazon Music en la tienda
+        try {
+            Intent it = new Intent(Intent.ACTION_VIEW,
+                    android.net.Uri.parse("https://music.amazon.com.mx"));
+            startActivity(it);
+            Toast.makeText(this, "No encontré reproductor; abro Amazon Music", Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "No encontré app de música en el teléfono", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /** Manda la tecla al reproductor que esté sonando (sirve para Amazon, Spotify, YouTube…). */
+    private void teclaMusica(int tecla) {
+        try {
+            android.media.AudioManager am =
+                    (android.media.AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            if (am == null) return;
+            long t = android.os.SystemClock.uptimeMillis();
+            am.dispatchMediaKeyEvent(new android.view.KeyEvent(t, t, android.view.KeyEvent.ACTION_DOWN, tecla, 0));
+            am.dispatchMediaKeyEvent(new android.view.KeyEvent(t, t, android.view.KeyEvent.ACTION_UP, tecla, 0));
+        } catch (Exception e) {
+            Toast.makeText(this, "El teléfono no dejó mandar la tecla de música", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private String edadLatido(SharedPreferences p) {
