@@ -882,9 +882,17 @@ function arrancarPaseo(reanudar){
       if(d>BIKE.saltoMax) BIKE.saltoMax=d;   // para saber si el GPS ve movimiento o no
       // acepta el tramo si el GPS no está disparando (precisión muy mala) y no es un salto imposible
       let sumado=false;
-      if(dt>0.5&&d<200&&(ac==null||ac<120)&&d>2){
+      // 31-oct (JJ pedaleando 1h23 y el tablero marcando 70 m): el tope d<200
+      // tiraba TODO tramo de más de 200 m, y con la pantalla apagada Chrome sólo
+      // despierta cada 5-10 minutos, así que cada lectura era un salto de 300 a
+      // 1500 m y se descartaba entero. Ahora un salto grande se acepta si el
+      // tiempo transcurrido lo hace creíble: 500 m en 60 s son 30 km/h (bici),
+      // pero 500 m en 5 s serían 360 km/h (ruido). Por eso se juzga por la
+      // velocidad implícita, no por el tamaño del tramo.
+      const tramoGrande=(dt>45&&d>=200&&d<5000);
+      if(dt>0.5&&(d<200||tramoGrande)&&(ac==null||ac<120)&&d>2){
         const vImp=(d/dt)*3.6;
-        if(vImp<=70){ BIKE.dist+=d; sumado=true }  // un salto que implicaria >70 km/h es ruido, no pedaleo
+        if(vImp<=70){ BIKE.dist+=d; sumado=true; if(tramoGrande)BIKE.tramosLargos=(BIKE.tramosLargos||0)+1 }
       }
       // si las coordenadas no alcanzan (GPS grueso o parado), suma por velocidad reportada
       if(!sumado && sp!=null && !isNaN(sp) && sp>0.6 && dt>0.5 && dt<30){
