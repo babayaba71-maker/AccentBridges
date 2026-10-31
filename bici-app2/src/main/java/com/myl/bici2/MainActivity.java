@@ -872,6 +872,7 @@ public class MainActivity extends Activity {
         new Thread(new Runnable() {
             @Override public void run() {
                 final String msg = enviar(txt);
+                parteAAlma(txt);   // 31-oct: segunda salida, hacia la app de Alma
                 runOnUiThread(new Runnable() { @Override public void run() {
                     if (msg.contains("enviado")) { sonar(0); decirAlma("Parte enviado. Ya se donde andas, Clyde."); }
                     else sonar(1);
@@ -1022,6 +1023,30 @@ public class MainActivity extends Activity {
             return "La línea estaba ocupada (" + ultimo.substring(10) + ") y reintenté 3 veces. El parte quedó copiado: pégalo en el chat.";
         }
         return ultimo;
+    }
+
+    /** 31-oct: el parte tambien se guarda en la app de Alma (ParteBici),
+     *  porque el rele de la casita no me lo entregaba a mi. */
+    private void parteAAlma(String texto) {
+        HttpURLConnection c = null;
+        try {
+            URL u = new URL(BICI_ALMA);
+            c = (HttpURLConnection) u.openConnection();
+            c.setRequestMethod("POST");
+            c.setDoOutput(true);
+            c.setConnectTimeout(12000);
+            c.setReadTimeout(75000);
+            c.setRequestProperty("Content-Type", "application/json");
+            String cuerpo = "{\"parte\":\"" + texto.replace("\\", "").replace("\"", "'")
+                    .replace("\n", " ") + "\"}";
+            OutputStream os = c.getOutputStream();
+            os.write(cuerpo.getBytes("UTF-8"));
+            os.flush(); os.close();
+            c.getResponseCode();
+        } catch (Exception ignored) {
+        } finally {
+            if (c != null) c.disconnect();
+        }
     }
 
     /** devuelve "OKmensaje", "REINTENTAhttpNNN" o el texto del error */
