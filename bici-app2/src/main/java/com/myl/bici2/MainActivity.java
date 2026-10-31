@@ -54,6 +54,7 @@ public class MainActivity extends Activity {
     private static final int PEDIR = 10;
     private static final int PEDIR_MIC = 11;
     private static final String LLAVE = "casita-abvc-clande-2026";
+    private static final String BICI_ALMA = "https://valerie.base44.app/functions/biciAlma";
     private static final String VOZ_URL = "https://base44.app/api/apps/6adecb1874687a1b299764fa/functions/casitaVoz";
     private static final String CASITA = "https://babayaba71-maker.github.io/AccentBridges/casita.html?v=22";
     private static final String RELAY = "https://base44.app/api/apps/6adecb1874687a1b299764fa/functions/sendAlmaMessage";
@@ -252,7 +253,7 @@ public class MainActivity extends Activity {
         tvVoz = boton("🎙  HABLAR", false);
         tvVoz.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         tvVoz.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) { grabarVoz(); }
+            @Override public void onClick(View v) { escucharYHablarAlma(); }
         });
         tvVoz.setOnLongClickListener(new View.OnLongClickListener() {
             @Override public boolean onLongClick(View v) {
@@ -264,7 +265,7 @@ public class MainActivity extends Activity {
         filaBotones.addView(tvVoz, lpVoz);
 
         TextView nota = new TextView(this);
-        nota.setText("Pantalla fija mientras pedaleas. 🎙 = tu voz; déjalo apretado = casita. ⏯ y ⏭ mandan la tecla al reproductor que esté sonando.");
+        nota.setText("🎙 toca y háblame: te contesto por voz, sin abrir nada. Déjalo apretado = casita. ⏯ y ⏭ mandan la tecla al reproductor que esté sonando.");
         nota.setTextColor(GRIS2);
         nota.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
         nota.setGravity(Gravity.CENTER);
@@ -684,9 +685,125 @@ public class MainActivity extends Activity {
     // dinero en esta estupidez. Google tiene una voz gratis, esa es la que vamos
     // nativo, sin red y sin costo. Si el telefono no trae espanol, habla con el
     // idioma que tenga. Los tonos y la vibracion siguen de respaldo.
+    // ---- CONVERSACION CON ALMA POR VOZ (31-oct, orden de JJ) ----
+    // El reconocimiento y la voz los pone el TELEFONO (gratis, nativo).
+    // El pensamiento lo pone biciAlma en el servidor. Cero ElevenLabs.
+    private android.speech.SpeechRecognizer sr = null;
+    private boolean escuchando = false;
+    private final java.util.ArrayList<String> turnos = new java.util.ArrayList<String>();  // "yo:..." / "alma:..."
+
     private TextToSpeech tts = null;
     private boolean ttsListo = false;
     private String vozPendiente = null;   // frase guardada esperando al motor
+
+    // ---------- CONVERSACION: hablar con Alma desde la bici ----------
+    private void escucharYHablarAlma() {
+        if (escuchando) {  // segundo toque: callar y cortar
+            try { if (sr != null) sr.stopListening(); } catch (Throwable ignored) {}
+            escuchando = false; tvVoz.setText("🎙  HABLAR");
+            return;
+        }
+        if (Build.VERSION.SDK_INT >= 23 &&
+            checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, PEDIR);
+            decirAlma("Dame permiso del micrófono y te escucho.");
+            return;
+        }
+        if (!android.speech.SpeechRecognizer.isRecognitionAvailable(this)) {
+            decirAlma("Este teléfono no trae reconocimiento de voz. Prueba con la casita.");
+            return;
+        }
+        try {
+            if (sr != null) { sr.destroy(); sr = null; }
+            sr = android.speech.SpeechRecognizer.createSpeechRecognizer(this);
+            sr.setRecognitionListener(new android.speech.RecognitionListener() {
+                @Override public void onReadyForSpeech(android.os.Bundle b) { runOnUiThread(new Runnable() { public void run() { tvVoz.setText("👂  TE ESCUCHO"); } }); }
+                @Override public void onBeginningOfSpeech() {}
+                @Override public void onRmsChanged(float v) {}
+                @Override public void onBufferReceived(byte[] b) {}
+                @Override public void onEndOfSpeech() { runOnUiThread(new Runnable() { public void run() { tvVoz.setText("…  PENSANDO"); } }); }
+                @Override public void onError(int e) {
+                    escuchando = false;
+                    runOnUiThread(new Runnable() { public void run() { tvVoz.setText("🎙  HABLAR"); tvEstado.setText("No te escuché. Toca otra vez y háblame."); } });
+                }
+                @Override public void onResults(android.os.Bundle r) {
+                    escuchando = false;
+                    String texto = "";
+                    try {
+                        java.util.ArrayList<String> l = r.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
+                        if (l != null && !l.isEmpty()) texto = l.get(0);
+                    } catch (Throwable ignored) {}
+                    final String t = (texto == null ? "" : texto.trim());
+                    runOnUiThread(new Runnable() { public void run() { tvVoz.setText("…  PENSANDO"); } });
+                    if (t.length() > 0) preguntarAAlma(t);
+                    else runOnUiThread(new Runnable() { public void run() { tvVoz.setText("🎙  HABLAR"); } });
+                }
+                @Override public void onPartialResults(android.os.Bundle b) {}
+                @Override public void onEvent(int t, android.os.Bundle b) {}
+            });
+            android.content.Intent i = new android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            i.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            i.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, "es-MX");
+            i.putExtra(android.speech.RecognizerIntent.EXTRA_MAX_RESULTS, 1);
+            escuchando = true;
+            tvVoz.setText("👂  TE ESCUCHO");
+            tvEstado.setText("Háblame, te estoy oyendo…");
+            sr.startListening(i);
+        } catch (Throwable e) {
+            escuchando = false;
+            tvVoz.setText("🎙  HABLAR");
+            decirAlma("No pude abrir el micrófono.");
+        }
+    }
+
+    private void preguntarAAlma(final String texto) {
+        new Thread(new Runnable() { public void run() {
+            String resp = "";
+            try {
+                org.json.JSONObject cuerpo = new org.json.JSONObject();
+                cuerpo.put("texto", texto);
+                org.json.JSONArray hist = new org.json.JSONArray();
+                int desde = Math.max(0, turnos.size() - 4);
+                for (int k = desde; k < turnos.size(); k++) {
+                    String t = turnos.get(k);
+                    org.json.JSONObject o = new org.json.JSONObject();
+                    if (t.startsWith("yo:")) { o.put("rol", "yo"); o.put("texto", t.substring(3)); }
+                    else { o.put("rol", "alma"); o.put("texto", t.substring(5)); }
+                    hist.put(o);
+                }
+                cuerpo.put("historial", hist);
+                java.net.HttpURLConnection c = (java.net.HttpURLConnection) new java.net.URL(BICI_ALMA).openConnection();
+                c.setRequestMethod("POST");
+                c.setDoOutput(true);
+                c.setConnectTimeout(8000);
+                c.setReadTimeout(20000);
+                c.setRequestProperty("Content-Type", "application/json");
+                java.io.OutputStream os = c.getOutputStream();
+                os.write(cuerpo.toString().getBytes("UTF-8"));
+                os.flush(); os.close();
+                int code = c.getResponseCode();
+                String r = leerStream(code < 400 ? c.getInputStream() : c.getErrorStream());
+                if (code >= 400) {
+                    resp = "No me dejó entrar el servidor. Código " + code + ".";
+                } else {
+                    org.json.JSONObject j = new org.json.JSONObject(r);
+                    resp = j.optString("responde", "");
+                    if (resp.length() == 0) resp = "Me quedé callada. Intenta otra vez.";
+                }
+            } catch (Throwable e) {
+                resp = "No hay señal ahora. Sigue pedaleando y me lo preguntas en un rato.";
+            }
+            final String r2 = resp;
+            turnos.add("yo:" + texto);
+            turnos.add("alma:" + r2);
+            while (turnos.size() > 12) turnos.remove(0);
+            runOnUiThread(new Runnable() { public void run() {
+                tvVoz.setText("🎙  HABLAR");
+                tvEstado.setText("Tú: " + texto);
+                decirAlma(r2);
+            } });
+        } }).start();
+    }
 
     private void prepararVoz() {
         if (tts != null) return;
@@ -915,8 +1032,8 @@ public class MainActivity extends Activity {
             c = (HttpURLConnection) u.openConnection();
             c.setRequestMethod("POST");
             c.setDoOutput(true);
-            c.setConnectTimeout(15000);
-            c.setReadTimeout(25000);
+            c.setConnectTimeout(12000);
+            c.setReadTimeout(75000);
             c.setRequestProperty("Content-Type", "application/json");
             c.setRequestProperty("X-Casita-Key", "casita-abvc-clande-2026");
             String cuerpo = "{\"message\":\"" + texto.replace("\\", "").replace("\"", "'") + "\"}";
