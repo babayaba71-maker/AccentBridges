@@ -78,7 +78,8 @@ public class RideService extends Service implements LocationListener {
             p.edit().putBoolean(K_ON,true).putLong(K_START,System.currentTimeMillis())
                 .putFloat(K_DIST,0f).putFloat(K_MAX,0f).putInt(K_N,0).putFloat(K_SALTO,0f)
                 .putInt(K_ACC,-1).putLong(K_ULT,0L).putInt(K_REIN,0)
-                .putLong("finT",0L).putFloat("finDist",0f).putLong("finSeg",0L).putFloat("finMax",0f).apply();
+                .putLong("finT",0L).putFloat("finDist",0f).putLong("finSeg",0L).putFloat("finMax",0f)
+                .putFloat("mueve",0f).putLong("lat",0L).putLong("lon",0L).apply();
             ultimo = null;
             anclaGps = null; anclaRed = null; ultimoGpsT = 0L; borrarAnclas();   // paseo nuevo, ancla nueva (si no, sumaría el salto desde el punto viejo)
             String ver = "?";
@@ -384,6 +385,7 @@ public class RideService extends Service implements LocationListener {
         float acc = loc.hasAccuracy() ? loc.getAccuracy() : 199f;
         boolean esGps = loc.getProvider() != null && loc.getProvider().contains("gps");
         float dist = p.getFloat(K_DIST,0f);
+        float mueve = p.getFloat("mueve",0f);
         float max  = p.getFloat(K_MAX,0f);
         int n = p.getInt(K_N,0) + 1;
         boolean sumado = false;
@@ -404,7 +406,11 @@ public class RideService extends Service implements LocationListener {
             Location ancla = esGps ? anclaGps : anclaRed;
             float margen = esGps ? Math.max(10f, Math.min(acc * 1.5f, 60f))
                                  : Math.max(25f, Math.min(acc, 60f));
-            float topeVel = esGps ? 70f : 50f;
+            // 31-oct (JJ: "máxima 60.0 exactos... eso no son mis piernas"): el tope
+            // de 70 km/h dejaba pasar picos de GPS como si fueran pedaleo y el
+            // tablero marcaba 60. Una bici en Culiacán no pasa de 45; cualquier
+            // tramo que implique más que eso es un salto, no una pierna.
+            float topeVel = esGps ? 45f : 40f;
 
             if (ancla == null) {
                 ancla = loc;
@@ -419,7 +425,15 @@ public class RideService extends Service implements LocationListener {
                     if (vImp <= topeVel) {
                         dist += (float) d;
                         sumado = true;
-                        if (vImp > max) max = (float) vImp;
+                        // 31-oct: velocidad tomada de las DOS fuentes, no del ruido
+                        // de una sola lectura. Si el GPS reporta su propia velocidad
+                        // (hasSpeed) esa manda porque viene suavizada por el chip.
+                        float vel = loc.hasSpeed() ? loc.getSpeed() * 3.6f : (float) vImp;
+                        if (vel <= topeVel && vel > max) max = vel;
+                        // 31-oct (JJ: "promedio 5.3 castigado"): el promedio se
+                        // calcula sobre tiempo EN MOVIMIENTO, no sobre el reloj de
+                        // pared con las horas parado dentro.
+                        if (vImp > 2.0) mueve += (float) dt;
                     }
                     ancla = loc;          // el ancla se mueve aun si el tramo se descartó
                 } else if (loc.hasSpeed() && loc.getSpeed() > 0.6f
@@ -430,6 +444,7 @@ public class RideService extends Service implements LocationListener {
                         sumado = true;
                         float vel = loc.getSpeed() * 3.6f;
                         if (vel <= topeVel && vel > max) max = vel;
+                        if (vel > 2f) mueve += (float) dt;
                         ancla = loc;
                     }
                 }
@@ -451,6 +466,9 @@ public class RideService extends Service implements LocationListener {
          .putString("prov", loc.getProvider() == null ? "?" : loc.getProvider())
          .putBoolean("sumo", sumado)
          .putBoolean("gpsSistema", gpsSistema)
+         .putFloat("mueve", mueve)
+         .putLong("lat", Double.doubleToRawLongBits(loc.getLatitude()))
+         .putLong("lon", Double.doubleToRawLongBits(loc.getLongitude()))
          .putLong(K_ULT,ahoraMs).apply();
 
         if (ahoraMs - ultimoAviso > 5000) { ultimoAviso = ahoraMs; iniciarForeground(textoNotif(p)); }

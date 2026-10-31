@@ -122,7 +122,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v4.6 · ancla que no se borra");
+        placa.setText("v5.1 · promedio de verdad");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -468,7 +468,10 @@ public class MainActivity extends Activity {
             seg = 0L;
             max = 0f;
         }
-        float prom = seg > 5 ? Math.min(70f, km / (seg / 3600f)) : 0f;
+        // 31-oct: promedio sobre tiempo EN MOVIMIENTO, no sobre el reloj de pared.
+        // 2.30 km en 24 min daba 5.6 km/h aunque la mitad del rato estuviera parado.
+        float mueveS = p.getFloat("mueve", 0f);
+        float prom = (mueveS > 5f) ? Math.min(70f, km / (mueveS / 3600f)) : 0f;
 
         tvKm.setText(String.format("%.2f", km));
         tvTiempo.setText(reloj(seg));
@@ -610,11 +613,24 @@ public class MainActivity extends Activity {
         return s < 90 ? ("hace " + s + " s") : ("hace " + (s / 60) + " min");
     }
 
+    // 31-oct (JJ: "que el parte mande las coordenadas para dibujar el mapa"): el
+    // parte lleva el punto de la última lectura, así el mapa se arma solo sin
+    // depender de que toque 📍 en la casita.
+    private String puntoParte(SharedPreferences p) {
+        long laBits = p.getLong("lat", 0L), loBits = p.getLong("lon", 0L);
+        if (laBits == 0L || loBits == 0L) return "";
+        return " · 📍 " + String.format(java.util.Locale.US, "%.5f, %.5f",
+                Double.longBitsToDouble(laBits), Double.longBitsToDouble(loBits));
+    }
+
     private String textoParte() {
         SharedPreferences p = RideService.prefs(this);
         float km = p.getFloat("dist", 0f) / 1000f;
         long seg = Math.max(0, (System.currentTimeMillis() - p.getLong("start", 0)) / 1000);
-        float prom = seg > 5 ? Math.min(70f, km / (seg / 3600f)) : 0f;
+        // 31-oct: promedio sobre tiempo EN MOVIMIENTO, no sobre el reloj de pared.
+        // 2.30 km en 24 min daba 5.6 km/h aunque la mitad del rato estuviera parado.
+        float mueveS = p.getFloat("mueve", 0f);
+        float prom = (mueveS > 5f) ? Math.min(70f, km / (mueveS / 3600f)) : 0f;
         return "Voy en la bici: " + String.format("%.2f", km) + " km, " + reloj(seg)
                 + ", promedio " + String.format("%.1f", prom) + " km/h, máxima "
                 + String.format("%.1f", p.getFloat("max", 0f))
@@ -625,7 +641,8 @@ public class MainActivity extends Activity {
                 + " · reinicios " + p.getInt("rein", 0) + " · latidos " + p.getInt("latidos", 0)
                 + " · pantalla " + (p.getBoolean("pantallaFija", false) ? "fija" : "suelta")
                 + " · ultimo latido " + edadLatido(p)
-                + " · servicio " + (servicioVivo(p) ? "vivo" : "DORMIDO") + ")";
+                + " · servicio " + (servicioVivo(p) ? "vivo" : "DORMIDO")
+                + puntoParte(p) + ")";
     }
 
     // 30-oct: el parte decia "v2" escrito a mano en TODAS las versiones, asi que
