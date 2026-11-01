@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>La Palabra Abierta — Maqueta</title>
+<style>
+:root{
+  --bg:#0a0f18; --card:#121a26; --card2:#0f1620; --tx:#e8eef6; --mut:#8fa3b8;
+  --bd:#22303f; --oro:#e8b44a; --cian:#00f2ff; --azul:#58a6ff;
+  --raiz:#f0e6d2; --pref:#e8b44a; --suf:#58a6ff; --ok:#3fb950;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--tx);
+  font:16px/1.6 -apple-system,"Segoe UI",Roboto,sans-serif;
+  padding:calc(18px + env(safe-area-inset-top)) 14px calc(48px + env(safe-area-inset-bottom))}
+h1{font-size:23px;margin:0 0 4px;color:var(--cian);letter-spacing:.3px}
+h2{font-size:17px;margin:30px 0 12px;padding-top:16px;border-top:1px solid var(--bd);color:var(--oro)}
+h3{font-size:14px;margin:16px 0 8px;color:var(--tx);text-transform:uppercase;letter-spacing:.6px}
+p{margin:8px 0;color:#c2cfdd}
+.lead{color:var(--mut);font-size:13px;margin:0 0 18px}
+.dia{display:inline-block;background:#12202e;border:1px solid #1d3c52;color:var(--cian);
+  font-size:12px;padding:4px 11px;border-radius:20px;margin-bottom:14px}
+
+/* --- recorrido por etapas --- */
+.etapa{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:13px 14px;margin:11px 0;position:relative}
+.etapa .num{display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;
+  border-radius:50%;background:#1b2a38;color:var(--cian);font-size:12px;font-weight:700;margin-right:7px}
+.etapa .nombre{font-weight:700;font-size:15px;color:#fff}
+.etapa .que{font-size:13.5px;color:var(--mut);margin:6px 0 9px}
+.mini{background:#0b131c;border:1px dashed #24384a;border-radius:9px;padding:11px 12px;text-align:center}
+.mini .palabra{font-size:23px;font-weight:800;letter-spacing:.5px}
+.mini .chico{font-size:11.5px;color:var(--mut);margin-top:5px}
+
+/* --- piezas --- */
+.son{color:var(--cian);text-shadow:0 0 14px rgba(0,242,255,.45)}
+.r{color:var(--raiz)} .p{color:var(--pref)} .s{color:var(--suf)}
+.desp{display:flex;justify-content:center;align-items:flex-end;gap:3px;flex-wrap:wrap;margin:4px 0 2px}
+.desp span{font-size:27px;font-weight:800;letter-spacing:.5px}
+.llaves{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:9px}
+.llave{border-radius:9px;padding:7px 10px;font-size:11.5px;line-height:1.35;text-align:center;min-width:86px}
+.llave b{display:block;font-size:12.5px;letter-spacing:.3px}
+.ip{background:rgba(232,180,74,.12);border:1px solid rgba(232,180,74,.42);color:#f3d79b}
+.ir{background:rgba(240,230,210,.1);border:1px solid rgba(240,230,210,.38);color:#f5efdf}
+.is{background:rgba(88,166,255,.12);border:1px solid rgba(88,166,255,.42);color:#a8d0ff}
+
+/* --- bloque grande --- */
+.bloque{background:linear-gradient(180deg,#101b26 0%,#0c141d 100%);
+  border:1px solid #1e3a4c;border-radius:16px;padding:16px 15px;margin:14px 0;
+  box-shadow:0 0 0 1px rgba(0,242,255,.06),0 10px 30px rgba(0,0,0,.35)}
+.titulo-bloque{display:flex;align-items:center;gap:8px;font-size:12.5px;letter-spacing:1.1px;
+  text-transform:uppercase;color:var(--cian);margin-bottom:14px}
+.titulo-bloque::before{content:"";width:26px;height:2px;background:var(--cian);border-radius:2px}
+
+/* --- familia --- */
+.familia{display:grid;gap:7px;margin-top:10px}
+.miembro{display:flex;align-items:center;gap:10px;background:#0b131c;border:1px solid #1c2b39;
+  border-radius:9px;padding:9px 11px}
+.miembro .w{font-size:16px;font-weight:700;min-width:104px}
+.miembro .g{font-size:12px;color:var(--mut)}
+
+.regla{background:#0b131c;border-left:3px solid var(--oro);border-radius:0 9px 9px 0;
+  padding:10px 12px;margin:10px 0;font-size:13.5px;color:#cfdae6}
+.regla b{color:var(--oro)}
+.nota{background:#0b131c;border:1px solid #1c2b39;border-radius:10px;padding:11px 13px;
+  font-size:12.5px;color:var(--mut);margin-top:16px}
+.nota b{color:#c2cfdd}
+.leyenda{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--mut);margin-top:12px;justify-content:center}
+.leyenda i{font-style:normal;font-weight:800}
+</style>
+</head>
+<body>
+
+<h1>La Palabra Abierta</h1>
+<p class="lead">Maqueta del bloque de morfología incrustado en el estudio morfofónico. Ejemplo real del Día 21, el sonido SH /ʃ/.</p>
+<div class="dia">DÍA 21 · LA CHE Y LA ESE ANCHA · chip / ship</div>
+
+<h2>Dónde entra en cada etapa</h2>
+<p>No es una sección aparte: la misma palabra acompaña el día entero y solo se abre cuando el ojo ya puede sostenerla.</p>
+
+<div class="etapa">
+  <span class="num">1</span><span class="nombre">Oído</span>
+  <p class="que">La palabra aparece completa, sin despiece. Solo se escucha y se marca el sonido del día.</p>
+  <div class="mini">
+    <div class="palabra">sh<span class="son">i</span>p<span class="s">ment</span></div>
+    <div class="chico">¿Oyes la ese ancha al inicio? Todavía no la partimos.</div>
+  </div>
+</div>
+
+<div class="etapa">
+  <span class="num">2</span><span class="nombre">Ojos</span>
+  <p class="que">La imagen ancla la palabra entera. Aquí se ve el envío, la caja que sale, no el despiece.</p>
+  <div class="mini">
+    <div class="palabra">📦 ship·ment</div>
+    <div class="chico">Una palabra, una imagen. Si la imagen no existe, no se abre todavía.</div>
+  </div>
+</div>
+
+<div class="etapa">
+  <span class="num">3</span><span class="nombre">Letras</span>
+  <p class="que">Aquí es donde la morfología se abre. Es su único momento de despiece en todo el día.</p>
+  <div class="mini">
+    <div class="desp"><span class="r">ship</span><span class="s">ment</span></div>
+    <div class="chico">raíz + sufijo</div>
+  </div>
+</div>
+
+<div class="etapa">
+  <span class="num">4</span><span class="nombre">Boca</span>
+  <p class="que">Se dice la palabra ya abierta y vuelta a cerrar. Si no se dice completa, el despiece no sirvió.</p>
+  <div class="mini">
+    <div class="palabra">SH<span class="son">I</span>P-ment</div>
+    <div class="chico">el sonido del día sigue vivo dentro de la palabra grande</div>
+  </div>
+</div>
+
+<h2>El bloque completo, al cierre del día</h2>
+
+<div class="bloque">
+  <div class="titulo-bloque">La palabra abierta</div>
+
+  <div style="text-align:center;margin-bottom:16px">
+    <div style="font-size:31px;font-weight:800;letter-spacing:.6px">sh<span class="son">i</span>p·ment</div>
+    <div style="font-size:12px;color:var(--mut);margin-top:4px">envío · lo que se manda</div>
+  </div>
+
+  <div class="desp">
+    <span class="r">ship</span>
+    <span class="s">ment</span>
+  </div>
+  <div class="llaves">
+    <div class="llave ir"><b>ship</b>raíz: enviar</div>
+    <div class="llave is"><b>-ment</b>sufijo: el resultado</div>
+  </div>
+
+  <div class="leyenda">
+    <span><i class="r">■</i> raíz</span>
+    <span><i class="p">■</i> prefijo</span>
+    <span><i class="s">■</i> sufijo</span>
+    <span><i class="son">■</i> sonido del día</span>
+  </div>
+
+  <h3 style="margin-top:20px">La familia</h3>
+  <div class="familia">
+    <div class="miembro"><span class="w r">sh<span class="son">i</span>p</span><span class="g">barco, o enviar</span></div>
+    <div class="miembro"><span class="w">sh<span class="son">i</span>pp<span class="s">ing</span></span><span class="g">el envío, en marcha</span></div>
+    <div class="miembro"><span class="w">sh<span class="son">i</span>pp<span class="s">ed</span></span><span class="g">ya fue enviado</span></div>
+    <div class="miembro"><span class="w">sh<span class="son">i</span>p<span class="s">ment</span></span><span class="g">el envío, la cosa enviada</span></div>
+  </div>
+  <p style="font-size:13px;color:var(--mut);margin-top:11px">
+    Cuatro palabras, una sola raíz, y el sonido del día se queda quieto en todas. Eso es lo que el ojo gana: deja de ver palabras nuevas y empieza a ver familia.
+  </p>
+</div>
+
+<h2>Las tres reglas que la sostienen</h2>
+
+<div class="regla"><b>Una sola palabra abierta por día.</b> Con dos ya es clase de morfología y se rompe el ritmo del sonido.</div>
+<div class="regla"><b>Siempre al final, nunca al principio.</b> Si la morfología entra antes del oído, el alumno despieza letras sin haber abierto la categoría del sonido: letra muerta.</div>
+<div class="regla"><b>En los primeros días de cada sonido nuevo, no entra.</b> Ahí toda la carga es el oído. Abrir palabras encima es la sobrecarga que ya nos costó caro.</div>
+
+<div class="nota">
+  <b>Nota de esta maqueta:</b> el ejemplo usa ship y sus derivados porque pertenece al Día 21, que ya existe en el estudio. En el diseño final, la palabra se elige del propio día y la familia se arma alrededor del sufijo que el día necesita.
+  <br><br>
+  <b>Por qué el sufijo manda:</b> el sonido del día casi nunca vive en el prefijo. Vive pegado a la raíz y al sufijo, y por eso la familia se construye hacia atrás, desde el final de la palabra.
+</div>
+
+</body>
+</html>
