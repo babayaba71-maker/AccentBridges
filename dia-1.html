@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Día 1 · Guion del maestro · Action Bridges</title>
+<style>
+:root{--bg:#0a0f18;--card:#121a26;--tx:#e8eef6;--mut:#8fa3b8;--bd:#22303f;
+--cian:#00f2ff;--oro:#e8b44a;--ok:#3fb950;--bad:#f85149}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--tx);font:16.5px/1.6 -apple-system,"Segoe UI",Roboto,sans-serif;
+padding:calc(14px + env(safe-area-inset-top)) 13px calc(30px + env(safe-area-inset-bottom))}
+#app{max-width:540px;margin:0 auto}
+h1{font-size:22px;margin:0;color:var(--cian);line-height:1.25}
+.sub{color:var(--mut);font-size:13px;margin:6px 0 0}
+.alerta{background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.45);border-radius:12px;
+padding:13px 14px;margin:14px 0;font-size:14.5px;color:#ffc9c6}
+.alerta b{color:#fff}
+.paso{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:15px;margin:12px 0;position:relative}
+.paso.activo{border-color:var(--cian);box-shadow:0 0 0 1px rgba(0,242,255,.25)}
+.paso.listo{opacity:.62}
+.cab{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.num{width:26px;height:26px;line-height:26px;text-align:center;border-radius:50%;
+background:#1b2a38;color:var(--cian);font-size:13px;font-weight:800;flex:none}
+.nombre{font-weight:800;font-size:16px}
+.min{color:var(--mut);font-size:12px;margin-left:auto;flex:none}
+.como{font-size:14.5px;color:#cbd8e5;margin:8px 0}
+.decir{background:#0b131c;border-left:3px solid var(--oro);border-radius:0 9px 9px 0;
+padding:9px 12px;margin:9px 0;font-size:13.5px;color:#d5e0ea}
+.decir b{color:var(--oro)}
+.oche{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.oche button{flex:1;min-width:90px;font:inherit;border:0;border-radius:11px;padding:15px 10px;
+background:#12202e;border:1px solid #1d3c52;color:var(--cian);font-weight:700;cursor:pointer}
+.oche button:active{transform:scale(.97)}
+button.accion{width:100%;font:inherit;font-weight:800;border:0;border-radius:11px;padding:13px;
+margin-top:11px;cursor:pointer}
+.primario{background:linear-gradient(135deg,#00f2ff,#0aa6ff);color:#052030}
+.siguiente{background:#1b2a38;color:#cbd8e5}
+textarea{width:100%;min-height:88px;background:#0b131c;border:1px solid var(--bd);border-radius:10px;
+color:var(--tx);font:inherit;padding:11px;margin-top:9px;resize:vertical}
+.crono{font-variant-numeric:tabular-nums;font-weight:800;color:var(--oro);font-size:15px}
+.fin{background:linear-gradient(180deg,#101b26,#0c141d);border:1px solid #1e3a4c;border-radius:15px;
+padding:17px;margin:16px 0}
+.chip{display:inline-block;font-size:11.5px;padding:3px 9px;border-radius:20px;
+border:1px solid var(--bd);color:var(--mut);margin:2px 4px 2px 0}
+.oculto{display:none}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <h1 id="titulo">Día 1 · El sonido no es la letra</h1>
+  <p class="sub" id="sub">fase oído · 40 min · A0-bajo</p>
+
+  <div class="alerta">
+    <b>Hoy no se muestra ninguna letra inglesa.</b><br>
+    Ni una. Si el aprendiz pide cómo se escribe, se anota y se aplaza.
+  </div>
+
+  <div id="pasos"></div>
+
+  <div id="cierre" class="fin oculto">
+    <h1 style="font-size:19px;color:var(--ok)">Día 1 cerrado</h1>
+    <p class="sub" id="resumenFin"></p>
+    <p style="margin-top:12px"><b>Lo que dejó el día:</b></p>
+    <div id="notaGuardada" class="como"></div>
+    <p style="margin-top:14px"><b>Campana de mañana (día 2)</b></p>
+    <div class="decir" id="campana"></div>
+    <button class="accion siguiente" id="btnManana">VER EL DÍA 2 CUANDO TOQUE</button>
+  </div>
+
+</div>
+
+<script>
+var DIA = {
+  dia: 1, fase: "oído", minutos: 40, nivel: "A0-bajo",
+  titulo: "El sonido no es la letra",
+  hook: "Antes de alfabetizar, se despega el oído del ojo.",
+  porQue: "En A0-bajo el error más caro es empezar por el abecedario. El inglés no es un código transparente: la a se lee de cinco maneras. El método empieza por lo que el aprendiz ya tiene: la boca y el oído. Hoy no se muestra ninguna letra inglesa.",
+  pasos: [
+    { n:1, nombre:"Contrato del método", min:6,
+      como:"Explica: primero oímos, luego partimos palabras, al final vemos letras. El aprendiz no pide cómo se escribe todavía. Si lo pide, se anota y se aplaza.",
+      decir:"Decir: «En estas cuatro semanas no vas a ver letras. Vas a oír. Cuando tu oído distinga, la letra va a ser lo fácil.»" },
+    { n:2, nombre:"Mapa sonoro L1", min:8,
+      como:"El aprendiz nombra los sonidos del español que conoce: las cinco vocales y las consonantes de su variedad. Se deja escrito: esto es lo que YA posee.",
+      decir:"Decir: «Todo esto ya lo tienes. No empezamos de cero, empezamos de aquí.»" },
+    { n:3, nombre:"Tres palabras a ciegas", min:10, audios:["cat","what","yacht"],
+      como:"Dices cat, what, yacht. El aprendiz solo escucha. No se escribe. Se pregunta: ¿cuántos sonidos distintos oíste al final? El punto es la extrañeza, no la respuesta correcta.",
+      decir:"No corrijas. Si dice «suena raro», ahí ganaste: eso es la extrañeza abriendo la puerta." },
+    { n:4, nombre:"Regla de oro", min:8,
+      como:"Acordar: cada día hay un sonido o una parte. Poca cantidad, mucha repetición. Cerrar con un gesto: mano en la oreja significa modo oído.",
+      decir:"Decir: «Poco y muchas veces. Prefiero que hoy te lleves un sonido que treinta a medias.»" },
+    { n:5, nombre:"Nota del método", min:8, nota:true,
+      como:"Escribe qué resistencia apareció: ansiedad por las letras, traducción, prisa. Eso es dato, no fallo.",
+      decir:"Esta nota es el dato más valioso del día. Se guarda y se compara con la del día 8." }
+  ],
+  campanaHoy: "Hoy es el día 1. Primero oímos, después partimos palabras y al final las letras. Cuarenta minutos. No necesitas cuaderno ni apuntes, necesitas oídos.",
+  campanaManana: "Mañana es el día 2: voz y sordera. Vas a poner la mano en la garganta para sentir qué sonidos vibran y cuáles no."
+};
+
+var DIR = "assets/dia1/";
+var hechos = {};
+var audio = new Audio();
+var timer = null, restante = 0, pasoActual = null;
+
+var $ = function(id){ return document.getElementById(id); };
+
+function sonar(p){
+  try{ audio.pause(); audio = new Audio(DIR + p + ".mp3"); audio.play().catch(function(){}); }catch(e){}
+}
+
+function pintar(){
+  var cont = $("pasos"); cont.innerHTML = "";
+  DIA.pasos.forEach(function(p){
+    var d = document.createElement("div");
+    d.className = "paso" + (hechos[p.n] ? " listo" : "");
+    var html = '<div class="cab"><span class="num">' + p.n + '</span>' +
+      '<span class="nombre">' + p.nombre + '</span>' +
+      '<span class="min">' + p.min + ' min</span></div>' +
+      '<div class="como">' + p.como + '</div>' +
+      '<div class="decir"><b>Sugerencia:</b> ' + p.decir + '</div>';
+    if(p.audios){
+      html += '<div class="oche">';
+      p.audios.forEach(function(a){
+        html += '<button data-audio="' + a + '">🔊 ' + a + '</button>';
+      });
+      html += '</div>';
+    }
+    if(p.nota){
+      html += '<textarea id="nota" placeholder="Qué resistencia apareció: ansiedad por las letras, traducción, prisa..."></textarea>';
+    }
+    html += '<div id="crono' + p.n + '" class="crono"></div>' +
+      '<button class="accion ' + (hechos[p.n] ? 'siguiente' : 'primario') + '" data-paso="' + p.n + '">' +
+      (hechos[p.n] ? 'HECHO · repetir' : 'EMPEZAR ' + p.min + ' MIN') + '</button>';
+    d.innerHTML = html;
+    cont.appendChild(d);
+  });
+
+  var btns = cont.querySelectorAll("[data-audio]");
+  for(var i=0;i<btns.length;i++){
+    btns[i].onclick = function(){ sonar(this.getAttribute("data-audio")); };
+  }
+  var pb = cont.querySelectorAll("[data-paso]");
+  for(var j=0;j<pb.length;j++){
+    pb[j].onclick = function(){ arrancar(parseInt(this.getAttribute("data-paso"),10), this); };
+  }
+}
+
+function arrancar(n, btn){
+  var p = null;
+  for(var i=0;i<DIA.pasos.length;i++){ if(DIA.pasos[i].n === n) p = DIA.pasos[i]; }
+  if(!p) return;
+  if(hechos[n]){ hechos[n] = false; pintar(); return; }
+  if(timer){ clearInterval(timer); timer = null; }
+  pasoActual = n;
+  restante = p.min * 60;
+  btn.textContent = "LISTO";
+  btn.onclick = function(){ terminar(n); };
+  timer = setInterval(function(){
+    restante--;
+    var m = Math.floor(Math.max(0,restante)/60), s = Math.max(0,restante)%60;
+    var el = $("crono" + n);
+    if(el) el.textContent = m + ":" + (s<10?"0":"") + s + (restante<=0 ? " · se acabó el tiempo" : "");
+    if(restante <= 0){ clearInterval(timer); timer = null; }
+  }, 1000);
+}
+
+function terminar(n){
+  if(timer){ clearInterval(timer); timer = null; }
+  hechos[n] = true;
+  pintar();
+  var todos = true;
+  for(var i=0;i<DIA.pasos.length;i++){ if(!hechos[DIA.pasos[i].n]) todos = false; }
+  if(todos) cerrar();
+}
+
+function cerrar(){
+  $("cierre").classList.remove("oculto");
+  var nota = "";
+  try{ nota = (document.getElementById("nota") && document.getElementById("nota").value) || ""; }
+  catch(e){ nota = ""; }
+  if(!nota){ try{ nota = localStorage.getItem("abvc_d1_nota") || ""; }catch(e){} }
+  if(nota){ $("notaGuardada").textContent = "«" + nota + "»"; }
+  else { $("notaGuardada").textContent = "No se anotó resistencia. Vale también: se registra como día limpio."; }
+  $("resumenFin").textContent = DIA.titulo + " · " + DIA.minutos + " min · " + DIA.nivel;
+  $("campana").textContent = DIA.campanaManana;
+  try{ localStorage.setItem("abvc_d1", JSON.stringify({fecha:new Date().toISOString(), hechos:hechos, nota:nota})); }catch(e){}
+  window.scrollTo({top: document.body.scrollHeight, behavior:"smooth"});
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  var guardado = null;
+  try{ guardado = JSON.parse(localStorage.getItem("abvc_d1") || "null"); }catch(e){}
+  if(guardado && guardado.hechos){
+    hechos = guardado.hechos;
+    var ta = null;
+    setTimeout(function(){ if($("nota")) $("nota").value = guardado.nota || ""; }, 0);
+  }
+  $("titulo").textContent = "Día " + DIA.dia + " · " + DIA.titulo;
+  $("sub").textContent = "fase " + DIA.fase + " · " + DIA.minutos + " min · " + DIA.nivel;
+  $("btnManana").onclick = function(){
+    alert("El día 2 todavía no está construido. Este botón es el lugar donde se abrirá.");
+  };
+  pintar();
+  setTimeout(function(){
+    var t = document.getElementById("nota");
+    if(t && guardado) t.value = guardado.nota || "";
+    if(t) t.addEventListener("input", function(){
+      try{ localStorage.setItem("abvc_d1_nota", t.value); }catch(e){}
+    });
+  }, 30);
+});
+</script>
+</body>
+</html>
