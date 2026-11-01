@@ -863,10 +863,8 @@ public class MainActivity extends Activity {
 
     private void mandarParte() {
         final String txt = textoParte();
-        try {
-            ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            if (cm != null) cm.setPrimaryClip(ClipData.newPlainText("parte", txt));
-        } catch (Exception ignored) {}
+        // 31-oct: NO copiar al portapapeles de entrada. JJ guarda sus fallos ahi
+        // y el parte se los borraba cada vez. Solo se copia SI EL ENVIO FALLA.
         sonar(2);
         Toast.makeText(this, "Mandando el parte…", Toast.LENGTH_SHORT).show();
         new Thread(new Runnable() {
@@ -874,8 +872,14 @@ public class MainActivity extends Activity {
                 final String msg = enviar(txt);
                 parteAAlma(txt);   // 31-oct: segunda salida, hacia la app de Alma
                 runOnUiThread(new Runnable() { @Override public void run() {
-                    if (msg.contains("enviado")) { sonar(0); decirAlma("Parte enviado. Ya se donde andas, Clyde."); }
-                    else sonar(1);
+                    if (msg.contains("enviado")) { sonar(0); decirAlma("Parte enviado."); }
+                    else {
+                        try {
+                            ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                            if (cm != null) cm.setPrimaryClip(ClipData.newPlainText("parte", txt));
+                        } catch (Exception ignored) {}
+                        sonar(1);
+                    }
                     Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show();
                 }});
             }
