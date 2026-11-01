@@ -133,17 +133,37 @@ function cargarVoces(){
   if(el) el.textContent = vozEstado;
 }
 
-function sonar(palabra){
+var DIR = "assets/dia1/", audioMp3 = new Audio();
+
+// RESPALDO: el audio ya horneado y ya pagado no se tira (orden de JJ 1-nov:
+// "gastaste creditos y ahora los quieres borrar?"). Si el telefono no tiene voz
+// en ingles, se usa el MP3 guardado. Cero gasto nuevo.
+function sonarMP3(palabra, avisar){
   try{
-    if(!("speechSynthesis" in window)){ alert("Este navegador no tiene voz. Prueba en Chrome."); return; }
+    audioMp3.pause();
+    audioMp3 = new Audio(DIR + palabra + ".mp3");
+    audioMp3.play().catch(function(){});
+    if(avisar){
+      var d = $("diagVoz");
+      if(d) d.textContent = "Tu telefono no tiene voz en ingles: uso el audio guardado (" + palabra + ").";
+    }
+    return true;
+  }catch(e){ return false; }
+}
+
+function sonar(palabra){
+  var hayVoz = ("speechSynthesis" in window) && vozElegida;
+  if(!hayVoz){ sonarMP3(palabra, true); return; }
+  try{
     window.speechSynthesis.cancel();
     var u = new SpeechSynthesisUtterance(palabra);
     u.lang = "en-US";
-    u.rate = 0.85;   // lento a propósito: es un día de oído
+    u.rate = 0.85;
     u.pitch = 1;
-    if(vozElegida) u.voice = vozElegida;
+    u.voice = vozElegida;
+    u.onerror = function(){ sonarMP3(palabra, true); };
     window.speechSynthesis.speak(u);
-  }catch(e){}
+  }catch(e){ sonarMP3(palabra, true); }
 }
 
 function pintar(){
