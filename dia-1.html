@@ -69,6 +69,7 @@ padding:17px;margin:16px 0}
   </div>
 
   <button id="btnTodo" style="width:100%;font:inherit;font-weight:800;border:1px solid #1d3c52;background:#12202e;color:#00f2ff;border-radius:12px;padding:13px;margin:6px 0 4px;cursor:pointer">🔊 ESCUCHAR EL DÍA COMPLETO</button>
+  <p style="margin:4px 0 0;font-size:12.5px"><a href="assets/dia1/guion/dia.mp3" target="_blank" style="color:#8fa3b8">si no suena, ábrelo directo aquí</a></p>
   <div id="pasos"></div>
 
   <div id="cierre" class="fin oculto">
@@ -149,8 +150,11 @@ function reproducirGuion(nombre){
   try{
     audioGuion.pause();
     audioGuion = new Audio(DIRG + nombre + ".mp3");
-    audioGuion.play().catch(function(){
-      var d = $("diagVoz"); if(d) d.textContent = "No se pudo reproducir. Revisa que tengas datos.";
+    audioGuion.play().catch(function(err){
+      var d = $("diagVoz");
+      var nom = (err && err.name) ? err.name : "desconocido";
+      if(d) d.innerHTML = "El navegador bloqueó el audio (" + nom + "). " +
+        '<a href="' + DIRG + nombre + '.mp3" target="_blank" style="color:#00f2ff">Toca aquí para oírlo directo</a>';
     });
     var d2 = $("diagVoz"); if(d2) d2.textContent = "Reproduciendo la narración grabada.";
   }catch(e){}
