@@ -196,12 +196,30 @@ public class RideService extends Service implements LocationListener {
                         .putBoolean(K_CAND, cand).putBoolean(K_PWR, pwr).putBoolean(K_IDLE, idle).apply();
 
                 long ult = p.getLong(K_ULT,0);
-                boolean dormido = ult > 0 && System.currentTimeMillis() - ult > 45000;
+                // 31-oct (parte de llegada a casa: "0/7 satelites · ANTENA · reinicios 61"):
+                // este vigia estaba ESTRANGULANDO al GPS. Con umbral de 45 s y un
+                // reinicio cada 30 s, el chip nunca completaba el fix en frio (que al
+                // aire libre tarda de 1 a 3 min): cada intento mataba al anterior, y
+                // por eso el parte salio con 0 satelites enganchados y 61 reinicios
+                // en menos de dos horas. Ahora hay 3 min de gracia al arrancar, el
+                // hueco tiene que ser de 2 min para contar como dormido, y entre
+                // reinicio y reinicio pasan al menos 3 min, con tope de 8 por paseo.
+                long ahora = System.currentTimeMillis();
+                long arranque = p.getLong(K_START, 0L);
+                long hace = (ult > 0) ? ahora - ult : (arranque > 0 ? ahora - arranque : 0L);
+                boolean gracia = arranque > 0 && ahora - arranque < 180000L;
+                long ultRein = p.getLong("reinT", 0L);
+                boolean puedeRein = p.getInt(K_REIN,0) < 8
+                        && (ultRein == 0L || ahora - ultRein > 180000L);
+                boolean dormido = !gracia && puedeRein && hace > 120000L;
                 if (dormido) {
-                    p.edit().putInt(K_REIN, p.getInt(K_REIN,0)+1).apply();
+                    p.edit().putInt(K_REIN, p.getInt(K_REIN,0)+1)
+                            .putLong("reinT", ahora).apply();
                     try { if (lm != null) lm.removeUpdates(RideService.this); } catch (Exception ignored) {}
                     empezarGps();
                     // ademas pide UNA lectura suelta por si el flujo continuo esta muerto
+                    // (31-oct: solo dentro del bloque dormido, ya con la gracia y el
+                    // tope aplicados; antes se pedia cada 30 s y competia con el fix)
                     try {
                         if (lm != null && lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                             if (Build.VERSION.SDK_INT >= 30)

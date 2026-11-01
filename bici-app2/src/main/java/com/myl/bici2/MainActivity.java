@@ -123,7 +123,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v5.6 · velocimetro real");
+        placa.setText("v5.7 · GPS sin estrangulamiento");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
