@@ -63,7 +63,7 @@ padding:17px;margin:16px 0}
     <p id="prop">En español cada letra es un sonido, y por eso uno lee y ya sabe decir. En inglés no es así: la misma letra suena de cinco maneras. Si empiezas por las letras, aprendes a leer mal y después hablas peor. Hoy solo se oye. Cuarenta minutos sin ver una sola palabra escrita en inglés.</p>
   </div>
 
-  <div class="alerta" style="background:rgba(0,242,255,.07);border-color:rgba(0,242,255,.35);color:#bfe9f2"><b>Voz del sistema, sin costo.</b> <span id="vozEstado">buscando voz...</span><button id="btnProbar" style="margin-top:9px;width:100%;font:inherit;font-weight:800;border:1px solid #1d3c52;background:#12202e;color:#00f2ff;border-radius:10px;padding:11px;cursor:pointer">PROBAR LA VOZ (5 segundos)</button><div id="diagVoz" style="margin-top:8px;font-size:12.5px;color:#8fa3b8"></div></div>
+  <div class="alerta" style="background:rgba(0,242,255,.07);border-color:rgba(0,242,255,.35);color:#bfe9f2"><b>Narración grabada, sin costo.</b> <span id="vozEstado">voz de Google, español de México</span><button id="btnProbar" style="margin-top:9px;width:100%;font:inherit;font-weight:800;border:1px solid #1d3c52;background:#12202e;color:#00f2ff;border-radius:10px;padding:11px;cursor:pointer">PROBAR LA VOZ (5 segundos)</button><div id="diagVoz" style="margin-top:8px;font-size:12.5px;color:#8fa3b8">Toca el botón grande y debe hablar sola.</div></div>
   <div class="alerta">
     <b>Hoy no se muestra ninguna letra inglesa.</b> Ni una. Si pregunta cómo se escribe, se anota y se aplaza.
   </div>
@@ -140,20 +140,20 @@ var DIR = "assets/dia1/", audioMp3 = new Audio();
 // RESPALDO: el audio ya horneado y ya pagado no se tira (orden de JJ 1-nov:
 // "gastaste creditos y ahora los quieres borrar?"). Si el telefono no tiene voz
 // en ingles, se usa el MP3 guardado. Cero gasto nuevo.
-function leer(texto, lang){
+var DIRG = "assets/dia1/guion/", audioGuion = new Audio();
+
+// NARRACION GRABADA CON LA VOZ GRATIS DE GOOGLE (gTTS, es-MX, tld com.mx).
+// Motivo real: el telefono de JJ no tiene voces del sistema instaladas, asi que
+// speechSynthesis no decia nada. Un MP3 si suena siempre. Cero costo, cero ElevenLabs.
+function reproducirGuion(nombre){
   try{
-    if(!("speechSynthesis" in window)) return false;
-    window.speechSynthesis.cancel();
-    var u = new SpeechSynthesisUtterance(texto);
-    u.lang = lang || "es-MX";
-    u.rate = 0.95;
-    var vs = window.speechSynthesis.getVoices() || [];
-    for(var i=0;i<vs.length;i++){
-      if(new RegExp("^" + (lang||"es").slice(0,2), "i").test(vs[i].lang)){ u.voice = vs[i]; break; }
-    }
-    window.speechSynthesis.speak(u);
-    return true;
-  }catch(e){ return false; }
+    audioGuion.pause();
+    audioGuion = new Audio(DIRG + nombre + ".mp3");
+    audioGuion.play().catch(function(){
+      var d = $("diagVoz"); if(d) d.textContent = "No se pudo reproducir. Revisa que tengas datos.";
+    });
+    var d2 = $("diagVoz"); if(d2) d2.textContent = "Reproduciendo la narración grabada.";
+  }catch(e){}
 }
 
 function sonarMP3(palabra, avisar){
@@ -211,12 +211,7 @@ function pintar(){
 
   var lb = cont.querySelectorAll("[data-leer]");
   for(var k=0;k<lb.length;k++){
-    lb[k].onclick = function(){
-      var nn = parseInt(this.getAttribute("data-leer"),10), pp = null;
-      for(var z=0;z<DIA.pasos.length;z++){ if(DIA.pasos[z].n === nn) pp = DIA.pasos[z]; }
-      if(!pp) return;
-      leer("Paso " + pp.n + ". " + pp.nombre + ". " + pp.hace + " Se lleva: " + pp.lleva);
-    };
+    lb[k].onclick = function(){ reproducirGuion("p" + this.getAttribute("data-leer")); };
   }
   var btns = cont.querySelectorAll("[data-audio]");
   for(var i=0;i<btns.length;i++){ btns[i].onclick = function(){ sonar(this.getAttribute("data-audio")); }; }
@@ -300,11 +295,7 @@ document.addEventListener("DOMContentLoaded", function(){
   };
   pintar();
   var bt = $("btnTodo");
-  if(bt) bt.onclick = function(){
-    var t = "Día 1. El sonido no es la letra. Cuarenta minutos. " + DIA.proposito + " ";
-    DIA.pasos.forEach(function(p){ t += "Paso " + p.n + ", " + p.nombre + ", " + p.min + " minutos. " + p.hace + " "; });
-    leer(t);
-  };
+  if(bt) bt.onclick = function(){ reproducirGuion("dia"); };
   var bp = $("btnProbar"); if(bp) bp.onclick = probarVoz;
   cargarVoces();
   if("speechSynthesis" in window){
