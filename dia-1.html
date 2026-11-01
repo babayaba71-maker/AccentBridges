@@ -62,6 +62,7 @@ padding:17px;margin:16px 0}
     <p id="prop">En español cada letra es un sonido, y por eso uno lee y ya sabe decir. En inglés no es así: la misma letra suena de cinco maneras. Si empiezas por las letras, aprendes a leer mal y después hablas peor. Hoy solo se oye. Cuarenta minutos sin ver una sola palabra escrita en inglés.</p>
   </div>
 
+  <div class="alerta" style="background:rgba(0,242,255,.07);border-color:rgba(0,242,255,.35);color:#bfe9f2"><b>Voz del sistema, sin costo.</b> <span id="vozEstado">buscando voz...</span></div>
   <div class="alerta">
     <b>Hoy no se muestra ninguna letra inglesa.</b> Ni una. Si pregunta cómo se escribe, se anota y se aplaza.
   </div>
@@ -114,12 +115,35 @@ var DIA = {
   campanaManana: "Mañana es el día 2: voz y sordera. Va a poner la mano en la garganta para sentir qué sonidos vibran y cuáles no."
 };
 
-var DIR = "assets/dia1/";
-var hechos = {}, audio = new Audio(), timer = null, restante = 0;
+var hechos = {}, timer = null, restante = 0, vozElegida = null, vozEstado = "buscando voz...";
 var $ = function(id){ return document.getElementById(id); };
 
-function sonar(p){
-  try{ audio.pause(); audio = new Audio(DIR + p + ".mp3"); audio.play().catch(function(){}); }catch(e){}
+// VOZ GRATIS DEL SISTEMA (orden de JJ 1-nov: "no uses la voz de ElevenLabs en esto,
+// ponle la voz gratis de Google"). Cero caracteres de pago, funciona sin red.
+function cargarVoces(){
+  if(!("speechSynthesis" in window)){ vozEstado = "este navegador no tiene voz"; return; }
+  var vs = window.speechSynthesis.getVoices() || [];
+  if(!vs.length){ vozEstado = "cargando voces..."; return; }
+  var g = null;
+  for(var i=0;i<vs.length;i++){ if(/google/i.test(vs[i].name) && /^en/i.test(vs[i].lang)){ g = vs[i]; break; } }
+  if(!g){ for(var j=0;j<vs.length;j++){ if(/^en/i.test(vs[j].lang)){ g = vs[j]; break; } } }
+  vozElegida = g;
+  vozEstado = g ? ("voz lista: " + g.name + " · " + g.lang) : "sin voz en inglés";
+  var el = $("vozEstado");
+  if(el) el.textContent = vozEstado;
+}
+
+function sonar(palabra){
+  try{
+    if(!("speechSynthesis" in window)){ alert("Este navegador no tiene voz. Prueba en Chrome."); return; }
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(palabra);
+    u.lang = "en-US";
+    u.rate = 0.85;   // lento a propósito: es un día de oído
+    u.pitch = 1;
+    if(vozElegida) u.voice = vozElegida;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
 }
 
 function pintar(){
@@ -205,6 +229,11 @@ document.addEventListener("DOMContentLoaded", function(){
     alert("El día 2 todavía no está construido. Este botón es el lugar donde abrirá.");
   };
   pintar();
+  cargarVoces();
+  if("speechSynthesis" in window){
+    window.speechSynthesis.onvoiceschanged = cargarVoces;
+    setTimeout(cargarVoces, 600);
+  }
 });
 </script>
 </body>
