@@ -68,8 +68,11 @@ padding:17px;margin:16px 0}
     <b>Hoy no se muestra ninguna letra inglesa.</b> Ni una. Si pregunta cómo se escribe, se anota y se aplaza.
   </div>
 
-  <button id="btnTodo" style="width:100%;font:inherit;font-weight:800;border:1px solid #1d3c52;background:#12202e;color:#00f2ff;border-radius:12px;padding:13px;margin:6px 0 4px;cursor:pointer">🔊 ESCUCHAR EL DÍA COMPLETO</button>
-  <p style="margin:4px 0 0;font-size:12.5px"><a href="assets/dia1/guion/dia.mp3" target="_blank" style="color:#8fa3b8">si no suena, ábrelo directo aquí</a></p>
+  <div style="margin:8px 0 2px;font-size:13px;color:#8fa3b8">Narración del día (1:13)</div>
+  <audio id="audDia" controls preload="metadata" src="assets/dia1/guion/dia.mp3"
+    style="width:100%;margin:0 0 6px"></audio>
+  <p style="margin:0 0 8px;font-size:12.5px;color:#6d8298">Arrastra la barra para adelantar o repetir lo que quieras.</p>
+
   <div id="pasos"></div>
 
   <div id="cierre" class="fin oculto">
@@ -205,6 +208,9 @@ function pintar(){
       p.audios.forEach(function(a){ html += '<button data-audio="' + a + '">🔊 ' + a + '</button>'; });
       html += '</div>';
     }
+    html += '<div style="margin-top:10px;font-size:12.5px;color:#8fa3b8">Escuchar este paso (' +
+      Math.floor(p.min) + ' min de clase · ' + ')' + '</div>' +
+      '<audio controls preload="metadata" src="' + DIRG + 'p' + p.n + '.mp3" style="width:100%;margin-top:4px"></audio>';
     if(p.nota){ html += '<textarea id="nota" placeholder="Qué resistencia apareció..."></textarea>'; }
     html += '<div id="crono' + p.n + '" class="crono"></div>' +
       '<button class="accion ' + (hechos[p.n] ? 'siguiente' : 'primario') + '" data-paso="' + p.n + '">' +
