@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Día 18 · TH · Action Bridges</title>
+<style>
+:root{--bg:#0a0f18;--card:#121a26;--tx:#e8eef6;--mut:#8fa3b8;--bd:#22303f;
+--cian:#00f2ff;--oro:#e8b44a;--ok:#3fb950;--bad:#f85149;--azul:#58a6ff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.6 -apple-system,"Segoe UI",Roboto,sans-serif;
+padding:calc(16px + env(safe-area-inset-top)) 14px calc(36px + env(safe-area-inset-bottom));min-height:100vh}
+#app{max-width:520px;margin:0 auto}
+h1{font-size:21px;margin:0 0 6px;color:var(--cian)}
+p{margin:8px 0;color:#c2cfdd}
+.mut{color:var(--mut);font-size:13px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin:12px 0}
+button{font:inherit;border:0;cursor:pointer;border-radius:12px;padding:14px 16px;width:100%;margin:8px 0;
+background:#1b2a38;color:var(--tx);transition:.15s}
+button:active{transform:scale(.985)}
+.primario{background:linear-gradient(135deg,#00f2ff,#0aa6ff);color:#052030;font-weight:800}
+.ghost{background:#0d1620;border:1px solid var(--bd);color:#c2cfdd}
+.opcion{text-align:left;font-size:19px;font-weight:700;letter-spacing:.4px;border:1px solid var(--bd);background:#0d1620}
+.opcion.ok{border-color:var(--ok);background:rgba(63,185,80,.14);color:#b7f0c2}
+.opcion.mal{border-color:var(--bad);background:rgba(248,81,73,.14);color:#ffc2bf}
+.opcion:disabled{opacity:.65}
+.barra{height:5px;background:#16202c;border-radius:3px;overflow:hidden;margin:10px 0 4px}
+.barra i{display:block;height:100%;background:linear-gradient(90deg,#00f2ff,#0aa6ff);width:0;transition:.3s}
+.fila{display:flex;justify-content:space-between;font-size:12px;color:var(--mut)}
+.escucha{display:block;width:100%;padding:26px;border-radius:16px;border:1px solid #1d3c52;
+background:radial-gradient(circle at 50% 30%,#122636,#0b131c);text-align:center;font-size:15px;color:var(--cian);font-weight:700}
+.escucha .ico{font-size:34px;display:block;margin-bottom:6px}
+.explica{border-left:3px solid var(--oro);background:#101820;border-radius:0 10px 10px 0;padding:11px 13px;margin:12px 0;font-size:14px}
+.explica b{color:var(--oro)}
+.chip{display:inline-block;font-size:11.5px;padding:3px 9px;border-radius:20px;border:1px solid var(--bd);color:var(--mut);margin:2px 4px 2px 0}
+.grande{font-size:44px;font-weight:800;color:var(--cian);text-align:center;margin:6px 0}
+.cuenta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.cuenta span{font-size:12px;padding:3px 9px;border-radius:8px;background:#16202c;color:var(--mut)}
+.oculto{display:none}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="p0">
+    <h1>Día 18 · TH</h1>
+    <p class="mut">Las dos que no existen en español</p>
+    <div class="card">
+      <p><b>Escucha y elige.</b> Cada palabra se dice una vez. Si te equivocas no se acaba nada: te digo por qué y te la vuelvo a sonar.</p>
+      <p class="mut">Diez preguntas. Necesitas ocho en el primer intento. Lo que falles vuelve al final hasta que lo aciertes.</p>
+    </div>
+    <button class="primario" id="btnEmpezar">EMPEZAR</button>
+  </div>
+
+  <div id="p1" class="oculto">
+    <div class="fila"><span id="prog">1 de 10</span><span id="marca"></span></div>
+    <div class="barra"><i id="progBar"></i></div>
+    <button class="escucha" id="btnOir"><span class="ico">🔊</span><span id="oirTxt">TOCA PARA OÍR</span></button>
+    <p class="mut" style="text-align:center;margin-top:14px">¿Cuál dijeron?</p>
+    <div id="opciones"></div>
+    <div id="feedback"></div>
+  </div>
+
+  <div id="p2" class="oculto">
+    <h1 id="finTitulo">Terminado</h1>
+    <div class="grande" id="finScore">0/10</div>
+    <p class="mut" style="text-align:center" id="finBanda"></p>
+    <div id="finDetalle" class="card"></div>
+    <div id="finCtx"></div>
+  </div>
+
+</div>
+
+<script>
+var ITEMS = [
+  {a:"think", b:"sink", ok:"think", why:"En <b>think</b> la punta de la lengua sale entre los dientes y el aire pasa. En <b>sink</b> la lengua se queda adentro y sisea. Si tu lengua no se ve, no es think."},
+  {a:"sink",  b:"think", ok:"sink",  why:"En <b>sink</b> la lengua no sale: hay un siseo adentro. En <b>think</b> la lengua se ve entre los dientes. Aquí no salió, así que fue sink."},
+  {a:"thing", b:"sing",  ok:"thing", why:"<b>Thing</b> empieza con la lengua entre los dientes. <b>Sing</b> empieza con un siseo suave y termina con la nasal de atrás. Lengua visible, thing."},
+  {a:"sing",  b:"thing", ok:"sing",  why:"<b>Sing</b> arranca siseando y cierra con la nasal del final. <b>Thing</b> arranca con la lengua entre los dientes. Aquí no hubo lengua, fue sing."},
+  {a:"three", b:"tree",  ok:"three", why:"<b>Three</b> lleva la lengua entre los dientes ANTES de la r. <b>Tree</b> va directo con la lengua al techo. Si no oíste el soplo de dientes, fue tree."},
+  {a:"tree",  b:"three", ok:"tree",  why:"<b>Tree</b> empieza con la lengua pegando el techo, sin soplo. <b>Three</b> primero saca la lengua entre los dientes. Sin soplo, tree."},
+  {a:"mouth", b:"mouse", ok:"mouth", why:"<b>Mouth</b> termina con la lengua entre los dientes. <b>Mouse</b> termina siseando con la boca cerrada. Final con lengua, mouth."},
+  {a:"mouse", b:"mouth", ok:"mouse", why:"<b>Mouse</b> cierra siseando. <b>Mouth</b> cierra con la lengua afuera. Aquí cerró siseando, mouse."},
+  {a:"bath",  b:"bat",   ok:"bath",  why:"<b>Bath</b> termina con la lengua entre los dientes y aire. <b>Bat</b> corta seco con la lengua en el techo. Final con soplo, bath."},
+  {a:"bat",   b:"bath",  ok:"bat",   why:"<b>Bat</b> termina de golpe, sin soplo. <b>Bath</b> termina con lengua afuera y aire. Cortó seco, bat."}
+];
+
+var DIR = "assets/leccion-d18/";
+var $ = function(id){ return document.getElementById(id); };
+var cola = [], actual = null, idx = 0, total = 0;
+var primero = {}, reintentos = {}, aciertos = 0, respondido = false;
+var audio = new Audio();
+
+function mezclar(a){ a = a.slice(); for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+
+function sonar(palabra, cb){
+  try{
+    audio.pause();
+    audio = new Audio(DIR + palabra + ".mp3");
+    audio.onended = function(){ if(cb) cb(); };
+    var pr = audio.play();
+    if(pr && pr.catch) pr.catch(function(){ /* toque previo ya hubo */ });
+  }catch(e){}
+}
+
+function empezar(){
+  $("p0").classList.add("oculto");
+  $("p1").classList.remove("oculto");
+  total = 0; aciertos = 0; primero = {}; reintentos = {}; idx = 0;
+  cola = mezclar(ITEMS.map(function(it,i){ return {it:it, n:i}; }));
+  pintar();
+}
+
+function pintar(){
+  respondido = false;
+  if(cola.length === 0){ terminar(); return; }
+  actual = cola[0];
+  $("feedback").innerHTML = "";
+  $("prog").textContent = (idx+1) + " de " + (idx + 1 + cola.length - 1);
+  $("progBar").style.width = Math.round((idx / Math.max(1, idx + cola.length)) * 100) + "%";
+  $("marca").textContent = (primero[actual.n] === true) ? "✔ ya lo tenías" : "";
+  $("oirTxt").textContent = "TOCA PARA OÍR";
+  var cont = $("opciones");
+  cont.innerHTML = "";
+  var orden = Math.random() < 0.5 ? ["a","b"] : ["b","a"];
+  orden.forEach(function(k){
+    var b = document.createElement("button");
+    b.className = "opcion";
+    b.textContent = actual.it[k];
+    b.onclick = function(){ responder(actual.it[k] === actual.it.ok, actual.it[k]); };
+    cont.appendChild(b);
+  });
+  sonar(actual.it.ok);
+}
+
+function responder(bien, eligio){
+  if(respondido) return;
+  respondido = true;
+  var botones = $("opciones").querySelectorAll("button");
+  for(var i=0;i<botones.length;i++){
+    botones[i].disabled = true;
+    if(botones[i].textContent === actual.it.ok) botones[i].classList.add("ok");
+    else if(botones[i].textContent === eligio && !bien) botones[i].classList.add("mal");
+  }
+
+  var n = actual.n;
+  if(!(n in primero)) primero[n] = bien;   // el puntaje es del PRIMER intento
+
+  if(bien){
+    if(primero[n] === true && !reintentos[n]) aciertos++;
+    $("feedback").innerHTML = '<div class="explica" style="border-color:#3fb950"><b style="color:#3fb950">Correcto.</b> ' + actual.it.why + '</div>';
+    setTimeout(siguiente, 900);
+  } else {
+    reintentos[n] = (reintentos[n] || 0) + 1;
+    $("feedback").innerHTML = '<div class="explica">Dijeron <b>' + actual.it.ok + '</b>, elegiste <b>' + eligio + '</b>.<br>' + actual.it.why + '</div>' +
+      '<button class="primario" id="btnOtra">↺ OÍRLA OTRA VEZ</button>' +
+      '<button class="ghost" id="btnSeguir">ENTENDIDO, SIGUE</button>';
+    $("btnOtra").onclick = function(){ sonar(actual.it.ok, function(){ $("oirTxt").textContent = "ESCUCHA OTRA VEZ"; }); };
+    $("btnSeguir").onclick = function(){
+      cola.shift();
+      cola.push(actual);   // el fallado vuelve al final
+      pintar();
+    };
+  }
+}
+
+function siguiente(){
+  cola.shift();
+  idx++;
+  pintar();
+}
+
+function terminar(){
+  $("p1").classList.add("oculto");
+  $("p2").classList.remove("oculto");
+  var pct = Math.round(aciertos / ITEMS.length * 100);
+  var banda = aciertos >= 9 ? "sólido" : (aciertos >= 7 ? "frágil" : "falla");
+  var color = aciertos >= 9 ? "#3fb950" : (aciertos >= 7 ? "#d29922" : "#f85149");
+  $("finScore").textContent = aciertos + "/10";
+  $("finScore").style.color = color;
+  $("finTitulo").textContent = aciertos >= 8 ? "Pasaste el día 18" : "Casi. Repasamos y lo cierras.";
+  $("finBanda").innerHTML = pct + "% en el primer intento · banda <b style=" + '"color:' + color + '"' + ">" + banda + "</b>";
+
+  var fallados = [];
+  for(var k in primero){ if(primero[k] === false) fallados.push(ITEMS[k].ok); }
+  var html = "";
+  if(fallados.length){
+    html += "<p><b>Lo que se te fue:</b></p><div>";
+    fallados.forEach(function(p){ html += '<span class="chip">' + p + '</span>'; });
+    html += "</div><p class=\'mut\'>Estas se quedan para mañana. No se borran, se vuelven a preguntar.</p>";
+  } else {
+    html += "<p>Nada se te fue. Diez de diez al primer intento.</p>";
+  }
+  $("finDetalle").innerHTML = html;
+
+  $("finCtx").innerHTML = '<div class="card"><p><b>Ahora en una frase.</b></p>' +
+    '<button class="escucha" id="btnCtx"><span class="ico">🔊</span>TOCA PARA OÍR</button>' +
+    '<p class="mut" style="margin-top:10px">I think this thing is three.</p>' +
+    '<p class="mut">Tres sonidos de lengua entre dientes en una sola frase. Si te salen los tres, el día 18 está cerrado.</p></div>' +
+    '<button class="primario" id="btnOtraVez">REPETIR LA LECCIÓN</button>';
+  $("btnCtx").onclick = function(){ sonar("ctx1"); };
+  $("btnOtraVez").onclick = function(){
+    $("p2").classList.add("oculto");
+    $("p1").classList.remove("oculto");
+    empezar();
+  };
+
+  try{
+    localStorage.setItem("abvc_d18", JSON.stringify({
+      fecha: new Date().toISOString(), aciertos: aciertos, total: ITEMS.length,
+      banda: banda, bandas: primero, reintentos: reintentos
+    }));
+  }catch(e){}
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  $("btnEmpezar").onclick = empezar;
+  $("btnOir").onclick = function(){
+    if(actual) sonar(actual.it.ok, function(){ $("oirTxt").textContent = "ESCUCHA OTRA VEZ"; });
+  };
+});
+</script>
+</body>
+</html>
