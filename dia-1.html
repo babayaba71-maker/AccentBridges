@@ -63,7 +63,7 @@ padding:17px;margin:16px 0}
     <p id="prop">En español cada letra es un sonido, y por eso uno lee y ya sabe decir. En inglés no es así: la misma letra suena de cinco maneras. Si empiezas por las letras, aprendes a leer mal y después hablas peor. Hoy solo se oye. Cuarenta minutos sin ver una sola palabra escrita en inglés.</p>
   </div>
 
-  <div class="alerta" style="background:rgba(0,242,255,.07);border-color:rgba(0,242,255,.35);color:#bfe9f2"><b>Narración grabada, sin costo.</b> <span id="vozEstado">voz de Google, español de México</span><button id="btnProbar" style="margin-top:9px;width:100%;font:inherit;font-weight:800;border:1px solid #1d3c52;background:#12202e;color:#00f2ff;border-radius:10px;padding:11px;cursor:pointer">PROBAR LA VOZ (5 segundos)</button><div id="diagVoz" style="margin-top:8px;font-size:12.5px;color:#8fa3b8">Toca el botón grande y debe hablar sola.</div></div>
+  </div>
   <div class="alerta">
     <b>Hoy no se muestra ninguna letra inglesa.</b> Ni una. Si pregunta cómo se escribe, se anota y se aplaza.
   </div>
@@ -208,8 +208,8 @@ function pintar(){
       p.audios.forEach(function(a){ html += '<button data-audio="' + a + '">🔊 ' + a + '</button>'; });
       html += '</div>';
     }
-    html += '<div style="margin-top:10px;font-size:12.5px;color:#8fa3b8">Escuchar este paso (' +
-      Math.floor(p.min) + ' min de clase · ' + ')' + '</div>' +
+    html += '<div style="margin-top:10px;font-size:12.5px;color:#8fa3b8">Escuchar este paso (la clase dura ' +
+      p.min + ' min) · adelanta o repite con la barra</div>' +
       '<audio controls preload="metadata" src="' + DIRG + 'p' + p.n + '.mp3" style="width:100%;margin-top:4px"></audio>';
     if(p.nota){ html += '<textarea id="nota" placeholder="Qué resistencia apareció..."></textarea>'; }
     html += '<div id="crono' + p.n + '" class="crono"></div>' +
