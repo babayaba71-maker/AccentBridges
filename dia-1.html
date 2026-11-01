@@ -27,6 +27,7 @@ padding:12px 14px;margin:13px 0;font-size:14px;color:#f2dfae}
 background:#1b2a38;color:var(--cian);font-size:13px;font-weight:800;flex:none}
 .nombre{font-weight:800;font-size:16.5px}
 .min{color:var(--mut);font-size:12px;margin-left:auto;flex:none}
+.btn-oir{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid #1d3c52;background:#12202e;color:#00f2ff;font-size:15px;cursor:pointer;margin-left:8px;padding:0}
 .hace{font-size:14.5px;color:#cfdbe7;margin:9px 0}
 .hace b{color:#fff}
 .lleva{background:#0b131c;border-left:3px solid var(--ok);border-radius:0 9px 9px 0;
@@ -67,6 +68,7 @@ padding:17px;margin:16px 0}
     <b>Hoy no se muestra ninguna letra inglesa.</b> Ni una. Si pregunta cómo se escribe, se anota y se aplaza.
   </div>
 
+  <button id="btnTodo" style="width:100%;font:inherit;font-weight:800;border:1px solid #1d3c52;background:#12202e;color:#00f2ff;border-radius:12px;padding:13px;margin:6px 0 4px;cursor:pointer">🔊 ESCUCHAR EL DÍA COMPLETO</button>
   <div id="pasos"></div>
 
   <div id="cierre" class="fin oculto">
@@ -138,6 +140,22 @@ var DIR = "assets/dia1/", audioMp3 = new Audio();
 // RESPALDO: el audio ya horneado y ya pagado no se tira (orden de JJ 1-nov:
 // "gastaste creditos y ahora los quieres borrar?"). Si el telefono no tiene voz
 // en ingles, se usa el MP3 guardado. Cero gasto nuevo.
+function leer(texto, lang){
+  try{
+    if(!("speechSynthesis" in window)) return false;
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(texto);
+    u.lang = lang || "es-MX";
+    u.rate = 0.95;
+    var vs = window.speechSynthesis.getVoices() || [];
+    for(var i=0;i<vs.length;i++){
+      if(new RegExp("^" + (lang||"es").slice(0,2), "i").test(vs[i].lang)){ u.voice = vs[i]; break; }
+    }
+    window.speechSynthesis.speak(u);
+    return true;
+  }catch(e){ return false; }
+}
+
 function sonarMP3(palabra, avisar){
   try{
     audioMp3.pause();
@@ -173,7 +191,8 @@ function pintar(){
     d.className = "paso" + (hechos[p.n] ? " listo" : "");
     var html = '<div class="cab"><span class="num">' + p.n + '</span>' +
       '<span class="nombre">' + p.nombre + '</span>' +
-      '<span class="min">' + p.min + ' min</span></div>' +
+      '<span class="min">' + p.min + ' min</span>' +
+      '<button class="btn-oir" data-leer="' + p.n + '">🔊</button></div>' +
       '<div class="hace">' + p.hace + '</div>' +
       '<div class="lleva"><b>Se lleva:</b> ' + p.lleva + '</div>' +
       '<div class="tip"><b>Tu papel:</b> ' + p.tip + '</div>';
@@ -190,6 +209,15 @@ function pintar(){
     cont.appendChild(d);
   });
 
+  var lb = cont.querySelectorAll("[data-leer]");
+  for(var k=0;k<lb.length;k++){
+    lb[k].onclick = function(){
+      var nn = parseInt(this.getAttribute("data-leer"),10), pp = null;
+      for(var z=0;z<DIA.pasos.length;z++){ if(DIA.pasos[z].n === nn) pp = DIA.pasos[z]; }
+      if(!pp) return;
+      leer("Paso " + pp.n + ". " + pp.nombre + ". " + pp.hace + " Se lleva: " + pp.lleva);
+    };
+  }
   var btns = cont.querySelectorAll("[data-audio]");
   for(var i=0;i<btns.length;i++){ btns[i].onclick = function(){ sonar(this.getAttribute("data-audio")); }; }
   var pb = cont.querySelectorAll("[data-paso]");
@@ -271,6 +299,12 @@ document.addEventListener("DOMContentLoaded", function(){
     alert("El día 2 todavía no está construido. Este botón es el lugar donde abrirá.");
   };
   pintar();
+  var bt = $("btnTodo");
+  if(bt) bt.onclick = function(){
+    var t = "Día 1. El sonido no es la letra. Cuarenta minutos. " + DIA.proposito + " ";
+    DIA.pasos.forEach(function(p){ t += "Paso " + p.n + ", " + p.nombre + ", " + p.min + " minutos. " + p.hace + " "; });
+    leer(t);
+  };
   var bp = $("btnProbar"); if(bp) bp.onclick = probarVoz;
   cargarVoces();
   if("speechSynthesis" in window){
