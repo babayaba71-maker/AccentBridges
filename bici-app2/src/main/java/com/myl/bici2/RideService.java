@@ -79,7 +79,8 @@ public class RideService extends Service implements LocationListener {
                 .putFloat(K_DIST,0f).putFloat(K_MAX,0f).putInt(K_N,0).putFloat(K_SALTO,0f)
                 .putInt(K_ACC,-1).putLong(K_ULT,0L).putInt(K_REIN,0)
                 .putLong("finT",0L).putFloat("finDist",0f).putLong("finSeg",0L).putFloat("finMax",0f)
-                .putFloat("mueve",0f).putLong("lat",0L).putLong("lon",0L).apply();
+                .putFloat("mueve",0f).putLong("lat",0L).putLong("lon",0L)
+                .putFloat("vel",0f).putLong("velT",0L).apply();
             ultimo = null;
             anclaGps = null; anclaRed = null; ultimoGpsT = 0L; borrarAnclas();   // paseo nuevo, ancla nueva (si no, sumaría el salto desde el punto viejo)
             String ver = "?";
@@ -326,7 +327,8 @@ public class RideService extends Service implements LocationListener {
         p0.edit().putFloat("finDist", p0.getFloat(K_DIST, 0f))
                  .putLong("finSeg", segFin)
                  .putFloat("finMax", p0.getFloat(K_MAX, 0f))
-                 .putLong("finT", System.currentTimeMillis()).apply();
+                 .putLong("finT", System.currentTimeMillis())
+                 .putFloat("vel",0f).putLong("velT",0L).apply();
 
         soltarSatelites();
         try { if (lm != null) lm.removeUpdates(this); } catch (Exception ignored) {}
@@ -430,6 +432,8 @@ public class RideService extends Service implements LocationListener {
                         // (hasSpeed) esa manda porque viene suavizada por el chip.
                         float vel = loc.hasSpeed() ? loc.getSpeed() * 3.6f : (float) vImp;
                         if (vel <= topeVel && vel > max) max = vel;
+                        // 31-oct: la velocidad tambien se publica para el tablero
+                        p.edit().putFloat("vel", vel).putLong("velT", ahoraMs).apply();
                         // 31-oct (JJ: "promedio 5.3 castigado"): el promedio se
                         // calcula sobre tiempo EN MOVIMIENTO, no sobre el reloj de
                         // pared con las horas parado dentro.
@@ -444,6 +448,8 @@ public class RideService extends Service implements LocationListener {
                         sumado = true;
                         float vel = loc.getSpeed() * 3.6f;
                         if (vel <= topeVel && vel > max) max = vel;
+                        // 31-oct: la velocidad tambien se publica para el tablero
+                        p.edit().putFloat("vel", vel).putLong("velT", ahoraMs).apply();
                         if (vel > 2f) mueve += (float) dt;
                         ancla = loc;
                     }

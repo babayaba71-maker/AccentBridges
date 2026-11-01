@@ -81,7 +81,7 @@ public class MainActivity extends Activity {
     private static final int GRIS = Color.rgb(109, 130, 153);
     private static final int GRIS2 = Color.rgb(110, 130, 150);
 
-    private TextView tvKm, tvTiempo, tvProm, tvMax, tvEstado, tvArrancar, tvParte, tvKmLabel;
+    private TextView tvKm, tvDist, tvTiempo, tvProm, tvMax, tvEstado, tvArrancar, tvParte, tvKmLabel;
     private OrbView orb;
     private final Handler h = new Handler(Looper.getMainLooper());
 
@@ -123,7 +123,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v5.1 · promedio de verdad");
+        placa.setText("v5.6 · velocimetro real");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -164,6 +164,7 @@ public class MainActivity extends Activity {
         lpFila.topMargin = dp(18);
         col.addView(fila, lpFila);
 
+        tvDist = dato(fila, "DISTANCIA");
         tvTiempo = dato(fila, "TIEMPO");
         tvProm = dato(fila, "PROMEDIO");
         tvMax = dato(fila, "MÁXIMA");
@@ -474,11 +475,23 @@ public class MainActivity extends Activity {
         float mueveS = p.getFloat("mueve", 0f);
         float prom = (mueveS > 5f) ? Math.min(70f, km / (mueveS / 3600f)) : 0f;
 
-        tvKm.setText(String.format("%.2f", km));
+        // 31-oct (JJ desde la bici: "el GPS no sirve, queda marcando 8.6 km/h"):
+        // el numero grande NUNCA fue velocidad, era la distancia, y por eso
+        // parecia un velocimetro pegado. Ahora el numero grande ES la velocidad
+        // del GPS y los kilometros bajan a la fila de datos. Si no hay lectura
+        // fresca, marca 0.0 en vez de quedarse con el ultimo valor.
+        float velViva = 0f;
+        if (on) {
+            long vT = p.getLong("velT", 0L);
+            if (vT > 0L && System.currentTimeMillis() - vT < 9000L) velViva = p.getFloat("vel", 0f);
+        }
+        tvKm.setText(String.format("%.1f", velViva));
+        tvDist.setText(String.format("%.2f", km));
         tvTiempo.setText(reloj(seg));
         tvProm.setText(String.format("%.1f", prom));
         tvMax.setText(String.format("%.1f", max));
-        tvKmLabel.setText(resumen ? "ÚLTIMO PASEO · KILÓMETROS" : "KILÓMETROS");
+        tvKmLabel.setText(on ? "KILÓMETROS POR HORA"
+                : (resumen ? "PASEO TERMINADO · VELOCIDAD EN CERO" : "KILÓMETROS POR HORA"));
 
         if (on) {
             tvArrancar.setText("⏸  PARAR");
