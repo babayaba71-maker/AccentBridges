@@ -156,7 +156,7 @@
       <input class="field" id="f-name" placeholder="Tu nombre" autocomplete="name" inputmode="text">
       <div class="tel-row">
         <span class="tel-prefix">+52</span>
-        <input class="field" id="f-phone" placeholder="10 dígitos" autocomplete="tel-national" inputmode="numeric" maxlength="10" aria-label="Tu WhatsApp, diez dígitos sin el 52">
+        <input class="field" id="f-phone" placeholder="10 dígitos, sin el 52" autocomplete="tel-national" inputmode="numeric" maxlength="13" aria-label="Tu WhatsApp, diez dígitos sin el 52">
       </div>
       <p class="tel-hint">Escribe tus diez dígitos. El 52 ya va puesto.</p>
       <button class="btn" id="b-send">Quiero que me lo expliquen</button>
@@ -385,9 +385,16 @@ function diezDigitos(bruto){
   return v.length > 10 ? v.slice(-10) : v;
 }
 $('f-phone').addEventListener('input', (e)=>{
-  // al teclear solo se descartan los caracteres que no son numeros
-  const limpio = e.target.value.replace(/\D/g,'');
+  // al teclear se descartan los caracteres que no son numeros, pero se deja
+  // escribir el numero completo con lada: el recorte es al salir del campo
+  const limpio = e.target.value.replace(/\D/g,'').slice(0,13);
   if(limpio !== e.target.value) e.target.value = limpio;
+});
+// al salir del campo (o antes de enviar) se queda con los diez del numero
+$('f-phone').addEventListener('blur', (e)=>{
+  const v = diezDigitos(e.target.value);
+  e.target.value = v;
+  if(v.length === 10) e.target.style.borderColor = '';
 });
 $('f-phone').addEventListener('paste', (e)=>{
   const txt = (e.clipboardData || window.clipboardData).getData('text');
