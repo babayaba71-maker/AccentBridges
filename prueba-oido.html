@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1623">
+<title>Prueba de oído — AccentBridges</title>
+<style>
+  :root{
+    --bg:#0b1623; --card:#101f2f; --card2:#152a3d; --line:#25405a;
+    --fg:#eef4fa; --muted:#93a7bb; --cyan:#22c8f5; --cyan-dark:#0d93b8;
+    --ok:#38d39f; --warn:#f0b429; --bad:#ef5f6b;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--fg);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    line-height:1.55; min-height:100vh;
+    padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  .wrap{max-width:560px;margin:0 auto;padding:20px 18px 40px}
+  .brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:16px;letter-spacing:-.2px;margin-bottom:26px}
+  .brand b{color:var(--cyan);font-weight:800}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);display:inline-block}
+  h1{font-size:27px;line-height:1.2;letter-spacing:-.6px;margin:0 0 12px;font-weight:800}
+  h2{font-size:19px;margin:0 0 10px;letter-spacing:-.3px}
+  p{margin:0 0 14px;color:var(--muted);font-size:15.5px}
+  .lead{font-size:16px;color:#c9d8e6}
+  .btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+    padding:16px 18px;border-radius:12px;border:1px solid transparent;
+    background:var(--cyan);color:#052230;font-weight:800;font-size:16.5px;
+    cursor:pointer;font-family:inherit;transition:transform .08s ease,background .15s;
+  }
+  .btn:active{transform:scale(.985)}
+  .btn.ghost{background:transparent;color:var(--fg);border-color:var(--line);font-weight:600}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+  .meta{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-bottom:10px;font-variant-numeric:tabular-nums}
+  .bar{height:5px;background:#0a1a28;border-radius:99px;overflow:hidden;margin-bottom:22px}
+  .bar>i{display:block;height:100%;background:var(--cyan);width:0;transition:width .3s ease;border-radius:99px}
+  .listen{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+    width:100%;padding:30px 18px;border-radius:16px;border:1.5px solid var(--cyan);
+    background:linear-gradient(180deg,#0e2233,#0b1c2b);color:var(--fg);
+    cursor:pointer;font-family:inherit;margin-bottom:22px;position:relative;
+  }
+  .listen:disabled{opacity:.4}
+  .listen .ico{font-size:30px;line-height:1}
+  .listen .lbl{font-weight:800;font-size:17px;letter-spacing:-.2px}
+  .listen .hint{font-size:12.5px;color:var(--muted);font-weight:500}
+  .listen.playing{border-color:var(--ok);animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(56,211,159,.35)}50%{box-shadow:0 0 0 12px rgba(56,211,159,0)}}
+  .ask{font-size:14px;color:var(--muted);text-align:center;margin-bottom:12px;font-weight:600}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .opt{
+    padding:20px 10px;border-radius:12px;border:1.5px solid var(--line);background:var(--card2);
+    color:var(--fg);font-size:20px;font-weight:700;font-family:inherit;cursor:pointer;
+    letter-spacing:-.2px;transition:border-color .12s,background .12s;
+  }
+  .opt:active{border-color:var(--cyan)}
+  .opt .tag{display:block;font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.08em;margin-bottom:5px;text-transform:uppercase}
+  .big{font-size:52px;font-weight:800;letter-spacing:-2px;line-height:1;margin:0 0 4px}
+  .big small{font-size:20px;color:var(--muted);font-weight:700;letter-spacing:0}
+  .row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+  .row:last-child{border-bottom:none}
+  .row .nm{flex:1;color:#c9d8e6}
+  .pill{font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:99px;letter-spacing:.03em;white-space:nowrap}
+  .pill.g{background:rgba(56,211,159,.15);color:var(--ok)}
+  .pill.y{background:rgba(240,180,41,.15);color:var(--warn)}
+  .pill.r{background:rgba(239,95,107,.15);color:var(--bad)}
+  .field{width:100%;padding:14px;border-radius:11px;border:1.5px solid var(--line);background:#0a1a28;color:var(--fg);font-family:inherit;font-size:16px;margin-bottom:10px}
+  .field::placeholder{color:#5f7488}
+  .field:focus{outline:none;border-color:var(--cyan)}
+  .note{font-size:12.5px;color:#6d8298;line-height:1.5;margin-top:14px}
+  .hide{display:none!important}
+  .ctr{text-align:center}
+  .wave{display:flex;align-items:flex-end;justify-content:center;gap:3px;height:26px;margin-bottom:8px}
+  .wave i{width:3px;background:var(--cyan);border-radius:2px;opacity:.35}
+  .listen.playing .wave i{animation:eq .6s infinite ease-in-out;opacity:1}
+  .wave i:nth-child(1){height:40%}.wave i:nth-child(2){height:75%}.wave i:nth-child(3){height:100%}
+  .wave i:nth-child(4){height:60%}.wave i:nth-child(5){height:85%}.wave i:nth-child(6){height:45%}
+  .wave i:nth-child(7){height:70%}
+  @keyframes eq{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1)}}
+  .fine{font-size:12px;color:#5f7488;text-align:center;margin-top:18px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><span class="dot"></span>Accent<span><b>Bridges</b></span></div>
+
+  <!-- ============ INTRO ============ -->
+  <section id="s-intro">
+    <h1>La prueba de oído</h1>
+    <p class="lead">Son diez minutos y veinte preguntas. Vas a escuchar una palabra y elegir cuál fue.</p>
+    <p>Esto no mide tu vocabulario ni tu gramática. Mide una sola cosa: qué sonidos del inglés tu oído ya separa y cuáles todavía se te mezclan. Si dos sonidos se te mezclan al escuchar, no los vas a poder decir, por más que practiques.</p>
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;margin-bottom:8px">Antes de empezar</div>
+      <p style="margin:0;font-size:14px">Ponte los audífonos si puedes, o busca un lugar con poco ruido. Escucha cada palabra sin repetirla en voz alta.</p>
+    </div>
+    <button class="btn" id="b-start">Empezar la prueba</button>
+    <p class="fine">Cada palabra se puede repetir una vez. Si dudas, contesta lo que te suene y sigue.</p>
+  </section>
+
+  <!-- ============ TEST ============ -->
+  <section id="s-test" class="hide">
+    <div class="meta"><span id="m-count">Pregunta 1 de 20</span><span id="m-score"></span></div>
+    <div class="bar"><i id="m-bar"></i></div>
+
+    <button class="listen" id="b-listen">
+      <div class="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <span class="lbl" id="l-listen">Escuchar</span>
+      <span class="hint" id="l-hint">Toca para escuchar la palabra</span>
+    </button>
+
+    <p class="ask">¿Cuál escuchaste?</p>
+    <div class="opts">
+      <button class="opt" data-i="0"><span class="tag">Opción A</span><span id="o-0">—</span></button>
+      <button class="opt" data-i="1"><span class="tag">Opción B</span><span id="o-1">—</span></button>
+    </div>
+
+    <button class="btn ghost hide" id="b-next" style="margin-top:20px">Siguiente</button>
+  </section>
+
+  <!-- ============ RESULTADO ============ -->
+  <section id="s-result" class="hide">
+    <h2 id="r-title">Tu diagnóstico de oído</h2>
+    <p class="big"><span id="r-score">0</span><small> / 20</small></p>
+    <p id="r-line" style="margin-bottom:22px"></p>
+
+    <div class="card">
+      <div style="font-size:13px;font-weight:800;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Por contraste</div>
+      <div id="r-rows"></div>
+    </div>
+
+    <div class="card" id="r-box-text">
+      <div style="font-size:14px;font-weight:700;margin-bottom:8px">Lo que dicen tus números</div>
+      <p id="r-text" style="margin:0;font-size:14.5px;color:#c9d8e6"></p>
+    </div>
+
+    <div class="card">
+      <div style="font-size:15px;font-weight:800;margin-bottom:4px">Te mando el resultado por escrito</div>
+      <p style="font-size:13.5px;margin:0 0 14px">Con los sonidos exactos que te faltan y por dónde empezar. Sin costo.</p>
+      <input class="field" id="f-name" placeholder="Tu nombre" autocomplete="name" inputmode="text">
+      <input class="field" id="f-phone" placeholder="Tu WhatsApp (10 dígitos)" autocomplete="tel" inputmode="tel">
+      <button class="btn" id="b-send">Enviar mi resultado</button>
+      <p class="fine" id="f-send-note">Solo lo uso para mandarte tu diagnóstico. Nada de publicidad.</p>
+    </div>
+
+    <button class="btn ghost" id="b-again">Volver a hacer la prueba</button>
+    <p class="fine">AccentBridges · Técnica, identidad y libertad</p>
+  </section>
+</div>
+
+<script>
+// ============ DATOS DEL TEST ============
+// Cada contraste mide un par de sonidos que el hispanohablante suele confundir.
+// Dos ítems por contraste, uno con cada palabra del par.
+const CONTRASTES = [
+  { id:'vocal-larga', nombre:'Vocal corta y vocal larga', par:['ship','sheep'],
+    tip:'En inglés la duración del sonido cambia el significado. Ship es corto, sheep es largo.' },
+  { id:'a-e', nombre:'A abierta y E', par:['bat','bet'],
+    tip:'La a de bat es más abierta y más larga que la e de bet.' },
+  { id:'th-s', nombre:'TH soplada y S', par:['think','sink'],
+    tip:'En think la lengua sale entre los dientes. En sink se queda adentro.' },
+  { id:'th-d', nombre:'TH con voz y D', par:['they','day'],
+    tip:'En they la lengua toca los dientes y vibra la garganta. En day toca el paladar.' },
+  { id:'v-b', nombre:'V y B', par:['very','berry'],
+    tip:'En very los dientes de arriba muerden el labio. En berry los labios se juntan.' },
+  { id:'sh-ch', nombre:'SH y CH', par:['shop','chop'],
+    tip:'En shop el aire sale largo. En chop primero hay un golpe de lengua.' },
+  { id:'u-abierta', nombre:'U neutra y A abierta', par:['cut','cot'],
+    tip:'La vocal de cut es corta y central. La de cot es más abierta y suena más hacia la a.' },
+  { id:'ng-n', nombre:'NG final y N final', par:['sing','sin'],
+    tip:'En sing el aire sale por la nariz con la lengua atrás. En sin la lengua toca los dientes.' },
+  { id:'r-l', nombre:'R americana y L', par:['right','light'],
+    tip:'En right la lengua no toca nada. En light la punta toca el techo de la boca.' },
+  { id:'a-u', nombre:'A abierta y U neutra', par:['cap','cup'],
+    tip:'La a de cap abre la boca. La u de cup es corta y relajada, con la boca casi cerrada.' }
+];
+
+const AUDIO_BASE = 'oido/audio/';
+const audioCache = {};
+let items = [], idx = 0, answers = [], currentPlays = 0, locked = false;
+
+// ============ CONSTRUIR ITEMS ============
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function buildItems(){
+  let out = [];
+  CONTRASTES.forEach(c=>{
+    // dos ítems por contraste, uno con cada palabra, en orden aleatorio
+    const orden = shuffle([0,1]);
+    orden.forEach(k=>{
+      const dicho = c.par[k];
+      const opciones = shuffle([...c.par]);
+      out.push({ cid:c.id, dicho, opciones });
+    });
+  });
+  return shuffle(out);
+}
+
+// ============ AUDIO ============
+function precargar(){
+  const palabras = [...new Set(CONTRASTES.flatMap(c=>c.par))];
+  palabras.forEach(w=>{
+    const a = new Audio(AUDIO_BASE + w + '.mp3');
+    a.preload = 'auto';
+    audioCache[w] = a;
+  });
+}
+
+let currentAudio = null;
+function playWord(w, cb){
+  if(currentAudio){ try{ currentAudio.pause(); }catch(e){} }
+  const base = audioCache[w];
+  // clonar para poder repetir sin esperar
+  const a = base.cloneNode ? base.cloneNode() : new Audio(AUDIO_BASE + w + '.mp3');
+  a.src = AUDIO_BASE + w + '.mp3';
+  currentAudio = a;
+  const btn = document.getElementById('b-listen');
+  btn.classList.add('playing');
+  a.onended = ()=>{ btn.classList.remove('playing'); if(cb) cb(); };
+  a.onerror = ()=>{ btn.classList.remove('playing'); if(cb) cb(); };
+  const p = a.play();
+  if(p && p.catch) p.catch(()=>{ btn.classList.remove('playing'); if(cb) cb(); });
+}
+
+// ============ FLUJO ============
+const $ = id => document.getElementById(id);
+
+function start(){
+  items = buildItems();
+  answers = []; idx = 0; 
+  precargar();
+  $('s-intro').classList.add('hide');
+  $('s-result').classList.add('hide');
+  $('s-test').classList.remove('hide');
+  render();
+}
+
+function render(){
+  locked = false;
+  currentPlays = 0;
+  const it = items[idx];
+  $('m-count').textContent = `Pregunta ${idx+1} de ${items.length}`;
+  $('m-bar').style.width = `${(idx/items.length)*100}%`;
+  $('o-0').textContent = it.opciones[0];
+  $('o-1').textContent = it.opciones[1];
+  $('b-next').classList.add('hide');
+  $('b-listen').disabled = false;
+  $('l-listen').textContent = 'Escuchar';
+  $('l-hint').textContent = 'Toca para escuchar la palabra';
+  document.querySelectorAll('.opt').forEach(b=>{ b.disabled=false; b.style.opacity=1; b.style.borderColor=''; });
+}
+
+function listen(){
+  if(currentPlays >= 2) return;
+  currentPlays++;
+  $('l-listen').textContent = 'Escuchando…';
+  $('l-hint').textContent = currentPlays === 1 ? 'Puedes repetirla una vez más' : 'Última escucha';
+  playWord(items[idx].dicho, ()=>{
+    $('l-listen').textContent = 'Escuchar de nuevo';
+    if(currentPlays >= 2){ $('b-listen').disabled = true; $('l-hint').textContent = 'Ya no hay más repeticiones'; }
+  });
+}
+
+function answer(i){
+  if(locked) return;
+  locked = true;
+  const it = items[idx];
+  const elegida = it.opciones[i];
+  const correcto = elegida === it.dicho;
+  answers.push({ cid:it.cid, dicho:it.dicho, elegida, correcto });
+
+  // marcar visualmente
+  document.querySelectorAll('.opt').forEach((b,k)=>{
+    b.disabled = true;
+    const val = it.opciones[k];
+    if(val === it.dicho){ b.style.borderColor = '#38d39f'; }
+    else if(k === i){ b.style.borderColor = '#ef5f6b'; b.style.opacity = .75; }
+    else { b.style.opacity = .45; }
+  });
+  $('m-score').textContent = `${answers.filter(a=>a.correcto).length} correctas`;
+  $('b-next').classList.remove('hide');
+  $('b-next').textContent = (idx === items.length-1) ? 'Ver mi resultado' : 'Siguiente';
+}
+
+function next(){
+  idx++;
+  if(idx >= items.length){ finish(); return; }
+  render();
+}
+
+function finish(){
+  $('s-test').classList.add('hide');
+  $('s-result').classList.remove('hide');
+  const total = answers.filter(a=>a.correcto).length;
+
+  // por contraste
+  const porC = {};
+  CONTRASTES.forEach(c=>{ porC[c.id] = {c, ok:0, n:0}; });
+  answers.forEach(a=>{ porC[a.cid].n++; if(a.correcto) porC[a.cid].ok++; });
+
+  const filas = Object.values(porC).map(o=>{
+    const ratio = o.ok/o.n;
+    const cls = ratio === 1 ? 'g' : (ratio >= .5 ? 'y' : 'r');
+    const lbl = ratio === 1 ? 'Lo distingues' : (ratio >= .5 ? 'Frágil' : 'Se te mezcla');
+    return {...o, ratio, cls, lbl};
+  }).sort((a,b)=> a.ratio - b.ratio);
+
+  $('r-score').textContent = total;
+  const pct = total/answers.length;
+  let linea = '';
+  if(pct >= .9) linea = 'Tu oído está fino. Lo que te falta es producción: que la boca haga lo que el oído ya reconoce.';
+  else if(pct >= .7) linea = 'Buen punto de partida. Distingues la mayoría, pero hay dos o tres sonidos que todavía se te cruzan.';
+  else if(pct >= .5) linea = 'Vas a la mitad. Media docena de sonidos se te mezclan al escuchar, y eso es exactamente lo que hay que trabajar primero.';
+  else linea = 'Tu oído está trabajando con el mapa del español. No es problema de inteligencia ni de oído: es que nadie te enseñó a separar estos sonidos.';
+  $('r-line').textContent = linea;
+
+  $('r-rows').innerHTML = filas.map(f=>`
+    <div class="row">
+      <span class="nm">${f.c.nombre}</span>
+      <span class="pill ${f.cls}">${f.lbl}</span>
+    </div>`).join('');
+
+  const flojos = filas.filter(f=>f.ratio < 1);
+  if(flojos.length === 0){
+    $('r-text').textContent = 'Los diez contrastes salieron limpios. En la clase el trabajo sería otro: ritmo, acento de palabra y velocidad.';
+  } else {
+    const nombres = flojos.slice(0,3).map(f=>f.c.nombre.toLowerCase());
+    const lista = nombres.length === 1 ? nombres[0] : nombres.slice(0,-1).join(', ') + ' y ' + nombres[nombres.length-1];
+    $('r-text').textContent = `Los sonidos que hoy no separas: ${lista}. Así se empieza: primero el oído, hasta que la diferencia deje de ser invisible. Después la boca. Nunca al revés.`;
+  }
+
+  // guardar local por si se corta la conexión
+  try{
+    localStorage.setItem('abvc_oido', JSON.stringify({
+      fecha: new Date().toISOString(), total, respuestas: answers,
+      contrastes: filas.map(f=>({id:f.c.id, nombre:f.c.nombre, ok:f.ok, n:f.n}))
+    }));
+  }catch(e){}
+}
+
+// ============ ENVÍO ============
+async function enviar(){
+  const nombre = $('f-name').value.trim();
+  const tel = $('f-phone').value.replace(/\D/g,'');
+  if(nombre.length < 2){ $('f-name').focus(); $('f-name').style.borderColor='#ef5f6b'; return; }
+  if(tel.length < 10){ $('f-phone').focus(); $('f-phone').style.borderColor='#ef5f6b'; return; }
+
+  const btn = $('b-send');
+  btn.disabled = true; btn.textContent = 'Enviando…';
+
+  const total = answers.filter(a=>a.correcto).length;
+  const porC = {};
+  CONTRASTES.forEach(c=>{ porC[c.id]={nombre:c.nombre, ok:0, n:0}; });
+  answers.forEach(a=>{ porC[a.cid].n++; if(a.correcto) porC[a.cid].ok++; });
+
+  const payload = {
+    nombre, whatsapp: tel, puntaje: total, total: answers.length,
+    fecha: new Date().toISOString(),
+    contraste: Object.values(porC),
+    respuestas: answers
+  };
+
+  try{
+    const r = await fetch('https://base44.app/api/apps/69c78b20df328cd2f8bbcc29/functions/registrarPruebaOido', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
+    });
+    if(!r.ok) throw new Error('no');
+    btn.textContent = 'Listo, ya me llegó';
+    $('f-send-note').textContent = 'Tu resultado llegó. Te mando el diagnóstico por WhatsApp.';
+    $('f-name').disabled = $('f-phone').disabled = true;
+  }catch(e){
+    // respaldo: WhatsApp directo
+    btn.disabled = false; btn.textContent = 'Mandar por WhatsApp';
+    $('f-send-note').innerHTML = 'No pasó el envío. <a href="#" id="wa-alt" style="color:#22c8f5">Mándalo por WhatsApp</a> y te contesto igual.';
+    const alt = $('wa-alt');
+    if(alt){
+      alt.onclick = (ev)=>{
+        ev.preventDefault();
+        const txt = `Hola, hice la prueba de oído. Me llamo ${nombre}. Saqué ${total} de ${answers.length}.`;
+        window.open(`https://wa.me/5216451153334?text=${encodeURIComponent(txt)}`,'_blank');
+      };
+    }
+  }
+}
+
+// ============ EVENTOS ============
+$('b-start').onclick = start;
+$('b-listen').onclick = listen;
+$('b-next').onclick = next;
+$('b-again').onclick = ()=>{ $('s-result').classList.add('hide'); start(); };
+$('b-send').onclick = enviar;
+document.querySelectorAll('.opt').forEach(b=>{ b.onclick = ()=> answer(parseInt(b.dataset.i,10)); });
+</script>
+</body>
+</html>
