@@ -74,6 +74,8 @@
   .tel-row .field{margin-bottom:0}
   .tel-prefix{position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:16px;font-weight:700;color:#9fb6cc;pointer-events:none;letter-spacing:.02em}
   .tel-row .field{padding-left:56px}
+  .sel-lbl{display:block;font-size:12.5px;font-weight:700;color:#9fb6cc;margin:2px 0 6px}
+  .sel{appearance:none;-webkit-appearance:none;background-image:none;margin-bottom:12px}
   .tel-hint{font-size:12px;color:var(--muted);margin:6px 0 12px;line-height:1.45}
   .field{width:100%;padding:14px;border-radius:11px;border:1.5px solid var(--line);background:#0a1a28;color:var(--fg);font-family:inherit;font-size:16px;margin-bottom:10px}
   .field::placeholder{color:#5f7488}
@@ -159,6 +161,24 @@
         <input class="field" id="f-phone" placeholder="10 dígitos, sin el 52" autocomplete="tel-national" inputmode="numeric" maxlength="13" aria-label="Tu WhatsApp, diez dígitos sin el 52">
       </div>
       <p class="tel-hint">Escribe tus diez dígitos. El 52 ya va puesto.</p>
+
+      <label class="sel-lbl" for="f-nivel">¿En qué nivel andas ahorita?</label>
+      <select class="field sel" id="f-nivel">
+        <option value="">Prefiero no decir</option>
+        <option value="A1">A1 — entiendo poco, hablo menos</option>
+        <option value="A2">A2 — me defiendo, pero se me nota</option>
+        <option value="B1">B1 — converso, aunque no suene bien</option>
+        <option value="B2">B2 — trabajo en inglés, quiero afinar</option>
+      </select>
+
+      <label class="sel-lbl" for="f-horario">¿Cuándo puedes practicar?</label>
+      <select class="field sel" id="f-horario">
+        <option value="">Aún no sé</option>
+        <option value="mañana">En la mañana</option>
+        <option value="tarde">En la tarde</option>
+        <option value="noche">En la noche</option>
+      </select>
+
       <button class="btn" id="b-send">Quiero que me lo expliquen</button>
       <p class="fine" id="f-send-note">Solo lo uso para responderte. Nada de publicidad.</p>
     </div>
@@ -431,12 +451,16 @@ async function enviar(){
     contraste: Object.values(porC),
     respuestas: answers,
     interesado: true,          // dejo sus datos porque quiere que le explique
+    nivelIngles: ($('f-nivel') ? $('f-nivel').value : ''),
+    horario: ($('f-horario') ? $('f-horario').value : ''),
     origen: 'sitio'
   };
 
   // mensaje de respaldo por WhatsApp, con el resultado ya puesto
   const textoWA = `Hola, hice la prueba de oído. Me llamo ${nombre}. Saqué ${total} de ${answers.length}.`
     + (flacos.length ? ` Los contrastes que se me cruzan: ${flacos.join(', ')}.` : ' Los diez contrastes me salieron limpios.')
+    + ($('f-nivel') && $('f-nivel').value ? ` Mi nivel: ${$('f-nivel').value}.` : '')
+    + ($('f-horario') && $('f-horario').value ? ` Puedo practicar en la ${$('f-horario').value}.` : '')
     + ' Quiero que me expliquen mi resultado.';
 
   try{
