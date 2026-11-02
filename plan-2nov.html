@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plan de enlace — AccentBridges</title>
+<style>
+  :root{--bg:#0b1623;--card:#141f2e;--line:#26374b;--fg:#e8eef5;--muted:#8fa6bd;--cyan:#22c8f5;--ok:#37d399;--warn:#f0b452;--bad:#ef5f6b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:22px 16px 70px;line-height:1.65}
+  .wrap{max-width:680px;margin:0 auto}
+  h1{font-size:24px;margin:0 0 6px;letter-spacing:-.02em;line-height:1.25}
+  .fecha{color:var(--muted);font-size:13px;margin:0 0 26px}
+  h2{font-size:17px;margin:34px 0 12px;letter-spacing:-.01em;display:flex;align-items:center;gap:9px}
+  h2 .num{background:var(--cyan);color:#04121a;width:23px;height:23px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex:0 0 auto}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:16px;margin-bottom:12px}
+  .card h3{margin:0 0 7px;font-size:15px}
+  .card p{margin:0;font-size:14.5px;color:#c9d8e6}
+  ul,ol{margin:9px 0 0;padding-left:20px}
+  li{margin-bottom:9px;font-size:14.5px;color:#c9d8e6}
+  li b{color:#fff}
+  a{color:var(--cyan);text-decoration:none;font-weight:600}
+  a:hover{text-decoration:underline}
+  .ok{border-left:3px solid var(--ok)}
+  .warn{border-left:3px solid var(--warn)}
+  .bad{border-left:3px solid var(--bad)}
+  .cyan{border-left:3px solid var(--cyan)}
+  .pill{display:inline-block;font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:.06em;vertical-align:middle}
+  .p-ok{background:rgba(55,211,153,.15);color:var(--ok)}
+  .p-warn{background:rgba(240,180,82,.15);color:var(--warn)}
+  .p-bad{background:rgba(239,95,107,.15);color:var(--bad)}
+  .p-cyan{background:rgba(34,200,245,.15);color:var(--cyan)}
+  .quote{background:#0a1420;border-radius:10px;padding:13px;font-size:14px;color:#d5e2ee;border:1px solid var(--line);margin-top:10px;font-style:italic}
+  .firma{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Lo que quedó hecho y lo que sigue</h1>
+  <p class="fecha">Lunes 2 de noviembre de 2026 · mientras estás cobrando</p>
+
+  <div class="card cyan">
+    <h3>La idea en una línea</h3>
+    <p>El embudo ya existe de punta a punta: alguien ve el sitio, contesta la prueba de oído, recibe su diagnóstico completo en pantalla, y su nombre te cae a ti con su nivel, su horario y los sonidos exactos que se le cruzan. Lo único que falta para que circule es que el botón del sitio apunte a la prueba.</p>
+  </div>
+
+  <h2><span class="num">1</span> Lo que ya está funcionando</h2>
+
+  <div class="card ok">
+    <h3>La prueba de oído <span class="pill p-ok">viva</span></h3>
+    <p><a href="https://babayaba71-maker.github.io/AccentBridges/prueba-oido.html">babayaba71-maker.github.io/AccentBridges/prueba-oido.html</a></p>
+    <p style="margin-top:9px">Veinte preguntas, diez contrastes probados en las dos direcciones. Al final el prospecto ve el diagnóstico completo ahí mismo: su puntaje, cada contraste clasificado, y una explicación concreta de cómo se hace cada sonido que no distingue. Cuesta cero pesos por visita y corre a cualquier hora sin ti.</p>
+  </div>
+
+  <div class="card ok">
+    <h3>El panel de prospectos <span class="pill p-ok">nuevo hoy</span></h3>
+    <p><a href="https://babayaba71-maker.github.io/AccentBridges/prospectos.html">babayaba71-maker.github.io/AccentBridges/prospectos.html</a></p>
+    <p style="margin-top:9px">Entra con la clave <b>clyde-2026-accent</b> y te queda guardada en el teléfono. Ves cuántos hay, cuántos sin atender, el promedio, y la ficha de cada uno con su nivel de inglés y cuándo puede practicar. Cada ficha tiene un botón para escribirle por WhatsApp con el mensaje ya redactado y personalizado con su nombre y sus sonidos flacos: le das enviar y ya. Sirve para que nadie se te pierda en el chat.</p>
+  </div>
+
+  <div class="card ok">
+    <h3>Lo que se captura de cada prospecto</h3>
+    <p>Nombre, WhatsApp de diez dígitos, puntaje, nivel de oído, los contrastes que falló, <b>su nivel de inglés</b> y <b>su horario para practicar</b>. Esos dos últimos los agregué hoy porque son justo lo que necesitas para saber a quién le hablas y cuándo.</p>
+  </div>
+
+  <h2><span class="num">2</span> Lo que está atorado</h2>
+
+  <div class="card bad">
+    <h3>El botón del sitio <span class="pill p-bad">bloqueado</span></h3>
+    <p>El sitio de Base44 sigue mandando el botón "Prueba gratis" a WhatsApp en vez de a la prueba. Ya se lo pedí tres veces al builder y sigue publicando el mismo archivo. Hoy le mandé una instrucción de un solo punto, lo más específica posible: que solo cambie esos botones y no toque nada más. Sigue en cola. Si mañana no aparece, el plan B es no depender de él: el enlace directo a la prueba se puede poner en tu bio, en el estado de WhatsApp y en los episodios, y el sitio se arregla cuando el builder despierte.</p>
+  </div>
+
+  <h2><span class="num">3</span> Lo que te toca a ti</h2>
+
+  <div class="card warn">
+    <h3>WhatsApp Business <span class="pill p-warn">tu tarea de mañana</span></h3>
+    <p>Es la pieza que desbloquea lo automático. Hoy yo no puedo mandarle un WhatsApp a un número nuevo, solo puedo contestar en conversaciones que ya existen. Con la cuenta de WhatsApp Business y su API sí se puede: el prospecto termina la prueba y le llega solo un mensaje con su resultado y el siguiente paso, sin que tú lo escribas. Es el trámite de uno o dos días que mencionaste, y es el que más cambia el juego.</p>
+  </div>
+
+  <div class="card warn">
+    <h3>El dominio <span class="pill p-warn">mañana</span></h3>
+    <p>Cuando lo compres me dices y lo apunto. Ojo con una cosa: la prueba y el panel viven en GitHub Pages, no en Base44. El dominio puede apuntar al sitio de Base44, pero entonces la prueba debería mudarse al mismo dominio para que no se sienta que brincas de casa. Es un trabajo de una hora y lo hago cuando el dominio esté en tu nombre.</p>
+  </div>
+
+  <h2><span class="num">4</span> La decisión de cobro que planteaste</h2>
+
+  <div class="card">
+    <h3>No se cobra por aprender. Se cobra por el costo.</h3>
+    <p>Lo que dijiste es correcto y tiene salida sin contradecirte: <b>no vas a cobrar por un resultado que todavía no está probado, pero sí puedes pedir una cuota de recuperación</b>. No es lo mismo vender un curso que abrir un piloto con costo compartido. Al prospecto se le dice tal cual:</p>
+    <div class="quote">"Todavía no te voy a vender un curso, porque sería injusto cobrarte por algo que estoy terminando de probar. Lo que estoy abriendo es un grupo piloto de cinco personas. La cuota sirve para cubrir el material y el tiempo, no para pagar un resultado que aún no te puedo garantizar. A cambio te pido dos cosas: que practiques de verdad y que me dejes usar tus datos para mejorar el método."</div>
+    <p style="margin-top:11px">Eso te da tres cosas de golpe: cubre gastos, te consigue los participantes que te faltan, y te deja decir la verdad sin prometer de más. La cifra la pones tú; con que sea simbólica alcanza para que la gente se comprometa, porque lo gratis no se usa.</p>
+  </div>
+
+  <h2><span class="num">5</span> Los participantes que te faltan</h2>
+
+  <div class="card">
+    <h3>Josefina sola no alcanza, y ya lo sabías</h3>
+    <p>Tienes razón en el diagnóstico: con un solo caso las variables están pegadas, no se puede separar qué causó qué. Necesitas al menos cuatro o cinco para empezar a ver patrones. Y hay un detalle que te favorece: <b>la prueba de oído ya te da un primer dato de cada persona sin gastar un peso</b>, así que puedes filtrar antes de invertir tiempo con ellos. Los que salgan con varios contrastes mezclados son los que más van a aprender, y también los que más datos te van a dar.</p>
+    <p style="margin-top:11px">Tu red natural son las familias que ya visitas cobrando. No es venta en frío: ya te conocen, ya te abren la puerta. La prueba es una excusa perfecta para dejar la puerta abierta sin compromiso.</p>
+  </div>
+
+  <h2><span class="num">6</span> Lo que sigue de mi lado</h2>
+
+  <div class="card">
+    <ul>
+      <li><b>Insistir con el botón del sitio</b> hasta que publique, y avisarte en cuanto cambie.</li>
+      <li><b>La página del siguiente paso</b>: cuando alguien quiere hablar contigo, mandarle un enlace con el episodio de introducción y el botón de la llamada con Valerie. Ese es el eslabón que hoy no existe.</li>
+      <li><b>Avisarte con los datos completos</b> cada vez que entre alguien, ya con nivel y horario para que decidas rápido si le escribes.</li>
+      <li><b>Lo de Lovable</b>: me dijiste que hablamos luego de lo que estuviste haciendo anoche. Cuando regreses lo reviso y te digo qué quedó y qué no.</li>
+    </ul>
+  </div>
+
+  <p class="firma">Técnica, identidad y libertad.<br>Nos vemos cuando regreses, Bones.</p>
+</div>
+</body>
+</html>
