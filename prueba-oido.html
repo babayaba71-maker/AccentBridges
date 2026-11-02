@@ -70,6 +70,11 @@
   .pill.g{background:rgba(56,211,159,.15);color:var(--ok)}
   .pill.y{background:rgba(240,180,41,.15);color:var(--warn)}
   .pill.r{background:rgba(239,95,107,.15);color:var(--bad)}
+  .tel-row{position:relative;margin-bottom:10px}
+  .tel-row .field{margin-bottom:0}
+  .tel-prefix{position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:16px;font-weight:700;color:#9fb6cc;pointer-events:none;letter-spacing:.02em}
+  .tel-row .field{padding-left:56px}
+  .tel-hint{font-size:12px;color:var(--muted);margin:6px 0 12px;line-height:1.45}
   .field{width:100%;padding:14px;border-radius:11px;border:1.5px solid var(--line);background:#0a1a28;color:var(--fg);font-family:inherit;font-size:16px;margin-bottom:10px}
   .field::placeholder{color:#5f7488}
   .field:focus{outline:none;border-color:var(--cyan)}
@@ -149,7 +154,11 @@
       <div style="font-size:15px;font-weight:800;margin-bottom:6px">Tu resultado ya está arriba</div>
       <p style="font-size:13.5px;margin:0 0 14px">Esto no se lo lleva un robot. Si quieres que te explique lo que salió y cómo se trabaja cada sonido, déjame tu nombre y tu WhatsApp y te escribo yo.</p>
       <input class="field" id="f-name" placeholder="Tu nombre" autocomplete="name" inputmode="text">
-      <input class="field" id="f-phone" placeholder="Tu WhatsApp (10 dígitos)" autocomplete="tel" inputmode="tel">
+      <div class="tel-row">
+        <span class="tel-prefix">+52</span>
+        <input class="field" id="f-phone" placeholder="10 dígitos" autocomplete="tel-national" inputmode="numeric" maxlength="10" aria-label="Tu WhatsApp, diez dígitos sin el 52">
+      </div>
+      <p class="tel-hint">Escribe tus diez dígitos. El 52 ya va puesto.</p>
       <button class="btn" id="b-send">Quiero que me lo expliquen</button>
       <p class="fine" id="f-send-note">Solo lo uso para responderte. Nada de publicidad.</p>
     </div>
@@ -368,11 +377,30 @@ function finish(){
 }
 
 // ============ ENVÍO ============
+// el prefijo +52 ya va en la interfaz: aqui solo se aceptan diez digitos
+function limpiarTel(el){
+  let v = String(el.value || '').replace(/\D/g,'');
+  // si pegaron el numero completo con lada, se quita
+  if(v.length > 10 && v.slice(0,2) === '52') v = v.slice(2);
+  if(v.length > 10) v = v.slice(0,10);
+  el.value = v;
+  return v;
+}
+$('f-phone').addEventListener('input', (e)=>{ limpiarTel(e.target); });
+$('f-phone').addEventListener('paste', (e)=>{
+  const txt = (e.clipboardData || window.clipboardData).getData('text');
+  if(txt){
+    e.preventDefault();
+    e.target.value = txt;
+    limpiarTel(e.target);
+  }
+});
+
 async function enviar(){
   const nombre = $('f-name').value.trim();
-  const tel = $('f-phone').value.replace(/\D/g,'');
+  const tel = limpiarTel($('f-phone'));
   if(nombre.length < 2){ $('f-name').focus(); $('f-name').style.borderColor='#ef5f6b'; return; }
-  if(tel.length < 10){ $('f-phone').focus(); $('f-phone').style.borderColor='#ef5f6b'; return; }
+  if(tel.length !== 10){ $('f-phone').focus(); $('f-phone').style.borderColor='#ef5f6b'; $('f-send-note').textContent='Faltan dígitos: son diez, sin el 52.'; return; }
 
   const btn = $('b-send');
   btn.disabled = true; btn.textContent = 'Enviando…';
