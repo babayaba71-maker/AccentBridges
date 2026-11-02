@@ -377,28 +377,30 @@ function finish(){
 }
 
 // ============ ENVÍO ============
-// el prefijo +52 ya va en la interfaz: aqui solo se aceptan diez digitos
-function limpiarTel(el){
-  let v = String(el.value || '').replace(/\D/g,'');
-  // si pegaron el numero completo con lada, se quita
-  if(v.length > 10 && v.slice(0,2) === '52') v = v.slice(2);
-  if(v.length > 10) v = v.slice(0,10);
-  el.value = v;
-  return v;
+// El prefijo +52 ya esta en la interfaz: el campo solo lleva los diez digitos
+// nacionales. Si el usuario pega el numero completo con lada, se toman los
+// ULTIMOS diez, que es lo unico que no se equivoca con 52, 521 o +52.
+function diezDigitos(bruto){
+  const v = String(bruto || '').replace(/\D/g,'');
+  return v.length > 10 ? v.slice(-10) : v;
 }
-$('f-phone').addEventListener('input', (e)=>{ limpiarTel(e.target); });
+$('f-phone').addEventListener('input', (e)=>{
+  // al teclear solo se descartan los caracteres que no son numeros
+  const limpio = e.target.value.replace(/\D/g,'');
+  if(limpio !== e.target.value) e.target.value = limpio;
+});
 $('f-phone').addEventListener('paste', (e)=>{
   const txt = (e.clipboardData || window.clipboardData).getData('text');
   if(txt){
     e.preventDefault();
-    e.target.value = txt;
-    limpiarTel(e.target);
+    e.target.value = diezDigitos(txt);
   }
 });
 
 async function enviar(){
   const nombre = $('f-name').value.trim();
-  const tel = limpiarTel($('f-phone'));
+  const tel = diezDigitos($('f-phone').value);
+  $('f-phone').value = tel;
   if(nombre.length < 2){ $('f-name').focus(); $('f-name').style.borderColor='#ef5f6b'; return; }
   if(tel.length !== 10){ $('f-phone').focus(); $('f-phone').style.borderColor='#ef5f6b'; $('f-send-note').textContent='Faltan dígitos: son diez, sin el 52.'; return; }
 
