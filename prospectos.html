@@ -113,6 +113,7 @@ function mensaje(p){
   } else {
     m += 'Tu oído está fino, así que el trabajo iría más al ritmo y la producción.\n\n';
   }
+  if(p.nivelIngles) m += 'Vi que andas en ' + p.nivelIngles + ', así que el plan va a tu medida.\n\n';
   m += '¿Te parece si te explico en un audio corto por aquí y vemos si te sirve?';
   return m;
 }
@@ -147,6 +148,7 @@ function pintar(){
           ${p.interesado ? '<span class="badge b-inter">quiere plática</span>' : ''}
         </div>
         <div class="flacos">${p.flacos ? '<b>Se le cruzan:</b> ' + p.flacos : '<b>Los diez contrastes limpios.</b>'}</div>
+        ${(p.nivelIngles || p.horario) ? `<div class="flacos" style="margin-top:-4px"><b>Su inglés:</b> ${p.nivelIngles || 'sin dato'}${p.horario ? ' · práctica en la ' + p.horario : ''}</div>` : ''}
         <div class="acciones">
           <a class="wa" href="${wa}" target="_blank" rel="noopener">Escribirle</a>
           <button class="mini ${p.atendido ? 'hecho' : ''}" data-id="${p.id}" data-at="${p.atendido ? '0' : '1'}">
