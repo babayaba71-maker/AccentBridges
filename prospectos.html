@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prospectos — AccentBridges</title>
+<style>
+  :root{
+    --bg:#0b1623; --card:#141f2e; --line:#26374b; --fg:#e8eef5;
+    --muted:#8fa6bd; --cyan:#22c8f5; --ok:#37d399; --warn:#f0b452; --bad:#ef5f6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:18px 14px 60px}
+  .wrap{max-width:760px;margin:0 auto}
+  h1{font-size:21px;margin:0 0 4px;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:13.5px;margin:0 0 18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+  input{width:100%;padding:13px;border-radius:10px;border:1.5px solid var(--line);background:#0a1420;color:var(--fg);font-family:inherit;font-size:16px}
+  button{font-family:inherit;font-size:14px;font-weight:700;border:0;border-radius:10px;padding:12px 16px;cursor:pointer}
+  .primary{background:var(--cyan);color:#04121a;width:100%;margin-top:10px}
+  .ghost{background:transparent;color:var(--muted);border:1.5px solid var(--line)}
+  .tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px}
+  .tile .n{font-size:24px;font-weight:800;line-height:1}
+  .tile .l{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:5px;font-weight:700}
+  .filtros{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+  .chip{background:transparent;border:1.5px solid var(--line);color:var(--muted);padding:8px 14px;border-radius:999px;font-size:13px;font-weight:700}
+  .chip.on{background:var(--cyan);border-color:var(--cyan);color:#04121a}
+  .p{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:11px}
+  .p.nuevo{border-color:var(--cyan)}
+  .p .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
+  .p .nom{font-size:16.5px;font-weight:800}
+  .p .fec{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .score{font-size:19px;font-weight:800;white-space:nowrap}
+  .score small{font-size:12px;color:var(--muted);font-weight:600}
+  .badge{display:inline-block;font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:.05em;margin-right:6px}
+  .b-inter{background:rgba(34,200,245,.15);color:var(--cyan)}
+  .b-fino{background:rgba(55,211,153,.15);color:var(--ok)}
+  .b-bueno{background:rgba(55,211,153,.12);color:var(--ok)}
+  .b-medio{background:rgba(240,180,82,.15);color:var(--warn)}
+  .b-inicial{background:rgba(239,95,107,.15);color:var(--bad)}
+  .flacos{font-size:13px;color:var(--muted);line-height:1.5;margin:8px 0 12px}
+  .flacos b{color:#c9d8e6;font-weight:700}
+  .acciones{display:flex;gap:8px;flex-wrap:wrap}
+  .wa{background:var(--ok);color:#032018;flex:1;min-width:150px;text-align:center;text-decoration:none;display:inline-block;padding:12px 16px;border-radius:10px;font-weight:800;font-size:14px}
+  .mini{background:transparent;border:1.5px solid var(--line);color:var(--muted);font-size:12.5px;padding:10px 13px;border-radius:10px;font-weight:700}
+  .mini.hecho{border-color:var(--ok);color:var(--ok)}
+  .vacio{text-align:center;color:var(--muted);padding:40px 20px;font-size:14px}
+  .hide{display:none!important}
+  .msg{margin-top:9px;background:#0a1420;border:1px solid var(--line);border-radius:9px;padding:10px;font-size:12.5px;color:#c9d8e6;line-height:1.5;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="login">
+    <h1>Prospectos</h1>
+    <p class="sub">Prueba de oído de AccentBridges</p>
+    <div class="card">
+      <input id="clave" type="password" placeholder="Clave" autocomplete="current-password">
+      <button class="primary" id="entrar">Entrar</button>
+      <p class="sub" id="err" style="margin:10px 0 0;color:var(--bad);display:none">Clave incorrecta.</p>
+    </div>
+  </div>
+
+  <div id="panel" class="hide">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+      <h1>Prospectos</h1>
+      <button class="mini" id="salir">Salir</button>
+    </div>
+    <p class="sub" id="hoy">Cargando…</p>
+
+    <div class="tiles">
+      <div class="tile"><div class="n" id="t-total">0</div><div class="l">Total</div></div>
+      <div class="tile"><div class="n" id="t-sin">0</div><div class="l">Sin atender</div></div>
+      <div class="tile"><div class="n" id="t-inter">0</div><div class="l">Quieren plática</div></div>
+      <div class="tile"><div class="n" id="t-prom">0</div><div class="l">Promedio</div></div>
+    </div>
+
+    <div class="filtros">
+      <button class="chip on" data-f="todos">Todos</button>
+      <button class="chip" data-f="sin">Sin atender</button>
+      <button class="chip" data-f="inter">Quieren plática</button>
+    </div>
+
+    <div id="lista"></div>
+  </div>
+</div>
+
+<script>
+const API = 'https://base44.app/api/apps/69c78b20df328cd2f8bbcc29/functions/panelProspectos';
+const $ = (id) => document.getElementById(id);
+let CLAVE = '';
+let TODOS = [];
+let FILTRO = 'todos';
+
+function fechaCorta(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  if(isNaN(d)) return '';
+  return d.toLocaleDateString('es-MX', { day:'2-digit', month:'short' }) + ' · ' +
+         d.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
+}
+
+function mensaje(p){
+  const nombre = (p.nombre || '').split(' ')[0];
+  let m = 'Hola ' + nombre + ', soy Jacob de AccentBridges. ';
+  m += 'Hice la prueba de oído que contestaste y quiero comentarte tu resultado.\n\n';
+  m += 'Sacaste ' + p.puntaje + ' de ' + (p.total || 20) + '. ';
+  if(p.flacos){
+    const lista = p.flacos.split(' · ').slice(0,3).map(x => x.replace(/\s*\(\d+\/\d+\)/, '')).join(', ');
+    m += 'Lo que más vale trabajar en tu caso es: ' + lista + '.\n\n';
+  } else {
+    m += 'Tu oído está fino, así que el trabajo iría más al ritmo y la producción.\n\n';
+  }
+  m += '¿Te parece si te explico en un audio corto por aquí y vemos si te sirve?';
+  return m;
+}
+
+function pintar(){
+  const filtrados = TODOS.filter(p => {
+    if(FILTRO === 'sin') return !p.atendido;
+    if(FILTRO === 'inter') return p.interesado;
+    return true;
+  });
+
+  if(!filtrados.length){
+    $('lista').innerHTML = '<div class="vacio">Aquí van a aparecer los que hagan la prueba.<br>Por ahora no hay nadie en esta vista.</div>';
+    return;
+  }
+
+  $('lista').innerHTML = filtrados.map(p => {
+    const tel = String(p.whatsapp || '').replace(/\D/g,'');
+    const wa = 'https://wa.me/52' + tel + '?text=' + encodeURIComponent(mensaje(p));
+    const nivel = (p.nivel || '').toLowerCase();
+    return `
+      <div class="p ${p.atendido ? '' : 'nuevo'}">
+        <div class="top">
+          <div>
+            <div class="nom">${p.nombre || '(sin nombre)'}</div>
+            <div class="fec">${fechaCorta(p.fecha)} · +52 ${tel}</div>
+          </div>
+          <div class="score">${p.puntaje}<small>/${p.total || 20}</small></div>
+        </div>
+        <div>
+          <span class="badge b-${nivel}">${p.nivel || 's/d'}</span>
+          ${p.interesado ? '<span class="badge b-inter">quiere plática</span>' : ''}
+        </div>
+        <div class="flacos">${p.flacos ? '<b>Se le cruzan:</b> ' + p.flacos : '<b>Los diez contrastes limpios.</b>'}</div>
+        <div class="acciones">
+          <a class="wa" href="${wa}" target="_blank" rel="noopener">Escribirle</a>
+          <button class="mini ${p.atendido ? 'hecho' : ''}" data-id="${p.id}" data-at="${p.atendido ? '0' : '1'}">
+            ${p.atendido ? 'Atendido ✓' : 'Marcar atendido'}
+          </button>
+          <button class="mini" data-copiar="${p.id}">Copiar mensaje</button>
+        </div>
+        <div class="msg hide" id="m-${p.id}">${mensaje(p)}</div>
+      </div>`;
+  }).join('');
+
+  // marcar atendido
+  document.querySelectorAll('[data-at]').forEach(b => {
+    b.onclick = async () => {
+      b.disabled = true;
+      await fetch(API, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ clave: CLAVE, action:'atender', id: b.dataset.id, atendido: b.dataset.at === '1' })
+      });
+      await cargar();
+    };
+  });
+
+  // copiar mensaje
+  document.querySelectorAll('[data-copiar]').forEach(b => {
+    b.onclick = async () => {
+      const p = TODOS.find(x => x.id === b.dataset.copiar);
+      if(!p) return;
+      const txt = mensaje(p);
+      try{
+        await navigator.clipboard.writeText(txt);
+        b.textContent = 'Copiado ✓';
+      }catch(e){
+        const caja = $('m-' + p.id);
+        caja.classList.remove('hide');
+        b.textContent = 'Ahí está abajo';
+        return;
+      }
+      setTimeout(() => { b.textContent = 'Copiar mensaje'; }, 1800);
+    };
+  });
+}
+
+async function cargar(){
+  const r = await fetch(API, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ clave: CLAVE })
+  });
+  const d = await r.json();
+  if(!d.ok) return false;
+  TODOS = d.prospectos || [];
+  $('t-total').textContent = d.resumen.total;
+  $('t-sin').textContent = d.resumen.sinAtender;
+  $('t-inter').textContent = d.resumen.interesados;
+  $('t-prom').textContent = d.resumen.promedio;
+  $('hoy').textContent = d.resumen.total
+    ? (d.resumen.hoy + ' hoy · ' + d.resumen.sinAtender + ' sin atender')
+    : 'Todavía no hay prospectos.';
+  pintar();
+  return true;
+}
+
+$('entrar').onclick = async () => {
+  const v = $('clave').value.trim();
+  if(!v) return;
+  CLAVE = v;
+  $('err').style.display = 'none';
+  const ok = await cargar();
+  if(!ok){ $('err').style.display = 'block'; return; }
+  try{ localStorage.setItem('abvc_panel', v); }catch(e){}
+  $('login').classList.add('hide');
+  $('panel').classList.remove('hide');
+};
+
+$('clave').addEventListener('keydown', (e) => { if(e.key === 'Enter') $('entrar').click(); });
+
+$('salir').onclick = () => {
+  try{ localStorage.removeItem('abvc_panel'); }catch(e){}
+  CLAVE = ''; TODOS = [];
+  $('panel').classList.add('hide');
+  $('login').classList.remove('hide');
+  $('clave').value = '';
+};
+
+document.querySelectorAll('.chip').forEach(c => {
+  c.onclick = () => {
+    document.querySelectorAll('.chip').forEach(x => x.classList.remove('on'));
+    c.classList.add('on');
+    FILTRO = c.dataset.f;
+    pintar();
+  };
+});
+
+// si ya entró antes desde este teléfono, entra solo
+(async () => {
+  let guardada = '';
+  try{ guardada = localStorage.getItem('abvc_panel') || ''; }catch(e){}
+  if(guardada){
+    CLAVE = guardada;
+    const ok = await cargar();
+    if(ok){
+      $('login').classList.add('hide');
+      $('panel').classList.remove('hide');
+    }
+  }
+})();
+</script>
+</body>
+</html>
