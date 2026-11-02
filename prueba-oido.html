@@ -83,6 +83,7 @@
   .wave i:nth-child(4){height:60%}.wave i:nth-child(5){height:85%}.wave i:nth-child(6){height:45%}
   .wave i:nth-child(7){height:70%}
   @keyframes eq{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1)}}
+  .cap{font-size:13px;font-weight:800;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
   .fine{font-size:12px;color:#5f7488;text-align:center;margin-top:18px;line-height:1.5}
 </style>
 </head>
@@ -130,22 +131,27 @@
     <p id="r-line" style="margin-bottom:22px"></p>
 
     <div class="card">
-      <div style="font-size:13px;font-weight:800;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Por contraste</div>
+      <div class="cap">Los diez contrastes</div>
       <div id="r-rows"></div>
     </div>
 
     <div class="card" id="r-box-text">
-      <div style="font-size:14px;font-weight:700;margin-bottom:8px">Lo que dicen tus números</div>
+      <div class="cap">Lo que dicen tus números</div>
       <p id="r-text" style="margin:0;font-size:14.5px;color:#c9d8e6"></p>
     </div>
 
+    <div class="card" id="r-box-fix">
+      <div class="cap">Los que sí hay que trabajar</div>
+      <div id="r-fix"></div>
+    </div>
+
     <div class="card">
-      <div style="font-size:15px;font-weight:800;margin-bottom:4px">Te mando el resultado por escrito</div>
-      <p style="font-size:13.5px;margin:0 0 14px">Con los sonidos exactos que te faltan y por dónde empezar. Sin costo.</p>
+      <div style="font-size:15px;font-weight:800;margin-bottom:6px">Tu resultado ya está arriba</div>
+      <p style="font-size:13.5px;margin:0 0 14px">Esto no se lo lleva un robot. Si quieres que te explique lo que salió y cómo se trabaja cada sonido, déjame tu nombre y tu WhatsApp y te escribo yo.</p>
       <input class="field" id="f-name" placeholder="Tu nombre" autocomplete="name" inputmode="text">
       <input class="field" id="f-phone" placeholder="Tu WhatsApp (10 dígitos)" autocomplete="tel" inputmode="tel">
-      <button class="btn" id="b-send">Enviar mi resultado</button>
-      <p class="fine" id="f-send-note">Solo lo uso para mandarte tu diagnóstico. Nada de publicidad.</p>
+      <button class="btn" id="b-send">Quiero que me lo expliquen</button>
+      <p class="fine" id="f-send-note">Solo lo uso para responderte. Nada de publicidad.</p>
     </div>
 
     <button class="btn ghost" id="b-again">Volver a hacer la prueba</button>
@@ -338,6 +344,20 @@ function finish(){
     $('r-text').textContent = `${arranque} Así se empieza: primero el oído, hasta que la diferencia deje de ser invisible. Después la boca. Nunca al revés.`;
   }
 
+  // bloque "los que sí hay que trabajar"
+  const pendientes = filas.filter(f=>f.ratio < 1).slice(0,4);
+  if(pendientes.length === 0){
+    $('r-box-fix').classList.add('hide');
+  } else {
+    $('r-box-fix').classList.remove('hide');
+    $('r-fix').innerHTML = pendientes.map(f=>`
+      <div style="padding:11px 0;border-bottom:1px solid var(--line)">
+        <div style="font-weight:700;font-size:14.5px;margin-bottom:4px">${f.c.nombre}</div>
+        <div style="font-size:13.5px;color:var(--muted);line-height:1.55">${f.c.tip}</div>
+      </div>`).join('')
+      + '<p style="font-size:13px;color:#6d8298;margin:14px 0 0;line-height:1.5">Ese es el orden. Primero el oído, hasta que la diferencia deje de ser invisible. Después la boca.</p>';
+  }
+
   // guardar local por si se corta la conexión
   try{
     localStorage.setItem('abvc_oido', JSON.stringify({
@@ -362,31 +382,51 @@ async function enviar(){
   CONTRASTES.forEach(c=>{ porC[c.id]={nombre:c.nombre, ok:0, n:0}; });
   answers.forEach(a=>{ porC[a.cid].n++; if(a.correcto) porC[a.cid].ok++; });
 
+  // los tres contrastes mas flojos, en texto, para que el aviso llegue con sustancia
+  const flacos = Object.entries(porC)
+    .filter(([,v]) => v.ok < v.n)
+    .sort((a,b) => (a[1].ok/a[1].n) - (b[1].ok/b[1].n))
+    .map(([,v]) => `${v.nombre} (${v.ok}/${v.n})`);
+
   const payload = {
     nombre, whatsapp: tel, puntaje: total, total: answers.length,
     fecha: new Date().toISOString(),
     contraste: Object.values(porC),
-    respuestas: answers
+    respuestas: answers,
+    interesado: true,          // dejo sus datos porque quiere que le explique
+    origen: 'sitio'
   };
+
+  // mensaje de respaldo por WhatsApp, con el resultado ya puesto
+  const textoWA = `Hola, hice la prueba de oído. Me llamo ${nombre}. Saqué ${total} de ${answers.length}.`
+    + (flacos.length ? ` Los contrastes que se me cruzan: ${flacos.join(', ')}.` : ' Los diez contrastes me salieron limpios.')
+    + ' Quiero que me expliquen mi resultado.';
 
   try{
     const r = await fetch('https://base44.app/api/apps/69c78b20df328cd2f8bbcc29/functions/registrarPruebaOido', {
       method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
     });
     if(!r.ok) throw new Error('no');
-    btn.textContent = 'Listo, ya me llegó';
-    $('f-send-note').textContent = 'Tu resultado llegó. Te mando el diagnóstico por WhatsApp.';
+    btn.textContent = 'Listo, ya te tengo';
+    $('f-send-note').textContent = 'Ya quedó registrado. Te escribo yo a ese WhatsApp para explicarte tu resultado.';
     $('f-name').disabled = $('f-phone').disabled = true;
+    // ademas abro WhatsApp para que el interes llegue caliente
+    const wa = document.createElement('a');
+    wa.href = `https://wa.me/5216451153334?text=${encodeURIComponent(textoWA)}`;
+    wa.target = '_blank'; wa.rel='noopener';
+    wa.className = 'btn';
+    wa.style.marginTop = '12px';
+    wa.textContent = 'Abrir WhatsApp y escribirle al maestro';
+    btn.parentNode.insertBefore(wa, btn.nextSibling);
   }catch(e){
-    // respaldo: WhatsApp directo
-    btn.disabled = false; btn.textContent = 'Mandar por WhatsApp';
-    $('f-send-note').innerHTML = 'No pasó el envío. <a href="#" id="wa-alt" style="color:#22c8f5">Mándalo por WhatsApp</a> y te contesto igual.';
+    // sin conexion: el interes se manda igual por WhatsApp, que es lo que si funciona en 3G
+    btn.disabled = false; btn.textContent = 'Mandarlo por WhatsApp';
+    $('f-send-note').innerHTML = 'No pasó el registro. <a href="#" id="wa-alt" style="color:#22c8f5">Mándalo por WhatsApp</a> y te contesto igual.';
     const alt = $('wa-alt');
     if(alt){
       alt.onclick = (ev)=>{
         ev.preventDefault();
-        const txt = `Hola, hice la prueba de oído. Me llamo ${nombre}. Saqué ${total} de ${answers.length}.`;
-        window.open(`https://wa.me/5216451153334?text=${encodeURIComponent(txt)}`,'_blank');
+        window.open(`https://wa.me/5216451153334?text=${encodeURIComponent(textoWA)}`,'_blank');
       };
     }
   }
