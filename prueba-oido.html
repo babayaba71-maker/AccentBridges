@@ -158,25 +158,25 @@
 // Cada contraste mide un par de sonidos que el hispanohablante suele confundir.
 // Dos ítems por contraste, uno con cada palabra del par.
 const CONTRASTES = [
-  { id:'vocal-larga', nombre:'Vocal corta y vocal larga', par:['ship','sheep'],
+  { id:'vocal-larga', nombre:'Vocal corta / vocal larga', par:['ship','sheep'],
     tip:'En inglés la duración del sonido cambia el significado. Ship es corto, sheep es largo.' },
-  { id:'a-e', nombre:'A abierta y E', par:['bat','bet'],
+  { id:'a-e', nombre:'A abierta / E', par:['bat','bet'],
     tip:'La a de bat es más abierta y más larga que la e de bet.' },
-  { id:'th-s', nombre:'TH soplada y S', par:['think','sink'],
+  { id:'th-s', nombre:'TH soplada / S', par:['think','sink'],
     tip:'En think la lengua sale entre los dientes. En sink se queda adentro.' },
-  { id:'th-d', nombre:'TH con voz y D', par:['they','day'],
+  { id:'th-d', nombre:'TH con voz / D', par:['they','day'],
     tip:'En they la lengua toca los dientes y vibra la garganta. En day toca el paladar.' },
-  { id:'v-b', nombre:'V y B', par:['very','berry'],
+  { id:'v-b', nombre:'V / B', par:['very','berry'],
     tip:'En very los dientes de arriba muerden el labio. En berry los labios se juntan.' },
-  { id:'sh-ch', nombre:'SH y CH', par:['shop','chop'],
+  { id:'sh-ch', nombre:'SH / CH', par:['shop','chop'],
     tip:'En shop el aire sale largo. En chop primero hay un golpe de lengua.' },
-  { id:'u-abierta', nombre:'U neutra y A abierta', par:['cut','cot'],
+  { id:'u-abierta', nombre:'U neutra / A abierta', par:['cut','cot'],
     tip:'La vocal de cut es corta y central. La de cot es más abierta y suena más hacia la a.' },
-  { id:'ng-n', nombre:'NG final y N final', par:['sing','sin'],
+  { id:'ng-n', nombre:'NG final / N final', par:['sing','sin'],
     tip:'En sing el aire sale por la nariz con la lengua atrás. En sin la lengua toca los dientes.' },
-  { id:'r-l', nombre:'R americana y L', par:['right','light'],
+  { id:'r-l', nombre:'R americana / L', par:['right','light'],
     tip:'En right la lengua no toca nada. En light la punta toca el techo de la boca.' },
-  { id:'a-u', nombre:'A abierta y U neutra', par:['cap','cup'],
+  { id:'a-u', nombre:'A abierta / U neutra', par:['cap','cup'],
     tip:'La a de cap abre la boca. La u de cup es corta y relajada, con la boca casi cerrada.' }
 ];
 
@@ -329,9 +329,13 @@ function finish(){
   if(flojos.length === 0){
     $('r-text').textContent = 'Los diez contrastes salieron limpios. En la clase el trabajo sería otro: ritmo, acento de palabra y velocidad.';
   } else {
-    const nombres = flojos.slice(0,3).map(f=>f.c.nombre.toLowerCase());
+    const nombres = flojos.slice(0,3).map(f=>f.c.nombre);
     const lista = nombres.length === 1 ? nombres[0] : nombres.slice(0,-1).join(', ') + ' y ' + nombres[nombres.length-1];
-    $('r-text').textContent = `Los sonidos que hoy no separas: ${lista}. Así se empieza: primero el oído, hasta que la diferencia deje de ser invisible. Después la boca. Nunca al revés.`;
+    const cuantos = flojos.length;
+    const arranque = cuantos === 1
+      ? `El contraste que hoy no separas es ${lista}.`
+      : `Los contrastes que hoy no separas: ${lista}.`;
+    $('r-text').textContent = `${arranque} Así se empieza: primero el oído, hasta que la diferencia deje de ser invisible. Después la boca. Nunca al revés.`;
   }
 
   // guardar local por si se corta la conexión
