@@ -136,7 +136,13 @@ public class RideService extends Service implements LocationListener {
                         float cn0 = st.getCn0DbHz(i);
                         if (cn0 > 0f) { conSenal++; if (cn0 > mejor) mejor = cn0; }
                     }
-                    prefs(RideService.this).edit().putInt("sats", vistos)
+                    // 3-nov (parte de JJ: "satelite hace 1271 min", o sea 21 horas
+                    // sin fix): el motor GNSS del telefono se queda trabado y no se
+                    // cura solo; pedirle lecturas otra vez no sirve porque sigue
+                    // devolviendo antena. Aquí se anota CUÁNDO se vio cielo por
+                    // última vez para que el vigilante decida si hay que curarlo.
+                    prefs(RideService.this).edit().putLong("satsT", System.currentTimeMillis())
+                            .putInt("sats", vistos)
                             .putInt("satsUsados", usados)
                             .putInt("satsSenal", conSenal)
                             .putInt("satsCn0", Math.round(mejor)).apply();
@@ -173,6 +179,39 @@ public class RideService extends Service implements LocationListener {
     // Android puede dejar de entregar lecturas (permiso "solo con la app abierta",
     // ahorro de bateria agresivo, cache del proveedor). Si pasa mas de 45 s sin
     // lecturas, se vuelve a registrar solo. JJ: "1:31:30 y 0.00 km, 1 lectura".
+    private long ultimoResetGps = 0L;
+
+    /**
+     * 3-nov (JJ venía de "satelite hace 1271 min · 0/4 satélites · ANTENA · ±40 m"
+     * y los tres paseos anteriores igual): el motor GNSS de Android se atasca y no
+     * se destraba pidiendo lecturas, porque sigue respondiendo con la última posición
+     * de antena. Lo único que lo despierta es borrar los datos de ayuda (aiding) y
+     * volver a suscribirse, que es lo mismo que hace el truco manual de apagar y
+     * encender la ubicación, pero sin que JJ tenga que hacerlo pedaleando.
+     * Condiciones: cero satélites en uso hace más de 90 s, o dos minutos sin ningún
+     * reporte GNSS, y nunca más de un intento cada 3 minutos.
+     */
+    private void curarGpsSiTrabado(SharedPreferences p) {
+        try {
+            long ahora = System.currentTimeMillis();
+            int usados = p.getInt("satsUsados", 0);
+            long satsT = p.getLong("satsT", 0L);
+            boolean sinFix = usados == 0 && (ahora - (satsT > 0 ? satsT : ahora)) > 90000L;
+            boolean mudo  = satsT > 0 && (ahora - satsT) > 120000L;
+            if ((sinFix || mudo) && (ahora - ultimoResetGps) > 180000L) {
+                ultimoResetGps = ahora;
+                int n = p.getInt("gpsResets", 0) + 1;
+                p.edit().putInt("gpsResets", n).putLong("gpsResetT", ahora).apply();
+                try { if (lm != null) lm.sendExtraCommand("gps", "delete_aiding_data", null); } catch (Exception ignored) {}
+                try { if (gnss != null && lm != null) lm.unregisterGnssStatusCallback(gnss); } catch (Exception ignored) {}
+                gnss = null;
+                try { if (lm != null) lm.removeUpdates(RideService.this); } catch (Exception ignored) {}
+                empezarGps();
+                p.edit().putString("gpsCura", mudo ? "sin reportes GNSS" : "cero satélites").apply();
+            }
+        } catch (Exception ignored) {}
+    }
+
     private final Handler vigia = new Handler(Looper.getMainLooper());
     private final Runnable chequeo = new Runnable() {
         @Override public void run() {
@@ -194,6 +233,8 @@ public class RideService extends Service implements LocationListener {
                         .putLong(K_VIGT, System.currentTimeMillis())
                         .putLong("vivo", System.currentTimeMillis())
                         .putBoolean(K_CAND, cand).putBoolean(K_PWR, pwr).putBoolean(K_IDLE, idle).apply();
+
+                curarGpsSiTrabado(p);
 
                 long ult = p.getLong(K_ULT,0);
                 // 31-oct (parte de llegada a casa: "0/7 satelites · ANTENA · reinicios 61"):

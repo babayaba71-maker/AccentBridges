@@ -123,7 +123,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v5.7 · GPS sin estrangulamiento");
+        placa.setText("v5.9 · GPS que se cura");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -656,6 +656,7 @@ public class MainActivity extends Activity {
                 + " · pantalla " + (p.getBoolean("pantallaFija", false) ? "fija" : "suelta")
                 + " · ultimo latido " + edadLatido(p)
                 + " · servicio " + (servicioVivo(p) ? "vivo" : "DORMIDO")
+                + (p.getInt("gpsResets", 0) > 0 ? " · reseteos GPS " + p.getInt("gpsResets", 0) + " (" + p.getString("gpsCura", "") + ")" : "")
                 + puntoParte(p) + ")";
     }
 
