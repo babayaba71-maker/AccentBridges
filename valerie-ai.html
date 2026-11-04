@@ -34,6 +34,12 @@
   .grande b{display:block;font-size:20px;color:var(--ok);margin-bottom:6px}
   .pie{color:var(--muted);font-size:13px;text-align:center;margin-top:26px}
   #zona-widget{min-height:74px}
+  .banner{border-radius:14px;padding:16px 18px;margin-bottom:16px;font-size:16px;line-height:1.6}
+  .b-ok{background:rgba(55,211,153,.12);border:1px solid rgba(55,211,153,.45)}
+  .b-espera{background:rgba(240,180,82,.12);border:1px solid rgba(240,180,82,.45)}
+  .b-no{background:rgba(239,95,107,.12);border:1px solid rgba(239,95,107,.4)}
+  .banner b{display:block;margin-bottom:6px;font-size:17px}
+  .b-ok b{color:#37d399} .b-espera b{color:#f0b452} .b-no b{color:#ef5f6b}
   #fallo{display:none;margin-top:14px;background:rgba(239,95,107,.12);border:1px solid rgba(239,95,107,.35);border-radius:12px;padding:14px;font-size:15px;color:#ffd9dd}
 </style>
 </head>
@@ -47,6 +53,8 @@
     <b>Toca el botón de abajo</b>
     Permite el micrófono y empieza a hablar
   </div>
+
+  <div id="vozEstado" style="display:none"></div>
 
   <div id="zona-widget"></div>
 
@@ -86,6 +94,52 @@
 <elevenlabs-convai agent-id="agent_7401kqvpkpmhep5rqcf95j5kz41b"></elevenlabs-convai>
 
 <script>
+  // ===== LA COMPUERTA DEL MAESTRO =====
+  // El cerebro propone si hoy toca voz y el maestro decide en el Tablero.
+  // Si la negó, aquí no se abre la llamada.
+  (function(){
+    var CEREBRO = "https://valerie.base44.app/functions/routerBrain";
+    var LLAVE = "ABVC-PILOTO-2026";
+    var hoy = new Date(Date.now() - 7*3600000).toISOString().slice(0,10);
+    var caja = document.getElementById("vozEstado");
+
+    function pintar(clase, titulo, texto){
+      caja.className = "banner " + clase;
+      caja.innerHTML = "<b>" + titulo + "</b>" + texto;
+      caja.style.display = "block";
+    }
+
+    fetch(CEREBRO + "?accion=estado&fecha=" + hoy, { headers: { api_key: LLAVE } })
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        var c = d && d.decision;
+        if(!c){ return; }
+        var est = c.voz_status || "";
+        if(est === "negada"){
+          pintar("b-no", "Hoy no toca voz", "Tu maestro pidió que hoy practiques en silencio. " + (c.voz_foco ? "" : "") +
+            "Ve al gimnasio de oído: <a href='https://babayaba71-maker.github.io/AccentBridges/oido-ingles.html' style='color:#8ecbff'>entrena tu oído aquí</a>.");
+          var w = document.querySelector("elevenlabs-convai");
+          if(w) w.style.display = "none";
+          var z = document.getElementById("zona-widget");
+          if(z) z.style.display = "none";
+          return;
+        }
+        if(est === "autorizada"){
+          pintar("b-ok", "El maestro autorizó tu sesión de hoy",
+            "Habla " + (c.voz_minutos || 6) + " minutos con Valerie. " + (c.voz_foco ? "<br><b style='display:inline'>De qué hablar:</b> " + c.voz_foco : ""));
+          return;
+        }
+        if(est === "propuesta"){
+          pintar("b-espera", "Tu maestro todavía no lo confirma",
+            "Puedes practicar, pero si te dice que no, respeta su decisión." + (c.voz_foco ? "<br><b style='display:inline'>De qué hablar:</b> " + c.voz_foco : ""));
+          return;
+        }
+      })
+      .catch(function(){
+        pintar("b-espera", "No pude consultar al maestro", "Si te dice que no practiques, respeta su decisión.");
+      });
+  })();
+
   // si en 6 segundos no apareció el botón de ElevenLabs, mostramos la salida directa
   setTimeout(function(){
     var w = document.querySelector('elevenlabs-convai');
