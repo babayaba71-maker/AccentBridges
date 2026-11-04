@@ -224,6 +224,7 @@ function pintarVoz(c){
     <span class="mut">Por qué:</span> ${c.voz_motivo||"—"}<br>
     <span class="mut">Evidencia:</span> ${c.voz_evidencia||"—"}
     ${c.voz_foco?"<br><span class='mut'>Foco de la sesión:</span> <b>"+c.voz_foco+"</b>":""}
+    ${c.voz_nota?"<br><span class='mut'>Tu nota:</span> <span style='color:var(--gold)'>"+c.voz_nota+"</span>":""}
     </div>`;
 }
 async function cerebroAccion(accion,dia,texto){
