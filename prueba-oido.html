@@ -473,7 +473,7 @@ async function enviar(){
     $('f-name').disabled = $('f-phone').disabled = true;
     // ademas abro WhatsApp para que el interes llegue caliente
     const wa = document.createElement('a');
-    wa.href = `https://wa.me/5216451153334?text=${encodeURIComponent(textoWA)}`;
+    wa.href = `https://wa.me/526451153334?text=${encodeURIComponent(textoWA)}`;
     wa.target = '_blank'; wa.rel='noopener';
     wa.className = 'btn';
     wa.style.marginTop = '12px';
@@ -487,7 +487,7 @@ async function enviar(){
     if(alt){
       alt.onclick = (ev)=>{
         ev.preventDefault();
-        window.open(`https://wa.me/5216451153334?text=${encodeURIComponent(textoWA)}`,'_blank');
+        window.open(`https://wa.me/526451153334?text=${encodeURIComponent(textoWA)}`,'_blank');
       };
     }
   }
