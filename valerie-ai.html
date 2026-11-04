@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Habla con Valerie — AccentBridges</title>
+<style>
+  :root{
+    --bg:#0b1623; --card:#141f2e; --line:#26374b; --fg:#eef4fa;
+    --muted:#9bb2c9; --cyan:#25c8f5; --ok:#37d399; --warn:#f0b452;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--bg);color:var(--fg);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    padding:22px 18px 80px;line-height:1.6;
+  }
+  .wrap{max-width:520px;margin:0 auto}
+  h1{font-size:26px;line-height:1.25;margin:0 0 8px;letter-spacing:-.02em}
+  .sub{color:var(--muted);font-size:16px;margin:0 0 22px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:16px}
+  .card h2{font-size:17px;margin:0 0 12px}
+  ol{margin:0;padding-left:22px}
+  li{font-size:16px;margin-bottom:11px;color:#d6e3ef}
+  li b{color:#fff}
+  .aviso{border-left:3px solid var(--warn)}
+  .aviso p{margin:0;font-size:15px;color:#e6d5b3}
+  .linkbox{
+    background:#0a1420;border:1px solid var(--line);border-radius:10px;
+    padding:12px;font-size:15px;color:#cfe0ee;word-break:break-all;margin-top:12px;
+  }
+  .linkbox b{color:var(--cyan)}
+  .grande{font-size:18px;text-align:center;padding:22px 16px;background:#0a1420;border:1px solid var(--line);border-radius:14px;margin-bottom:16px}
+  .grande b{display:block;font-size:20px;color:var(--ok);margin-bottom:6px}
+  .pie{color:var(--muted);font-size:13px;text-align:center;margin-top:26px}
+  #zona-widget{min-height:74px}
+  #fallo{display:none;margin-top:14px;background:rgba(239,95,107,.12);border:1px solid rgba(239,95,107,.35);border-radius:12px;padding:14px;font-size:15px;color:#ffd9dd}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Habla con Valerie</h1>
+  <p class="sub">Esta es la Valerie de voz. Escucha y contesta en inglés, como en una llamada de verdad.</p>
+
+  <div class="grande">
+    <b>Toca el botón azul de abajo</b>
+    Permite el micrófono y empieza a hablar
+  </div>
+
+  <div id="zona-widget"></div>
+
+  <div id="fallo">
+    No cargó el botón de voz. Abre entonces este enlace directo:<br>
+    <span class="linkbox">https://elevenlabs.io/app/talk-to?agent_id=agent_7401kqvpkpmhep5rqcf95j5kz41b</span>
+  </div>
+
+  <div class="card">
+    <h2>Antes de empezar</h2>
+    <ol>
+      <li><b>Ponte los audífonos</b> si puedes, o busca un lugar callado. Si hay ruido de fondo, Valerie no te escucha bien.</li>
+      <li><b>Permite el micrófono</b> cuando el teléfono lo pregunte. Si le das "no", no hay manera de hablar.</li>
+      <li><b>Habla normal, sin prisa.</b> No tienes que decir frases perfectas; para eso estamos.</li>
+      <li>Si Valerie tarda en contestar, espera un segundo. No repitas la frase dos veces, eso la confunde.</li>
+    </ol>
+  </div>
+
+  <div class="card aviso">
+    <p><b>Sobre tu nombre:</b> si te llama por otro nombre o te pregunta algo que no viene al caso, corrígela tranquila: "no, yo soy Josefina". Es una máquina y a veces se equivoca.</p>
+  </div>
+
+  <div class="card">
+    <h2>De qué puedes hablar hoy</h2>
+    <ol>
+      <li>Preséntate: <b>Hi, my name is Josefina.</b></li>
+      <li>Di qué haces en el día: <b>I take care of my baby. I cook. I go to the store.</b></li>
+      <li>Pídele que te corrija: <b>How do I say this better?</b></li>
+      <li>Repite en voz alta lo que ella diga. Ese es el ejercicio.</li>
+    </ol>
+  </div>
+
+  <p class="pie">AccentBridges · Técnica, identidad y libertad</p>
+</div>
+
+<script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+<elevenlabs-convai agent-id="agent_7401kqvpkpmhep5rqcf95j5kz41b"></elevenlabs-convai>
+
+<script>
+  // si en 6 segundos no apareció el botón de ElevenLabs, mostramos la salida directa
+  setTimeout(function(){
+    var w = document.querySelector('elevenlabs-convai');
+    var visible = w && w.shadowRoot && w.shadowRoot.querySelector('button');
+    if(!visible){ document.getElementById('fallo').style.display = 'block'; }
+  }, 6000);
+</script>
+</body>
+</html>
