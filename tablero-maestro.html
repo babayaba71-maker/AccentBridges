@@ -69,6 +69,14 @@ canvas{width:100%;height:auto}
 <div class="card" id="cerebroCard" style="border-color:#7bb1ff">
 <h2 style="color:#7bb1ff">🧠 EL CEREBRO DE LA ESCUELA · la tarea que la matemática propone</h2>
 <div id="cerebroBody">Cargando…</div>
+<div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--line)">
+  <div style="font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);margin-bottom:8px">🎙️ Sesión de voz con Valerie</div>
+  <div id="vozBody">Cargando…</div>
+  <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+    <button onclick="vozSi()" style="background:#14361f;border-color:var(--good);color:var(--good);font-weight:700">🎙️ Autorizar voz</button>
+    <button onclick="vozNo()" style="background:#3a1620;border-color:var(--red);color:var(--red);font-weight:700">🔇 Negar voz</button>
+  </div>
+</div>
 <div style="margin-top:10px;border-top:1px dashed var(--line);padding-top:10px">
 <h2>El maestro manda:</h2>
 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
@@ -199,7 +207,24 @@ async function cerebro(){
     <span class="mut">Evidencia:</span> ${c.evidence}
     ${c.status==="pisada"?"<br><span style='color:var(--red)'>Tu decisión: ${c.final_label}</span>":""}
     </div>`;
+    pintarVoz(c);
   }catch(e){document.getElementById("cerebroBody").innerHTML="<p class='mut'>No pude hablar con el cerebro.</p>"}
+}
+function pintarVoz(c){
+  const el=document.getElementById("vozBody");
+  if(!el) return;
+  const est=c.voz_status||"no_aplica";
+  const sig=est==="autorizada"?"<span class='sig' style='border-color:var(--good);color:var(--good)'>VOZ AUTORIZADA POR TI</span>"
+    :est==="negada"?"<span class='sig' style='border-color:var(--red);color:var(--red)'>VOZ NEGADA POR TI</span>"
+    :est==="propuesta"?"<span class='sig' style='border-color:var(--gold);color:var(--gold)'>EL CEREBRO LA PROPONE — FALTA TU PALOMITA</span>"
+    :"<span class='sig' style='border-color:var(--line);color:var(--mut)'>HOY NO APLICA</span>";
+  el.innerHTML=`<div style="font-size:.9rem;line-height:1.7">
+    ${sig}<br>
+    <b style="color:var(--cyan)">Para ${c.fecha}:</b> ${c.voz_sugerida?(c.voz_minutos||6)+" minutos con Valerie":"sin sesión de voz"}<br>
+    <span class="mut">Por qué:</span> ${c.voz_motivo||"—"}<br>
+    <span class="mut">Evidencia:</span> ${c.voz_evidencia||"—"}
+    ${c.voz_foco?"<br><span class='mut'>Foco de la sesión:</span> <b>"+c.voz_foco+"</b>":""}
+    </div>`;
 }
 async function cerebroAccion(accion,dia,texto){
   const fecha=new Date(Date.now()-7*3600000).toISOString().slice(0,10);
@@ -210,6 +235,8 @@ async function cerebroAccion(accion,dia,texto){
   cerebro();
   if(!d.ok) alert("El cerebro no obedeció: "+(d.error||"revisa"));
 }
+function vozSi(){cerebroAccion("voz_si")}
+function vozNo(){cerebroAccion("voz_no",null,document.getElementById("pisaTexto")?document.getElementById("pisaTexto").value:"")}
 function palomita(){cerebroAccion("palomita")}
 function pisar(){cerebroAccion("pisar",document.getElementById("pisaDia").value,document.getElementById("pisaTexto").value)}
 cerebro();setInterval(cerebro,60000);
