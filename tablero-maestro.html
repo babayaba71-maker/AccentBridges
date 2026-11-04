@@ -71,7 +71,8 @@ canvas{width:100%;height:auto}
 <div id="cerebroBody">Cargando…</div>
 <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--line)">
   <div style="font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);margin-bottom:8px">🎙️ Sesión de voz con Valerie</div>
-  <div id="vozBody">Cargando…</div>
+  <div id="vozSesiones" style="margin-top:14px"></div>
+<div id="vozBody">Cargando…</div>
   <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
     <button onclick="vozSi()" style="background:#14361f;border-color:var(--good);color:var(--good);font-weight:700">🎙️ Autorizar voz</button>
     <button onclick="vozNo()" style="background:#3a1620;border-color:var(--red);color:var(--red);font-weight:700">🔇 Negar voz</button>
@@ -187,8 +188,22 @@ function feed(){
     return `<div class="ev"><span class="f">${hh}</span><span class="u">${e.usuario}</span><span class="t">${e.canal}${e.topic?" · "+e.topic:""}</span><span class="s">${sc}</span></div>`;
   }).join("")||"<p class='mut'>Sin eventos.</p>";
 }
-carga();setInterval(carga,300000);
+carga();sesionesVoz();setInterval(carga,300000);
 
+// ===== LO QUE DIJO VALERIE (SesionVoz) =====
+async function sesionesVoz(){
+  try{
+    const r=await fetch("https://valerie.base44.app/functions/vozSesiones",{headers:{api_key:"ABVC-PILOTO-2026"}});
+    const d=await r.json();
+    const lista=(d.sesiones||d.records||[]);
+    if(!lista.length){document.getElementById("vozSesiones").innerHTML="";return}
+    const ult=lista.slice(0,3);
+    document.getElementById("vozSesiones").innerHTML="<div class='mut' style='font-size:.8rem;margin-bottom:4px'>Últimas llamadas registradas</div>"+
+      ult.map(v=>`<div style="font-size:.85rem;line-height:1.6">
+        ${v.estudiante} · ${v.fecha} · ${v.minutos} min · ${v.palabras} palabras ${v.cumplio?"✅ produjo":"⚠️ casi no habló"}
+      </div>`).join("");
+  }catch(e){}
+}
 // ===== EL CEREBRO =====
 const CEREBRO_API="https://valerie.base44.app/functions/routerBrain";
 async function cerebro(){
