@@ -109,7 +109,7 @@
       caja.style.display = "block";
     }
 
-    fetch(CEREBRO + "?accion=estado&fecha=" + hoy, { headers: { api_key: LLAVE } })
+    fetch(CEREBRO + "?accion=estado", { headers: { api_key: LLAVE } })
       .then(function(r){ return r.json(); })
       .then(function(d){
         var c = d && d.decision;
@@ -125,12 +125,12 @@
           return;
         }
         if(est === "autorizada"){
-          pintar("b-ok", "El maestro autorizó tu sesión de hoy",
+          pintar("b-ok", "El maestro autorizó tu sesión" + (c.fecha ? " del " + c.fecha : ""),
             "Habla " + (c.voz_minutos || 6) + " minutos con Valerie. " + (c.voz_foco ? "<br><b style='display:inline'>De qué hablar:</b> " + c.voz_foco : ""));
           return;
         }
         if(est === "propuesta"){
-          pintar("b-espera", "Tu maestro todavía no lo confirma",
+          pintar("b-espera", "Tu maestro todavía no lo confirma" + (c.fecha ? " (sesión del " + c.fecha + ")" : ""),
             "Puedes practicar, pero si te dice que no, respeta su decisión." + (c.voz_foco ? "<br><b style='display:inline'>De qué hablar:</b> " + c.voz_foco : ""));
           return;
         }
