@@ -109,6 +109,16 @@
       caja.style.display = "block";
     }
 
+    var CANDADO = "https://valerie.base44.app/functions/compuertaVoz";
+
+    function cerrarWidget(){
+      var w = document.querySelector("elevenlabs-convai");
+      if(w) w.style.display = "none";
+      var z = document.getElementById("zona-widget");
+      if(z) z.style.display = "none";
+    }
+
+    function consultarMaestro(){
     fetch(CEREBRO + "?accion=estado", { headers: { api_key: LLAVE } })
       .then(function(r){ return r.json(); })
       .then(function(d){
@@ -137,6 +147,31 @@
       })
       .catch(function(){
         pintar("b-espera", "No pude consultar al maestro", "Si te dice que no practiques, respeta su decisión.");
+      });
+    }
+
+    // ===== EL CANDADO: UNA SESION AL DIA =====
+    // Se pregunta antes que nada. Si ya la uso hoy, el widget ni aparece.
+    fetch(CANDADO, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clave: LLAVE, estudiante: "Josefina" })
+    })
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(d && d.permitido === false){
+          pintar("b-no", "Hoy ya tuviste tu sesion",
+            (d.motivo || "Tu sesion es una al dia.") +
+            "<br><br>Mientras tanto, entrena tu oido aqui: " +
+            "<a href='https://babayaba71-maker.github.io/AccentBridges/oido-ingles.html' style='color:#8ecbff'>gimnasio de oido</a>.");
+          cerrarWidget();
+          return;
+        }
+        consultarMaestro();
+      })
+      .catch(function(){
+        // si el candado no responde, no la dejamos sin clase por un fallo de red
+        consultarMaestro();
       });
   })();
 
