@@ -7,7 +7,7 @@
 <style>
   :root{
     --tinta:#1b1b1f; --gris:#6b6b75; --linea:#e2e0da; --papel:#faf8f4;
-    --acento:#b4423c; --acento-suave:#f6e8e6; --ok:#2e7d5b; --alerta:#b4423c;
+    --acento:#b4423c; --acento-suave:#f6e8e6; --alerta:#b4423c;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
@@ -22,43 +22,27 @@
   .marca{font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--gris); margin:0 0 6px}
   h1{font-size:21px; line-height:1.2; margin:0; font-weight:650; letter-spacing:-.01em}
   .sub{font-size:13.5px; color:var(--gris); margin:7px 0 0; line-height:1.45}
-  main{flex:1; display:flex; flex-direction:column; padding:16px 18px 8px; gap:14px; max-width:640px; width:100%; margin:0 auto}
-  #hilo{
-    flex:1; display:flex; flex-direction:column; gap:12px;
-    overflow-y:auto; padding:4px 2px 8px; min-height:180px;
-  }
+  main{flex:1; display:flex; flex-direction:column; padding:16px 18px 8px; gap:12px; max-width:640px; width:100%; margin:0 auto}
+  #hilo{flex:1; display:flex; flex-direction:column; gap:12px; overflow-y:auto; padding:4px 2px 8px; min-height:180px}
   .turno{max-width:88%; padding:12px 15px; border-radius:16px; font-size:15.2px; line-height:1.52}
   .vale{align-self:flex-start; background:#fff; border:1px solid var(--linea); border-bottom-left-radius:5px}
-  .ella{align-self:flex-end; background:var(--acento-suave); border:1px solid #eeD7d4; border-bottom-right-radius:5px}
+  .ella{align-self:flex-end; background:var(--acento-suave); border:1px solid #eed7d4; border-bottom-right-radius:5px}
   .quien{display:block; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--gris); margin-bottom:5px}
-  .estado{
-    font-size:13px; color:var(--gris); text-align:center; min-height:20px; padding:2px 0;
-    display:flex; align-items:center; justify-content:center; gap:7px;
-  }
+  .estado{font-size:13px; color:var(--gris); text-align:center; min-height:20px; padding:2px 0; display:flex; align-items:center; justify-content:center; gap:7px}
   .punto{width:7px;height:7px;border-radius:50%;background:var(--gris);display:inline-block}
   .punto.live{background:var(--acento); animation:lati 1.15s infinite}
   @keyframes lati{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.82)}}
   .barra{display:flex; gap:10px; align-items:center; padding:6px 0 14px}
-  button{
-    font-family:inherit; font-size:15px; font-weight:600; border-radius:13px;
-    border:1px solid transparent; cursor:pointer; transition:transform .06s ease, opacity .15s;
-  }
+  button{font-family:inherit; font-size:15px; font-weight:600; border-radius:13px; border:1px solid transparent; cursor:pointer; transition:transform .06s ease, opacity .15s}
   button:active{transform:scale(.985)}
-  #btn{
-    flex:1; padding:16px 18px; background:var(--acento); color:#fff; border:none;
-    box-shadow:0 2px 10px rgba(180,66,60,.22);
-  }
-  #btn.escuchando{background:var(--tinta)}
+  #btn{flex:1; padding:16px 18px; background:var(--acento); color:#fff; border:none; box-shadow:0 2px 10px rgba(180,66,60,.22)}
   #btn:disabled{opacity:.42; box-shadow:none}
-  #btnFin{
-    padding:16px 16px; background:#fff; color:var(--gris); border:1px solid var(--linea);
-  }
-  .aviso{
-    font-size:12.5px; line-height:1.55; color:var(--gris); background:#fff;
-    border:1px solid var(--linea); border-radius:12px; padding:12px 14px; margin:0 0 10px;
-  }
+  #btnHablar{flex:1; padding:18px 16px; background:var(--acento); color:#fff; border:none; box-shadow:0 2px 10px rgba(180,66,60,.22)}
+  #btnHablar.grabando{background:var(--tinta)}
+  #btnHablar:disabled{opacity:.45; box-shadow:none}
+  #btnFin{padding:18px 16px; background:#fff; color:var(--gris); border:1px solid var(--linea)}
+  .aviso{font-size:12.5px; line-height:1.55; color:var(--gris); background:#fff; border:1px solid var(--linea); border-radius:12px; padding:12px 14px; margin:0 0 10px}
   .aviso b{color:var(--tinta); font-weight:620}
-  .error{color:var(--alerta)}
   .modo{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--acento); font-weight:650}
 </style>
 </head>
@@ -76,16 +60,15 @@
 
   <div id="arranque">
     <p class="aviso">
-      <b>Antes de empezar.</b> Ponte los audífonos si puedes y busca un lugar callado: si hay ruido de fondo, no te escucho bien.
+      <b>Antes de empezar.</b> Ponte los audífonos si puedes y busca un lugar callado.
       Cuando toques el botón, el navegador te va a pedir permiso de micrófono. Acéptalo una vez y ya.
+      Habla como salga, mezclando español e inglés: así te entiendo mejor.
     </p>
-    <div class="barra">
-      <button id="btn">Empezar a hablar</button>
-    </div>
+    <div class="barra"><button id="btn">Empezar a hablar</button></div>
   </div>
 
   <div class="barra" id="controles" style="display:none">
-    <button id="btnHablar">Hablar</button>
+    <button id="btnHablar">Toca para hablar</button>
     <button id="btnFin">Terminar</button>
   </div>
 </main>
@@ -97,6 +80,7 @@
   var APP = "69c78b20df328cd2f8bbcc29";
   var BASE = "https://base44.app/api/apps/" + APP + "/functions/";
   var PRUEBA = /(\?|&)prueba=1/.test(location.search);
+  var MAX_MS = 12000;
 
   var SALUDO = "Josefina, ¿cómo te va? Antes de lo de Betty, cuéntame qué hiciste hoy. En inglés, aunque te salga a medias.";
 
@@ -113,10 +97,13 @@
 
   var historial = [];
   var audio = new Audio();
-  var recon = null;
-  var escuchando = false;
-  var hablando = false;
   var vivo = true;
+  var grabando = false;
+  var ocupada = false;
+  var rec = null;
+  var trozos = [];
+  var mimeType = "";
+  var timer = null;
 
   function estado(txt, live){
     estadoTexto.textContent = txt;
@@ -143,6 +130,18 @@
     }).then(function(r){ return r.json(); });
   }
 
+  function b64(blob){
+    return new Promise(function(res, rej){
+      var fr = new FileReader();
+      fr.onload = function(){
+        var s = String(fr.result || "");
+        res(s.slice(s.indexOf(",") + 1));
+      };
+      fr.onerror = rej;
+      fr.readAsDataURL(blob);
+    });
+  }
+
   function habla(texto){
     return post("valerieHabla", {texto: texto}).then(function(d){
       if (!d || !d.ok || !d.audio) throw new Error("sin voz");
@@ -162,6 +161,7 @@
 
   function turno(texto){
     if (!texto) return;
+    ocupada = true;
     historial.push({role: "user", content: texto});
     pinta("ella", texto);
     estado("Pensando…", true);
@@ -171,101 +171,129 @@
         return habla(reply);
       })
       .then(function(){
-        estado("Te escucho", true);
-        if (vivo) empiezaEscucha();
+        ocupada = false;
+        estado("Te escucho. Toca para hablar.", false);
+        btnHablar.disabled = false;
+        btnHablar.textContent = "Toca para hablar";
       })
       .catch(function(e){
-        estado("No pude responder. " + (e && e.message ? e.message : ""), false);
+        ocupada = false;
         btnHablar.disabled = false;
-        btnHablar.textContent = "Hablar";
+        btnHablar.textContent = "Toca para hablar";
+        estado("No pude responder. " + (e && e.message ? e.message : ""), false);
       });
   }
 
-  function creaRecon(){
-    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) return null;
-    var r = new SR();
-    r.lang = "en-US";
-    r.continuous = false;
-    r.interimResults = false;
-    r.maxAlternatives = 1;
-    r.onstart = function(){ escuchando = true; };
-    r.onresult = function(ev){
-      var t = "";
-      for (var i = 0; i < ev.results.length; i++) t += ev.results[i][0].transcript;
-      t = (t || "").trim();
-      escuchando = false;
-      btnHablar.textContent = "Hablar";
-      if (!t) { estado("No te oí. Otra vez, más cerquita.", false); btnHablar.disabled = false; return; }
-      turno(t);
-    };
-    r.onerror = function(ev){
-      escuchando = false;
-      btnHablar.disabled = false;
-      btnHablar.textContent = "Hablar";
-      if (ev.error === "no-speech") estado("No te oí. Toca y vuelve a hablar.", false);
-      else if (ev.error === "not-allowed" || ev.error === "service-not-allowed") {
-        estado("El navegador no me dio el micrófono. Revisa el permiso.", false);
-        estadoTexto.className = "error";
-      }
-      else estado("Se cortó la escucha (" + ev.error + "). Toca otra vez.", false);
-    };
-    r.onend = function(){ escuchando = false; };
-    return r;
+  function eligeMime(){
+    var cands = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"];
+    for (var i = 0; i < cands.length; i++){
+      if (window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(cands[i])) return cands[i];
+    }
+    return "";
   }
 
-  function empiezaEscucha(){
-    if (!vivo) return;
-    if (hablando) return;
-    btnHablar.disabled = false;
-    if (!recon) recon = creaRecon();
-    if (!recon) {
-      estado("Este navegador no puede escuchar. Abre en Chrome.", false);
-      return;
+  function sueltaMicro(){
+    if (rec && rec.stream){
+      try { rec.stream.getTracks().forEach(function(t){ t.stop(); }); } catch(e){}
     }
-    try {
-      recon.start();
-      escuchando = true;
-      estado("Te escucho", true);
-      btnHablar.textContent = "Escuchando…";
-    } catch (e) {
-      estado("Toca Hablar para seguir.", false);
+  }
+
+  function empieza(){
+    if (ocupada || grabando) return;
+    btnHablar.disabled = true;
+    estado("Abriendo el micrófono…", false);
+    navigator.mediaDevices.getUserMedia({audio: {echoCancellation: true, noiseSuppression: true}})
+      .then(function(stream){
+        mimeType = eligeMime();
+        var opts = mimeType ? {mimeType: mimeType} : {};
+        rec = new MediaRecorder(stream, opts);
+        mimeType = rec.mimeType || mimeType || "audio/webm";
+        trozos = [];
+        rec.ondataavailable = function(ev){ if (ev.data && ev.data.size) trozos.push(ev.data); };
+        rec.onstop = function(){
+          sueltaMicro();
+          grabando = false;
+          btnHablar.classList.remove("grabando");
+          btnHablar.disabled = true;
+          btnHablar.textContent = "Toca para hablar";
+          clearTimeout(timer);
+          var blob = new Blob(trozos, {type: mimeType});
+          if (blob.size < 800){
+            estado("No te oí. Toca y otra vez, más cerquita.", false);
+            btnHablar.disabled = false;
+            return;
+          }
+          estado("Entendiendo…", true);
+          b64(blob)
+            .then(function(a){
+              return post("salaOido", {audio_b64: a, mime: mimeType});
+            })
+            .then(function(d){
+              if (!d || !d.ok){
+                throw new Error((d && (d.error || d.detalle)) || "no entendí");
+              }
+              var t = (d.text || "").trim();
+              if (!t){ throw new Error("vacío"); }
+              turno(t);
+            })
+            .catch(function(e){
+              btnHablar.disabled = false;
+              estado("No pude entender el audio. " + (e && e.message ? e.message : ""), false);
+            });
+        };
+        rec.start();
+        grabando = true;
+        btnHablar.disabled = false;
+        btnHablar.classList.add("grabando");
+        btnHablar.textContent = "Toca para terminar";
+        estado("Grabando… habla normal", true);
+        timer = setTimeout(function(){ if (grabando) deten(); }, MAX_MS);
+      })
+      .catch(function(e){
+        btnHablar.disabled = false;
+        var n = (e && e.name) || "";
+        if (n === "NotAllowedError") estado("No me diste el micrófono. Revísalo en el candado de la barra.", false);
+        else if (n === "NotFoundError") estado("No encuentro micrófono en este aparato.", false);
+        else estado("No pude abrir el micrófono (" + n + ").", false);
+      });
+  }
+
+  function deten(){
+    clearTimeout(timer);
+    if (rec && grabando){
+      try { rec.stop(); } catch(e){}
     }
   }
 
   btnHablar.addEventListener("click", function(){
-    if (escuchando) return;
-    empiezaEscucha();
+    if (grabando) { deten(); return; }
+    empieza();
   });
 
   btn.addEventListener("click", function(){
     btn.disabled = true;
     arranque.style.display = "none";
     controles.style.display = "flex";
-    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
-      pinta("valerie", "Necesitas abrir esto en Chrome para que pueda escucharte.");
-      estado("Sin micrófono en este navegador", false);
+    if (!navigator.mediaDevices || !window.MediaRecorder){
+      pinta("valerie", "Este navegador no puede grabar audio. Ábrelo en Chrome.");
+      estado("Sin grabadora en este navegador", false);
       return;
     }
     pinta("valerie", SALUDO);
     historial.push({role: "assistant", content: SALUDO});
     estado("Valerie habla…", true);
     habla(SALUDO)
-      .then(function(){ estado("Te escucho", true); empiezaEscucha(); })
-      .catch(function(){ estado("Toca Hablar y arrancamos.", false); });
+      .then(function(){ estado("Te escucho. Toca para hablar.", false); })
+      .catch(function(){ estado("Toca para hablar y arrancamos.", false); });
   });
 
   btnFin.addEventListener("click", function(){
     vivo = false;
-    if (recon && escuchando) { try { recon.stop(); } catch(e){} }
+    deten();
     audio.pause();
     controles.style.display = "none";
     estado("Cerramos. Nos vemos mañana.", false);
   });
-
-  audio.addEventListener("ended", function(){ hablando = false; });
-  audio.addEventListener("play", function(){ hablando = true; });
 })();
 </script>
 </body>
