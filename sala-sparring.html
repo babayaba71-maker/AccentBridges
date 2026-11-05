@@ -271,6 +271,7 @@
   });
 
   btn.addEventListener("click", function(){
+    vivo = true;
     btn.disabled = true;
     arranque.style.display = "none";
     controles.style.display = "flex";
@@ -291,8 +292,16 @@
     vivo = false;
     deten();
     audio.pause();
+    hilo.innerHTML = "";
+    historial = [];
+    vivo = false;
     controles.style.display = "none";
-    estado("Cerramos. Nos vemos mañana.", false);
+    arranque.style.display = "block";
+    btn.disabled = false;
+    btnHablar.disabled = false;
+    btnHablar.classList.remove("grabando");
+    btnHablar.textContent = "Toca para hablar";
+    estado("Cerramos. Toca Empezar cuando quieras otra vez.", false);
   });
 })();
 </script>
