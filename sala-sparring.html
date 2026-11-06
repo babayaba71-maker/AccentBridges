@@ -142,8 +142,18 @@
     });
   }
 
+  // RESPELLING PARA LA VOZ (5-nov): Verónica lee "Valerie" con reglas del
+  // español y le clava el acento al final ("Valerí"). Se le manda la forma con
+  // guiones, que la obliga a partir las tres sílabas. La alumna sigue VIENDO
+  // "Valerie" escrito correctamente en el chat; esto solo es para el oído.
+  function paraVoz(texto){
+    return String(texto)
+      .replace(/\bValerie\b/g, "Val-uh-ree")
+      .replace(/\bJosefina\b/g, "Jo-se-FEE-na");
+  }
+
   function habla(texto){
-    return post("valerieHabla", {texto: texto}).then(function(d){
+    return post("valerieHabla", {texto: paraVoz(texto)}).then(function(d){
       if (!d || !d.ok || !d.audio) throw new Error("sin voz");
       audio.src = "data:" + (d.mime || "audio/mpeg") + ";base64," + d.audio;
       return audio.play();
