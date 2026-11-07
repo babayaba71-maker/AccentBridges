@@ -169,6 +169,22 @@ public class RideService extends Service implements LocationListener {
             try {
                 if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
                     lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 0, this);
+                // 7-nov 20:00 (JJ: "0.00 km, 1:23, 125 lecturas, ±18 m, 19 reseteos,
+                // satelite hace 1111 min" MIENTRAS sus 📍 de Chrome en el mismo teléfono
+                // se movían 700 m en 40 min): el motor GNSS crudo está muerto, pero el
+                // proveedor FUSIONADO de Android sí entrega posiciones frescas — es el
+                // mismo que usa Chrome para el botón 📍 de la casita. Ese proveedor
+                // (API 31+, presente en el S22) no depende de que el chip GNSS despierte,
+                // así que el paseo puede contarse aunque el GPS siga trabado.
+                try {
+                    if (Build.VERSION.SDK_INT >= 31
+                            && lm.isProviderEnabled(LocationManager.FUSED_PROVIDER)) {
+                        lm.requestLocationUpdates(LocationManager.FUSED_PROVIDER, 1000, 0, this);
+                        prefs(this).edit().putBoolean("fused", true).apply();
+                    } else prefs(this).edit().putBoolean("fused", false).apply();
+                } catch (Exception e) {
+                    prefs(this).edit().putString("fusErr", e.getClass().getSimpleName()).apply();
+                }
             } catch (Exception e) {
                 prefs(this).edit().putString("redErr", e.getClass().getSimpleName() + ": " + e.getMessage()).apply();
             }
@@ -445,6 +461,9 @@ public class RideService extends Service implements LocationListener {
 
         float acc = loc.hasAccuracy() ? loc.getAccuracy() : 199f;
         boolean esGps = loc.getProvider() != null && loc.getProvider().contains("gps");
+        // 7-nov: la fuente de cada lectura va al parte (fused/gps/network). Sin esto
+        // no hay manera de saber quien esta entregando la posicion.
+        prefs(this).edit().putString("prov", String.valueOf(loc.getProvider())).apply();
         float dist = p.getFloat(K_DIST,0f);
         float mueve = p.getFloat("mueve",0f);
         // 7-nov: cuantas lecturas no sumaron nada (por precision o por estar parado).

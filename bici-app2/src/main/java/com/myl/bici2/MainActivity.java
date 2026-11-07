@@ -123,7 +123,7 @@ public class MainActivity extends Activity {
         col.addView(titulo);
 
         TextView placa = new TextView(this);
-        placa.setText("v6.2 · margen que obedece");
+        placa.setText("v6.3 · GPS fusionado");
         placa.setTextColor(Color.rgb(70, 95, 120));
         placa.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
         placa.setGravity(Gravity.CENTER);
@@ -658,6 +658,7 @@ public class MainActivity extends Activity {
                 + " · servicio " + (servicioVivo(p) ? "vivo" : "DORMIDO")
                 + (p.getInt("gpsResets", 0) > 0 ? " · reseteos GPS " + p.getInt("gpsResets", 0) + " (" + p.getString("gpsCura", "") + ")" : "")
                 + (p.getInt("descartes", 0) > 0 ? " · descartes " + p.getInt("descartes", 0) : "")
+                + " · fuente " + p.getString("prov", "?") + (p.getBoolean("fused", false) ? " · fusion ON" : " · fusion NO")
                 + puntoParte(p) + ")";
     }
 
