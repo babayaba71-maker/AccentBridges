@@ -80,7 +80,7 @@ public class RideService extends Service implements LocationListener {
                 .putInt(K_ACC,-1).putLong(K_ULT,0L).putInt(K_REIN,0)
                 .putLong("finT",0L).putFloat("finDist",0f).putLong("finSeg",0L).putFloat("finMax",0f)
                 .putFloat("mueve",0f).putLong("lat",0L).putLong("lon",0L)
-                .putFloat("vel",0f).putLong("velT",0L).apply();
+                .putFloat("vel",0f).putLong("velT",0L).putInt("descartes",0).apply();
             ultimo = null;
             anclaGps = null; anclaRed = null; ultimoGpsT = 0L; borrarAnclas();   // paseo nuevo, ancla nueva (si no, sumaría el salto desde el punto viejo)
             String ver = "?";
@@ -447,6 +447,9 @@ public class RideService extends Service implements LocationListener {
         boolean esGps = loc.getProvider() != null && loc.getProvider().contains("gps");
         float dist = p.getFloat(K_DIST,0f);
         float mueve = p.getFloat("mueve",0f);
+        // 7-nov: cuantas lecturas no sumaron nada (por precision o por estar parado).
+        // Si el parte dice "descartes 90" y la distancia no sube, es precision.
+        int descartes = p.getInt("descartes", 0);
         float max  = p.getFloat(K_MAX,0f);
         int n = p.getInt(K_N,0) + 1;
         boolean sumado = false;
@@ -465,8 +468,15 @@ public class RideService extends Service implements LocationListener {
             if (esGps && anclaGps == null) anclaGps = leerAncla("ag");
             if (!esGps && anclaRed == null) anclaRed = leerAncla("ar");
             Location ancla = esGps ? anclaGps : anclaRed;
+            // 7-nov (JJ: "0.00 km, 1:11, 105 lecturas, ±100 m" y sus dos 📍 de la
+            // app separados 1,358 m): el margen de la antena estaba TOPADO en 60 m.
+            // Con ±100 m de precisión cada lectura avanza ~37 m, así que TODOS los
+            // tramos quedaban por debajo de los 60 m y se tiraban uno tras otro: el
+            // paseo se movía y el contador no. El margen tiene que seguir a la
+            // precisión REAL (hasta 150 m) para que el ruido se filtre sin congelar
+            // la cuenta.
             float margen = esGps ? Math.max(10f, Math.min(acc * 1.5f, 60f))
-                                 : Math.max(25f, Math.min(acc, 60f));
+                                 : Math.max(30f, Math.min(acc, 150f));
             // 31-oct (JJ: "máxima 60.0 exactos... eso no son mis piernas"): el tope
             // de 70 km/h dejaba pasar picos de GPS como si fueran pedaleo y el
             // tablero marcaba 60. Una bici en Culiacán no pasa de 45; cualquier
@@ -514,6 +524,8 @@ public class RideService extends Service implements LocationListener {
                     }
                 }
             }
+            if (!sumado) descartes++;
+            p.edit().putInt("descartes", descartes).apply();
             if (esGps) { anclaGps = ancla; guardarAncla("ag", ancla); }
             else       { anclaRed = ancla; guardarAncla("ar", ancla); }
         }
