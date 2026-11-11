@@ -2,848 +2,258 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Los Morfofónicos — comparación</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Los Morfofónicos — todo el sistema</title>
 <style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; background: #0f1419; color: #e8eaed;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    display: flex; flex-direction: column; height: 100vh; height: 100dvh;
-  }
-  header { padding: 14px 16px 10px; border-bottom: 1px solid #232a33; flex: 0 0 auto; }
-  h1 { margin: 0 0 3px; font-size: 17px; font-weight: 700; letter-spacing: -.2px; }
-  .sub { margin: 0; font-size: 12px; color: #8b949e; line-height: 1.4; }
-  nav { display: flex; gap: 6px; overflow-x: auto; padding: 10px 16px; border-bottom: 1px solid #232a33; flex: 0 0 auto; scrollbar-width: none; }
-  nav::-webkit-scrollbar { display: none; }
-  .tab {
-    flex: 0 0 auto; display: flex; align-items: center; gap: 6px;
-    background: #161b22; color: #8b949e; border: 1px solid #232a33;
-    padding: 8px 13px; border-radius: 999px; font-size: 12.5px; font-weight: 600;
-    cursor: pointer; white-space: nowrap; transition: .15s;
-  }
-  .tab:hover { border-color: var(--c); color: #c9d1d9; }
-  .tab.activo { background: var(--c); color: #0f1419; border-color: var(--c); }
-  .tab.activo .dot { background: #0f1419 !important; }
-  .dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
-  main { flex: 1 1 auto; overflow-y: auto; padding: 12px 16px 20px; }
-  .panel { flex-direction: column; gap: 10px; }
-  .barra { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-  .meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
-  .meta strong { font-size: 13.5px; }
-  .badge { font-size: 9.5px; font-weight: 800; letter-spacing: .4px; padding: 3px 7px; border-radius: 5px; border: 1px solid; }
-  .peso { font-size: 11px; color: #6e7681; }
-  .barra a { font-size: 12px; color: #58a6ff; text-decoration: none; font-weight: 600; }
-  .local { font-size: 11px; color: #6e7681; font-style: italic; }
-  .nota { margin: 0; font-size: 12.5px; line-height: 1.55; color: #9aa4ae; }
-  .aviso { font-size: 12px; color: #d29922; background: #d2992211; border-left: 2px solid #d29922; padding: 7px 10px; border-radius: 4px; }
-  .marco { border: 1px solid #232a33; border-radius: 10px; overflow: hidden; background: #fff; height: 72vh; min-height: 420px; }
-  .marco iframe { width: 100%; height: 100%; border: 0; display: block; }
-  footer { flex: 0 0 auto; padding: 9px 16px; border-top: 1px solid #232a33; font-size: 11px; color: #6e7681; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:#0d1117;color:#e6edf3;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+  header{padding:18px 16px 12px;border-bottom:1px solid #21262d;position:sticky;top:0;background:#0d1117;z-index:5}
+  h1{margin:0 0 4px;font-size:19px;letter-spacing:-.3px}
+  .sub{margin:0 0 12px;font-size:12.5px;color:#8b949e}
+  .buscar{width:100%;padding:10px 13px;border-radius:9px;border:1px solid #30363d;background:#161b22;color:#e6edf3;font-size:14px;font-family:inherit;outline:none}
+  .buscar:focus{border-color:#eab308}
+  .chips{display:flex;gap:7px;overflow-x:auto;padding:11px 16px;border-bottom:1px solid #21262d;scrollbar-width:none;background:#0d1117}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;padding:7px 13px;border-radius:999px;border:1px solid #30363d;background:#161b22;color:#8b949e;font-size:12.5px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap}
+  .chip.activo{background:#eab308;color:#0d1117;border-color:#eab308}
+  main{padding:14px 16px 40px;display:grid;gap:11px;max-width:900px;margin:0 auto}
+  .card{background:#161b22;border:1px solid #21262d;border-radius:12px;padding:14px}
+  .top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .punto{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+  h3{margin:0;font-size:14.5px;font-weight:700;letter-spacing:-.1px}
+  .nota{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.5px;padding:2px 6px;border-radius:4px;border:1px solid;margin-bottom:7px}
+  .card p{margin:0 0 11px;font-size:12.8px;color:#9aa4ae;line-height:1.55}
+  .acciones{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .abrir{background:#eab308;color:#0d1117;border:0;padding:9px 17px;border-radius:8px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer}
+  .abrir:active{transform:scale(.97)}
+  .ext{font-size:12.5px;color:#58a6ff;text-decoration:none;font-weight:600;padding:9px 4px}
+  .vacio{text-align:center;color:#6e7681;font-size:13px;padding:40px 0}
+  /* visor */
+  #visor{position:fixed;inset:0;background:#0d1117;display:none;flex-direction:column;z-index:50}
+  #visor.on{display:flex}
+  .vbar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #21262d;flex:0 0 auto;background:#161b22}
+  .volver{background:#21262d;border:0;color:#e6edf3;padding:9px 15px;border-radius:8px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;flex:0 0 auto}
+  .vtit{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1 1 auto;min-width:0}
+  .vext{font-size:12px;color:#58a6ff;text-decoration:none;font-weight:600;flex:0 0 auto}
+  #vframe{flex:1 1 auto;border:0;width:100%;background:#fff}
+  footer{text-align:center;font-size:11px;color:#484f58;padding:0 16px 26px}
 </style>
 </head>
 <body>
 <header>
   <h1>Los Morfofónicos</h1>
-  <p class="sub">Cuatro páginas, dos familias. Azul = A0 clásico. Amarillo = Estudio Integrado de Claude, Ruta de los 57 Días.</p>
+  <p class="sub">Todo el sistema, no solo cuatro. 26 páginas en cuatro familias.</p>
+  <input class="buscar" id="buscar" type="search" placeholder="Buscar una página…" autocomplete="off">
 </header>
-<nav><button class="tab activo" data-t="a0" style="--c:#3d5a73">
-      <span class="dot" style="background:#3d5a73"></span>A0 — Morfofono
-    </button><button class="tab" data-t="a1" style="--c:#3d5a73">
-      <span class="dot" style="background:#3d5a73"></span>A0-bajo → A1-bajo
-    </button><button class="tab" data-t="claude1" style="--c:#eab308">
-      <span class="dot" style="background:#eab308"></span>Estudio Integrado v1
-    </button><button class="tab" data-t="claude3" style="--c:#eab308">
-      <span class="dot" style="background:#eab308"></span>Estudio Integrado v3
-    </button></nav>
-<main><section class="panel" id="p-a0" style="display:flex">
-      <div class="barra">
-        <div class="meta">
-          <span class="badge" style="background:#3d5a7322;color:#3d5a73;border-color:#3d5a7355">AZUL</span>
-          <strong>Morfofono — alfabetización A0</strong>
-          <span class="peso">111 KB</span>
-        </div>
-        <a href="https://babayaba71-maker.github.io/AccentBridges/morfofono.html" target="_blank" rel="noopener">abrir aparte ↗</a>
-      </div>
-      <p class="nota">El clásico. 42 lecciones, 28 horas recorridas sin un solo veredicto guardado. Es el que se midió con Josefina.</p>
+<nav class="chips"><button class="chip activo" data-f="all">Todas</button><button class="chip" data-f="morfos" style="--c:#eab308">Los morfofónicos</button><button class="chip" data-f="talleres" style="--c:#3d5a73">Talleres del morfofónico</button><button class="chip" data-f="pruebas" style="--c:#58a6ff">Las pruebas</button><button class="chip" data-f="otros" style="--c:#8b949e">Lo que los acompaña</button></nav>
+<main id="lista">
+<article class="card" data-fam="morfos" data-nombre="morfofono a0">
+      <div class="top"><span class="punto" style="background:#eab308"></span><h3>Morfofono A0</h3></div>
+      <span class="nota" style="color:#eab308;border-color:#eab30855">AZUL</span>
+      <p>Alfabetización A0. El clásico de 42 lecciones: se recorrió completo, 28 horas, sin un solo veredicto guardado. Es el que se midió.</p>
+      <div class="acciones"><button class="abrir" data-open="m-a0">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/morfofono.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="morfos" data-nombre="morfofono estudio">
+      <div class="top"><span class="punto" style="background:#eab308"></span><h3>Morfofono Estudio</h3></div>
+      <span class="nota" style="color:#eab308;border-color:#eab30855">AZUL</span>
+      <p>De A0-bajo a A1-bajo. Un peldaño arriba, misma familia azul.</p>
+      <div class="acciones"><button class="abrir" data-open="m-estudio">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/morfofono-estudio.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="morfos" data-nombre="morfofono diario">
+      <div class="top"><span class="punto" style="background:#eab308"></span><h3>Morfofono Diario</h3></div>
+      <span class="nota" style="color:#eab308;border-color:#eab30855">AZUL</span>
+      <p>El organizador diario del A0. La agenda, no la lección.</p>
+      <div class="acciones"><button class="abrir" data-open="m-diario">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/morfofono-diario.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="morfos" data-nombre="estudio integrado v1">
+      <div class="top"><span class="punto" style="background:#eab308"></span><h3>Estudio Integrado v1</h3></div>
+      <span class="nota" style="color:#eab308;border-color:#eab30855">AMARILLO · CLAUDE</span>
+      <p>El borrador de Claude del 19-oct, Ruta de los 57 Días. Este es el que según JJ SÍ le enseñó. Nunca se integró ni se midió.</p>
+      <div class="acciones"><button class="abrir" data-open="m-v1">Ver aquí</button></div>
+    </article><article class="card" data-fam="morfos" data-nombre="estudio integrado v2">
+      <div class="top"><span class="punto" style="background:#eab308"></span><h3>Estudio Integrado v2</h3></div>
+      <span class="nota" style="color:#eab308;border-color:#eab30855">AMARILLO</span>
+      <p>La versión de control de calidad del linaje de Claude.</p>
+      <div class="acciones"><button class="abrir" data-open="m-v2">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/estudio-v2.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="morfos" data-nombre="estudio integrado v3">
+      <div class="top"><span class="punto" style="background:#eab308"></span><h3>Estudio Integrado v3</h3></div>
+      <span class="nota" style="color:#eab308;border-color:#eab30855">AMARILLO</span>
+      <p>La evolución publicada del de Claude. La más completa de esa familia.</p>
+      <div class="acciones"><button class="abrir" data-open="m-v3">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/estudio-v3.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="talleres" data-nombre="día 1 · el sonido no es la letra">
+      <div class="top"><span class="punto" style="background:#3d5a73"></span><h3>Día 1 · El sonido no es la letra</h3></div>
       
-      <div class="marco"><iframe src="https://babayaba71-maker.github.io/AccentBridges/morfofono.html" loading="lazy" referrerpolicy="no-referrer"></iframe></div>
-    </section><section class="panel" id="p-a1" style="display:none">
-      <div class="barra">
-        <div class="meta">
-          <span class="badge" style="background:#3d5a7322;color:#3d5a73;border-color:#3d5a7355">AZUL</span>
-          <strong>Morfofono — de A0-bajo a A1-bajo</strong>
-          <span class="peso">126 KB</span>
-        </div>
-        <a href="https://babayaba71-maker.github.io/AccentBridges/morfofono-estudio.html" target="_blank" rel="noopener">abrir aparte ↗</a>
-      </div>
-      <p class="nota">El estudio que sigue al A0. Misma familia azul, un peldaño arriba en la escalera.</p>
+      <p>El arranque: separar lo que se oye de lo que se ve.</p>
+      <div class="acciones"><button class="abrir" data-open="t-dia1">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/dia-1.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="talleres" data-nombre="cirugía del abecedario">
+      <div class="top"><span class="punto" style="background:#3d5a73"></span><h3>Cirugía del Abecedario</h3></div>
       
-      <div class="marco"><iframe src="https://babayaba71-maker.github.io/AccentBridges/morfofono-estudio.html" loading="lazy" referrerpolicy="no-referrer"></iframe></div>
-    </section><section class="panel" id="p-claude1" style="display:none">
-      <div class="barra">
-        <div class="meta">
-          <span class="badge" style="background:#eab30822;color:#eab308;border-color:#eab30855">AMARILLO · EL DE CLAUDE</span>
-          <strong>Action Bridges — Morfofono Estudio Integrado</strong>
-          <span class="peso">30 KB</span>
-        </div>
-        <span class="local">versión local, sin publicar</span>
-      </div>
-      <p class="nota">El borrador de Claude del 19-oct 15:04. Ruta de los 57 Días. Este es el que según JJ SÍ le enseñó. Nunca se integró ni se midió formalmente.</p>
-      <div class="aviso">Este borrador vive solo en el repo (para-cloud/), nunca se subió a Pages. Aquí va embebido tal cual.</div>
-      <div class="marco"><iframe srcdoc="Borrador v1 de Cloud/Claude (19-oct 15:04) — Morfofono Estudio Integrado. Prototipo recibido por WhatsApp, pendiente de integración doctrinal. NO DEPLOYAR sin: (1) telemetría real (endpoints Base44), (2) voz Maestra MP3-first, (3) fix letra suelta vocales, (4) unificar llave de compuerta con completedDays/morfofono_prog, (5) quitar SW blob muerto, (6) toast en vez de alert(). Verdict de Alma: flujo aprobado, costura pendiente.
-
-&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;es&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;utf-8&quot; /&gt;
-&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover&quot; /&gt;
-&lt;title&gt;Action Bridges — Morfofono Estudio Integrado&lt;/title&gt;
-&lt;meta name=&quot;description&quot; content=&quot;Coaching de acento americano para hispanohablantes. El oído entrena antes que la boca, la boca antes que la letra.&quot; /&gt;
-&lt;meta name=&quot;theme-color&quot; content=&quot;#3d5a73&quot; /&gt;
-&lt;meta name=&quot;apple-mobile-web-app-capable&quot; content=&quot;yes&quot; /&gt;
-&lt;meta name=&quot;apple-mobile-web-app-status-bar-style&quot; content=&quot;black-translucent&quot; /&gt;
-
-&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot; /&gt;
-&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin /&gt;
-&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&amp;family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&amp;display=swap&quot; rel=&quot;stylesheet&quot; /&gt;
-
-&lt;style&gt;
-:root {
-  --bg:#f3efe6; --surface:#faf7f0; --surface-2:#ebe4d6; --ink:#1c1915;
-  --muted:#6b6458; --accent:#3d5a73; --accent-fg:#faf7f0; --accent-soft:#dfe6ec;
-  --border:#ddd4c4; --good:#2d6a4f; --good-soft:rgba(45,106,79,.12);
-  --warn:#b05a18; --warn-soft:rgba(176,90,24,.12);
-  --yellow-lab:#facc15; --yellow-lab-fg:#713f12; --yellow-lab-border:#eab308;
-  --shadow: 0 1px 3px rgba(28,25,21,.08), 0 1px 2px rgba(28,25,21,.04);
-  --shadow-h: 0 8px 20px rgba(28,25,21,.12);
-  --bar:rgba(250,247,240,.96);
-  touch-action:manipulation;
-}
-
-html.dark {
-  --bg:#14110d; --surface:#1c1813; --surface-2:#262017; --ink:#ece5d8;
-  --muted:#b0a692; --accent:#a9c7e2; --accent-fg:#10141b; --accent-soft:#28313d;
-  --border:#342c20; --good:#52b788; --good-soft:rgba(82,183,136,.15);
-  --warn:#e08738; --warn-soft:rgba(224,135,56,.15);
-  --yellow-lab:#eab308; --yellow-lab-fg:#1e1402; --yellow-lab-border:#ca8a04;
-  --shadow: 0 1px 3px rgba(0,0,0,.4);
-  --shadow-h: 0 8px 24px rgba(0,0,0,.6);
-  --bar:rgba(20,17,13,.96);
-}
-
-*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
-body{
-  margin:0; background:var(--bg); color:var(--ink);
-  font-family:&quot;Source Sans 3&quot;,system-ui,sans-serif; line-height:1.55;
-  user-select:none; -webkit-user-select:none;
-}
-
-h1,h2,h3{font-family:&quot;Newsreader&quot;,Georgia,serif; font-weight:500; letter-spacing:-.02em}
-button{font:inherit; cursor:pointer; touch-action:manipulation}
-button:disabled{opacity:.4; cursor:not-allowed}
-
-.wrap{
-  max-width:44rem; margin:0 auto; min-height:100dvh; display:flex;
-  flex-direction:column; padding:0.75rem 1rem 6rem;
-}
-
-.masthead{
-  display:flex; justify-content:space-between; align-items:center;
-  padding:0.5rem 0; border-bottom:1px solid var(--border); margin-bottom:1rem;
-}
-.brand b{font-family:&quot;Newsreader&quot;,serif; font-size:1.35rem; display:block; line-height:1.1}
-.brand span{font-size:.76rem; color:var(--muted)}
-.header-actions{display:flex; gap:.4rem}
-.icon-btn{
-  width:2.4rem; height:2.4rem; border-radius:99px; border:1px solid var(--border);
-  background:var(--surface); display:grid; place-items:center; font-size:1.1rem;
-}
-
-.narrator-bar{
-  position:sticky; top:0.5rem; z-index:30; background:var(--bar);
-  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
-  border:1px solid var(--accent); border-radius:1rem;
-  padding:0.75rem 1rem; box-shadow:var(--shadow-h); margin-bottom:1.25rem;
-}
-.narrator-top{display:flex; align-items:center; justify-content:space-between; gap:.75rem}
-.narrator-badge{
-  font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:.08em;
-  padding:.2rem .55rem; border-radius:.35rem; background:var(--accent-soft); color:var(--accent);
-}
-.audio-status{font-size:.85rem; color:var(--muted); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.btn-narrate{
-  background:var(--accent); color:var(--accent-fg); border:0; border-radius:.6rem;
-  padding:.45rem .85rem; font-weight:600; font-size:.85rem; display:inline-flex; align-items:center; gap:.35rem;
-}
-
-.lesson-head{margin-bottom:1.25rem}
-.lesson-day{font-size:.8rem; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--accent)}
-.lesson-title{font-size:1.85rem; margin:.2rem 0 .3rem; line-height:1.2}
-.lesson-hook{font-size:1.02rem; color:var(--muted); font-style:italic}
-
-.step-card{
-  background:var(--surface); border:1px solid var(--border); border-radius:1rem;
-  padding:1.2rem; margin-bottom:1.2rem; box-shadow:var(--shadow);
-  transition:border-color .2s, box-shadow .2s;
-}
-.step-card.active{
-  border-color:var(--accent); box-shadow:var(--shadow-h);
-  outline:2px solid var(--accent-soft); outline-offset:2px;
-}
-.step-card.completed{border-left:5px solid var(--good)}
-.step-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:.65rem}
-.step-tag{display:flex; align-items:center; gap:.5rem; font-size:.88rem; font-weight:600; color:var(--accent)}
-.step-num{
-  width:1.6rem; height:1.6rem; border-radius:99px; background:var(--surface-2);
-  display:grid; place-items:center; font-size:.78rem; border:1px solid var(--border);
-}
-.step-card.completed .step-num{background:var(--good); color:#fff; border-color:var(--good)}
-.step-speech{
-  background:var(--surface-2); border-left:3px solid var(--accent);
-  padding:.7rem .9rem; border-radius:0 .5rem .5rem 0; font-size:.93rem; margin-bottom:.9rem;
-}
-
-.interactive-box{
-  background:var(--bg); border:1px dashed var(--border); border-radius:.85rem;
-  padding:1.1rem; margin-top:.75rem; text-align:center;
-}
-
-.ear-pact-btn{
-  width:5.4rem; height:5.4rem; border-radius:99px; border:2px solid var(--accent);
-  background:var(--surface); font-size:2.4rem; display:inline-grid; place-items:center;
-  margin:.4rem auto; box-shadow:var(--shadow); transition:transform .15s, background .15s;
-}
-.ear-pact-btn:active{transform:scale(0.92)}
-.ear-pact-btn.pact-sealed{background:var(--accent); color:var(--accent-fg); border-color:var(--accent)}
-
-.vowel-row{display:flex; justify-content:center; gap:.5rem; flex-wrap:wrap; margin:.6rem 0}
-.vowel-btn{
-  width:3.3rem; height:3.8rem; border-radius:.6rem; border:1px solid var(--border);
-  background:var(--surface); font-family:&quot;Newsreader&quot;,serif; font-size:1.55rem;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  box-shadow:var(--shadow); transition:transform .15s;
-}
-.vowel-btn:active{transform:scale(0.9)}
-.vowel-btn.played{border-color:var(--good); color:var(--good); background:var(--good-soft)}
-
-.blind-choices{display:flex; gap:.6rem; justify-content:center; margin-top:.75rem}
-.choice-btn{
-  flex:1; max-width:13.5rem; padding:.7rem .8rem; border-radius:.6rem; border:1px solid var(--border);
-  background:var(--surface); font-size:.88rem; font-weight:600;
-}
-.choice-btn.selected{border-color:var(--accent); background:var(--accent-soft); color:var(--accent)}
-
-.yellow-lab-box{
-  background:rgba(250,204,21,.12); border:2px solid var(--yellow-lab-border);
-  border-radius:.95rem; padding:1.2rem 1rem; text-align:center;
-}
-.lab-badge{
-  font-size:.7rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
-  background:var(--yellow-lab); color:var(--yellow-lab-fg); padding:.22rem .6rem; border-radius:.35rem;
-}
-.lab-pair-trigger{
-  width:100%; max-width:17rem; margin:1rem auto; padding:.8rem; border-radius:.75rem;
-  border:0; background:var(--accent); color:var(--accent-fg); font-weight:600; font-size:1rem;
-  display:flex; align-items:center; justify-content:center; gap:.5rem; box-shadow:var(--shadow);
-}
-.lab-pair-trigger:active{transform:scale(0.97)}
-.lab-answers{display:flex; gap:.75rem; justify-content:center; max-width:21rem; margin:0 auto}
-.lab-ans-btn{
-  flex:1; height:3.6rem; border-radius:.8rem; border:2px solid var(--yellow-lab-border);
-  background:var(--surface); font-size:1.02rem; font-weight:700; color:var(--ink); box-shadow:var(--shadow);
-}
-.lab-ans-btn:active{transform:scale(0.95)}
-
-.gym-box{margin-top:1.25rem; padding-top:1.25rem; border-top:1px dashed var(--border); text-align:center}
-.self-eval-row{display:flex; gap:.5rem; justify-content:center; margin-top:.65rem}
-.eval-btn{
-  padding:.6rem .8rem; border-radius:.6rem; border:1px solid var(--border);
-  background:var(--surface); font-size:.88rem; font-weight:600;
-}
-.eval-btn.picked{border-color:var(--good); background:var(--good-soft); color:var(--good)}
-
-.hint-banner{
-  background:var(--warn-soft); border-left:3px solid var(--warn);
-  padding:.6rem .8rem; font-size:.84rem; text-align:left; margin-top:.65rem; border-radius:0 .4rem .4rem 0;
-}
-
-.expediente-card{
-  background:var(--surface); border:1px solid var(--good); border-radius:.95rem;
-  padding:1.25rem; text-align:left; margin-top:.75rem;
-}
-.exp-row{display:flex; justify-content:space-between; padding:.4rem 0; font-size:.9rem; border-bottom:1px solid var(--border)}
-.exp-row:last-child{border-bottom:0}
-.btn-primary{
-  background:var(--good); color:#fff; border:0; border-radius:.75rem;
-  padding:.85rem 1.25rem; font-weight:600; font-size:1rem; width:100%; box-shadow:var(--shadow);
-}
-.btn-primary:active{transform:scale(0.98)}
-
-.drawer-backdrop{
-  position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:50;
-  display:none; backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
-}
-.drawer-backdrop.open{display:block}
-.drawer{
-  position:fixed; bottom:0; left:0; right:0; max-height:85dvh; background:var(--surface);
-  border-radius:1.35rem 1.35rem 0 0; padding:1.25rem; z-index:51; overflow-y:auto;
-  box-shadow:0 -8px 25px rgba(0,0,0,.3); transform:translateY(100%); transition:transform .25s ease-out;
-}
-.drawer-backdrop.open .drawer{transform:translateY(0)}
-.days-grid{
-  display:grid; grid-template-columns:repeat(auto-fill, minmax(4.2rem, 1fr));
-  gap:.6rem; margin-top:1rem; padding-bottom:1.5rem;
-}
-.day-node{
-  padding:.7rem .3rem; border-radius:.65rem; border:1px solid var(--border);
-  background:var(--surface-2); text-align:center; font-size:.85rem; font-weight:700;
-}
-.day-node.unlocked{background:var(--surface); border-color:var(--accent); color:var(--accent); cursor:pointer}
-.day-node.current{background:var(--accent); color:var(--accent-fg); border-color:var(--accent)}
-.day-node.completed{border-color:var(--good); color:var(--good)}
-&lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-
-&lt;div class=&quot;wrap&quot;&gt;
-  &lt;header class=&quot;masthead&quot;&gt;
-    &lt;div class=&quot;brand&quot;&gt;
-      &lt;b&gt;Action Bridges&lt;/b&gt;
-      &lt;span&gt;Método Valerie · Oído → Boca → Letra&lt;/span&gt;
-    &lt;/div&gt;
-    &lt;div class=&quot;header-actions&quot;&gt;
-      &lt;button class=&quot;icon-btn&quot; id=&quot;btn-open-days&quot; title=&quot;Ver 57 días&quot;&gt;🗓️&lt;/button&gt;
-      &lt;button class=&quot;icon-btn&quot; id=&quot;btn-theme&quot; title=&quot;Modo oscuro&quot;&gt;🌙&lt;/button&gt;
-    &lt;/div&gt;
-  &lt;/header&gt;
-
-  &lt;div class=&quot;narrator-bar&quot;&gt;
-    &lt;div class=&quot;narrator-top&quot;&gt;
-      &lt;span class=&quot;narrator-badge&quot;&gt;Maestra Lee&lt;/span&gt;
-      &lt;span class=&quot;audio-status&quot; id=&quot;narrator-status&quot;&gt;Lista para iniciar la clase&lt;/span&gt;
-      &lt;button class=&quot;btn-narrate&quot; id=&quot;btn-narrate&quot;&gt;
-        &lt;span id=&quot;narrate-icon&quot;&gt;▶&lt;/span&gt;
-        &lt;span id=&quot;narrate-label&quot;&gt;Escuchar&lt;/span&gt;
-      &lt;/button&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-
-  &lt;div class=&quot;lesson-head&quot;&gt;
-    &lt;div class=&quot;lesson-day&quot; id=&quot;lesson-phase-tag&quot;&gt;Fase 1: El Oído&lt;/div&gt;
-    &lt;h1 class=&quot;lesson-title&quot; id=&quot;lesson-title&quot;&gt;Cargando...&lt;/h1&gt;
-    &lt;p class=&quot;lesson-hook&quot; id=&quot;lesson-hook&quot;&gt;...&lt;/p&gt;
-  &lt;/div&gt;
-
-  &lt;div id=&quot;lesson-steps&quot;&gt;&lt;/div&gt;
-&lt;/div&gt;
-
-&lt;div class=&quot;drawer-backdrop&quot; id=&quot;days-drawer&quot;&gt;
-  &lt;div class=&quot;drawer&quot;&gt;
-    &lt;div style=&quot;display:flex; justify-content:space-between; align-items:center&quot;&gt;
-      &lt;h2 style=&quot;margin:0; font-size:1.3rem&quot;&gt;Ruta de los 57 Días&lt;/h2&gt;
-      &lt;button class=&quot;icon-btn&quot; onclick=&quot;toggleDrawer(false)&quot;&gt;✕&lt;/button&gt;
-    &lt;/div&gt;
-    &lt;p style=&quot;font-size:.85rem; color:var(--muted); margin:.3rem 0 1rem&quot;&gt;
-      Cada día se abre al sellar el expediente anterior. No hay atajos para el cerebro.
-    &lt;/p&gt;
-    &lt;div class=&quot;days-grid&quot; id=&quot;days-grid&quot;&gt;&lt;/div&gt;
-  &lt;/div&gt;
-&lt;/div&gt;
-
-&lt;script&gt;
-if (&#x27;serviceWorker&#x27; in navigator) {
-  const swCode = `
-    const CACHE_NAME = &#x27;ab-v1&#x27;;
-    self.addEventListener(&#x27;install&#x27;, e =&gt; self.skipWaiting());
-    self.addEventListener(&#x27;activate&#x27;, e =&gt; e.clients.claim());
-    self.addEventListener(&#x27;fetch&#x27;, e =&gt; {
-      if (e.request.url.includes(&#x27;/assets/&#x27;) || e.request.url.endsWith(&#x27;.mp3&#x27;)) {
-        e.respondWith(caches.open(CACHE_NAME).then(c =&gt; c.match(e.request).then(r =&gt; r || fetch(e.request).then(res =&gt; {
-          c.put(e.request, res);
-          return res;
-        }))));
-      } else {
-        e.respondWith(fetch(e.request).catch(() =&gt; caches.match(e.request)));
-      }
-    });
-  `;
-  const blob = new Blob([swCode], { type: &#x27;application/javascript&#x27; });
-  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() =&gt; {});
-}
-
-function haptic(ms = 25) {
-  if (&#x27;vibrate&#x27; in navigator) navigator.vibrate(ms);
-}
-
-const LESSONS_DB = {
-  1: {
-    day: 1,
-    title: &quot;El sonido no es la letra&quot;,
-    hook: &quot;Antes de alfabetizar, se despega el oído del ojo.&quot;,
-    phase: &quot;oido&quot;,
-    level: &quot;a0-bajo&quot;,
-    scripts: {
-      s1: &quot;Bienvenido. Hacemos un pacto: primero oímos, luego la boca siente, y al final vemos letras. En español lo que ves es lo que suena; en inglés no. Toca la oreja grande para sellar el pacto y despertar tu oído.&quot;,
-      s2: &quot;Reconoce tu tesoro: en español posees cinco vocales perfectas, fijas y firmes: A, E, I, O, U. Tócalas en orden antes de cruzarte con los sonidos del inglés.&quot;,
-      s3: &quot;Escucha estas tres palabras a ciegas. No intentes adivinar cómo se escriben; solo siente si suenan igual a tus vocales o si hay algo extraño.&quot;,
-      s4: &quot;Recreo de práctica. Tu oído ya detectó la diferencia; ahora afina el reflejo en el laboratorio amarillo. Consigue 5 aciertos y haz tu primer eco.&quot;,
-      s5: &quot;Día uno cumplido. Cero letras consultadas y tu cerebro ya no asume que la &#x27;a&#x27; suena igual en todas partes. Mañana exploraremos el motor del cuello.&quot;
-    }
-  },
-  2: {
-    day: 2,
-    title: &quot;Voz y sordera: el motor del cuello&quot;,
-    hook: &quot;Tus cuerdas vocales son un motor que se enciende y se apaga.&quot;,
-    phase: &quot;oido&quot;,
-    level: &quot;a0-bajo&quot;,
-    scripts: {
-      s1: &quot;Día dos. Pon dos dedos en tu garganta. En español casi todo vibra; en inglés la mitad de los sonidos son puro aire sordo.&quot;,
-      s2: &quot;Siente el motor: toca el sonido que vibra y luego el que es puro aire.&quot;,
-      s3: &quot;Escucha dos consonantes en inglés a ciegas y siente tu garganta.&quot;,
-      s4: &quot;Laboratorio amarillo: distingue pares con motor encendido y apagado.&quot;,
-      s5: &quot;Expediente del Día 2 sellado. Tu cuello ya sabe cuándo apagar el motor.&quot;
-    }
-  }
-};
-
-for (let d = 3; d &lt;= 57; d++) {
-  const isOido = d &lt;= 15;
-  const isBoca = d &gt; 15 &amp;&amp; d &lt;= 40;
-  LESSONS_DB[d] = {
-    day: d,
-    title: isOido ? `Calibración Auditiva #${d}` : (isBoca ? `Gimnasio Muscular #${d}` : `Confesión de la Letra #${d}`),
-    hook: isOido ? &quot;El oído manda.&quot; : (isBoca ? &quot;La boca imita.&quot; : &quot;La ortografía confiesa.&quot;),
-    phase: isOido ? &quot;oido&quot; : (isBoca ? &quot;boca&quot; : &quot;letra&quot;),
-    level: d &lt; 41 ? &quot;a0-bajo&quot; : &quot;a1-fonico&quot;,
-    scripts: {
-      s1: `Iniciamos la sesión del Día ${d}. Concéntrate en la vibración sonora.`,
-      s2: &quot;Calibramos el ancla muscular en tu memoria auditiva.&quot;,
-      s3: &quot;Discriminación a ciegas sin ortografía.&quot;,
-      s4: &quot;Laboratorio amarillo de reflejo rápido.&quot;,
-      s5: `Expediente del Día ${d} listo para guardarse.`
-    }
-  };
-}
-
-const state = {
-  currentDay: 1,
-  highestUnlocked: parseInt(localStorage.getItem(&quot;ab_highest_unlocked&quot;) || &quot;1&quot;, 10),
-  step: 1,
-  pactSealed: false,
-  l1Explored: new Set(),
-  blindDone: false,
-  labScore: 0,
-  labErrors: 0,
-  labTarget: 5,
-  labPairIdx: 0,
-  gymRated: false,
-  gymRating: null,
-  consecutiveFails: 0
-};
-
-const LAB_PAIRS = [
-  { a: &quot;cat&quot;, b: &quot;cat&quot;, same: true, id: &quot;c_c&quot; },
-  { a: &quot;cat&quot;, b: &quot;what&quot;, same: false, id: &quot;c_w&quot; },
-  { a: &quot;beat&quot;, b: &quot;bit&quot;, same: false, id: &quot;b_bt&quot; },
-  { a: &quot;one&quot;, b: &quot;one&quot;, same: true, id: &quot;o_o&quot; },
-  { a: &quot;sheep&quot;, b: &quot;ship&quot;, same: false, id: &quot;s_sp&quot; },
-  { a: &quot;yacht&quot;, b: &quot;what&quot;, same: false, id: &quot;y_w&quot; },
-  { a: &quot;two&quot;, b: &quot;two&quot;, same: true, id: &quot;t_t&quot; }
-];
-
-const audioEl = new Audio();
-let audioUnlocked = false;
-
-function unlockAudio() {
-  if (audioUnlocked) return;
-  const silent = new Audio(&quot;data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAA=&quot;);
-  silent.play().then(() =&gt; { audioUnlocked = true; }).catch(() =&gt; {});
-}
-
-function playSound(token, lang = &quot;en-US&quot;) {
-  unlockAudio();
-  haptic(20);
-  const clean = token.replace(/[^a-zA-Z]/g, &quot;&quot;).toLowerCase();
-  const local = `assets/oido-audio/${clean}.mp3`;
-  const cdn = `https://babayaba71-maker.github.io/AccentBridges/assets/oido-audio/${clean}.mp3`;
-
-  audioEl.src = local;
-  audioEl.play().catch(() =&gt; {
-    audioEl.src = cdn;
-    audioEl.play().catch(() =&gt; {
-      if (&#x27;speechSynthesis&#x27; in window) {
-        window.speechSynthesis.cancel();
-        const utt = new SpeechSynthesisUtterance(clean);
-        utt.lang = lang;
-        utt.rate = 0.9;
-        window.speechSynthesis.speak(utt);
-      }
-    });
-  });
-}
-
-function speakMaestra(text, onEnd) {
-  document.getElementById(&quot;narrator-status&quot;).textContent = text;
-  if (&#x27;mediaSession&#x27; in navigator) {
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: `Día ${state.currentDay} · Action Bridges`,
-      artist: &quot;Maestra Lee&quot;,
-      album: &quot;Método Valerie&quot;
-    });
-  }
-
-  if (&#x27;speechSynthesis&#x27; in window) {
-    window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.lang = &quot;es-MX&quot;;
-    utt.rate = 0.95;
-    utt.onend = onEnd || null;
-    window.speechSynthesis.speak(utt);
-  } else {
-    setTimeout(onEnd || (() =&gt; {}), 3500);
-  }
-}
-
-function loadDayFromHash() {
-  const hash = window.location.hash;
-  const match = hash.match(/#dia-(\d+)/);
-  let requestedDay = match ? parseInt(match[1], 10) : 1;
-
-  if (requestedDay &gt; state.highestUnlocked) {
-    requestedDay = state.highestUnlocked;
-    window.location.hash = `#dia-${requestedDay}`;
-  }
-
-  state.currentDay = requestedDay;
-  state.step = 1;
-  state.pactSealed = false;
-  state.l1Explored.clear();
-  state.blindDone = false;
-  state.labScore = 0;
-  state.labErrors = 0;
-  state.gymRated = false;
-  state.consecutiveFails = 0;
-
-  renderApp();
-}
-
-function renderApp() {
-  const lesson = LESSONS_DB[state.currentDay];
-  document.getElementById(&quot;lesson-phase-tag&quot;).textContent = `Fase: ${lesson.phase.toUpperCase()} · Día ${lesson.day} de 57`;
-  document.getElementById(&quot;lesson-title&quot;).textContent = lesson.title;
-  document.getElementById(&quot;lesson-hook&quot;).textContent = `&quot;${lesson.hook}&quot;`;
-
-  const container = document.getElementById(&quot;lesson-steps&quot;);
-  container.innerHTML = `
-    &lt;div class=&quot;step-card ${state.step === 1 ? &#x27;active&#x27; : &#x27;&#x27;} ${state.pactSealed ? &#x27;completed&#x27; : &#x27;&#x27;}&quot; id=&quot;s1-card&quot;&gt;
-      &lt;div class=&quot;step-header&quot;&gt;
-        &lt;div class=&quot;step-tag&quot;&gt;&lt;span class=&quot;step-num&quot;&gt;1&lt;/span&gt; Contrato del Método&lt;/div&gt;
-        &lt;span style=&quot;font-size:.85rem; font-weight:700&quot;&gt;${state.pactSealed ? &#x27;✓ Sellado&#x27; : &#x27;Compuerta&#x27;}&lt;/span&gt;
-      &lt;/div&gt;
-      &lt;div class=&quot;step-speech&quot;&gt;&quot;${lesson.scripts.s1}&quot;&lt;/div&gt;
-      &lt;div class=&quot;interactive-box&quot;&gt;
-        &lt;button class=&quot;ear-pact-btn ${state.pactSealed ? &#x27;pact-sealed&#x27; : &#x27;&#x27;}&quot; onclick=&quot;onPactClick()&quot;&gt;👂&lt;/button&gt;
-        &lt;p style=&quot;font-size:.85rem; color:var(--muted); margin:.4rem 0 0&quot;&gt;
-          ${state.pactSealed ? &#x27;✓ Oído calibrado. Modo sin letras activado.&#x27; : &#x27;Toca la oreja grande para sellar el pacto.&#x27;}
-        &lt;/p&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-
-    &lt;div class=&quot;step-card ${state.step === 2 ? &#x27;active&#x27; : &#x27;&#x27;} ${state.l1Explored.size &gt;= 5 ? &#x27;completed&#x27; : &#x27;&#x27;}&quot; id=&quot;s2-card&quot;&gt;
-      &lt;div class=&quot;step-header&quot;&gt;
-        &lt;div class=&quot;step-tag&quot;&gt;&lt;span class=&quot;step-num&quot;&gt;2&lt;/span&gt; Tus 5 Vocales del Español&lt;/div&gt;
-        &lt;span style=&quot;font-size:.85rem; font-weight:700&quot;&gt;${state.l1Explored.size} / 5&lt;/span&gt;
-      &lt;/div&gt;
-      &lt;div class=&quot;step-speech&quot;&gt;&quot;${lesson.scripts.s2}&quot;&lt;/div&gt;
-      &lt;div class=&quot;interactive-box&quot;&gt;
-        &lt;div class=&quot;vowel-row&quot;&gt;
-          ${[&quot;a&quot;,&quot;e&quot;,&quot;i&quot;,&quot;o&quot;,&quot;u&quot;].map(v =&gt; `
-            &lt;button class=&quot;vowel-btn ${state.l1Explored.has(v) ? &#x27;played&#x27; : &#x27;&#x27;}&quot; onclick=&quot;onVowelClick(&#x27;${v}&#x27;)&quot;&gt;
-              ${v.toUpperCase()}
-              &lt;span style=&quot;font-size:.6rem; color:var(--muted)&quot;&gt;L1&lt;/span&gt;
-            &lt;/button&gt;
-          `).join(&#x27;&#x27;)}
-        &lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-
-    &lt;div class=&quot;step-card ${state.step === 3 ? &#x27;active&#x27; : &#x27;&#x27;} ${state.blindDone ? &#x27;completed&#x27; : &#x27;&#x27;}&quot; id=&quot;s3-card&quot;&gt;
-      &lt;div class=&quot;step-header&quot;&gt;
-        &lt;div class=&quot;step-tag&quot;&gt;&lt;span class=&quot;step-num&quot;&gt;3&lt;/span&gt; Estímulo a Ciegas (Cero Texto)&lt;/div&gt;
-        &lt;span style=&quot;font-size:.85rem; font-weight:700&quot;&gt;${state.blindDone ? &#x27;✓ Listo&#x27; : &#x27;Compuerta&#x27;}&lt;/span&gt;
-      &lt;/div&gt;
-      &lt;div class=&quot;step-speech&quot;&gt;&quot;${lesson.scripts.s3}&quot;&lt;/div&gt;
-      &lt;div class=&quot;interactive-box&quot;&gt;
-        &lt;button class=&quot;btn-narrate&quot; style=&quot;margin:.4rem auto&quot; onclick=&quot;playBlindBurst()&quot;&gt;
-          🔊 Escuchar ráfaga (3 sonidos)
-        &lt;/button&gt;
-        &lt;div class=&quot;blind-choices&quot;&gt;
-          &lt;button class=&quot;choice-btn&quot; onclick=&quot;onBlindChoice(&#x27;familiar&#x27;)&quot;&gt;Sonó igual a mis vocales&lt;/button&gt;
-          &lt;button class=&quot;choice-btn&quot; onclick=&quot;onBlindChoice(&#x27;extrano&#x27;)&quot;&gt;Sonó extraño / diferente&lt;/button&gt;
-        &lt;/div&gt;
-        ${state.blindDone ? `
-          &lt;div class=&quot;hint-banner&quot;&gt;
-            &lt;b&gt;Explicación de la Maestra Lee:&lt;/b&gt; Las 3 palabras que escuchaste se escriben con la letra &quot;A&quot; en inglés, pero suenan con tres vocales completamente distintas. Tu oído no se dejó engañar.
-          &lt;/div&gt;
-        ` : &#x27;&#x27;}
-      &lt;/div&gt;
-    &lt;/div&gt;
-
-    &lt;div class=&quot;step-card ${state.step === 4 ? &#x27;active&#x27; : &#x27;&#x27;} ${(state.labScore &gt;= state.labTarget &amp;&amp; state.gymRated) ? &#x27;completed&#x27; : &#x27;&#x27;}&quot; id=&quot;s4-card&quot;&gt;
-      &lt;div class=&quot;step-header&quot;&gt;
-        &lt;div class=&quot;step-tag&quot;&gt;&lt;span class=&quot;step-num&quot;&gt;4&lt;/span&gt; Recreo: Laboratorio Amarillo&lt;/div&gt;
-        &lt;span style=&quot;font-size:.85rem; font-weight:700&quot;&gt;Meta: ${state.labScore} / ${state.labTarget}&lt;/span&gt;
-      &lt;/div&gt;
-      &lt;div class=&quot;step-speech&quot;&gt;&quot;${lesson.scripts.s4}&quot;&lt;/div&gt;
-
-      &lt;div class=&quot;yellow-lab-box&quot;&gt;
-        &lt;span class=&quot;lab-badge&quot;&gt;Laboratorio Oído Inglés&lt;/span&gt;
-        &lt;p style=&quot;font-size:.9rem; font-weight:700; margin:.5rem 0&quot;&gt;¿Los dos sonidos son IGUALES o DISTINTOS?&lt;/p&gt;
-        &lt;button class=&quot;lab-pair-trigger&quot; onclick=&quot;playLabPair()&quot;&gt;🔊 Reproducir Par Sonoro&lt;/button&gt;
-        &lt;div class=&quot;lab-answers&quot;&gt;
-          &lt;button class=&quot;lab-ans-btn&quot; onclick=&quot;onLabAnswer(true)&quot;&gt;[ = ] IGUAL&lt;/button&gt;
-          &lt;button class=&quot;lab-ans-btn&quot; onclick=&quot;onLabAnswer(false)&quot;&gt;[ ≠ ] DISTINTO&lt;/button&gt;
-        &lt;/div&gt;
-        &lt;p id=&quot;lab-status&quot; style=&quot;font-size:.84rem; color:var(--muted); margin-top:.5rem&quot;&gt;Toca el botón azul para escuchar.&lt;/p&gt;
-
-        ${renderScaffoldingHint()}
-      &lt;/div&gt;
-
-      ${state.labScore &gt;= state.labTarget ? `
-        &lt;div class=&quot;gym-box&quot;&gt;
-          &lt;p style=&quot;font-weight:700; font-size:.92rem; color:var(--good); margin:0 0 .4rem&quot;&gt;👄 Primer Eco (Shadowing Muscular)&lt;/p&gt;
-          &lt;button class=&quot;lab-ans-btn&quot; style=&quot;height:2.6rem; max-width:14rem; margin:0 auto; font-size:.85rem&quot; onclick=&quot;playSound(&#x27;cat&#x27;)&quot;&gt;
-            🔊 Escuchar modelo
-          &lt;/button&gt;
-          &lt;div class=&quot;self-eval-row&quot;&gt;
-            &lt;button class=&quot;eval-btn ${state.gymRating===&#x27;logre&#x27;?&#x27;picked&#x27;:&#x27;&#x27;}&quot; onclick=&quot;onGymRate(&#x27;logre&#x27;)&quot;&gt;😎 Lo logré&lt;/button&gt;
-            &lt;button class=&quot;eval-btn ${state.gymRating===&#x27;casi&#x27;?&#x27;picked&#x27;:&#x27;&#x27;}&quot; onclick=&quot;onGymRate(&#x27;casi&#x27;)&quot;&gt;🤏 Casi&lt;/button&gt;
-            &lt;button class=&quot;eval-btn ${state.gymRating===&#x27;todavia&#x27;?&#x27;picked&#x27;:&#x27;&#x27;}&quot; onclick=&quot;onGymRate(&#x27;todavia&#x27;)&quot;&gt;😅 Todavía no&lt;/button&gt;
-          &lt;/div&gt;
-          ${state.gymRating ? `&lt;p style=&quot;font-size:.8rem; color:var(--good); margin-top:.4rem&quot;&gt;✓ Autoevaluación registrada con honestidad.&lt;/p&gt;` : &#x27;&#x27;}
-        &lt;/div&gt;
-      ` : &#x27;&#x27;}
-    &lt;/div&gt;
-
-    &lt;div class=&quot;step-card ${state.step === 5 ? &#x27;active&#x27; : &#x27;&#x27;}&quot; id=&quot;s5-card&quot;&gt;
-      &lt;div class=&quot;step-header&quot;&gt;
-        &lt;div class=&quot;step-tag&quot;&gt;&lt;span class=&quot;step-num&quot;&gt;5&lt;/span&gt; Expediente del Día ${state.currentDay}&lt;/div&gt;
-      &lt;/div&gt;
-      &lt;div class=&quot;step-speech&quot;&gt;&quot;${lesson.scripts.s5}&quot;&lt;/div&gt;
-
-      ${(state.labScore &gt;= state.labTarget &amp;&amp; state.gymRated) ? `
-        &lt;div class=&quot;expediente-card&quot;&gt;
-          &lt;h3 style=&quot;margin:0 0 .5rem; font-size:1.15rem&quot;&gt;Expediente Sellado con Éxito&lt;/h3&gt;
-          &lt;div class=&quot;exp-row&quot;&gt;&lt;span&gt;👂 Discriminación Auditiva:&lt;/span&gt; &lt;b&gt;${state.labScore} aciertos (${state.labErrors} reintentos)&lt;/b&gt;&lt;/div&gt;
-          &lt;div class=&quot;exp-row&quot;&gt;&lt;span&gt;👄 Eco Muscular:&lt;/span&gt; &lt;b&gt;${state.gymRating || &#x27;Completado&#x27;}&lt;/b&gt;&lt;/div&gt;
-          &lt;div class=&quot;exp-row&quot;&gt;&lt;span&gt;🛡️ Doctrina:&lt;/span&gt; &lt;b&gt;0 letras consultadas (Oído puro)&lt;/b&gt;&lt;/div&gt;
-          &lt;div style=&quot;margin-top:1rem&quot;&gt;
-            &lt;button class=&quot;btn-primary&quot; onclick=&quot;sealDayExpediente()&quot;&gt;
-              🔓 Guardar y Desbloquear Día ${state.currentDay + 1}
-            &lt;/button&gt;
-          &lt;/div&gt;
-        &lt;/div&gt;
-      ` : `
-        &lt;p style=&quot;font-size:.85rem; color:var(--muted); text-align:center&quot;&gt;Completa el laboratorio amarillo y el eco muscular para destrabar el expediente.&lt;/p&gt;
-      `}
-    &lt;/div&gt;
-  `;
-}
-
-function renderScaffoldingHint() {
-  if (state.consecutiveFails &gt;= 5) {
-    return `&lt;div class=&quot;hint-banner&quot;&gt;&lt;b&gt;Pista nivel 3 (Imagen mental):&lt;/b&gt; Piensa en la primera como una sonrisa amplia y en la segunda como un bostezo relajado.&lt;/div&gt;`;
-  } else if (state.consecutiveFails &gt;= 3) {
-    return `&lt;div class=&quot;hint-banner&quot;&gt;&lt;b&gt;Pista nivel 2 (Ancla español):&lt;/b&gt; El primer sonido estira los labios hacia los lados; el segundo cae sin tensión al pecho.&lt;/div&gt;`;
-  } else if (state.consecutiveFails &gt;= 1) {
-    return `&lt;div class=&quot;hint-banner&quot;&gt;&lt;b&gt;Pista nivel 1:&lt;/b&gt; Escucha con atención a la duración y al aire entre ambos disparos.&lt;/div&gt;`;
-  }
-  return &#x27;&#x27;;
-}
-
-function onPactClick() {
-  haptic(40);
-  unlockAudio();
-  state.pactSealed = true;
-  state.step = 2;
-  renderApp();
-  speakMaestra(LESSONS_DB[state.currentDay].scripts.s2);
-  document.getElementById(&quot;s2-card&quot;).scrollIntoView({ behavior: &#x27;smooth&#x27; });
-}
-
-function onVowelClick(v) {
-  haptic(20);
-  state.l1Explored.add(v);
-  playSound(v, &quot;es-MX&quot;);
-  if (state.l1Explored.size &gt;= 5 &amp;&amp; state.step === 2) {
-    state.step = 3;
-    setTimeout(() =&gt; {
-      renderApp();
-      speakMaestra(LESSONS_DB[state.currentDay].scripts.s3);
-      document.getElementById(&quot;s3-card&quot;).scrollIntoView({ behavior: &#x27;smooth&#x27; });
-    }, 600);
-  } else {
-    renderApp();
-  }
-}
-
-function playBlindBurst() {
-  playSound(&quot;cat&quot;);
-  setTimeout(() =&gt; playSound(&quot;what&quot;), 1200);
-  setTimeout(() =&gt; playSound(&quot;yacht&quot;), 2400);
-}
-
-function onBlindChoice(choice) {
-  haptic(25);
-  state.blindDone = true;
-  state.step = 4;
-  renderApp();
-  speakMaestra(LESSONS_DB[state.currentDay].scripts.s4);
-  document.getElementById(&quot;s4-card&quot;).scrollIntoView({ behavior: &#x27;smooth&#x27; });
-}
-
-let activeLabPair = LAB_PAIRS[0];
-
-function playLabPair() {
-  activeLabPair = LAB_PAIRS[state.labPairIdx % LAB_PAIRS.length];
-  playSound(activeLabPair.a);
-  setTimeout(() =&gt; playSound(activeLabPair.b), 1050);
-  document.getElementById(&quot;lab-status&quot;).textContent = &quot;Escuchando sonidos A y B...&quot;;
-}
-
-function onLabAnswer(saidSame) {
-  const isCorrect = (saidSame === activeLabPair.same);
-  haptic(isCorrect ? 30 : 60);
-
-  if (isCorrect) {
-    state.labScore++;
-    state.consecutiveFails = 0;
-    document.getElementById(&quot;lab-status&quot;).innerHTML = &quot;&lt;b style=&#x27;color:var(--good)&#x27;&gt;✓ ¡Correcto! Tu oído captó la relación.&lt;/b&gt;&quot;;
-  } else {
-    state.labErrors++;
-    state.consecutiveFails++;
-    document.getElementById(&quot;lab-status&quot;).innerHTML = &quot;&lt;b style=&#x27;color:var(--warn)&#x27;&gt;Reintenta con calma.&lt;/b&gt;&quot;;
-  }
-
-  fetch(&quot;/api/QuizResponse&quot;, {
-    method: &quot;POST&quot;,
-    headers: { &quot;Content-Type&quot;: &quot;application/json&quot;, &quot;ABVC-PILOTO-2026&quot;: &quot;true&quot; },
-    body: JSON.stringify({ pair: activeLabPair.id, correct: isCorrect, day: state.currentDay })
-  }).catch(() =&gt; {});
-
-  state.labPairIdx++;
-  setTimeout(() =&gt; {
-    renderApp();
-  }, 750);
-}
-
-function onGymRate(rate) {
-  haptic(25);
-  state.gymRating = rate;
-  state.gymRated = true;
-  state.step = 5;
-  renderApp();
-  speakMaestra(LESSONS_DB[state.currentDay].scripts.s5);
-  document.getElementById(&quot;s5-card&quot;).scrollIntoView({ behavior: &#x27;smooth&#x27; });
-}
-
-function sealDayExpediente() {
-  haptic([30, 50, 30]);
-  const nextDay = state.currentDay + 1;
-  if (nextDay &gt; state.highestUnlocked) {
-    state.highestUnlocked = nextDay;
-    localStorage.setItem(&quot;ab_highest_unlocked&quot;, nextDay.toString());
-  }
-
-  fetch(&quot;/api/PracticeSession&quot;, {
-    method: &quot;POST&quot;,
-    headers: { &quot;Content-Type&quot;: &quot;application/json&quot;, &quot;ABVC-PILOTO-2026&quot;: &quot;true&quot; },
-    body: JSON.stringify({ day: state.currentDay, completed: true, timestamp: Date.now() })
-  }).catch(() =&gt; {});
-
-  alert(`🎉 ¡Expediente del Día ${state.currentDay} sellado! La puerta del Día ${nextDay} ha sido abierta.`);
-  window.location.hash = `#dia-${nextDay}`;
-}
-
-function toggleDrawer(open) {
-  const drawer = document.getElementById(&quot;days-drawer&quot;);
-  if (open) {
-    buildDaysGrid();
-    drawer.classList.add(&quot;open&quot;);
-  } else {
-    drawer.classList.remove(&quot;open&quot;);
-  }
-}
-
-function buildDaysGrid() {
-  const grid = document.getElementById(&quot;days-grid&quot;);
-  grid.innerHTML = &quot;&quot;;
-  for (let d = 1; d &lt;= 57; d++) {
-    const isUnlocked = d &lt;= state.highestUnlocked;
-    const isCurrent = d === state.currentDay;
-    const div = document.createElement(&quot;div&quot;);
-    div.className = `day-node ${isCurrent ? &#x27;current&#x27; : (isUnlocked ? &#x27;unlocked&#x27; : &#x27;&#x27;)}`;
-    div.textContent = `D${d}`;
-    if (isUnlocked) {
-      div.onclick = () =&gt; {
-        toggleDrawer(false);
-        window.location.hash = `#dia-${d}`;
-      };
-    } else {
-      div.style.opacity = &quot;.35&quot;;
-      div.style.cursor = &quot;not-allowed&quot;;
-    }
-    grid.appendChild(div);
-  }
-}
-
-document.getElementById(&quot;btn-open-days&quot;).onclick = () =&gt; toggleDrawer(true);
-
-const btnTheme = document.getElementById(&quot;btn-theme&quot;);
-btnTheme.onclick = () =&gt; {
-  const isDark = document.documentElement.classList.toggle(&quot;dark&quot;);
-  btnTheme.textContent = isDark ? &quot;☀️&quot; : &quot;🌙&quot;;
-  localStorage.setItem(&quot;ab_theme&quot;, isDark ? &quot;dark&quot; : &quot;light&quot;);
-};
-if (localStorage.getItem(&quot;ab_theme&quot;) === &quot;dark&quot;) {
-  document.documentElement.classList.add(&quot;dark&quot;);
-  btnTheme.textContent = &quot;☀️&quot;;
-}
-
-document.getElementById(&quot;btn-narrate&quot;).onclick = () =&gt; {
-  const script = LESSONS_DB[state.currentDay].scripts[`s${state.step}`];
-  speakMaestra(script);
-};
-
-window.addEventListener(&quot;hashchange&quot;, loadDayFromHash);
-loadDayFromHash();
-&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-" loading="lazy"></iframe></div>
-    </section><section class="panel" id="p-claude3" style="display:none">
-      <div class="barra">
-        <div class="meta">
-          <span class="badge" style="background:#eab30822;color:#eab308;border-color:#eab30855">AMARILLO · EVOLUCIÓN</span>
-          <strong>Action Bridges — Estudio Integrado v3</strong>
-          <span class="peso">45 KB</span>
-        </div>
-        <a href="https://babayaba71-maker.github.io/AccentBridges/estudio-v3.html" target="_blank" rel="noopener">abrir aparte ↗</a>
-      </div>
-      <p class="nota">La evolución publicada del de Claude. También Ruta de los 57 Días, con más peso. Es la versión viva de esa familia.</p>
+      <p>Abrir el abecedario letra por letra.</p>
+      <div class="acciones"><button class="abrir" data-open="t-cirugia">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/cirugia-abc.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="talleres" data-nombre="deletrando">
+      <div class="top"><span class="punto" style="background:#3d5a73"></span><h3>Deletrando</h3></div>
       
-      <div class="marco"><iframe src="https://babayaba71-maker.github.io/AccentBridges/estudio-v3.html" loading="lazy" referrerpolicy="no-referrer"></iframe></div>
-    </section></main>
-<footer>AccentBridges · comparación de morfofónicos · 10-nov-2026</footer>
+      <p>Spelling en inglés, desde el sonido.</p>
+      <div class="acciones"><button class="abrir" data-open="t-deletrando">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/deletrando.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="talleres" data-nombre="teclado del abecedario">
+      <div class="top"><span class="punto" style="background:#3d5a73"></span><h3>Teclado del Abecedario</h3></div>
+      
+      <p>El alfabeto trabajando con las manos.</p>
+      <div class="acciones"><button class="abrir" data-open="t-teclado">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/teclado.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="talleres" data-nombre="armador de sonidos">
+      <div class="top"><span class="punto" style="background:#3d5a73"></span><h3>Armador de Sonidos</h3></div>
+      
+      <p>Armar palabras desde sus sonidos.</p>
+      <div class="acciones"><button class="abrir" data-open="t-armador">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/armador.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="talleres" data-nombre="mouth gym">
+      <div class="top"><span class="punto" style="background:#3d5a73"></span><h3>Mouth Gym</h3></div>
+      
+      <p>Shadowing por nivel. Gimnasio de boca.</p>
+      <div class="acciones"><button class="abrir" data-open="t-boca">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/boca-gym.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="talleres" data-nombre="reflejos">
+      <div class="top"><span class="punto" style="background:#3d5a73"></span><h3>Reflejos</h3></div>
+      
+      <p>Velocidad de reconocimiento.</p>
+      <div class="acciones"><button class="abrir" data-open="t-reflejos">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/reflejos.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="talleres" data-nombre="el pegamento">
+      <div class="top"><span class="punto" style="background:#3d5a73"></span><h3>El Pegamento</h3></div>
+      
+      <p>Lo que une las piezas.</p>
+      <div class="acciones"><button class="abrir" data-open="t-pegamento">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/el-pegamento.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="talleres" data-nombre="inventario">
+      <div class="top"><span class="punto" style="background:#3d5a73"></span><h3>Inventario</h3></div>
+      
+      <p>Palabras clave del alumno.</p>
+      <div class="acciones"><button class="abrir" data-open="t-inventario">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/inventario.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="talleres" data-nombre="el mapa de tus sonidos">
+      <div class="top"><span class="punto" style="background:#3d5a73"></span><h3>El Mapa de tus Sonidos</h3></div>
+      
+      <p>Dónde están sus huecos.</p>
+      <div class="acciones"><button class="abrir" data-open="t-mapa">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/mapa-sonidos.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="talleres" data-nombre="tecnicismos">
+      <div class="top"><span class="punto" style="background:#3d5a73"></span><h3>Tecnicismos</h3></div>
+      
+      <p>Tres canales para el vocabulario técnico.</p>
+      <div class="acciones"><button class="abrir" data-open="t-tecnicismos">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/tecnicismos.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="talleres" data-nombre="lección día 18 · th">
+      <div class="top"><span class="punto" style="background:#3d5a73"></span><h3>Lección Día 18 · TH</h3></div>
+      
+      <p>La lección de la TH, ya armada.</p>
+      <div class="acciones"><button class="abrir" data-open="t-d18">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/leccion-d18.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="talleres" data-nombre="estudio de variaciones">
+      <div class="top"><span class="punto" style="background:#3d5a73"></span><h3>Estudio de Variaciones</h3></div>
+      
+      <p>La Guía de Vecindad: cómo cambia un sonido según el contexto.</p>
+      <div class="acciones"><button class="abrir" data-open="t-variaciones">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/variaciones-estudio.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="pruebas" data-nombre="prueba de oído (20 ítems)">
+      <div class="top"><span class="punto" style="background:#58a6ff"></span><h3>Prueba de Oído (20 ítems)</h3></div>
+      
+      <p>La puerta de entrada: 20 preguntas, 10 minutos, devuelve puntaje y los dos contrastes flacos.</p>
+      <div class="acciones"><button class="abrir" data-open="p-oido">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/prueba-oido.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="pruebas" data-nombre="oído inglés">
+      <div class="top"><span class="punto" style="background:#58a6ff"></span><h3>Oído Inglés</h3></div>
+      
+      <p>La versión larga del entrenamiento de oído.</p>
+      <div class="acciones"><button class="abrir" data-open="p-oidoing">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/oido-ingles.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="pruebas" data-nombre="prueba del oído">
+      <div class="top"><span class="punto" style="background:#58a6ff"></span><h3>Prueba del Oído</h3></div>
+      
+      <p>La versión anterior del diagnóstico.</p>
+      <div class="acciones"><button class="abrir" data-open="p-assessment">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/assessment.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="pruebas" data-nombre="prueba del cerebro">
+      <div class="top"><span class="punto" style="background:#58a6ff"></span><h3>Prueba del Cerebro</h3></div>
+      
+      <p>Comprensión, el canal de al lado.</p>
+      <div class="acciones"><button class="abrir" data-open="p-cerebro">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/prueba-comprension.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="pruebas" data-nombre="prueba del ojo">
+      <div class="top"><span class="punto" style="background:#58a6ff"></span><h3>Prueba del Ojo</h3></div>
+      
+      <p>Qué tanto lo resuelve leyendo.</p>
+      <div class="acciones"><button class="abrir" data-open="p-ojo">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/prueba-del-ojo.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="otros" data-nombre="english foundation trainer v3.2">
+      <div class="top"><span class="punto" style="background:#8b949e"></span><h3>English Foundation Trainer v3.2</h3></div>
+      
+      <p>La base completa, fuera del morfofónico.</p>
+      <div class="acciones"><button class="abrir" data-open="o-foundation">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/foundation-trainer.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article><article class="card" data-fam="otros" data-nombre="mapa de lecciones faltantes">
+      <div class="top"><span class="punto" style="background:#8b949e"></span><h3>Mapa de lecciones faltantes</h3></div>
+      
+      <p>Lo que le falta al sistema, por escrito.</p>
+      <div class="acciones"><button class="abrir" data-open="o-faltantes">Ver aquí</button><a class="ext" href="https://babayaba71-maker.github.io/AccentBridges/mapa-lecciones-faltantes.html" target="_blank" rel="noopener">Aparte ↗</a></div>
+    </article>
+<p class="vacio" id="vacio" style="display:none">No hay nada con ese nombre.</p>
+</main>
+<footer>AccentBridges · inventario de morfofónicos · 10-nov-2026</footer>
+
+<div id="visor">
+  <div class="vbar">
+    <button class="volver" id="volver">← Volver</button>
+    <span class="vtit" id="vtit"></span>
+    <a class="vext" id="vext" href="#" target="_blank" rel="noopener">Aparte ↗</a>
+  </div>
+  <iframe id="vframe" title="Vista de la página"></iframe>
+</div>
+
 <script>
-document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => {
-  document.querySelectorAll('.tab').forEach(x => x.classList.remove('activo'));
-  document.querySelectorAll('.panel').forEach(x => x.style.display = 'none');
-  b.classList.add('activo');
-  const p = document.getElementById('p-' + b.dataset.t);
-  if (p) { p.style.display = 'flex'; }
+const DATA = [{"id": "m-a0", "nombre": "Morfofono A0", "fam": "morfos", "color": "#eab308", "desc": "Alfabetización A0. El clásico de 42 lecciones: se recorrió completo, 28 horas, sin un solo veredicto guardado. Es el que se midió.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/morfofono.html", "peso": ""}, {"id": "m-estudio", "nombre": "Morfofono Estudio", "fam": "morfos", "color": "#eab308", "desc": "De A0-bajo a A1-bajo. Un peldaño arriba, misma familia azul.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/morfofono-estudio.html", "peso": ""}, {"id": "m-diario", "nombre": "Morfofono Diario", "fam": "morfos", "color": "#eab308", "desc": "El organizador diario del A0. La agenda, no la lección.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/morfofono-diario.html", "peso": ""}, {"id": "m-v1", "nombre": "Estudio Integrado v1", "fam": "morfos", "color": "#eab308", "desc": "El borrador de Claude del 19-oct, Ruta de los 57 Días. Este es el que según JJ SÍ le enseñó. Nunca se integró ni se midió.", "local": true, "src": "", "peso": "30 KB"}, {"id": "m-v2", "nombre": "Estudio Integrado v2", "fam": "morfos", "color": "#eab308", "desc": "La versión de control de calidad del linaje de Claude.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/estudio-v2.html", "peso": ""}, {"id": "m-v3", "nombre": "Estudio Integrado v3", "fam": "morfos", "color": "#eab308", "desc": "La evolución publicada del de Claude. La más completa de esa familia.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/estudio-v3.html", "peso": ""}, {"id": "t-dia1", "nombre": "Día 1 · El sonido no es la letra", "fam": "talleres", "color": "#3d5a73", "desc": "El arranque: separar lo que se oye de lo que se ve.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/dia-1.html", "peso": ""}, {"id": "t-cirugia", "nombre": "Cirugía del Abecedario", "fam": "talleres", "color": "#3d5a73", "desc": "Abrir el abecedario letra por letra.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/cirugia-abc.html", "peso": ""}, {"id": "t-deletrando", "nombre": "Deletrando", "fam": "talleres", "color": "#3d5a73", "desc": "Spelling en inglés, desde el sonido.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/deletrando.html", "peso": ""}, {"id": "t-teclado", "nombre": "Teclado del Abecedario", "fam": "talleres", "color": "#3d5a73", "desc": "El alfabeto trabajando con las manos.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/teclado.html", "peso": ""}, {"id": "t-armador", "nombre": "Armador de Sonidos", "fam": "talleres", "color": "#3d5a73", "desc": "Armar palabras desde sus sonidos.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/armador.html", "peso": ""}, {"id": "t-boca", "nombre": "Mouth Gym", "fam": "talleres", "color": "#3d5a73", "desc": "Shadowing por nivel. Gimnasio de boca.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/boca-gym.html", "peso": ""}, {"id": "t-reflejos", "nombre": "Reflejos", "fam": "talleres", "color": "#3d5a73", "desc": "Velocidad de reconocimiento.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/reflejos.html", "peso": ""}, {"id": "t-pegamento", "nombre": "El Pegamento", "fam": "talleres", "color": "#3d5a73", "desc": "Lo que une las piezas.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/el-pegamento.html", "peso": ""}, {"id": "t-inventario", "nombre": "Inventario", "fam": "talleres", "color": "#3d5a73", "desc": "Palabras clave del alumno.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/inventario.html", "peso": ""}, {"id": "t-mapa", "nombre": "El Mapa de tus Sonidos", "fam": "talleres", "color": "#3d5a73", "desc": "Dónde están sus huecos.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/mapa-sonidos.html", "peso": ""}, {"id": "t-tecnicismos", "nombre": "Tecnicismos", "fam": "talleres", "color": "#3d5a73", "desc": "Tres canales para el vocabulario técnico.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/tecnicismos.html", "peso": ""}, {"id": "t-d18", "nombre": "Lección Día 18 · TH", "fam": "talleres", "color": "#3d5a73", "desc": "La lección de la TH, ya armada.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/leccion-d18.html", "peso": ""}, {"id": "t-variaciones", "nombre": "Estudio de Variaciones", "fam": "talleres", "color": "#3d5a73", "desc": "La Guía de Vecindad: cómo cambia un sonido según el contexto.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/variaciones-estudio.html", "peso": ""}, {"id": "p-oido", "nombre": "Prueba de Oído (20 ítems)", "fam": "pruebas", "color": "#58a6ff", "desc": "La puerta de entrada: 20 preguntas, 10 minutos, devuelve puntaje y los dos contrastes flacos.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/prueba-oido.html", "peso": ""}, {"id": "p-oidoing", "nombre": "Oído Inglés", "fam": "pruebas", "color": "#58a6ff", "desc": "La versión larga del entrenamiento de oído.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/oido-ingles.html", "peso": ""}, {"id": "p-assessment", "nombre": "Prueba del Oído", "fam": "pruebas", "color": "#58a6ff", "desc": "La versión anterior del diagnóstico.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/assessment.html", "peso": ""}, {"id": "p-cerebro", "nombre": "Prueba del Cerebro", "fam": "pruebas", "color": "#58a6ff", "desc": "Comprensión, el canal de al lado.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/prueba-comprension.html", "peso": ""}, {"id": "p-ojo", "nombre": "Prueba del Ojo", "fam": "pruebas", "color": "#58a6ff", "desc": "Qué tanto lo resuelve leyendo.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/prueba-del-ojo.html", "peso": ""}, {"id": "o-foundation", "nombre": "English Foundation Trainer v3.2", "fam": "otros", "color": "#8b949e", "desc": "La base completa, fuera del morfofónico.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/foundation-trainer.html", "peso": ""}, {"id": "o-faltantes", "nombre": "Mapa de lecciones faltantes", "fam": "otros", "color": "#8b949e", "desc": "Lo que le falta al sistema, por escrito.", "local": false, "src": "https://babayaba71-maker.github.io/AccentBridges/mapa-lecciones-faltantes.html", "peso": ""}];
+const V1_SRCDOC = "Borrador v1 de Cloud/Claude (19-oct 15:04) \u2014 Morfofono Estudio Integrado. Prototipo recibido por WhatsApp, pendiente de integraci\u00f3n doctrinal. NO DEPLOYAR sin: (1) telemetr\u00eda real (endpoints Base44), (2) voz Maestra MP3-first, (3) fix letra suelta vocales, (4) unificar llave de compuerta con completedDays/morfofono_prog, (5) quitar SW blob muerto, (6) toast en vez de alert(). Verdict de Alma: flujo aprobado, costura pendiente.\n\n<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n<meta charset=\"utf-8\" />\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\" />\n<title>Action Bridges \u2014 Morfofono Estudio Integrado</title>\n<meta name=\"description\" content=\"Coaching de acento americano para hispanohablantes. El o\u00eddo entrena antes que la boca, la boca antes que la letra.\" />\n<meta name=\"theme-color\" content=\"#3d5a73\" />\n<meta name=\"apple-mobile-web-app-capable\" content=\"yes\" />\n<meta name=\"apple-mobile-web-app-status-bar-style\" content=\"black-translucent\" />\n\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\" />\n<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin />\n<link href=\"https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap\" rel=\"stylesheet\" />\n\n<style>\n:root {\n  --bg:#f3efe6; --surface:#faf7f0; --surface-2:#ebe4d6; --ink:#1c1915;\n  --muted:#6b6458; --accent:#3d5a73; --accent-fg:#faf7f0; --accent-soft:#dfe6ec;\n  --border:#ddd4c4; --good:#2d6a4f; --good-soft:rgba(45,106,79,.12);\n  --warn:#b05a18; --warn-soft:rgba(176,90,24,.12);\n  --yellow-lab:#facc15; --yellow-lab-fg:#713f12; --yellow-lab-border:#eab308;\n  --shadow: 0 1px 3px rgba(28,25,21,.08), 0 1px 2px rgba(28,25,21,.04);\n  --shadow-h: 0 8px 20px rgba(28,25,21,.12);\n  --bar:rgba(250,247,240,.96);\n  touch-action:manipulation;\n}\n\nhtml.dark {\n  --bg:#14110d; --surface:#1c1813; --surface-2:#262017; --ink:#ece5d8;\n  --muted:#b0a692; --accent:#a9c7e2; --accent-fg:#10141b; --accent-soft:#28313d;\n  --border:#342c20; --good:#52b788; --good-soft:rgba(82,183,136,.15);\n  --warn:#e08738; --warn-soft:rgba(224,135,56,.15);\n  --yellow-lab:#eab308; --yellow-lab-fg:#1e1402; --yellow-lab-border:#ca8a04;\n  --shadow: 0 1px 3px rgba(0,0,0,.4);\n  --shadow-h: 0 8px 24px rgba(0,0,0,.6);\n  --bar:rgba(20,17,13,.96);\n}\n\n*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}\nbody{\n  margin:0; background:var(--bg); color:var(--ink);\n  font-family:\"Source Sans 3\",system-ui,sans-serif; line-height:1.55;\n  user-select:none; -webkit-user-select:none;\n}\n\nh1,h2,h3{font-family:\"Newsreader\",Georgia,serif; font-weight:500; letter-spacing:-.02em}\nbutton{font:inherit; cursor:pointer; touch-action:manipulation}\nbutton:disabled{opacity:.4; cursor:not-allowed}\n\n.wrap{\n  max-width:44rem; margin:0 auto; min-height:100dvh; display:flex;\n  flex-direction:column; padding:0.75rem 1rem 6rem;\n}\n\n.masthead{\n  display:flex; justify-content:space-between; align-items:center;\n  padding:0.5rem 0; border-bottom:1px solid var(--border); margin-bottom:1rem;\n}\n.brand b{font-family:\"Newsreader\",serif; font-size:1.35rem; display:block; line-height:1.1}\n.brand span{font-size:.76rem; color:var(--muted)}\n.header-actions{display:flex; gap:.4rem}\n.icon-btn{\n  width:2.4rem; height:2.4rem; border-radius:99px; border:1px solid var(--border);\n  background:var(--surface); display:grid; place-items:center; font-size:1.1rem;\n}\n\n.narrator-bar{\n  position:sticky; top:0.5rem; z-index:30; background:var(--bar);\n  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);\n  border:1px solid var(--accent); border-radius:1rem;\n  padding:0.75rem 1rem; box-shadow:var(--shadow-h); margin-bottom:1.25rem;\n}\n.narrator-top{display:flex; align-items:center; justify-content:space-between; gap:.75rem}\n.narrator-badge{\n  font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:.08em;\n  padding:.2rem .55rem; border-radius:.35rem; background:var(--accent-soft); color:var(--accent);\n}\n.audio-status{font-size:.85rem; color:var(--muted); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}\n.btn-narrate{\n  background:var(--accent); color:var(--accent-fg); border:0; border-radius:.6rem;\n  padding:.45rem .85rem; font-weight:600; font-size:.85rem; display:inline-flex; align-items:center; gap:.35rem;\n}\n\n.lesson-head{margin-bottom:1.25rem}\n.lesson-day{font-size:.8rem; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--accent)}\n.lesson-title{font-size:1.85rem; margin:.2rem 0 .3rem; line-height:1.2}\n.lesson-hook{font-size:1.02rem; color:var(--muted); font-style:italic}\n\n.step-card{\n  background:var(--surface); border:1px solid var(--border); border-radius:1rem;\n  padding:1.2rem; margin-bottom:1.2rem; box-shadow:var(--shadow);\n  transition:border-color .2s, box-shadow .2s;\n}\n.step-card.active{\n  border-color:var(--accent); box-shadow:var(--shadow-h);\n  outline:2px solid var(--accent-soft); outline-offset:2px;\n}\n.step-card.completed{border-left:5px solid var(--good)}\n.step-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:.65rem}\n.step-tag{display:flex; align-items:center; gap:.5rem; font-size:.88rem; font-weight:600; color:var(--accent)}\n.step-num{\n  width:1.6rem; height:1.6rem; border-radius:99px; background:var(--surface-2);\n  display:grid; place-items:center; font-size:.78rem; border:1px solid var(--border);\n}\n.step-card.completed .step-num{background:var(--good); color:#fff; border-color:var(--good)}\n.step-speech{\n  background:var(--surface-2); border-left:3px solid var(--accent);\n  padding:.7rem .9rem; border-radius:0 .5rem .5rem 0; font-size:.93rem; margin-bottom:.9rem;\n}\n\n.interactive-box{\n  background:var(--bg); border:1px dashed var(--border); border-radius:.85rem;\n  padding:1.1rem; margin-top:.75rem; text-align:center;\n}\n\n.ear-pact-btn{\n  width:5.4rem; height:5.4rem; border-radius:99px; border:2px solid var(--accent);\n  background:var(--surface); font-size:2.4rem; display:inline-grid; place-items:center;\n  margin:.4rem auto; box-shadow:var(--shadow); transition:transform .15s, background .15s;\n}\n.ear-pact-btn:active{transform:scale(0.92)}\n.ear-pact-btn.pact-sealed{background:var(--accent); color:var(--accent-fg); border-color:var(--accent)}\n\n.vowel-row{display:flex; justify-content:center; gap:.5rem; flex-wrap:wrap; margin:.6rem 0}\n.vowel-btn{\n  width:3.3rem; height:3.8rem; border-radius:.6rem; border:1px solid var(--border);\n  background:var(--surface); font-family:\"Newsreader\",serif; font-size:1.55rem;\n  display:flex; flex-direction:column; align-items:center; justify-content:center;\n  box-shadow:var(--shadow); transition:transform .15s;\n}\n.vowel-btn:active{transform:scale(0.9)}\n.vowel-btn.played{border-color:var(--good); color:var(--good); background:var(--good-soft)}\n\n.blind-choices{display:flex; gap:.6rem; justify-content:center; margin-top:.75rem}\n.choice-btn{\n  flex:1; max-width:13.5rem; padding:.7rem .8rem; border-radius:.6rem; border:1px solid var(--border);\n  background:var(--surface); font-size:.88rem; font-weight:600;\n}\n.choice-btn.selected{border-color:var(--accent); background:var(--accent-soft); color:var(--accent)}\n\n.yellow-lab-box{\n  background:rgba(250,204,21,.12); border:2px solid var(--yellow-lab-border);\n  border-radius:.95rem; padding:1.2rem 1rem; text-align:center;\n}\n.lab-badge{\n  font-size:.7rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase;\n  background:var(--yellow-lab); color:var(--yellow-lab-fg); padding:.22rem .6rem; border-radius:.35rem;\n}\n.lab-pair-trigger{\n  width:100%; max-width:17rem; margin:1rem auto; padding:.8rem; border-radius:.75rem;\n  border:0; background:var(--accent); color:var(--accent-fg); font-weight:600; font-size:1rem;\n  display:flex; align-items:center; justify-content:center; gap:.5rem; box-shadow:var(--shadow);\n}\n.lab-pair-trigger:active{transform:scale(0.97)}\n.lab-answers{display:flex; gap:.75rem; justify-content:center; max-width:21rem; margin:0 auto}\n.lab-ans-btn{\n  flex:1; height:3.6rem; border-radius:.8rem; border:2px solid var(--yellow-lab-border);\n  background:var(--surface); font-size:1.02rem; font-weight:700; color:var(--ink); box-shadow:var(--shadow);\n}\n.lab-ans-btn:active{transform:scale(0.95)}\n\n.gym-box{margin-top:1.25rem; padding-top:1.25rem; border-top:1px dashed var(--border); text-align:center}\n.self-eval-row{display:flex; gap:.5rem; justify-content:center; margin-top:.65rem}\n.eval-btn{\n  padding:.6rem .8rem; border-radius:.6rem; border:1px solid var(--border);\n  background:var(--surface); font-size:.88rem; font-weight:600;\n}\n.eval-btn.picked{border-color:var(--good); background:var(--good-soft); color:var(--good)}\n\n.hint-banner{\n  background:var(--warn-soft); border-left:3px solid var(--warn);\n  padding:.6rem .8rem; font-size:.84rem; text-align:left; margin-top:.65rem; border-radius:0 .4rem .4rem 0;\n}\n\n.expediente-card{\n  background:var(--surface); border:1px solid var(--good); border-radius:.95rem;\n  padding:1.25rem; text-align:left; margin-top:.75rem;\n}\n.exp-row{display:flex; justify-content:space-between; padding:.4rem 0; font-size:.9rem; border-bottom:1px solid var(--border)}\n.exp-row:last-child{border-bottom:0}\n.btn-primary{\n  background:var(--good); color:#fff; border:0; border-radius:.75rem;\n  padding:.85rem 1.25rem; font-weight:600; font-size:1rem; width:100%; box-shadow:var(--shadow);\n}\n.btn-primary:active{transform:scale(0.98)}\n\n.drawer-backdrop{\n  position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:50;\n  display:none; backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);\n}\n.drawer-backdrop.open{display:block}\n.drawer{\n  position:fixed; bottom:0; left:0; right:0; max-height:85dvh; background:var(--surface);\n  border-radius:1.35rem 1.35rem 0 0; padding:1.25rem; z-index:51; overflow-y:auto;\n  box-shadow:0 -8px 25px rgba(0,0,0,.3); transform:translateY(100%); transition:transform .25s ease-out;\n}\n.drawer-backdrop.open .drawer{transform:translateY(0)}\n.days-grid{\n  display:grid; grid-template-columns:repeat(auto-fill, minmax(4.2rem, 1fr));\n  gap:.6rem; margin-top:1rem; padding-bottom:1.5rem;\n}\n.day-node{\n  padding:.7rem .3rem; border-radius:.65rem; border:1px solid var(--border);\n  background:var(--surface-2); text-align:center; font-size:.85rem; font-weight:700;\n}\n.day-node.unlocked{background:var(--surface); border-color:var(--accent); color:var(--accent); cursor:pointer}\n.day-node.current{background:var(--accent); color:var(--accent-fg); border-color:var(--accent)}\n.day-node.completed{border-color:var(--good); color:var(--good)}\n</style>\n</head>\n<body>\n\n<div class=\"wrap\">\n  <header class=\"masthead\">\n    <div class=\"brand\">\n      <b>Action Bridges</b>\n      <span>M\u00e9todo Valerie \u00b7 O\u00eddo \u2192 Boca \u2192 Letra</span>\n    </div>\n    <div class=\"header-actions\">\n      <button class=\"icon-btn\" id=\"btn-open-days\" title=\"Ver 57 d\u00edas\">\ud83d\uddd3\ufe0f</button>\n      <button class=\"icon-btn\" id=\"btn-theme\" title=\"Modo oscuro\">\ud83c\udf19</button>\n    </div>\n  </header>\n\n  <div class=\"narrator-bar\">\n    <div class=\"narrator-top\">\n      <span class=\"narrator-badge\">Maestra Lee</span>\n      <span class=\"audio-status\" id=\"narrator-status\">Lista para iniciar la clase</span>\n      <button class=\"btn-narrate\" id=\"btn-narrate\">\n        <span id=\"narrate-icon\">\u25b6</span>\n        <span id=\"narrate-label\">Escuchar</span>\n      </button>\n    </div>\n  </div>\n\n  <div class=\"lesson-head\">\n    <div class=\"lesson-day\" id=\"lesson-phase-tag\">Fase 1: El O\u00eddo</div>\n    <h1 class=\"lesson-title\" id=\"lesson-title\">Cargando...</h1>\n    <p class=\"lesson-hook\" id=\"lesson-hook\">...</p>\n  </div>\n\n  <div id=\"lesson-steps\"></div>\n</div>\n\n<div class=\"drawer-backdrop\" id=\"days-drawer\">\n  <div class=\"drawer\">\n    <div style=\"display:flex; justify-content:space-between; align-items:center\">\n      <h2 style=\"margin:0; font-size:1.3rem\">Ruta de los 57 D\u00edas</h2>\n      <button class=\"icon-btn\" onclick=\"toggleDrawer(false)\">\u2715</button>\n    </div>\n    <p style=\"font-size:.85rem; color:var(--muted); margin:.3rem 0 1rem\">\n      Cada d\u00eda se abre al sellar el expediente anterior. No hay atajos para el cerebro.\n    </p>\n    <div class=\"days-grid\" id=\"days-grid\"></div>\n  </div>\n</div>\n\n<script>\nif ('serviceWorker' in navigator) {\n  const swCode = `\n    const CACHE_NAME = 'ab-v1';\n    self.addEventListener('install', e => self.skipWaiting());\n    self.addEventListener('activate', e => e.clients.claim());\n    self.addEventListener('fetch', e => {\n      if (e.request.url.includes('/assets/') || e.request.url.endsWith('.mp3')) {\n        e.respondWith(caches.open(CACHE_NAME).then(c => c.match(e.request).then(r => r || fetch(e.request).then(res => {\n          c.put(e.request, res);\n          return res;\n        }))));\n      } else {\n        e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));\n      }\n    });\n  `;\n  const blob = new Blob([swCode], { type: 'application/javascript' });\n  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});\n}\n\nfunction haptic(ms = 25) {\n  if ('vibrate' in navigator) navigator.vibrate(ms);\n}\n\nconst LESSONS_DB = {\n  1: {\n    day: 1,\n    title: \"El sonido no es la letra\",\n    hook: \"Antes de alfabetizar, se despega el o\u00eddo del ojo.\",\n    phase: \"oido\",\n    level: \"a0-bajo\",\n    scripts: {\n      s1: \"Bienvenido. Hacemos un pacto: primero o\u00edmos, luego la boca siente, y al final vemos letras. En espa\u00f1ol lo que ves es lo que suena; en ingl\u00e9s no. Toca la oreja grande para sellar el pacto y despertar tu o\u00eddo.\",\n      s2: \"Reconoce tu tesoro: en espa\u00f1ol posees cinco vocales perfectas, fijas y firmes: A, E, I, O, U. T\u00f3calas en orden antes de cruzarte con los sonidos del ingl\u00e9s.\",\n      s3: \"Escucha estas tres palabras a ciegas. No intentes adivinar c\u00f3mo se escriben; solo siente si suenan igual a tus vocales o si hay algo extra\u00f1o.\",\n      s4: \"Recreo de pr\u00e1ctica. Tu o\u00eddo ya detect\u00f3 la diferencia; ahora afina el reflejo en el laboratorio amarillo. Consigue 5 aciertos y haz tu primer eco.\",\n      s5: \"D\u00eda uno cumplido. Cero letras consultadas y tu cerebro ya no asume que la 'a' suena igual en todas partes. Ma\u00f1ana exploraremos el motor del cuello.\"\n    }\n  },\n  2: {\n    day: 2,\n    title: \"Voz y sordera: el motor del cuello\",\n    hook: \"Tus cuerdas vocales son un motor que se enciende y se apaga.\",\n    phase: \"oido\",\n    level: \"a0-bajo\",\n    scripts: {\n      s1: \"D\u00eda dos. Pon dos dedos en tu garganta. En espa\u00f1ol casi todo vibra; en ingl\u00e9s la mitad de los sonidos son puro aire sordo.\",\n      s2: \"Siente el motor: toca el sonido que vibra y luego el que es puro aire.\",\n      s3: \"Escucha dos consonantes en ingl\u00e9s a ciegas y siente tu garganta.\",\n      s4: \"Laboratorio amarillo: distingue pares con motor encendido y apagado.\",\n      s5: \"Expediente del D\u00eda 2 sellado. Tu cuello ya sabe cu\u00e1ndo apagar el motor.\"\n    }\n  }\n};\n\nfor (let d = 3; d <= 57; d++) {\n  const isOido = d <= 15;\n  const isBoca = d > 15 && d <= 40;\n  LESSONS_DB[d] = {\n    day: d,\n    title: isOido ? `Calibraci\u00f3n Auditiva #${d}` : (isBoca ? `Gimnasio Muscular #${d}` : `Confesi\u00f3n de la Letra #${d}`),\n    hook: isOido ? \"El o\u00eddo manda.\" : (isBoca ? \"La boca imita.\" : \"La ortograf\u00eda confiesa.\"),\n    phase: isOido ? \"oido\" : (isBoca ? \"boca\" : \"letra\"),\n    level: d < 41 ? \"a0-bajo\" : \"a1-fonico\",\n    scripts: {\n      s1: `Iniciamos la sesi\u00f3n del D\u00eda ${d}. Conc\u00e9ntrate en la vibraci\u00f3n sonora.`,\n      s2: \"Calibramos el ancla muscular en tu memoria auditiva.\",\n      s3: \"Discriminaci\u00f3n a ciegas sin ortograf\u00eda.\",\n      s4: \"Laboratorio amarillo de reflejo r\u00e1pido.\",\n      s5: `Expediente del D\u00eda ${d} listo para guardarse.`\n    }\n  };\n}\n\nconst state = {\n  currentDay: 1,\n  highestUnlocked: parseInt(localStorage.getItem(\"ab_highest_unlocked\") || \"1\", 10),\n  step: 1,\n  pactSealed: false,\n  l1Explored: new Set(),\n  blindDone: false,\n  labScore: 0,\n  labErrors: 0,\n  labTarget: 5,\n  labPairIdx: 0,\n  gymRated: false,\n  gymRating: null,\n  consecutiveFails: 0\n};\n\nconst LAB_PAIRS = [\n  { a: \"cat\", b: \"cat\", same: true, id: \"c_c\" },\n  { a: \"cat\", b: \"what\", same: false, id: \"c_w\" },\n  { a: \"beat\", b: \"bit\", same: false, id: \"b_bt\" },\n  { a: \"one\", b: \"one\", same: true, id: \"o_o\" },\n  { a: \"sheep\", b: \"ship\", same: false, id: \"s_sp\" },\n  { a: \"yacht\", b: \"what\", same: false, id: \"y_w\" },\n  { a: \"two\", b: \"two\", same: true, id: \"t_t\" }\n];\n\nconst audioEl = new Audio();\nlet audioUnlocked = false;\n\nfunction unlockAudio() {\n  if (audioUnlocked) return;\n  const silent = new Audio(\"data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAA=\");\n  silent.play().then(() => { audioUnlocked = true; }).catch(() => {});\n}\n\nfunction playSound(token, lang = \"en-US\") {\n  unlockAudio();\n  haptic(20);\n  const clean = token.replace(/[^a-zA-Z]/g, \"\").toLowerCase();\n  const local = `assets/oido-audio/${clean}.mp3`;\n  const cdn = `https://babayaba71-maker.github.io/AccentBridges/assets/oido-audio/${clean}.mp3`;\n\n  audioEl.src = local;\n  audioEl.play().catch(() => {\n    audioEl.src = cdn;\n    audioEl.play().catch(() => {\n      if ('speechSynthesis' in window) {\n        window.speechSynthesis.cancel();\n        const utt = new SpeechSynthesisUtterance(clean);\n        utt.lang = lang;\n        utt.rate = 0.9;\n        window.speechSynthesis.speak(utt);\n      }\n    });\n  });\n}\n\nfunction speakMaestra(text, onEnd) {\n  document.getElementById(\"narrator-status\").textContent = text;\n  if ('mediaSession' in navigator) {\n    navigator.mediaSession.metadata = new MediaMetadata({\n      title: `D\u00eda ${state.currentDay} \u00b7 Action Bridges`,\n      artist: \"Maestra Lee\",\n      album: \"M\u00e9todo Valerie\"\n    });\n  }\n\n  if ('speechSynthesis' in window) {\n    window.speechSynthesis.cancel();\n    const utt = new SpeechSynthesisUtterance(text);\n    utt.lang = \"es-MX\";\n    utt.rate = 0.95;\n    utt.onend = onEnd || null;\n    window.speechSynthesis.speak(utt);\n  } else {\n    setTimeout(onEnd || (() => {}), 3500);\n  }\n}\n\nfunction loadDayFromHash() {\n  const hash = window.location.hash;\n  const match = hash.match(/#dia-(\\d+)/);\n  let requestedDay = match ? parseInt(match[1], 10) : 1;\n\n  if (requestedDay > state.highestUnlocked) {\n    requestedDay = state.highestUnlocked;\n    window.location.hash = `#dia-${requestedDay}`;\n  }\n\n  state.currentDay = requestedDay;\n  state.step = 1;\n  state.pactSealed = false;\n  state.l1Explored.clear();\n  state.blindDone = false;\n  state.labScore = 0;\n  state.labErrors = 0;\n  state.gymRated = false;\n  state.consecutiveFails = 0;\n\n  renderApp();\n}\n\nfunction renderApp() {\n  const lesson = LESSONS_DB[state.currentDay];\n  document.getElementById(\"lesson-phase-tag\").textContent = `Fase: ${lesson.phase.toUpperCase()} \u00b7 D\u00eda ${lesson.day} de 57`;\n  document.getElementById(\"lesson-title\").textContent = lesson.title;\n  document.getElementById(\"lesson-hook\").textContent = `\"${lesson.hook}\"`;\n\n  const container = document.getElementById(\"lesson-steps\");\n  container.innerHTML = `\n    <div class=\"step-card ${state.step === 1 ? 'active' : ''} ${state.pactSealed ? 'completed' : ''}\" id=\"s1-card\">\n      <div class=\"step-header\">\n        <div class=\"step-tag\"><span class=\"step-num\">1</span> Contrato del M\u00e9todo</div>\n        <span style=\"font-size:.85rem; font-weight:700\">${state.pactSealed ? '\u2713 Sellado' : 'Compuerta'}</span>\n      </div>\n      <div class=\"step-speech\">\"${lesson.scripts.s1}\"</div>\n      <div class=\"interactive-box\">\n        <button class=\"ear-pact-btn ${state.pactSealed ? 'pact-sealed' : ''}\" onclick=\"onPactClick()\">\ud83d\udc42</button>\n        <p style=\"font-size:.85rem; color:var(--muted); margin:.4rem 0 0\">\n          ${state.pactSealed ? '\u2713 O\u00eddo calibrado. Modo sin letras activado.' : 'Toca la oreja grande para sellar el pacto.'}\n        </p>\n      </div>\n    </div>\n\n    <div class=\"step-card ${state.step === 2 ? 'active' : ''} ${state.l1Explored.size >= 5 ? 'completed' : ''}\" id=\"s2-card\">\n      <div class=\"step-header\">\n        <div class=\"step-tag\"><span class=\"step-num\">2</span> Tus 5 Vocales del Espa\u00f1ol</div>\n        <span style=\"font-size:.85rem; font-weight:700\">${state.l1Explored.size} / 5</span>\n      </div>\n      <div class=\"step-speech\">\"${lesson.scripts.s2}\"</div>\n      <div class=\"interactive-box\">\n        <div class=\"vowel-row\">\n          ${[\"a\",\"e\",\"i\",\"o\",\"u\"].map(v => `\n            <button class=\"vowel-btn ${state.l1Explored.has(v) ? 'played' : ''}\" onclick=\"onVowelClick('${v}')\">\n              ${v.toUpperCase()}\n              <span style=\"font-size:.6rem; color:var(--muted)\">L1</span>\n            </button>\n          `).join('')}\n        </div>\n      </div>\n    </div>\n\n    <div class=\"step-card ${state.step === 3 ? 'active' : ''} ${state.blindDone ? 'completed' : ''}\" id=\"s3-card\">\n      <div class=\"step-header\">\n        <div class=\"step-tag\"><span class=\"step-num\">3</span> Est\u00edmulo a Ciegas (Cero Texto)</div>\n        <span style=\"font-size:.85rem; font-weight:700\">${state.blindDone ? '\u2713 Listo' : 'Compuerta'}</span>\n      </div>\n      <div class=\"step-speech\">\"${lesson.scripts.s3}\"</div>\n      <div class=\"interactive-box\">\n        <button class=\"btn-narrate\" style=\"margin:.4rem auto\" onclick=\"playBlindBurst()\">\n          \ud83d\udd0a Escuchar r\u00e1faga (3 sonidos)\n        </button>\n        <div class=\"blind-choices\">\n          <button class=\"choice-btn\" onclick=\"onBlindChoice('familiar')\">Son\u00f3 igual a mis vocales</button>\n          <button class=\"choice-btn\" onclick=\"onBlindChoice('extrano')\">Son\u00f3 extra\u00f1o / diferente</button>\n        </div>\n        ${state.blindDone ? `\n          <div class=\"hint-banner\">\n            <b>Explicaci\u00f3n de la Maestra Lee:</b> Las 3 palabras que escuchaste se escriben con la letra \"A\" en ingl\u00e9s, pero suenan con tres vocales completamente distintas. Tu o\u00eddo no se dej\u00f3 enga\u00f1ar.\n          </div>\n        ` : ''}\n      </div>\n    </div>\n\n    <div class=\"step-card ${state.step === 4 ? 'active' : ''} ${(state.labScore >= state.labTarget && state.gymRated) ? 'completed' : ''}\" id=\"s4-card\">\n      <div class=\"step-header\">\n        <div class=\"step-tag\"><span class=\"step-num\">4</span> Recreo: Laboratorio Amarillo</div>\n        <span style=\"font-size:.85rem; font-weight:700\">Meta: ${state.labScore} / ${state.labTarget}</span>\n      </div>\n      <div class=\"step-speech\">\"${lesson.scripts.s4}\"</div>\n\n      <div class=\"yellow-lab-box\">\n        <span class=\"lab-badge\">Laboratorio O\u00eddo Ingl\u00e9s</span>\n        <p style=\"font-size:.9rem; font-weight:700; margin:.5rem 0\">\u00bfLos dos sonidos son IGUALES o DISTINTOS?</p>\n        <button class=\"lab-pair-trigger\" onclick=\"playLabPair()\">\ud83d\udd0a Reproducir Par Sonoro</button>\n        <div class=\"lab-answers\">\n          <button class=\"lab-ans-btn\" onclick=\"onLabAnswer(true)\">[ = ] IGUAL</button>\n          <button class=\"lab-ans-btn\" onclick=\"onLabAnswer(false)\">[ \u2260 ] DISTINTO</button>\n        </div>\n        <p id=\"lab-status\" style=\"font-size:.84rem; color:var(--muted); margin-top:.5rem\">Toca el bot\u00f3n azul para escuchar.</p>\n\n        ${renderScaffoldingHint()}\n      </div>\n\n      ${state.labScore >= state.labTarget ? `\n        <div class=\"gym-box\">\n          <p style=\"font-weight:700; font-size:.92rem; color:var(--good); margin:0 0 .4rem\">\ud83d\udc44 Primer Eco (Shadowing Muscular)</p>\n          <button class=\"lab-ans-btn\" style=\"height:2.6rem; max-width:14rem; margin:0 auto; font-size:.85rem\" onclick=\"playSound('cat')\">\n            \ud83d\udd0a Escuchar modelo\n          </button>\n          <div class=\"self-eval-row\">\n            <button class=\"eval-btn ${state.gymRating==='logre'?'picked':''}\" onclick=\"onGymRate('logre')\">\ud83d\ude0e Lo logr\u00e9</button>\n            <button class=\"eval-btn ${state.gymRating==='casi'?'picked':''}\" onclick=\"onGymRate('casi')\">\ud83e\udd0f Casi</button>\n            <button class=\"eval-btn ${state.gymRating==='todavia'?'picked':''}\" onclick=\"onGymRate('todavia')\">\ud83d\ude05 Todav\u00eda no</button>\n          </div>\n          ${state.gymRating ? `<p style=\"font-size:.8rem; color:var(--good); margin-top:.4rem\">\u2713 Autoevaluaci\u00f3n registrada con honestidad.</p>` : ''}\n        </div>\n      ` : ''}\n    </div>\n\n    <div class=\"step-card ${state.step === 5 ? 'active' : ''}\" id=\"s5-card\">\n      <div class=\"step-header\">\n        <div class=\"step-tag\"><span class=\"step-num\">5</span> Expediente del D\u00eda ${state.currentDay}</div>\n      </div>\n      <div class=\"step-speech\">\"${lesson.scripts.s5}\"</div>\n\n      ${(state.labScore >= state.labTarget && state.gymRated) ? `\n        <div class=\"expediente-card\">\n          <h3 style=\"margin:0 0 .5rem; font-size:1.15rem\">Expediente Sellado con \u00c9xito</h3>\n          <div class=\"exp-row\"><span>\ud83d\udc42 Discriminaci\u00f3n Auditiva:</span> <b>${state.labScore} aciertos (${state.labErrors} reintentos)</b></div>\n          <div class=\"exp-row\"><span>\ud83d\udc44 Eco Muscular:</span> <b>${state.gymRating || 'Completado'}</b></div>\n          <div class=\"exp-row\"><span>\ud83d\udee1\ufe0f Doctrina:</span> <b>0 letras consultadas (O\u00eddo puro)</b></div>\n          <div style=\"margin-top:1rem\">\n            <button class=\"btn-primary\" onclick=\"sealDayExpediente()\">\n              \ud83d\udd13 Guardar y Desbloquear D\u00eda ${state.currentDay + 1}\n            </button>\n          </div>\n        </div>\n      ` : `\n        <p style=\"font-size:.85rem; color:var(--muted); text-align:center\">Completa el laboratorio amarillo y el eco muscular para destrabar el expediente.</p>\n      `}\n    </div>\n  `;\n}\n\nfunction renderScaffoldingHint() {\n  if (state.consecutiveFails >= 5) {\n    return `<div class=\"hint-banner\"><b>Pista nivel 3 (Imagen mental):</b> Piensa en la primera como una sonrisa amplia y en la segunda como un bostezo relajado.</div>`;\n  } else if (state.consecutiveFails >= 3) {\n    return `<div class=\"hint-banner\"><b>Pista nivel 2 (Ancla espa\u00f1ol):</b> El primer sonido estira los labios hacia los lados; el segundo cae sin tensi\u00f3n al pecho.</div>`;\n  } else if (state.consecutiveFails >= 1) {\n    return `<div class=\"hint-banner\"><b>Pista nivel 1:</b> Escucha con atenci\u00f3n a la duraci\u00f3n y al aire entre ambos disparos.</div>`;\n  }\n  return '';\n}\n\nfunction onPactClick() {\n  haptic(40);\n  unlockAudio();\n  state.pactSealed = true;\n  state.step = 2;\n  renderApp();\n  speakMaestra(LESSONS_DB[state.currentDay].scripts.s2);\n  document.getElementById(\"s2-card\").scrollIntoView({ behavior: 'smooth' });\n}\n\nfunction onVowelClick(v) {\n  haptic(20);\n  state.l1Explored.add(v);\n  playSound(v, \"es-MX\");\n  if (state.l1Explored.size >= 5 && state.step === 2) {\n    state.step = 3;\n    setTimeout(() => {\n      renderApp();\n      speakMaestra(LESSONS_DB[state.currentDay].scripts.s3);\n      document.getElementById(\"s3-card\").scrollIntoView({ behavior: 'smooth' });\n    }, 600);\n  } else {\n    renderApp();\n  }\n}\n\nfunction playBlindBurst() {\n  playSound(\"cat\");\n  setTimeout(() => playSound(\"what\"), 1200);\n  setTimeout(() => playSound(\"yacht\"), 2400);\n}\n\nfunction onBlindChoice(choice) {\n  haptic(25);\n  state.blindDone = true;\n  state.step = 4;\n  renderApp();\n  speakMaestra(LESSONS_DB[state.currentDay].scripts.s4);\n  document.getElementById(\"s4-card\").scrollIntoView({ behavior: 'smooth' });\n}\n\nlet activeLabPair = LAB_PAIRS[0];\n\nfunction playLabPair() {\n  activeLabPair = LAB_PAIRS[state.labPairIdx % LAB_PAIRS.length];\n  playSound(activeLabPair.a);\n  setTimeout(() => playSound(activeLabPair.b), 1050);\n  document.getElementById(\"lab-status\").textContent = \"Escuchando sonidos A y B...\";\n}\n\nfunction onLabAnswer(saidSame) {\n  const isCorrect = (saidSame === activeLabPair.same);\n  haptic(isCorrect ? 30 : 60);\n\n  if (isCorrect) {\n    state.labScore++;\n    state.consecutiveFails = 0;\n    document.getElementById(\"lab-status\").innerHTML = \"<b style='color:var(--good)'>\u2713 \u00a1Correcto! Tu o\u00eddo capt\u00f3 la relaci\u00f3n.</b>\";\n  } else {\n    state.labErrors++;\n    state.consecutiveFails++;\n    document.getElementById(\"lab-status\").innerHTML = \"<b style='color:var(--warn)'>Reintenta con calma.</b>\";\n  }\n\n  fetch(\"/api/QuizResponse\", {\n    method: \"POST\",\n    headers: { \"Content-Type\": \"application/json\", \"ABVC-PILOTO-2026\": \"true\" },\n    body: JSON.stringify({ pair: activeLabPair.id, correct: isCorrect, day: state.currentDay })\n  }).catch(() => {});\n\n  state.labPairIdx++;\n  setTimeout(() => {\n    renderApp();\n  }, 750);\n}\n\nfunction onGymRate(rate) {\n  haptic(25);\n  state.gymRating = rate;\n  state.gymRated = true;\n  state.step = 5;\n  renderApp();\n  speakMaestra(LESSONS_DB[state.currentDay].scripts.s5);\n  document.getElementById(\"s5-card\").scrollIntoView({ behavior: 'smooth' });\n}\n\nfunction sealDayExpediente() {\n  haptic([30, 50, 30]);\n  const nextDay = state.currentDay + 1;\n  if (nextDay > state.highestUnlocked) {\n    state.highestUnlocked = nextDay;\n    localStorage.setItem(\"ab_highest_unlocked\", nextDay.toString());\n  }\n\n  fetch(\"/api/PracticeSession\", {\n    method: \"POST\",\n    headers: { \"Content-Type\": \"application/json\", \"ABVC-PILOTO-2026\": \"true\" },\n    body: JSON.stringify({ day: state.currentDay, completed: true, timestamp: Date.now() })\n  }).catch(() => {});\n\n  alert(`\ud83c\udf89 \u00a1Expediente del D\u00eda ${state.currentDay} sellado! La puerta del D\u00eda ${nextDay} ha sido abierta.`);\n  window.location.hash = `#dia-${nextDay}`;\n}\n\nfunction toggleDrawer(open) {\n  const drawer = document.getElementById(\"days-drawer\");\n  if (open) {\n    buildDaysGrid();\n    drawer.classList.add(\"open\");\n  } else {\n    drawer.classList.remove(\"open\");\n  }\n}\n\nfunction buildDaysGrid() {\n  const grid = document.getElementById(\"days-grid\");\n  grid.innerHTML = \"\";\n  for (let d = 1; d <= 57; d++) {\n    const isUnlocked = d <= state.highestUnlocked;\n    const isCurrent = d === state.currentDay;\n    const div = document.createElement(\"div\");\n    div.className = `day-node ${isCurrent ? 'current' : (isUnlocked ? 'unlocked' : '')}`;\n    div.textContent = `D${d}`;\n    if (isUnlocked) {\n      div.onclick = () => {\n        toggleDrawer(false);\n        window.location.hash = `#dia-${d}`;\n      };\n    } else {\n      div.style.opacity = \".35\";\n      div.style.cursor = \"not-allowed\";\n    }\n    grid.appendChild(div);\n  }\n}\n\ndocument.getElementById(\"btn-open-days\").onclick = () => toggleDrawer(true);\n\nconst btnTheme = document.getElementById(\"btn-theme\");\nbtnTheme.onclick = () => {\n  const isDark = document.documentElement.classList.toggle(\"dark\");\n  btnTheme.textContent = isDark ? \"\u2600\ufe0f\" : \"\ud83c\udf19\";\n  localStorage.setItem(\"ab_theme\", isDark ? \"dark\" : \"light\");\n};\nif (localStorage.getItem(\"ab_theme\") === \"dark\") {\n  document.documentElement.classList.add(\"dark\");\n  btnTheme.textContent = \"\u2600\ufe0f\";\n}\n\ndocument.getElementById(\"btn-narrate\").onclick = () => {\n  const script = LESSONS_DB[state.currentDay].scripts[`s${state.step}`];\n  speakMaestra(script);\n};\n\nwindow.addEventListener(\"hashchange\", loadDayFromHash);\nloadDayFromHash();\n</script>\n</body>\n</html>\n";
+const porId = {};
+DATA.forEach(d => porId[d.id] = d);
+
+const lista = document.getElementById('lista');
+const buscar = document.getElementById('buscar');
+const visor = document.getElementById('visor');
+const vframe = document.getElementById('vframe');
+const vtit = document.getElementById('vtit');
+const vext = document.getElementById('vext');
+let famActual = 'all';
+
+function filtrar() {
+  const q = (buscar.value || '').trim().toLowerCase();
+  let n = 0;
+  lista.querySelectorAll('.card').forEach(card => {
+    const okFam = famActual === 'all' || card.dataset.fam === famActual;
+    const okQ = !q || card.dataset.nombre.includes(q);
+    const ver = okFam && okQ;
+    card.style.display = ver ? '' : 'none';
+    if (ver) n++;
+  });
+  document.getElementById('vacio').style.display = n ? 'none' : 'block';
+}
+
+document.querySelectorAll('.chip').forEach(ch => ch.addEventListener('click', () => {
+  document.querySelectorAll('.chip').forEach(x => x.classList.remove('activo'));
+  ch.classList.add('activo');
+  famActual = ch.dataset.f;
+  filtrar();
 }));
+
+buscar.addEventListener('input', filtrar);
+
+lista.addEventListener('click', e => {
+  const b = e.target.closest('[data-open]');
+  if (!b) return;
+  const d = porId[b.dataset.open];
+  if (!d) return;
+  vtit.textContent = d.nombre;
+  if (d.local) {
+    vframe.removeAttribute('src');
+    vframe.srcdoc = V1_SRCDOC;
+    vext.style.display = 'none';
+  } else {
+    vframe.removeAttribute('srcdoc');
+    vframe.src = d.src;
+    vext.href = d.src;
+    vext.style.display = '';
+  }
+  visor.classList.add('on');
+  document.body.style.overflow = 'hidden';
+});
+
+function cerrar() {
+  visor.classList.remove('on');
+  vframe.removeAttribute('src');
+  vframe.removeAttribute('srcdoc');
+  document.body.style.overflow = '';
+}
+document.getElementById('volver').addEventListener('click', cerrar);
 </script>
 </body>
 </html>
